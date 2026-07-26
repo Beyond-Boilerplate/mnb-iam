@@ -12,7 +12,7 @@ identityiq-data:
     instances: 1
     podAntiAffinity: false
     storage:
-      size: 20Gi
+      size: 30Gi
     resources:
       requests:
         cpu: 200m
