@@ -19,6 +19,8 @@ COPY web ./web
 COPY src ./src
 COPY config ./config
 COPY base/ga/identityiq-8.5.zip ./base/ga/identityiq-8.5.zip
+# SSB expects these even with no patches/efixes yet
+RUN mkdir -p base/patch base/efix/8.5
 
 ARG SPTARGET=homelab
 ENV SPTARGET=${SPTARGET}
