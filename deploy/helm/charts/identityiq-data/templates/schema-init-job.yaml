@@ -62,8 +62,17 @@ spec:
             - -ec
             - |
               set -eu
-              echo "Waiting for Postgres at ${PGHOST}:${PGPORT}…"
-              until pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"; do sleep 3; done
+              TIMEOUT={{ .Values.schemaInit.pgReadyTimeoutSeconds | default 300 }}
+              echo "Waiting for Postgres at ${PGHOST}:${PGPORT} (timeout ${TIMEOUT}s)…"
+              start=$(date +%s)
+              until pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"; do
+                now=$(date +%s)
+                if [ $((now - start)) -ge "$TIMEOUT" ]; then
+                  echo "ERROR: Postgres not ready after ${TIMEOUT}s at ${PGHOST}"
+                  exit 1
+                fi
+                sleep 5
+              done
 
               if psql -d postgres -Atc "SELECT 1 FROM pg_database WHERE datname='identityiq'" | grep -qx 1; then
                 if psql -d identityiq -Atc "SELECT 1 FROM information_schema.tables WHERE table_schema='identityiq' AND table_name='spt_identity'" 2>/dev/null | grep -qx 1; then

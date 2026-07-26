@@ -22,7 +22,9 @@ spec:
     initdb:
       database: {{ .Values.cnpg.bootstrap.database }}
       owner: {{ .Values.cnpg.bootstrap.owner }}
+  {{- if .Values.cnpg.podAntiAffinity }}
   affinity:
     enablePodAntiAffinity: true
     topologyKey: kubernetes.io/hostname
+  {{- end }}
 {{- end }}

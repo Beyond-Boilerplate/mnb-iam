@@ -73,9 +73,10 @@ push main
 
 ## Runtime shape
 
-- **2 IdentityIQ replicas**, Service `sessionAffinity: ClientIP`
-- **CNPG PostgreSQL** cluster `sailpoint-pg` (2 instances), DBs: `identityiq`, `identityiqPlugin`, `identityiqah`
-- Schema Job applies SailPoint `create_identityiq_tables-8.5.postgresql` once
+- **Phased Helm install**: data (CNPG + schema) then app — avoids a silent 15m `--wait` on IIQ cold start
+- **CNPG**: 1 instance in lab (no hard anti-affinity); scale up later if you have ≥2 nodes
+- **2 IdentityIQ replicas**, Service `sessionAffinity: ClientIP`; readiness uses **TCP:8080** (smoke still hits login.jsf)
+- Schema Job applies SailPoint `create_identityiq_tables-8.5.postgresql` once (5m PG ready timeout)
 - DB credentials: Secret `sailpoint-iiq-db` (override via `local-homelab.secrets.yaml`)
 
 ## Notes

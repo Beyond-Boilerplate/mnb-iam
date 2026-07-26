@@ -1,9 +1,11 @@
 cnpg:
   enabled: true
   name: sailpoint-pg
-  instances: 2
+  instances: 1
   imageName: ghcr.io/cloudnative-pg/postgresql:16.4
   enableSuperuserAccess: true
+  # Hard anti-affinity needs ≥N nodes; leave false for single/small k3s labs
+  podAntiAffinity: false
   storage:
     size: 30Gi
   resources:
@@ -28,3 +30,5 @@ appUser:
 schemaInit:
   enabled: true
   image: postgres:16-alpine
+  # Fail fast instead of hanging helm --wait for 15m
+  pgReadyTimeoutSeconds: 300

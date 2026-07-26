@@ -32,6 +32,34 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.waitForDb.enabled }}
+      initContainers:
+        - name: wait-for-db
+          image: {{ .Values.waitForDb.image | quote }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.dbSecretName | quote }}
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              set -eu
+              HOST="${IIQ_DB_HOST:-sailpoint-pg-rw}"
+              PORT="${IIQ_DB_PORT:-5432}"
+              TIMEOUT={{ .Values.waitForDb.timeoutSeconds }}
+              echo "Waiting for ${HOST}:${PORT} (timeout ${TIMEOUT}s)…"
+              start=$(date +%s)
+              until pg_isready -h "$HOST" -p "$PORT" -U postgres >/dev/null 2>&1 \
+                 || pg_isready -h "$HOST" -p "$PORT" >/dev/null 2>&1; do
+                now=$(date +%s)
+                if [ $((now - start)) -ge "$TIMEOUT" ]; then
+                  echo "ERROR: DB not ready after ${TIMEOUT}s"
+                  exit 1
+                fi
+                sleep 5
+              done
+              echo "Postgres is accepting connections"
+      {{- end }}
       containers:
         - name: identityiq
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -48,17 +76,27 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           readinessProbe:
+            {{- if eq (.Values.probes.readiness.type | default "http") "tcp" }}
+            tcpSocket:
+              port: http
+            {{- else }}
             httpGet:
               path: {{ .Values.probes.readiness.path }}
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           livenessProbe:
+            {{- if eq (.Values.probes.liveness.type | default "http") "tcp" }}
+            tcpSocket:
+              port: http
+            {{- else }}
             httpGet:
               path: {{ .Values.probes.liveness.path }}
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
             timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}

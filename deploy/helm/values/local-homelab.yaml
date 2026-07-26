@@ -8,18 +8,27 @@ identityiq-data:
   cnpg:
     enabled: true
     name: sailpoint-pg
-    instances: 2
+    # 1 instance for lab speed / single-node k3s (anti-affinity off in chart defaults)
+    instances: 1
+    podAntiAffinity: false
     storage:
-      size: 30Gi
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
   appUser:
     createSecret: true
     secretName: sailpoint-iiq-db
-    # Lab-only defaults — override via local-homelab.secrets.yaml (gitignored)
     identityiqPassword: "LabOnlyChangeMe1!"
     pluginPassword: "LabOnlyChangeMe1!"
     ahPassword: "LabOnlyChangeMe1!"
   schemaInit:
     enabled: true
+    pgReadyTimeoutSeconds: 300
 
 identityiq:
   enabled: true
@@ -35,8 +44,17 @@ identityiq:
     sessionAffinity: ClientIP
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 250m
+      memory: 1536Mi
     limits:
       cpu: "2"
-      memory: 4Gi
+      memory: 3Gi
+  probes:
+    readiness:
+      type: tcp
+      initialDelaySeconds: 45
+      periodSeconds: 10
+      failureThreshold: 30
+    liveness:
+      type: tcp
+      initialDelaySeconds: 180

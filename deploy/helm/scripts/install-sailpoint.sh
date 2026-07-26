@@ -1,12 +1,26 @@
 #!/usr/bin/env bash
 # Install / upgrade the sailpoint umbrella into namespace `sailpoint`.
+#
+# Phased for first-boot speed & diagnosis:
+#   1) data plane (CNPG + schema hook) with --wait
+#   2) app (IdentityIQ) with --wait
+# Progress dumps avoid silent 15m hangs.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VALUES="${1:-$ROOT/values/local-homelab.yaml}"
 NS="${NAMESPACE:-sailpoint}"
 RELEASE="${RELEASE_NAME:-sailpoint}"
+PHASE="${INSTALL_PHASE:-all}" # all | data | app
 
 kubectl get ns "$NS" >/dev/null 2>&1 || kubectl create namespace "$NS"
+
+dump_status() {
+  echo "---- cluster status ($NS) ----"
+  kubectl -n "$NS" get pods,pvc,jobs,svc 2>/dev/null || true
+  kubectl -n "$NS" get cluster 2>/dev/null || true
+  kubectl -n "$NS" get events --sort-by=.lastTimestamp 2>/dev/null | tail -15 || true
+  echo "------------------------------"
+}
 
 if helm -n "$NS" status "$RELEASE" >/dev/null 2>&1; then
   REL_STATUS="$(helm -n "$NS" status "$RELEASE" -o json | jq -r '.info.status // empty')"
@@ -24,35 +38,28 @@ if helm -n "$NS" status "$RELEASE" >/dev/null 2>&1; then
   esac
 fi
 
-# Clear failed schema hook jobs that can block upgrades
 kubectl -n "$NS" delete job sailpoint-pg-schema-init --ignore-not-found --wait=false || true
 
 "$ROOT/scripts/update-deps.sh"
-
 shift || true
 
-HELM_ARGS=(
+SECRETS_FILE="${VALUES%.yaml}.secrets.yaml"
+HELM_BASE=(
   upgrade --install "$RELEASE" "$ROOT/charts/sailpoint"
   --namespace "$NS"
   --create-namespace
   -f "$VALUES"
-  --timeout "${HELM_TIMEOUT:-15m}"
-  --wait
 )
-if [[ "${HELM_ATOMIC:-false}" == "true" ]]; then
-  HELM_ARGS+=(--atomic)
-fi
-
-SECRETS_FILE="${VALUES%.yaml}.secrets.yaml"
 if [[ -f "$SECRETS_FILE" ]]; then
   echo "Using secrets overlay: $SECRETS_FILE"
-  HELM_ARGS+=(-f "$SECRETS_FILE")
+  HELM_BASE+=(-f "$SECRETS_FILE")
 fi
 
 # Pin app image when IMAGE_TAG is set (CI after Publish GHCR)
+IMAGE_SETS=()
 if [[ -n "${IMAGE_TAG:-}" ]]; then
   echo "Pinning identityiq.image.tag=${IMAGE_TAG}"
-  HELM_ARGS+=(--set-string "identityiq.image.tag=${IMAGE_TAG}")
+  IMAGE_SETS+=(--set-string "identityiq.image.tag=${IMAGE_TAG}")
   if [[ "${VERIFY_IMAGE_TAGS:-}" == "true" ]]; then
     OWNER="${GHCR_OWNER:-beyond-boilerplate}"
     MANIFEST="ghcr.io/${OWNER}/identityiq:${IMAGE_TAG}"
@@ -70,11 +77,65 @@ elif [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
   exit 1
 fi
 
+EXTRA_ARGS=()
 if [[ "$#" -gt 0 ]]; then
-  HELM_ARGS+=("$@")
+  EXTRA_ARGS+=("$@")
 fi
 
-helm "${HELM_ARGS[@]}"
+run_helm() {
+  local label="$1"
+  shift
+  local timeout="${HELM_TIMEOUT:-8m}"
+  echo "==> Helm phase: ${label} (timeout ${timeout})"
+  # Background status ticker while helm blocks
+  (
+    while true; do
+      sleep 30
+      echo "… still waiting on ${label}"
+      dump_status
+    done
+  ) &
+  local ticker_pid=$!
+  # shellcheck disable=SC2064
+  trap "kill ${ticker_pid} 2>/dev/null || true" RETURN
+
+  if ! helm "${HELM_BASE[@]}" \
+      --timeout "$timeout" \
+      --wait \
+      "${IMAGE_SETS[@]}" \
+      "$@" \
+      "${EXTRA_ARGS[@]}"; then
+    echo "ERROR: Helm phase ${label} failed"
+    dump_status
+    return 1
+  fi
+  kill "$ticker_pid" 2>/dev/null || true
+  trap - RETURN
+  echo "==> Helm phase ${label} OK"
+  dump_status
+}
+
+# Phase 1: CNPG + schema hook only (avoid waiting on IIQ cold start in same --wait)
+if [[ "$PHASE" == "all" || "$PHASE" == "data" ]]; then
+  run_helm "data" \
+    --set identityiq.enabled=false \
+    --set identityiq-data.enabled=true
+fi
+
+# Phase 2: IdentityIQ (DB already up / schema applied)
+if [[ "$PHASE" == "all" || "$PHASE" == "app" ]]; then
+  # Give schema job a moment if it just finished as a hook
+  if kubectl -n "$NS" get job sailpoint-pg-schema-init >/dev/null 2>&1; then
+    echo "Waiting for schema init job (up to 5m)…"
+    kubectl -n "$NS" wait --for=condition=complete "job/sailpoint-pg-schema-init" --timeout=5m \
+      || dump_status
+  fi
+  run_helm "app" \
+    --set identityiq.enabled=true \
+    --set identityiq-data.enabled=true
+  echo "Waiting for IdentityIQ rollout…"
+  kubectl -n "$NS" rollout status deploy/identityiq --timeout="${ROLLOUT_TIMEOUT:-8m}"
+fi
 
 echo "Release ${RELEASE} installed in $NS"
-kubectl -n "$NS" get pods,svc,jobs,cluster 2>/dev/null || kubectl -n "$NS" get pods,svc,jobs
+dump_status

@@ -14,7 +14,6 @@ fullnameOverride: "identityiq"
 service:
   type: ClusterIP
   port: 8080
-  # Sticky sessions for IIQ UI across 2 replicas (DB-backed Quartz still shared)
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
@@ -31,17 +30,25 @@ resources:
 env:
   IIQ_DB_TYPE: postgresql
 
-# Secret created by identityiq-data chart (or external)
 dbSecretName: sailpoint-iiq-db
 
+waitForDb:
+  enabled: true
+  image: postgres:16-alpine
+  timeoutSeconds: 300
+
+# TCP probes: Tomcat listens long before login.jsf is fully warm (IIQ cold start is slow).
+# Public smoke still hits /identityiq/login.jsf after rollout.
 probes:
   readiness:
+    type: tcp
     path: /identityiq/login.jsf
-    initialDelaySeconds: 90
-    periodSeconds: 15
-    timeoutSeconds: 5
-    failureThreshold: 20
+    initialDelaySeconds: 45
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 30
   liveness:
+    type: tcp
     path: /identityiq/login.jsf
     initialDelaySeconds: 180
     periodSeconds: 30
@@ -49,7 +56,6 @@ probes:
     failureThreshold: 6
 
 podAnnotations: {}
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
