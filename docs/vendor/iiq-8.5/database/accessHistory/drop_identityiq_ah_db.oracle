@@ -1,0 +1,13 @@
+
+--
+-- ACCESS HISTORY database drop begin
+--
+
+-- DROP USER identityiqah CASCADE;
+-- DROP TABLESPACE identityiqah_ts INCLUDING CONTENTS;
+-- HOST rm /usr/local/oradata/identityiqah.dbf
+
+--
+-- ACCESS HISTORY database drop end
+--
+

@@ -1,0 +1,27 @@
+
+--
+-- ACCESS HISTORY database create begin
+--
+
+
+--
+-- The DATAFILE location must be modified to match your environment.
+-- Because of this, these commands are commented out in this script.
+--
+--
+-- CREATE BIGFILE TABLESPACE identityiqah_ts
+-- DATAFILE '/usr/local/oradata/identityiqah.dbf' SIZE 1G
+--    AUTOEXTEND ON NEXT 512M MAXSIZE UNLIMITED
+--    EXTENT MANAGEMENT LOCAL;
+--
+-- CREATE USER identityiqah IDENTIFIED BY identityiqah
+--     DEFAULT TABLESPACE identityiqah_ts
+--     QUOTA UNLIMITED ON identityiqah_ts;
+--
+-- GRANT CREATE SESSION to identityiqah;
+-- GRANT CREATE TABLE to identityiqah;
+
+--
+-- ACCESS HISTORY database create end
+--
+

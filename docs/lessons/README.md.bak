@@ -1,0 +1,99 @@
+# Meridian National Bank — IdentityIQ Lessons
+
+Progressive, hands-on path to learn **SailPoint IdentityIQ 8.5** by implementing realistic IAM work for a fictitious bank.
+
+**Company:** Meridian National Bank (MNB)  
+**Your role:** IAM Engineer on the Identity Governance team  
+**Platform:** Local IdentityIQ 8.5 lab from this repo
+
+---
+
+## Before you start
+
+1. Complete [LOCAL_SETUP.md](../LOCAL_SETUP.md) until you can log in as `spadmin`.  
+2. Read [INFRASTRUCTURE.md](../INFRASTRUCTURE.md) once for vocabulary.  
+3. Copy lab files:
+
+```bash
+mkdir -p ~/iiq-lab-data
+cp HRApplications.txt EmployeeData.txt ~/iiq-lab-data/
+```
+
+(Run the `cp` from this repo’s root.)
+
+---
+
+## Learning path
+
+| # | Lesson | Skill focus | Time (approx.) |
+| ---: | --- | --- | ---: |
+| 01 | [Bank briefing & UI orientation](01-bank-briefing-and-ui.md) | Navigation, mental model | 45–60 min |
+| 02 | [Authoritative HR source](02-authoritative-hr-source.md) | Delimited File app, aggregation | 60–90 min |
+| 03 | [Build identity cubes](03-identity-cubes-and-refresh.md) | Correlation basics, Identity Refresh | 60 min |
+| 04 | [Onboard bank applications](04-onboard-bank-applications.md) | Target apps, entitlements | 90 min |
+| 05 | [Account correlation mastery](05-account-correlation.md) | Matching accounts → people | 60–90 min |
+| 06 | [Birthright roles for bankers](06-birthright-roles.md) | Role model, assignment | 90 min |
+| 07 | [Joiner / Mover / Leaver](07-joiner-mover-leaver.md) | Lifecycle events | 90–120 min |
+| 08 | [Access requests & approvals](08-access-requests-approvals.md) | LCM request flow | 90 min |
+| 09 | [SoD policies for banking](09-sod-policies.md) | Policy violations | 60–90 min |
+| 10 | [Manager access certifications](10-access-certifications.md) | Campaigns, work items, email | 90–120 min |
+| 11 | [Provisioning & troubleshooting](11-provisioning-and-troubleshooting.md) | Plans, tasks, debug habits | 90 min |
+| 12 | [Audit-ready reporting & ops](12-reporting-and-ops.md) | Reports, hygiene, next steps | 60–90 min |
+
+Work **in order**. Later lessons assume objects and data from earlier ones.
+
+---
+
+## How each lesson is structured
+
+Every lesson file uses the same shape:
+
+- **Story** — why Meridian Bank cares  
+- **How it works** — concept in plain language  
+- **Lesson goals** — what “done” means  
+- **Tasks** — click-by-click / command steps  
+- **Tips & tricks** — time-savers and gotchas  
+- **Checkpoint** — self-test before continuing  
+- **Stretch** — optional harder practice
+
+---
+
+## Meridian National Bank — quick lore
+
+MNB is a mid-size retail + commercial bank. Regulators expect clean joiner/mover/leaver controls, SoD on payment functions, and periodic access reviews.
+
+| Org signal | In the lab data |
+| --- | --- |
+| Employees & managers | `HRApplications.txt` (`managerId`, `departmentCode`, `status`) |
+| IT system access | `EmployeeData.txt` (`itAccess` like `ODS`, `AWS`, `SAP`, `ELDAP`) |
+| Certification mail | `email.txt` (example manager notifications) |
+
+Suggested business mapping for `itAccess` codes (use consistently in lessons):
+
+| Code | Bank meaning (fictitious) |
+| --- | --- |
+| `ELDAP` | Enterprise directory / login backbone |
+| `ODS` | Operational Data Store (analytics) |
+| `IBSI` | Internet Banking Support Interface |
+| `Ecom` | E-commerce / digital channel ops |
+| `SalesForce` | CRM for relationship managers |
+| `AS500` | Legacy core / midrange operations access |
+| `SAP` | Finance / ERP |
+| `AWS` | Cloud admin / platform access |
+| `DWRP` | Developer workstation / repo platform |
+
+---
+
+## Suggested weekly pace
+
+- **Week 1:** Lessons 01–04  
+- **Week 2:** Lessons 05–08  
+- **Week 3:** Lessons 09–12 + stretch goals  
+
+---
+
+## Need help?
+
+- Setup issues → [LOCAL_SETUP.md](../LOCAL_SETUP.md) troubleshooting  
+- Concepts → [INFRASTRUCTURE.md](../INFRASTRUCTURE.md) glossary  
+- Product depth → PDFs in `identityiq-8.5/doc/`

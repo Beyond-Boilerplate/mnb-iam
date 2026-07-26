@@ -1,0 +1,21 @@
+
+--
+-- ACCESS HISTORY database create begin
+--
+
+
+\connect postgres postgres;
+CREATE USER identityiqah WITH ENCRYPTED PASSWORD 'identityiqah';
+
+-- Note that we do not specify a LC_COLLATE - use default value from each PostgreSQL release.
+-- IdentityIQ requires a case-insensitive collation.
+CREATE DATABASE identityiqah ENCODING utf8;
+GRANT identityiqah TO postgres;
+ALTER DATABASE identityiqah OWNER TO identityiqah;
+\connect identityiqah identityiqah;
+CREATE SCHEMA identityiqah AUTHORIZATION identityiqah;
+
+--
+-- ACCESS HISTORY database create end
+--
+

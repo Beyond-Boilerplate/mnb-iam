@@ -1,0 +1,9 @@
+dependencies:
+- name: identityiq-data
+  repository: file://../identityiq-data
+  version: 0.1.0
+- name: identityiq
+  repository: file://../identityiq
+  version: 0.1.0
+digest: sha256:5b3b17727cfdb0e9fc224421f4eed27fbb21344954f5c2c58f0defe64b124d59
+generated: "2026-07-26T16:22:18.661824-04:00"

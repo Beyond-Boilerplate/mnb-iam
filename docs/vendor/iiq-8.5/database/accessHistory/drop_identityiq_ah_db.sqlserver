@@ -1,0 +1,16 @@
+
+--
+-- ACCESS HISTORY database drop begin
+--
+
+use master
+GO
+
+drop database identityiqah
+GO
+sp_droplogin identityiqah
+
+--
+-- ACCESS HISTORY database drop end
+--
+

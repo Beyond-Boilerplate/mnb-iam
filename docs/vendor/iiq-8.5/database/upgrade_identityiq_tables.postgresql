@@ -1,0 +1,259 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+-- The CONTEXT-SWITCH token is used to notify the upgrader of a change in database context. The token is from
+-- the iiq.properties file which represents the database url.
+--
+
+\connect identityiq identityiq;
+
+-- DO NOT REMOVE OR MODIFY BLOCK
+-- CONTEXT-SWITCH: dataSource
+-- DO NOT REMOVE OR MODIFY BLOCK
+
+ALTER TABLE identityiq.spt_managed_attr_target_perms ALTER COLUMN target TYPE text;
+
+create index spt_workflowcase_name on identityiq.spt_workflow_case (name);
+
+UPDATE identityiq.spt_bundle_archive SET archive = convert_from(lo_get(archive::oid), 'UTF8');
+UPDATE identityiq.spt_identity_archive SET archive = convert_from(lo_get(archive::oid), 'UTF8');
+UPDATE identityiq.spt_archived_cert_entity SET explanation = convert_from(lo_get(explanation::oid), 'UTF8');
+UPDATE identityiq.spt_activity_constraint SET compensating_control = convert_from(lo_get(compensating_control::oid), 'UTF8');
+UPDATE identityiq.spt_activity_constraint SET remediation_advice = convert_from(lo_get(remediation_advice::oid), 'UTF8');
+UPDATE identityiq.spt_generic_constraint SET compensating_control = convert_from(lo_get(compensating_control::oid), 'UTF8');
+UPDATE identityiq.spt_generic_constraint SET remediation_advice = convert_from(lo_get(remediation_advice::oid), 'UTF8');
+UPDATE identityiq.spt_jasper_page_bucket SET xml = convert_from(lo_get(xml::oid), 'UTF8');
+UPDATE identityiq.spt_jasper_result SET print_xml = convert_from(lo_get(print_xml::oid), 'UTF8');
+UPDATE identityiq.spt_jasper_template SET design_xml = convert_from(lo_get(design_xml::oid), 'UTF8');
+UPDATE identityiq.spt_sodconstraint SET compensating_control = convert_from(lo_get(compensating_control::oid), 'UTF8');
+UPDATE identityiq.spt_sodconstraint SET remediation_advice = convert_from(lo_get(remediation_advice::oid), 'UTF8');
+UPDATE identityiq.spt_batch_request SET file_contents = convert_from(lo_get(file_contents::oid), 'UTF8');
+UPDATE identityiq.spt_certification_archive SET archive = convert_from(lo_get(archive::oid), 'UTF8');
+UPDATE identityiq.spt_email_template SET body = convert_from(lo_get(body::oid), 'UTF8');
+UPDATE identityiq.spt_intercepted_delete SET extracted_object_json = convert_from(lo_get(extracted_object_json::oid), 'UTF8');
+UPDATE identityiq.spt_post_commit_notification_object SET committed_object_string = convert_from(lo_get(committed_object_string::oid), 'UTF8');
+UPDATE identityiq.spt_rule SET source = convert_from(lo_get(source::oid), 'UTF8');
+UPDATE identityiq.spt_sign_off_history SET text = convert_from(lo_get(text::oid), 'UTF8');
+UPDATE identityiq.spt_syslog_event SET stacktrace = convert_from(lo_get(stacktrace::oid), 'UTF8');
+UPDATE identityiq.spt_request SET stack = convert_from(lo_get(stack::oid), 'UTF8');
+UPDATE identityiq.spt_task_result SET stack = convert_from(lo_get(stack::oid), 'UTF8');
+UPDATE identityiq.spt_workflow_case SET stack = convert_from(lo_get(stack::oid), 'UTF8');
+UPDATE identityiq.spt_request_arguments SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_request_arguments SET prompt = convert_from(lo_get(prompt::oid), 'UTF8');
+UPDATE identityiq.spt_request_returns SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_request_returns SET prompt = convert_from(lo_get(prompt::oid), 'UTF8');
+UPDATE identityiq.spt_rule_signature_arguments SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_rule_signature_arguments SET prompt = convert_from(lo_get(prompt::oid), 'UTF8');
+UPDATE identityiq.spt_rule_signature_returns SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_rule_signature_returns SET prompt = convert_from(lo_get(prompt::oid), 'UTF8');
+UPDATE identityiq.spt_task_signature_arguments SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_task_signature_arguments SET prompt = convert_from(lo_get(prompt::oid), 'UTF8');
+UPDATE identityiq.spt_task_signature_returns SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_task_signature_returns SET prompt = convert_from(lo_get(prompt::oid), 'UTF8');
+UPDATE identityiq.spt_schema_attributes SET description = convert_from(lo_get(description::oid), 'UTF8');
+UPDATE identityiq.spt_certification SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification SET error = convert_from(lo_get(error::oid), 'UTF8');
+UPDATE identityiq.spt_certification_action SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_action SET completion_comments = convert_from(lo_get(completion_comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_archive SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_challenge SET decision_comments = convert_from(lo_get(decision_comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_challenge SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_challenge SET completion_comments = convert_from(lo_get(completion_comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_delegation SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_certification_delegation SET completion_comments = convert_from(lo_get(completion_comments::oid), 'UTF8');
+UPDATE identityiq.spt_identity_history_item SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_managed_attr_target_perms SET target = convert_from(lo_get(target::oid), 'UTF8');
+UPDATE identityiq.spt_mitigation_expiration SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_policy_violation SET left_bundles = convert_from(lo_get(left_bundles::oid), 'UTF8');
+UPDATE identityiq.spt_policy_violation SET right_bundles = convert_from(lo_get(right_bundles::oid), 'UTF8');
+UPDATE identityiq.spt_policy_violation SET bundles_marked_for_remediation = convert_from(lo_get(bundles_marked_for_remediation::oid), 'UTF8');
+UPDATE identityiq.spt_policy_violation SET entitlements_marked_for_remed = convert_from(lo_get(entitlements_marked_for_remed::oid), 'UTF8');
+UPDATE identityiq.spt_target SET full_path = convert_from(lo_get(full_path::oid), 'UTF8');
+UPDATE identityiq.spt_work_item SET completion_comments = convert_from(lo_get(completion_comments::oid), 'UTF8');
+UPDATE identityiq.spt_work_item_comments SET comments = convert_from(lo_get(comments::oid), 'UTF8');
+UPDATE identityiq.spt_message_template SET text = convert_from(lo_get(text::oid), 'UTF8');
+
+
+create table identityiq.spt_adaptive_card_notification_template (
+        id varchar(32) not null,
+        created int8,
+        modified int8,
+        significant_modified int8,
+        assigned_scope_path varchar(450),
+        name varchar(128) not null,
+        description varchar(1024),
+        body text,
+        owner varchar(32),
+        assigned_scope varchar(32),
+        primary key (id)
+    );
+
+alter table if exists identityiq.spt_adaptive_card_notification_template
+       add constraint UK_dp45be316f5l6ayk12n8bt7vv unique (name);
+
+alter table if exists identityiq.spt_adaptive_card_notification_template
+       add constraint FK80bgxu2v1yd9x4e2ha8b3jdvp
+       foreign key (owner)
+       references identityiq.spt_identity;
+
+create table identityiq.spt_async_request (
+       id varchar(32) not null,
+        created int8,
+        modified int8,
+        significant_modified int8,
+        type varchar(55),
+        result varchar(4000),
+        poll_interval int4,
+        reference varchar(128),
+        status varchar(128),
+        reference_type varchar(128),
+        batch_id varchar(128),
+        primary key (id)
+    );
+
+create index spt_async_request_reference_type_combined on identityiq.spt_async_request (type, reference);
+create index spt_async_request_reference_type on identityiq.spt_async_request (reference_type);
+create index spt_async_request_batch_id on identityiq.spt_async_request (batch_id);
+
+create index FK80bgxu2v1yd9x4e2ha8b3jdvp on identityiq.spt_adaptive_card_notification_template (owner);
+
+alter table if exists identityiq.spt_adaptive_card_notification_template
+       add constraint FK90nti8lwr50moob5fvushxld8
+       foreign key (assigned_scope)
+       references identityiq.spt_scope;
+
+create index FK90nti8lwr50moob5fvushxld8 on identityiq.spt_adaptive_card_notification_template (assigned_scope);
+
+create index SPT_IDXD711E2C348ADC6C on identityiq.spt_adaptive_card_notification_template (assigned_scope_path);
+
+create index spt_adaptive_card_notification on identityiq.spt_adaptive_card_notification_template (upper(name));
+
+create index spt_cert_archive_name on identityiq.spt_certification_archive (name);
+
+
+--
+-- ACCESS HISTORY upgrade begin
+--
+
+\connect identityiqah identityiqah;
+
+-- DO NOT REMOVE OR MODIFY BLOCK
+-- CONTEXT-SWITCH: dataSourceAccessHistory
+-- DO NOT REMOVE OR MODIFY BLOCK
+
+
+
+
+--
+-- IIQTC-518 - Dispatch Access History Task Fails due to column size
+--
+DROP INDEX if exists identityiqah.spt_hcrc_exc_attrval;
+ALTER TABLE identityiqah.spt_hist_cert_remediation_capture ALTER COLUMN exception_attribute_value TYPE varchar(2048);
+ALTER TABLE identityiqah.spt_hist_certification ALTER COLUMN cert_display_name TYPE varchar(256);
+ALTER TABLE identityiqah.spt_hist_certification ALTER COLUMN cert_name TYPE varchar(256);
+ALTER TABLE identityiqah.spt_hist_certification ALTER COLUMN cert_type TYPE varchar(255);
+ALTER TABLE identityiqah.spt_hist_entitlement_capture ALTER COLUMN attribute_name TYPE varchar(322);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN property_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property1 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property10 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property2 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property3 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property4 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property5 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property6 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property7 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property8 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property9 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr ALTER COLUMN display_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_capture ALTER COLUMN attribute_name TYPE varchar(322);
+ALTER TABLE identityiqah.spt_hist_mattr_capture ALTER COLUMN display_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_capture ALTER COLUMN type TYPE varchar(255);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN display_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN property_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property1 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property10 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property2 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property3 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property4 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property5 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property6 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property7 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property8 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property9 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_policy_violation_capture ALTER COLUMN constraint_name TYPE varchar(2000);
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_capture ALTER COLUMN constraint_name TYPE varchar(2000);
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_entitlements ALTER COLUMN entitlement_display_value TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_entitlements ALTER COLUMN entitlement_name TYPE varchar(322);
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_entitlements ALTER COLUMN entitlement_value TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN property_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property1 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property10 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property2 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property3 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property4 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property5 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property6 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property7 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property8 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property9 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_role_remediation_entitlements ALTER COLUMN entitlement_name TYPE varchar(322);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN property_name TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property1 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property10 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property2 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property3 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property4 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property5 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property6 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property7 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property8 TYPE varchar(450);
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property9 TYPE varchar(450);
+
+UPDATE identityiqah.spt_hist_account_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_capability_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_certification SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_cert_remediation_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_entitlement_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_identity_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_identity_event SET event_detail_json = convert_from(lo_get(event_detail_json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_identity_event SET old_value = convert_from(lo_get(old_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_identity_event SET new_value = convert_from(lo_get(new_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_identity_req_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_identity_req_item_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_mattr_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_mattr_event SET event_detail_json = convert_from(lo_get(event_detail_json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_mattr_event SET old_value = convert_from(lo_get(old_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_mattr_event SET new_value = convert_from(lo_get(new_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_object_config_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_policy_violation_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_policy_violation_remediation_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_role_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_role_event SET event_detail_json = convert_from(lo_get(event_detail_json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_role_event SET old_value = convert_from(lo_get(old_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_role_event SET new_value = convert_from(lo_get(new_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_workgroup_capture SET json = convert_from(lo_get(json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_workgroup_event SET event_detail_json = convert_from(lo_get(event_detail_json::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_workgroup_event SET old_value = convert_from(lo_get(old_value::oid), 'UTF8');
+UPDATE identityiqah.spt_hist_workgroup_event SET new_value = convert_from(lo_get(new_value::oid), 'UTF8');
+
+--
+-- This is necessary to maintain the identityiqah schema version. DO NOT REMOVE.
+--
+update identityiqah.spt_hist_database_version set schema_version = '8.5-15' where name = 'main';
+
+--
+-- ACCESS HISTORY upgrade end
+--
+
+\connect identityiq identityiq;
+
+-- DO NOT REMOVE OR MODIFY BLOCK
+-- CONTEXT-SWITCH: dataSource
+-- DO NOT REMOVE OR MODIFY BLOCK
+
+--
+-- This is necessary to maintain the identityiq schema version. DO NOT REMOVE.
+--
+update identityiq.spt_database_version set schema_version = '8.5-15' where name = 'main';

@@ -1,0 +1,42 @@
+# Homelab (k3s) — Beyond-Boilerplate / mnb-iam
+# Public URL: https://sailpoint.lmsapp.us/identityiq/login.jsf
+# Cloudflare Tunnel (no Access for now):
+#   sailpoint.lmsapp.us → http://identityiq.sailpoint.svc.cluster.local:8080
+
+identityiq-data:
+  enabled: true
+  cnpg:
+    enabled: true
+    name: sailpoint-pg
+    instances: 2
+    storage:
+      size: 30Gi
+  appUser:
+    createSecret: true
+    secretName: sailpoint-iiq-db
+    # Lab-only defaults — override via local-homelab.secrets.yaml (gitignored)
+    identityiqPassword: "LabOnlyChangeMe1!"
+    pluginPassword: "LabOnlyChangeMe1!"
+    ahPassword: "LabOnlyChangeMe1!"
+  schemaInit:
+    enabled: true
+
+identityiq:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/beyond-boilerplate/identityiq
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  imagePullSecrets:
+    - name: ghcr-pull
+  dbSecretName: sailpoint-iiq-db
+  service:
+    sessionAffinity: ClientIP
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi

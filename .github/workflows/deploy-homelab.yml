@@ -1,0 +1,210 @@
+name: Deploy homelab
+
+# Tailscale → Helm into namespace sailpoint → smoke https://sailpoint.lmsapp.us
+#
+# Required secrets (reuse Beyond-Boilerplate org / same as nepaledu-platform):
+#   TS_OAUTH_CLIENT_ID, TS_OAUTH_SECRET, HOMELAB_KUBECONFIG
+#
+# Setup: docs/HOMELAB-CD.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_smoke:
+        description: Skip public smoke after Helm
+        type: boolean
+        default: false
+      image_tag:
+        description: GHCR tag (sha7 or semver). Empty on ops-only keeps live tag (CI still requires pin after publish).
+        type: string
+        required: false
+        default: ""
+  workflow_run:
+    workflows: ["Publish GHCR images"]
+    types: [completed]
+
+concurrency:
+  group: deploy-homelab-sailpoint
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  IIQ_SMOKE_URL: https://sailpoint.lmsapp.us/identityiq/login.jsf
+
+jobs:
+  helm-upgrade:
+    name: Helm upgrade
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'main' ||
+        github.event.workflow_run.head_branch == 'master'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: homelab
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Connect Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          ping: 192.168.50.11
+
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+
+      - name: Write kubeconfig
+        env:
+          HOMELAB_KUBECONFIG: ${{ secrets.HOMELAB_KUBECONFIG }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HOMELAB_KUBECONFIG}" ]; then
+            echo "::error::Missing secret HOMELAB_KUBECONFIG"
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          printf '%s\n' "$HOMELAB_KUBECONFIG" > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          export KUBECONFIG="$HOME/.kube/config"
+          SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+          echo "API server: ${SERVER}"
+
+      - name: Verify cluster
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          kubectl get nodes
+          kubectl -n sailpoint get deploy,pods 2>/dev/null || echo "namespace sailpoint not ready yet"
+
+      - name: Ensure ghcr-pull secret
+        env:
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          kubectl get ns sailpoint >/dev/null 2>&1 || kubectl create namespace sailpoint
+          if kubectl -n sailpoint get secret ghcr-pull >/dev/null 2>&1; then
+            echo "ghcr-pull already present"
+            exit 0
+          fi
+          TOKEN="${GHCR_PULL_TOKEN:-$GITHUB_TOKEN}"
+          kubectl -n sailpoint create secret docker-registry ghcr-pull \
+            --docker-server=ghcr.io \
+            --docker-username="${{ github.actor }}" \
+            --docker-password="${TOKEN}"
+
+      - name: Helm upgrade sailpoint
+        env:
+          VERIFY_IMAGE_TAGS: "true"
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          chmod +x deploy/helm/scripts/install-sailpoint.sh deploy/helm/scripts/update-deps.sh
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            REF="${{ github.event.workflow_run.head_sha }}"
+            export IMAGE_TAG="${REF:0:7}"
+            echo "Deploying IMAGE_TAG=${IMAGE_TAG} (from Publish GHCR)"
+          elif [ -n "${{ inputs.image_tag }}" ]; then
+            export IMAGE_TAG="${{ inputs.image_tag }}"
+            echo "Deploying IMAGE_TAG=${IMAGE_TAG} (workflow_dispatch)"
+          else
+            # Ops-only: pin to currently running tag if any, else VERSION
+            LIVE=$(kubectl -n sailpoint get deploy identityiq -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
+            if [[ "$LIVE" == *:* ]]; then
+              export IMAGE_TAG="${LIVE##*:}"
+              echo "Preserving live IMAGE_TAG=${IMAGE_TAG}"
+            else
+              export IMAGE_TAG="$(tr -d '[:space:]' < VERSION)"
+              echo "Bootstrap IMAGE_TAG=${IMAGE_TAG} from VERSION"
+            fi
+          fi
+          if ! ./deploy/helm/scripts/install-sailpoint.sh deploy/helm/values/local-homelab.yaml; then
+            echo "::error::Helm upgrade failed"
+            kubectl -n sailpoint get deploy,pods,pvc,svc,jobs -o wide || true
+            kubectl -n sailpoint get events --sort-by=.lastTimestamp | tail -40 || true
+            helm -n sailpoint status sailpoint || true
+            exit 1
+          fi
+
+      - name: Wait for IdentityIQ rollout
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          kubectl -n sailpoint rollout status deploy/identityiq --timeout=12m
+
+  smoke-iiq:
+    name: Smoke login.jsf
+    needs: helm-upgrade
+    if: >
+      always() &&
+      needs.helm-upgrade.result == 'success' &&
+      (github.event_name != 'workflow_dispatch' || inputs.skip_smoke != true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Probe sailpoint.lmsapp.us
+        run: |
+          set -euo pipefail
+          ok=0
+          for i in $(seq 1 36); do
+            code=$(curl -sS -o /tmp/iiq.html -w '%{http_code}' --connect-timeout 10 \
+              "$IIQ_SMOKE_URL" || echo "000")
+            echo "attempt ${i}: HTTP ${code}"
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::Smoke failed for ${IIQ_SMOKE_URL}"
+            echo "Add Cloudflare Tunnel Public Hostname:"
+            echo "  Subdomain: sailpoint  Domain: lmsapp.us"
+            echo "  Type: HTTP  URL: identityiq.sailpoint.svc.cluster.local:8080"
+            echo "(No Cloudflare Access for now.)"
+            exit 1
+          fi
+          echo "Public IdentityIQ login OK"
+
+  deploy-gate:
+    name: Deploy gate
+    needs: [helm-upgrade, smoke-iiq]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Aggregate
+        env:
+          HELM: ${{ needs.helm-upgrade.result }}
+          SMOKE: ${{ needs.smoke-iiq.result }}
+          REF: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Homelab deploy (sailpoint)"
+            echo ""
+            echo "- Ref: \`${REF}\`"
+            echo "- Helm: \`${HELM}\`"
+            echo "- Smoke IIQ: \`${SMOKE}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$HELM" != "success" ]; then
+            echo "::error::Helm upgrade failed"
+            exit 1
+          fi
+          if [ "$SMOKE" != "success" ] && [ "$SMOKE" != "skipped" ]; then
+            echo "::error::Smoke failed"
+            exit 1
+          fi
+          echo "Deploy gate passed"

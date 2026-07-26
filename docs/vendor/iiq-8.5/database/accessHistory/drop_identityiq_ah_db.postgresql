@@ -1,0 +1,13 @@
+
+--
+-- ACCESS HISTORY database drop begin
+--
+
+ALTER DATABASE identityiqah OWNER TO postgres;
+DROP DATABASE IF EXISTS identityiqah;
+DROP USER IF EXISTS identityiqah;
+
+--
+-- ACCESS HISTORY database drop end
+--
+

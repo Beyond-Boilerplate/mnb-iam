@@ -1,0 +1,230 @@
+name: Publish GHCR images
+
+# Pull GA zip from OCI → SSB war inside Docker → push identityiq image.
+# Tags: VERSION file (semver) + latest + short SHA.
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment_type:
+        description: SemVer bump of VERSION before publish
+        required: true
+        type: choice
+        options: [patch, minor, major, none]
+        default: none
+  push:
+    branches: [main, master]
+    paths:
+      - config/**
+      - src/**
+      - web/**
+      - docker/**
+      - build.xml
+      - build.sh
+      - build.properties
+      - homelab.*
+      - sandbox.*
+      - servers.properties
+      - VERSION
+      - .github/workflows/publish-ghcr.yml
+
+concurrency:
+  group: publish-ghcr-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  prepare:
+    name: Resolve version
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip ci]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      owner: ${{ steps.meta.outputs.owner }}
+      sha_short: ${{ steps.meta.outputs.sha_short }}
+      commit_sha: ${{ steps.meta.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Bump VERSION
+        id: bump
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INCREMENT_TYPE: ${{ github.event.inputs.increment_type || 'none' }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TYPE="${INCREMENT_TYPE}"
+          else
+            TYPE="none"
+          fi
+          echo "type=${TYPE}" >> "$GITHUB_OUTPUT"
+          if [ "$TYPE" = "none" ]; then
+            exit 0
+          fi
+          CUR=$(tr -d '[:space:]' < VERSION)
+          IFS=. read -r MAJOR MINOR PATCH <<<"$CUR"
+          case "$TYPE" in
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH+1)) ;;
+          esac
+          NEW="${MAJOR}.${MINOR}.${PATCH}"
+          echo "$NEW" > VERSION
+          echo "bumped ${CUR} → ${NEW}"
+
+      - name: Sync Helm image tag
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          set -euo pipefail
+          TAG=$(tr -d '[:space:]' < VERSION)
+          python3 - "$TAG" <<'PY'
+          from pathlib import Path
+          import re, sys
+          tag = sys.argv[1]
+          path = Path("deploy/helm/values/local-homelab.yaml")
+          text = path.read_text()
+          text2, n = re.subn(
+              r'(repository:\s*ghcr\.io/beyond-boilerplate/identityiq\s*\n\s*tag:\s*)"[^"]+"',
+              rf'\1"{tag}"',
+              text,
+          )
+          if n == 0:
+              raise SystemExit("no helm identityiq tag updated")
+          path.write_text(text2)
+          print(f"updated helm tag → {tag}")
+          PY
+
+      - name: Commit version bump
+        if: steps.bump.outputs.type != 'none'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add VERSION deploy/helm/values/local-homelab.yaml
+          if git diff --staged --quiet; then
+            exit 0
+          fi
+          TAG=$(tr -d '[:space:]' < VERSION)
+          git commit -m "chore: bump version to ${TAG} [skip ci]"
+          git push
+          git tag -f "v${TAG}"
+          git push -f origin "v${TAG}"
+
+      - name: Emit metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          TAG=$(tr -d '[:space:]' < VERSION)
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          {
+            echo "image_tag=${TAG}"
+            echo "owner=${OWNER}"
+            echo "sha_short=${GITHUB_SHA::7}"
+            echo "commit_sha=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build identityiq
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+
+      - name: Install oras
+        uses: oras-project/setup-oras@v1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull GA zip from OCI
+        env:
+          OWNER: ${{ needs.prepare.outputs.owner }}
+        run: |
+          set -euo pipefail
+          mkdir -p base/ga
+          if [ -f base/ga/identityiq-8.5.zip ]; then
+            echo "GA zip already in workspace"
+            ls -lh base/ga/identityiq-8.5.zip
+            exit 0
+          fi
+          REF="ghcr.io/${OWNER}/mnb-iam-ga:8.5"
+          echo "oras pull ${REF}"
+          oras pull "$REF" -o base/ga
+          # oras may write with original filename
+          if [ ! -f base/ga/identityiq-8.5.zip ]; then
+            found=$(find base/ga -name '*.zip' | head -1)
+            test -n "$found"
+            mv "$found" base/ga/identityiq-8.5.zip
+          fi
+          ls -lh base/ga/identityiq-8.5.zip
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push identityiq
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          platforms: linux/amd64
+          build-args: |
+            SPTARGET=homelab
+          provenance: mode=max
+          sbom: true
+          tags: |
+            ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.image_tag }}
+            ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:latest
+            ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.sha_short }}
+          cache-from: type=gha,scope=ghcr-identityiq
+          cache-to: type=gha,mode=max,scope=ghcr-identityiq
+
+  summarize:
+    name: Publish summary
+    needs: [prepare, build]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Aggregate
+        env:
+          BUILD: ${{ needs.build.result }}
+          TAG: ${{ needs.prepare.outputs.image_tag }}
+          OWNER: ${{ needs.prepare.outputs.owner }}
+          SHA: ${{ needs.prepare.outputs.sha_short }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## GHCR publish"
+            echo ""
+            echo "- Image tag: \`${TAG}\`"
+            echo "- SHA tag: \`${SHA}\`"
+            echo "- Owner: \`${OWNER}\`"
+            echo "- Build: \`${BUILD}\`"
+            echo ""
+            echo "\`ghcr.io/${OWNER}/identityiq:${TAG}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$BUILD" != "success" ]; then
+            echo "::error::identityiq image build failed"
+            exit 1
+          fi

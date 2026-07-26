@@ -1,0 +1,17 @@
+
+--
+-- PLUGIN database drop begin
+--
+
+use master
+GO
+
+drop database identityiqPlugin
+GO
+sp_droplogin identityiqPlugin
+
+--
+-- PLUGIN database drop end
+--
+
+

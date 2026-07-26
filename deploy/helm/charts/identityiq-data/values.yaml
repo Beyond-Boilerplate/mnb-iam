@@ -1,0 +1,30 @@
+cnpg:
+  enabled: true
+  name: sailpoint-pg
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4
+  enableSuperuserAccess: true
+  storage:
+    size: 30Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  bootstrap:
+    database: postgres
+    owner: postgres
+
+appUser:
+  createSecret: true
+  secretName: sailpoint-iiq-db
+  # Used by IIQ JDBC (identityiq / plugin / ah) — override in secrets file for prod
+  identityiqPassword: "LabOnlyChangeMe1!"
+  pluginPassword: "LabOnlyChangeMe1!"
+  ahPassword: "LabOnlyChangeMe1!"
+
+schemaInit:
+  enabled: true
+  image: postgres:16-alpine

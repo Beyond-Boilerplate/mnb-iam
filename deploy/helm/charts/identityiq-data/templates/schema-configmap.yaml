@@ -1,0 +1,11 @@
+{{- if .Values.schemaInit.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.cnpg.name }}-schema-sql
+  labels:
+    app.kubernetes.io/name: identityiq-data
+    app.kubernetes.io/component: schema-init
+binaryData:
+  create_identityiq_tables-8.5.postgresql: {{ .Files.Get "files/create_identityiq_tables-8.5.postgresql" | b64enc }}
+{{- end }}

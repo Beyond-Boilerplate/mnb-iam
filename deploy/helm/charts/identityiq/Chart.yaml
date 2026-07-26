@@ -1,0 +1,6 @@
+apiVersion: v2
+name: identityiq
+description: SailPoint IdentityIQ Tomcat workload (Meridian National Bank lab)
+type: application
+version: 0.1.0
+appVersion: "8.5"

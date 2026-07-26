@@ -1,0 +1,66 @@
+name: Publish GA OCI
+
+# Pushes SailPoint GA zip as an OCI artifact to GHCR (not as a container image).
+# One-time / rare: identityiq-8.5.zip → ghcr.io/<owner>/mnb-iam-ga:8.5
+#
+# Required: base/ga/identityiq-8.5.zip present locally when dispatching,
+#   OR attach via workflow_dispatch file upload is not supported — use
+#   workflow_dispatch after committing via temporary path, OR run
+#   .github/scripts/publish-ga-oci.sh from a trusted machine with GHCR auth.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: OCI artifact tag (IIQ major.minor)
+        required: true
+        default: "8.5"
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish-ga:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure GA zip present
+        run: |
+          set -euo pipefail
+          if [ ! -f base/ga/identityiq-8.5.zip ]; then
+            echo "::error::Missing base/ga/identityiq-8.5.zip"
+            echo "Store the GA zip out-of-band, then either:"
+            echo "  1) Run .github/scripts/publish-ga-oci.sh locally with GHCR login, or"
+            echo "  2) Temporarily place the zip for this workflow (prefer not committing to git)."
+            exit 1
+          fi
+          ls -lh base/ga/identityiq-8.5.zip
+
+      - name: Install oras
+        uses: oras-project/setup-oras@v1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push OCI artifact
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REF="ghcr.io/${OWNER}/mnb-iam-ga:${TAG}"
+          oras push "$REF" \
+            --artifact-type application/vnd.sailpoint.iiq.ga.v1+zip \
+            base/ga/identityiq-8.5.zip:application/zip
+          echo "Published ${REF}"
+          echo "### GA OCI" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`${REF}\`" >> "$GITHUB_STEP_SUMMARY"

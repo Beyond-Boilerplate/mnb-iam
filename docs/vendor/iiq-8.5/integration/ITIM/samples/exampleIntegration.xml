@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<!-- 
+ This file contains example objects that can be used to configure provisioning
+ system integrations.
+ -->
+<sailpoint>
+
+  <IntegrationConfig name="ITIM 4.6 Integration"
+                     executor="sailpoint.integration.itim.ITIMIntegrationExecutor"
+                     roleSyncStyle="dual">
+   
+    <!-- 
+      This would be the application representing the ITIM system if 
+      you have one.  This is used by Provisioner but not RoleSynchronzier.
+    -->
+    <ApplicationRef>
+      <Reference class="Application" name="ITIM - dugout"/>
+    </ApplicationRef>
+   
+    <!--
+      Connection params.
+    -->
+    <Attributes>
+      <Map>
+        <!-- The ITIM integration supports all operations. -->
+        <entry key="operations" value="Create,Modify,Delete,Enable,Unlock,SetPassword"/>
+
+        <entry key="url" value="http://dugout.test.sailpoint.com:9080/iiqitim/resources"/>
+        <entry key="username" value="itim manager"/>
+        <!-- Note that this can be encrypted using the encrypt command in the iiq console. -->
+        <entry key="password" value="sailpoint"/>
+
+        <!--
+          This can be set to true to trust all certificates when using SSL.  If false,
+          self-signed certificates are accepted regardless of the validity date, and
+          certificates that are signed by a trusted signer are accepted if valid.
+         -->
+        <entry key="trustAllCerts" value="false"/>
+
+        <!--
+           This specifies the name of the custom role attribute that can optionally
+           the dynamic role's filter.  Change the value to match the name of the
+           role attribute that you configure (if applicable).
+          -->
+        <entry key="dynamicFilterAttribute" value="ITIM dynamic role filter"/>
+      </Map>
+    </Attributes>
+   
+    <!--
+      Filter defining the roles you want to sync.
+      If not specified all roles are syncd.
+    <RoleSyncFilter>
+      <LeafFilter property="syncFlag" operation="EQ" value="true"/>
+    </RoleSyncFilter>
+    -->
+   
+    <RoleSyncContainer>
+      <Reference class="sailpoint.object.Bundle" name="ITIM 4.6" />
+    </RoleSyncContainer>
+   
+    <!--
+      Name mappings for resources and their attributes.
+    -->
+    <ManagedResources>
+      <ManagedResource name="ERP">
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="ERP" />
+        </ApplicationRef>
+        <ResourceAttributes>
+          <ResourceAttribute name="profiles" localName="profiles" />
+        </ResourceAttributes>
+      </ManagedResource>
+      <ManagedResource name="Corporate Directory">
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="Corporate Directory" />
+        </ApplicationRef>
+        <ResourceAttributes>
+          <ResourceAttribute name="memberof" localName="memberof" />
+        </ResourceAttributes>
+      </ManagedResource>
+    </ManagedResources>
+  </IntegrationConfig>
+
+
+  <IntegrationConfig name="ITIM 5.0 Integration"
+                     executor="sailpoint.integration.itim.ITIMIntegrationExecutor"
+                     roleSyncStyle="dual">
+   
+    <!-- 
+      This would be the application representing the ITIM system if 
+      you have one.  This is used by Provisioner but not RoleSynchronzier.
+    -->
+    <ApplicationRef>
+      <Reference class="Application" name="ITIM - dinghy"/>
+    </ApplicationRef>
+   
+    <!--
+      Connection params.
+    -->
+    <Attributes>
+      <Map>
+        <!-- The ITIM integration supports all operations. -->
+        <entry key="operations" value="Create,Modify,Delete,Enable,Unlock"/>
+
+        <entry key="url" value="http://dinghy.test.sailpoint.com:9080/iiqitim/resources"/>
+        <entry key="username" value="itim manager"/>
+        <!-- Note that this can be encrypted using the encrypt command in the iiq console. -->
+        <entry key="password" value="sailpoint"/>
+
+        <!--
+          This can be set to true to trust all certificates when using SSL.  If false,
+          self-signed certificates are accepted regardless of the validity date, and
+          certificates that are signed by a trusted signer are accepted if valid.
+         -->
+        <entry key="trustAllCerts" value="false"/>
+
+        <!--
+           This specifies the name of the custom role attribute that can optionally
+           the dynamic role's filter.  Change the value to match the name of the
+           role attribute that you configure (if applicable).
+          -->
+        <entry key="dynamicFilterAttribute" value="ITIM dynamic role filter"/>
+
+        <!--
+           Uncomment these to set access interface settings when pushing roles.
+           These control whether a role is accessible in the ITIM access user interface
+           and how they are displayed.
+          -->
+        <!--
+        <entry key="showRoleInAccessInterface" value="true"/>
+        <entry key="showRoleAsCommonAccess" value="true"/>
+        <entry key="accessInterfaceRoleCategory" value="AccessRole"/>
+        -->
+      </Map>
+    </Attributes>
+   
+    <!--
+      Filter defining the roles you want to sync.
+      If not specified all roles are syncd.
+    <RoleSyncFilter>
+      <LeafFilter property="syncFlag" operation="EQ" value="true"/>
+    </RoleSyncFilter>
+    -->
+   
+    <RoleSyncContainer>
+      <Reference class="sailpoint.object.Bundle" name="ITIM 5" />
+    </RoleSyncContainer>
+   
+    <!--
+      Name mappings for resources and their attributes.
+    -->
+    <ManagedResources>
+      <ManagedResource name="Corporate Directory">
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="ITIM 5 - Temp Test App" />
+        </ApplicationRef>
+        <ResourceAttributes>
+          <ResourceAttribute name="ergroup" localName="groups" />
+        </ResourceAttributes>
+      </ManagedResource>
+    </ManagedResources>
+  </IntegrationConfig>
+
+</sailpoint>

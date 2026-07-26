@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WORKFLOWEXTENSIONS>
+    <!--
+      SailPoint IdentityIQ workflow extensions.  Append these into
+      $ITIM_HOME/data/workflowextensions.xml.s
+     -->
+	<ACTIVITY ACTIVITYID="checkRolePolicies" LIMIT="0">
+		<IMPLEMENTATION_TYPE>
+			<APPLICATION CLASS_NAME="sailpoint.itim.workflow.PolicyCheckExtensions" METHOD_NAME="checkRolePolicies"/>
+		</IMPLEMENTATION_TYPE>
+		<PARAMETERS>
+			<IN_PARAMETERS  PARAM_ID="personIn"      TYPE="Person"/>
+			<OUT_PARAMETERS PARAM_ID="violationsOut" TYPE="List"/>
+		</PARAMETERS>
+	</ACTIVITY>
+
+    <ACTIVITY ACTIVITYID="checkRolePoliciesByName" LIMIT="0">
+        <IMPLEMENTATION_TYPE>
+            <APPLICATION CLASS_NAME="sailpoint.itim.workflow.PolicyCheckExtensions" METHOD_NAME="checkRolePoliciesByName"/>
+        </IMPLEMENTATION_TYPE>
+        <PARAMETERS>
+            <IN_PARAMETERS  PARAM_ID="identityIn"    TYPE="String"/>
+            <IN_PARAMETERS  PARAM_ID="roleNamesIn"   TYPE="List"/>
+            <OUT_PARAMETERS PARAM_ID="violationsOut" TYPE="List"/>
+        </PARAMETERS>
+    </ACTIVITY>
+</WORKFLOWEXTENSIONS>

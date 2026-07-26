@@ -1,0 +1,49 @@
+
+--
+-- ACCESS HISTORY database create begin
+--
+
+
+CREATE DATABASE identityiqah
+GO
+
+--create a sql server login with which to connect
+CREATE LOGIN [identityiqah] WITH PASSWORD='identityiqah',
+DEFAULT_DATABASE=identityiqah
+GO
+
+USE identityiqah
+GO
+
+--create a user in our db associated with our server login and our schema
+CREATE USER identityiqah FOR LOGIN identityiqah WITH DEFAULT_SCHEMA =
+identityiqah
+GO
+
+-- create a schema
+CREATE SCHEMA identityiqah AUTHORIZATION identityiqah
+GO
+
+--grant permissions
+grant select,insert,update,delete,create table to identityiqah
+GO
+
+--this makes our default user the db owner, so it can be
+--used to run scripts.
+EXEC sp_addrolemember 'db_owner', 'identityiqah'
+GO
+
+-- Enable automatic snapshot isolation
+
+ALTER DATABASE identityiqah SET ALLOW_SNAPSHOT_ISOLATION ON
+GO
+ALTER DATABASE identityiqah SET READ_COMMITTED_SNAPSHOT ON
+GO
+
+USE identityiq
+GO
+
+--
+-- ACCESS HISTORY database create end
+--
+

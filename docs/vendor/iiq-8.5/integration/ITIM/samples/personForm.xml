@@ -1,0 +1,73 @@
+<page>
+<body>
+<tabbedForm>
+<tab index="0" selected="true">
+<title>$personal</title>
+<image/>
+<url>javascript:switchTabs(document.forms['body'],0);</url>
+<formElement direction="inherit" required="true" label="$sn" name="data.sn">
+<input type="text" size="50" name="data.sn"/>
+<constraint><type>REQUIRED</type><parameter>true</parameter></constraint></formElement>
+<formElement direction="inherit" required="true" label="Username" name="data.cn">
+<input type="text" size="50" name="data.cn"/>
+<constraint><type>REQUIRED</type><parameter>true</parameter></constraint></formElement>
+<formElement direction="inherit" label="$givenname" name="data.givenname">
+<input type="text" size="50" name="data.givenname"/>
+</formElement>
+<formElement direction="inherit" label="$initials" name="data.initials">
+<input type="text" size="50" name="data.initials"/>
+</formElement>
+<formElement direction="inherit" label="$homepostaladdress" name="data.homepostaladdress">
+<input type="text" size="50" name="data.homepostaladdress"/>
+</formElement>
+<formElement direction="inherit" label="$ersharedsecret" name="data.ersharedsecret">
+<input type="text" size="50" name="data.ersharedsecret"/>
+</formElement>
+<formElement direction="inherit" label="$description" name="data.description">
+<input type="text" name="data.description"/>
+</formElement>
+<formElement direction="inherit" label="ITIM Roles" name="data.erroles">
+<searchMatch multiple="true" type="select" class="DefaultRole" category="Role" orgSubTreeSearch="true">
+<comboItem><size>4</size>
+<width>300</width>
+</comboItem>
+</searchMatch>
+</formElement>
+
+<!-- THIS ELEMENT ALLOWS PERFORMING ROLE CHECKS FROM THE PERSON FORM. -->
+<formElement direction="inherit" label="Check for role violations" name="data.audio">
+<subForm width="800" height="300">	<property name="customServletURI">checkIIQRoles.jsp</property></subForm></formElement>
+
+</tab>
+<tab index="1" selected="false">
+<title>$corporate</title>
+<image/>
+<url>javascript:switchTabs(document.forms['body'],1);</url>
+<formElement direction="inherit" label="$roomnumber" name="data.roomnumber">
+<input type="text" size="50" name="data.roomnumber"/>
+</formElement>
+<formElement direction="inherit" label="$employeenumber" name="data.employeenumber">
+<input type="text" size="50" name="data.employeenumber"/>
+</formElement>
+<formElement direction="inherit" label="$title" name="data.title">
+<input type="text" size="50" name="data.title"/>
+</formElement>
+<formElement direction="inherit" label="$manager" name="data.manager">
+<searchControl type="input" category="Person" orgSubTreeSearch="true">
+<comboItem><width>300</width>
+</comboItem>
+</searchControl>
+</formElement>
+<formElement direction="inherit" label="$postaladdress" name="data.postaladdress">
+<input type="text" size="50" name="data.postaladdress"/>
+</formElement>
+<formElement direction="inherit" label="$secretary" name="data.secretary">
+<searchControl type="input" category="Person" orgSubTreeSearch="true">
+<comboItem><width>300</width>
+</comboItem>
+</searchControl>
+</formElement>
+</tab>
+
+</tabbedForm></body>
+</page>

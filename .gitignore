@@ -1,0 +1,53 @@
+# /build/
+# /build.properties.local
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Lab / local runtime
+/base/ga/.work/
+*.log
+~$*
+
+# Secrets — never commit real prod passwords
+# (sandbox.iiq.properties may contain lab secrets; prefer encrypted values)
+local.iiq.properties
+*.local.properties
+
+# Node / misc
+node_modules/
+
+# Java
+*.class
+*.jar
+!lib/**/*.jar
+!SSDDeployer.jar
+!servicestools/**/*.jar
+!externaltools/**/*.jar
+!ssdplugins/**/*.jar
+
+# Large GA binaries: keep zip in base/ga for builds, ignore accidental war extracts
+/base/ga/*.war
+/base/ga/.work/
+
+# GA zip lives in GHCR OCI (mnb-iam-ga:8.5) — do not commit the bulk binary
+/base/ga/*.zip
+/base/ga/*.ZIP
+
+# Local Helm secret overlays
+deploy/helm/values/*.secrets.yaml
+
+# Build output
+/build/
+
+# Local lab DB dumps / archives (not for CD)
+/IIQDBDump/
+/IIQDBDump.rar
+*.rar
+
+# Eclipse metadata (optional IDE)
+.classpath
+.project
+.settings/

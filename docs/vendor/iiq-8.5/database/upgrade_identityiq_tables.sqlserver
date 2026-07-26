@@ -1,0 +1,561 @@
+--
+-- This script contains DDL statements to upgrade a database schema to
+-- reflect changes to the model.  This file should only be used to
+-- upgrade from the last formal release version to the current code base.
+--
+-- The CONTEXT-SWITCH token is used to notify the upgrader of a change in database context. The token is from
+-- the iiq.properties file which represents the database url.
+--
+
+USE identityiq
+GO
+
+-- DO NOT REMOVE OR MODIFY BLOCK
+-- CONTEXT-SWITCH: dataSource
+-- DO NOT REMOVE OR MODIFY BLOCK
+--
+
+EXEC sp_rename N'identityiq.spt_named_timestamp.uk_c5tewl8ylk44ns0wx9lik19ae', N'UK_c5tewl8ylk44ns0wx9lik19ae', N'INDEX';
+GO
+
+ALTER TABLE identityiq.spt_managed_attr_target_perms ALTER COLUMN target nvarchar(max);
+GO
+
+create index spt_workflowcase_name on identityiq.spt_workflow_case (name);
+GO
+
+
+create table identityiq.spt_adaptive_card_notification_template (
+        id nvarchar(32) not null,
+        created numeric(19,0),
+        modified numeric(19,0),
+        significant_modified numeric(19,0),
+        assigned_scope_path nvarchar(450),
+        name nvarchar(128) not null,
+        description nvarchar(1024),
+        body nvarchar(max),
+        owner nvarchar(32),
+        assigned_scope nvarchar(32),
+        primary key (id)
+    );
+GO
+
+alter table identityiq.spt_adaptive_card_notification_template
+       add constraint UK_dp45be316f5l6ayk12n8bt7vv unique (name);
+GO
+
+alter table identityiq.spt_adaptive_card_notification_template
+       add constraint FK80bgxu2v1yd9x4e2ha8b3jdvp
+       foreign key (owner)
+       references identityiq.spt_identity;
+GO
+
+create index FK80bgxu2v1yd9x4e2ha8b3jdvp on identityiq.spt_adaptive_card_notification_template (owner);
+GO
+
+alter table identityiq.spt_adaptive_card_notification_template
+       add constraint FK90nti8lwr50moob5fvushxld8
+       foreign key (assigned_scope)
+       references identityiq.spt_scope;
+GO
+
+create index FK90nti8lwr50moob5fvushxld8 on identityiq.spt_adaptive_card_notification_template (assigned_scope);
+GO
+
+create index SPT_IDXD711E2C348ADC6C on identityiq.spt_adaptive_card_notification_template (assigned_scope_path);
+GO
+
+create table identityiq.spt_async_request (
+       id nvarchar(32) not null,
+        created numeric(19,0),
+        modified numeric(19,0),
+        significant_modified numeric(19,0),
+        type nvarchar(55),
+        result nvarchar(4000),
+        poll_interval int,
+        reference nvarchar(128),
+        status nvarchar(128),
+        reference_type nvarchar(128),
+        batch_id nvarchar(128),
+        primary key (id)
+    );
+    GO
+create index spt_async_request_reference_type_combined on identityiq.spt_async_request (type, reference);
+GO
+create index spt_async_request_reference_type on identityiq.spt_async_request (reference_type);
+GO
+create index spt_async_request_batch_id on identityiq.spt_async_request (batch_id);
+GO
+create index spt_cert_archive_name on identityiq.spt_certification_archive (name);
+GO
+
+
+--
+-- ACCESS HISTORY upgrade begin
+--
+
+USE identityiqah
+GO
+
+-- DO NOT REMOVE OR MODIFY BLOCK
+-- CONTEXT-SWITCH: dataSourceAccessHistory
+-- DO NOT REMOVE OR MODIFY BLOCK
+
+EXEC sp_rename N'identityiqah.spt_hist_certification.uk_kesw6k26csy7qxitgtloos7y2', N'UK_jnf8asso0unr7868bv24coqyn', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_mattr.UK_sgmfjmeagljgj36cgi3o0cltw', N'UK_rle9g3il01fvqdeklw5hc5l5h', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_role.spt_hist_role_displayname_ci', N'spt_hist_role_displayName_ci', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_role.uk_kem9ulqu2gybfqdtq226k3htc', N'UK_i8w6vo76pdttiu6urwhbcaf9r', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_capability.spt_hist_cap_displayname_ci', N'spt_hist_cap_displayName_ci', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_capability.uk_q19cl120ixe3opavvwxoi0ahu', N'UK_pid42ojf0r3fmg5jcr1e9mj09', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_policy_violation_remediation_entitlements.fkjie8pn4nfhcfi3t92br291fc1', N'FKjie8pn4nfhcfi3t92br291fc1', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_accounts.fk605klb45cwnh86urs1aw07cue', N'FK605klb45cwnh86urs1aw07cue', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_workgroup.spt_hist_wg_displayname_ci', N'spt_hist_wg_displayName_ci', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_workgroup_capture.spt_hwc_displayname_ci', N'spt_hwc_displayName_ci', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_workgroup_event.spt_hist_wg_evt_evt_dt', N'spt_hist_wg_event_evt_dt', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_workgroup_event.spt_hist_wg_evt_evt_cat', N'spt_hist_wg_event_evt_cat', N'INDEX';
+GO
+
+EXEC sp_rename N'identityiqah.spt_hist_workgroup_event.spt_hist_wg_evt_evt_type', N'spt_hist_wg_event_evt_type', N'INDEX';
+GO
+
+create index spt_hac_app_name_ci on identityiqah.spt_hist_account_capture (application_name);
+GO
+
+create index spt_hist_pvr_deleted on identityiqah.spt_hist_policy_violation_remediation_capture (deleted);
+GO
+
+
+--
+-- IIQTC-518 - Dispatch Access History Task Fails due to column size
+--
+DROP INDEX spt_hcrc_exc_attrval ON identityiqah.spt_hist_cert_remediation_capture;
+GO
+ALTER table identityiqah.spt_hist_cert_remediation_capture ALTER COLUMN exception_attribute_value varchar(2048);
+GO
+
+DROP INDEX spt_hec_attrname_ci ON identityiqah.spt_hist_entitlement_capture;
+GO
+DROP INDEX spt_hec_app_role_type ON identityiqah.spt_hist_entitlement_capture;
+GO
+ALTER TABLE identityiqah.spt_hist_entitlement_capture ALTER COLUMN attribute_name varchar(322);
+GO
+create index spt_hec_attrname_ci on identityiqah.spt_hist_entitlement_capture (attribute_name);
+GO
+create index spt_hec_app_role_type on identityiqah.spt_hist_entitlement_capture (application_name, type, attribute_name);
+GO
+
+DROP INDEX spt_hist_ident_evt_prp_nm_ci ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN property_name varchar(450);
+GO
+create index spt_hist_ident_evt_prp_nm_ci on identityiqah.spt_hist_identity_event (property_name);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop1 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property1 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop1 on identityiqah.spt_hist_identity_event (qry_property1);
+
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop10 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property10 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop10 on identityiqah.spt_hist_identity_event (qry_property10);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop2 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property2 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop2 on identityiqah.spt_hist_identity_event (qry_property2);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop3 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property3 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop3 on identityiqah.spt_hist_identity_event (qry_property3);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop4 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property4 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop4 on identityiqah.spt_hist_identity_event (qry_property4);
+
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop5 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property5 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop5 on identityiqah.spt_hist_identity_event (qry_property5);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop6 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property6 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop6 on identityiqah.spt_hist_identity_event (qry_property6);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop7 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property7 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop7 on identityiqah.spt_hist_identity_event (qry_property7);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop8 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property8 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop8 on identityiqah.spt_hist_identity_event (qry_property8);
+
+GO
+DROP INDEX spt_hist_ident_evt_qry_prop9 ON identityiqah.spt_hist_identity_event;
+GO
+ALTER TABLE identityiqah.spt_hist_identity_event ALTER COLUMN qry_property9 varchar(450);
+GO
+create index spt_hist_ident_evt_qry_prop9 on identityiqah.spt_hist_identity_event (qry_property9);
+
+
+GO
+DROP INDEX spt_hist_mattr_displayName_ci ON identityiqah.spt_hist_mattr;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr ALTER COLUMN display_name varchar(450);
+GO
+create index spt_hist_mattr_displayName_ci on identityiqah.spt_hist_mattr (display_name);
+
+
+GO
+DROP INDEX spt_mac_attr_ci ON identityiqah.spt_hist_mattr_capture;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_capture ALTER COLUMN attribute_name varchar(322);
+GO
+create index spt_mac_attr_ci on identityiqah.spt_hist_mattr_capture (attribute_name);
+
+
+GO
+DROP INDEX spt_hist_mattr_cap_dsp_nm_ci ON identityiqah.spt_hist_mattr_capture;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_capture ALTER COLUMN display_name varchar(450);
+GO
+create index spt_hist_mattr_cap_dsp_nm_ci on identityiqah.spt_hist_mattr_capture (display_name);
+
+GO
+DROP INDEX spt_mac_type_ci ON identityiqah.spt_hist_mattr_capture;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_capture ALTER COLUMN type varchar(255);
+GO
+create index spt_mac_type_ci on identityiqah.spt_hist_mattr_capture (type);
+
+GO
+DROP INDEX spt_hist_mattr_evt_dsp_nm_ci ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN display_name varchar(450);
+GO
+create index spt_hist_mattr_evt_dsp_nm_ci on identityiqah.spt_hist_mattr_event (display_name);
+
+GO
+DROP INDEX spt_hist_mattr_evt_prp_nm_ci ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN property_name varchar(450);
+GO
+create index spt_hist_mattr_evt_prp_nm_ci on identityiqah.spt_hist_mattr_event (property_name);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop1 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property1 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop1 on identityiqah.spt_hist_mattr_event (qry_property1);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop10 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property10 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop10 on identityiqah.spt_hist_mattr_event (qry_property10);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop2 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property2 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop2 on identityiqah.spt_hist_mattr_event (qry_property2);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop3 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property3 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop3 on identityiqah.spt_hist_mattr_event (qry_property3);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop4 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property4 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop4 on identityiqah.spt_hist_mattr_event (qry_property4);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop5 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property5 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop5 on identityiqah.spt_hist_mattr_event (qry_property5);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop6 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property6 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop6 on identityiqah.spt_hist_mattr_event (qry_property6);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop7 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property7 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop7 on identityiqah.spt_hist_mattr_event (qry_property7);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop8 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property8 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop8 on identityiqah.spt_hist_mattr_event (qry_property8);
+
+GO
+DROP INDEX spt_hist_mattr_evt_qry_prop9 ON identityiqah.spt_hist_mattr_event;
+GO
+ALTER TABLE identityiqah.spt_hist_mattr_event ALTER COLUMN qry_property9 varchar(450);
+GO
+create index spt_hist_mattr_evt_qry_prop9 on identityiqah.spt_hist_mattr_event (qry_property9);
+
+GO
+DROP INDEX spt_hist_role_event_prp_nm_ci ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN property_name varchar(450);
+GO
+create index spt_hist_role_event_prp_nm_ci on identityiqah.spt_hist_role_event (property_name);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop1 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property1 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop1 on identityiqah.spt_hist_role_event (qry_property1);
+
+GO
+DROP INDEX spt_hist_role_evt_qry_prop10 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property10 varchar(450);
+GO
+create index spt_hist_role_evt_qry_prop10 on identityiqah.spt_hist_role_event (qry_property10);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop2 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property2 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop2 on identityiqah.spt_hist_role_event (qry_property2);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop3 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property3 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop3 on identityiqah.spt_hist_role_event (qry_property3);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop4 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property4 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop4 on identityiqah.spt_hist_role_event (qry_property4);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop5 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property5 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop5 on identityiqah.spt_hist_role_event (qry_property5);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop6 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property6 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop6 on identityiqah.spt_hist_role_event (qry_property6);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop7 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property7 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop7 on identityiqah.spt_hist_role_event (qry_property7);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop8 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property8 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop8 on identityiqah.spt_hist_role_event (qry_property8);
+
+GO
+DROP INDEX spt_hist_role_event_qry_prop9 ON identityiqah.spt_hist_role_event;
+GO
+ALTER TABLE identityiqah.spt_hist_role_event ALTER COLUMN qry_property9 varchar(450);
+GO
+create index spt_hist_role_event_qry_prop9 on identityiqah.spt_hist_role_event (qry_property9);
+
+GO
+DROP INDEX spt_hrre_ent_name ON identityiqah.spt_hist_role_remediation_entitlements;
+GO
+ALTER TABLE identityiqah.spt_hist_role_remediation_entitlements ALTER COLUMN entitlement_name varchar(322);
+GO
+create index spt_hrre_ent_name on identityiqah.spt_hist_role_remediation_entitlements (entitlement_name);
+
+GO
+DROP INDEX spt_hist_wg_evt_prp_nm_ci ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN property_name varchar(450);
+GO
+create index spt_hist_wg_evt_prp_nm_ci on identityiqah.spt_hist_workgroup_event (property_name);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop1 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property1 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop1 on identityiqah.spt_hist_workgroup_event (qry_property1);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop10 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property10 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop10 on identityiqah.spt_hist_workgroup_event (qry_property10);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop2 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property2 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop2 on identityiqah.spt_hist_workgroup_event (qry_property2);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop3 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property3 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop3 on identityiqah.spt_hist_workgroup_event (qry_property3);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop4 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property4 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop4 on identityiqah.spt_hist_workgroup_event (qry_property4);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop5 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property5 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop5 on identityiqah.spt_hist_workgroup_event (qry_property5);
+
+GO
+DROP INDEX spt_hist_wg_evt_qry_prop6 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property6 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop6 on identityiqah.spt_hist_workgroup_event (qry_property6);
+
+DROP INDEX spt_hist_wg_evt_qry_prop7 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property7 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop7 on identityiqah.spt_hist_workgroup_event (qry_property7);
+
+DROP INDEX spt_hist_wg_evt_qry_prop8 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property8 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop8 on identityiqah.spt_hist_workgroup_event (qry_property8);
+
+DROP INDEX spt_hist_wg_evt_qry_prop9 ON identityiqah.spt_hist_workgroup_event;
+GO
+ALTER TABLE identityiqah.spt_hist_workgroup_event ALTER COLUMN qry_property9 varchar(450);
+GO
+create index spt_hist_wg_evt_qry_prop9 on identityiqah.spt_hist_workgroup_event (qry_property9);
+
+GO
+ALTER TABLE identityiqah.spt_hist_certification ALTER COLUMN cert_display_name varchar(256);
+GO
+ALTER TABLE identityiqah.spt_hist_certification ALTER COLUMN cert_name varchar(256);
+GO
+ALTER TABLE identityiqah.spt_hist_certification ALTER COLUMN cert_type varchar(255);
+GO
+ALTER TABLE identityiqah.spt_hist_policy_violation_capture ALTER COLUMN constraint_name varchar(2000);
+GO
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_capture ALTER COLUMN constraint_name varchar(2000);
+GO
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_entitlements ALTER COLUMN entitlement_display_value varchar(450);
+GO
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_entitlements ALTER COLUMN entitlement_name varchar(322);
+GO
+ALTER TABLE identityiqah.spt_hist_policy_violation_remediation_entitlements ALTER COLUMN entitlement_value varchar(450);
+GO
+
+--
+-- This is necessary to maintain the identityiqah schema version. DO NOT REMOVE.
+--
+
+update identityiqah.spt_hist_database_version set schema_version='8.5-15' where name='main';
+GO
+
+--
+-- ACCESS HISTORY upgrade end
+--
+
+
+USE identityiq
+GO
+
+-- DO NOT REMOVE OR MODIFY BLOCK
+-- CONTEXT-SWITCH: dataSource
+-- DO NOT REMOVE OR MODIFY BLOCK
+
+--
+-- This is necessary to maintain the identityiq schema version. DO NOT REMOVE.
+--
+update identityiq.spt_database_version set schema_version='8.5-15' where name='main';
+GO

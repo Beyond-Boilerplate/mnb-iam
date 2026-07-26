@@ -1,0 +1,16 @@
+
+--
+-- PLUGIN database create begin
+--
+
+\connect postgres postgres;
+CREATE DATABASE "identityiqPlugin" ENCODING utf8;
+GRANT "identityiqPlugin" TO postgres;
+ALTER DATABASE "identityiqPlugin" OWNER to "identityiqPlugin";
+\connect "identityiqPlugin" "identityiqPlugin";
+CREATE SCHEMA "identityiqPlugin" AUTHORIZATION "identityiqPlugin";
+
+--
+-- PLUGIN database create end
+--
+

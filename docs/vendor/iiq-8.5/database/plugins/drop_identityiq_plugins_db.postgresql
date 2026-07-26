@@ -1,0 +1,14 @@
+
+--
+-- PLUGIN database drop begin
+--
+
+ALTER DATABASE "identityiqPlugin" OWNER TO postgres;
+DROP DATABASE IF EXISTS "identityiqPlugin";
+DROP USER IF EXISTS "identityiqPlugin";
+
+--
+-- PLUGIN database drop end
+--
+
+

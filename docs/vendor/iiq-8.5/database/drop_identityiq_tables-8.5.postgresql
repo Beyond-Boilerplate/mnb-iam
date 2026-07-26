@@ -1,0 +1,1997 @@
+--
+-- This script is a SAMPLE and can be modified as appropriate by the
+-- customer.  If the create sample was changed, then the corresponding
+-- changes will need to be made here, too.
+--
+
+\connect identityiq identityiq;
+
+-- From the Quartz 2.3.0 Distribution
+
+DROP TABLE IF EXISTS QRTZ221_FIRED_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ221_PAUSED_TRIGGER_GRPS;
+DROP TABLE IF EXISTS QRTZ221_SCHEDULER_STATE;
+DROP TABLE IF EXISTS QRTZ221_LOCKS;
+DROP TABLE IF EXISTS QRTZ221_SIMPLE_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ221_CRON_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ221_BLOB_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ221_CALENDARS;
+DROP TABLE IF EXISTS QRTZ221_SIMPROP_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ221_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ221_JOB_DETAILS;
+
+-- End Quartz configuration
+
+-- 
+-- IIQ schema delete begin
+-- 
+
+
+    alter table if exists identityiq.spt_account_group 
+       drop constraint if exists FK81npondqko61p2jbiurtiyjjh;
+
+    alter table if exists identityiq.spt_account_group 
+       drop constraint if exists FK34oc5rgrwidh1xfn80u7hw6ty;
+
+    alter table if exists identityiq.spt_account_group 
+       drop constraint if exists FKr2yvl55h4eygmk9g025u7knhg;
+
+    alter table if exists identityiq.spt_account_group_inheritance 
+       drop constraint if exists FK37nc4s7oaae0og1ks6qawxw5v;
+
+    alter table if exists identityiq.spt_account_group_inheritance 
+       drop constraint if exists FKmapn2o892qhdmaa1r4lemvgax;
+
+    alter table if exists identityiq.spt_account_group_perms 
+       drop constraint if exists FKiapqdfk3kcuq5jv68yxi5x7tx;
+
+    alter table if exists identityiq.spt_account_group_target_perms 
+       drop constraint if exists FK13f1jdxrqvk98rjhyw2nsywcj;
+
+    alter table if exists identityiq.spt_activity_constraint 
+       drop constraint if exists FKh07lkkaqonsf23oaqaiiowgxa;
+
+    alter table if exists identityiq.spt_activity_constraint 
+       drop constraint if exists FK84atg8et8jhm2q2xrbc8y3mmg;
+
+    alter table if exists identityiq.spt_activity_constraint 
+       drop constraint if exists FK54edcjc3jxlcm0n4x49vwmqbr;
+
+    alter table if exists identityiq.spt_activity_constraint 
+       drop constraint if exists FKi1i3q8kvh4ed7e734iwrmbkqp;
+
+    alter table if exists identityiq.spt_activity_constraint 
+       drop constraint if exists FKe1iukekxihoxdeji16gk4540c;
+
+    alter table if exists identityiq.spt_activity_data_source 
+       drop constraint if exists FK4nyoyf6fj2n0iqv4x6hy3p5a0;
+
+    alter table if exists identityiq.spt_activity_data_source 
+       drop constraint if exists FK9xs1b8n9mbigik443n155ils7;
+
+    alter table if exists identityiq.spt_activity_data_source 
+       drop constraint if exists FKa7oof6hhnyj73cgy991qj4159;
+
+    alter table if exists identityiq.spt_activity_data_source 
+       drop constraint if exists FK4t11m9gcjjxe4uhtlkab3mkh4;
+
+    alter table if exists identityiq.spt_activity_data_source 
+       drop constraint if exists FKqh1mk9ywu09wfephle51xm9j;
+
+    alter table if exists identityiq.spt_activity_time_periods 
+       drop constraint if exists FKdf7oxva0h2xktfgb8ro54gd5;
+
+    alter table if exists identityiq.spt_activity_time_periods 
+       drop constraint if exists FKbxg0qs6lvogays6vb2niyqgjk;
+
+    alter table if exists identityiq.spt_adaptive_card_notification_template 
+       drop constraint if exists FK80bgxu2v1yd9x4e2ha8b3jdvp;
+
+    alter table if exists identityiq.spt_adaptive_card_notification_template 
+       drop constraint if exists FK90nti8lwr50moob5fvushxld8;
+
+    alter table if exists identityiq.spt_alert 
+       drop constraint if exists FKjpmc8vdbv8mso3deakv8qi5dd;
+
+    alter table if exists identityiq.spt_alert_action 
+       drop constraint if exists FK4kt6nnjdocmdkgcv3wgdfvfyg;
+
+    alter table if exists identityiq.spt_alert_definition 
+       drop constraint if exists FKm2f36vhlf1u9vnf5w1rm21i0q;
+
+    alter table if exists identityiq.spt_alert_definition 
+       drop constraint if exists FK7nrecpxk2mr7mwgli5tk5kiq9;
+
+    alter table if exists identityiq.spt_app_dependencies 
+       drop constraint if exists FKg99wvor3c1wxfmvd1j1vekrk1;
+
+    alter table if exists identityiq.spt_app_dependencies 
+       drop constraint if exists FKfimmxii9xcyjfmgd0489d2q61;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKo50q3ykyumpddcaaokonvivah;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKjrqhmrsoaxkmetjcd0y3vo09r;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKr6orbi6gkpkds9hrhowsym3yy;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKo2741mu93ute68xlirxg7ysja;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKam9m6cw3jgye54ltd2xrnk818;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FK27agl8inv18vxa370rnhbss30;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKntlbgo69p5yhm3litlje9798g;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKinlcagndni6i9xdctdivcl2ne;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKhwhrrykvnnguijemwxxd5sn8t;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKpen32pdmnkn8icwjkusye7uul;
+
+    alter table if exists identityiq.spt_application 
+       drop constraint if exists FKbdx986tnctokxdrqw8q77s5rm;
+
+    alter table if exists identityiq.spt_application_remediators 
+       drop constraint if exists FK362oq0bg8kyjh8a8x6b870jkx;
+
+    alter table if exists identityiq.spt_application_remediators 
+       drop constraint if exists FK8csqgw7ff1rb2f1y0gtl4nbcc;
+
+    alter table if exists identityiq.spt_application_activity 
+       drop constraint if exists FKp0r4scrot0prnyokpjxt2649j;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FKkd8l977v65omox0wln8f6j20u;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FKl0g1ud8tainvo5qqgw0vsyum6;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FK4sj1w1c5l3xn6dl2mbfmcgq95;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FKcm5n6jy4gyawyrrv3ge1e7fqc;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FKov3msut61m895vk42fljyh68i;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FK78hblkspg3qrgy9uy4yh6amt2;
+
+    alter table if exists identityiq.spt_application_schema 
+       drop constraint if exists FKd3sov5jd5q1tvg43bervh4isw;
+
+    alter table if exists identityiq.spt_application_scorecard 
+       drop constraint if exists FKgq6j2537q2t6enu2ots2gwlug;
+
+    alter table if exists identityiq.spt_application_scorecard 
+       drop constraint if exists FKd25itmjnbgivvbvknkbs4dko2;
+
+    alter table if exists identityiq.spt_application_scorecard 
+       drop constraint if exists FKncvny5il4loprlf8ed4vkkm5o;
+
+    alter table if exists identityiq.spt_app_secondary_owners 
+       drop constraint if exists FKre2f8vro021ipil4lgflrrx9p;
+
+    alter table if exists identityiq.spt_app_secondary_owners 
+       drop constraint if exists FK5paly2u3hu7s3cnlx9er1tcfg;
+
+    alter table if exists identityiq.spt_arch_cert_item_apps 
+       drop constraint if exists FKjsbh6q9006l09jd5qso3kyn33;
+
+    alter table if exists identityiq.spt_attachment 
+       drop constraint if exists FKbyb94bn214vosuh3a9cr6ydi3;
+
+    alter table if exists identityiq.spt_attachment 
+       drop constraint if exists FKn1iv5d2bgun4hh7gmnyqyl0u7;
+
+    alter table if exists identityiq.spt_audit_config 
+       drop constraint if exists FKn99ngjtt90uu0e6osp4ben0k0;
+
+    alter table if exists identityiq.spt_audit_config 
+       drop constraint if exists FKnbd331q7w6aqq9xs5d2wmi63u;
+
+    alter table if exists identityiq.spt_audit_event 
+       drop constraint if exists FKhhxtrj41bo44qrvg1d0m5ytsy;
+
+    alter table if exists identityiq.spt_audit_event 
+       drop constraint if exists FK98m5i7uik1q162vtvklx4uwxy;
+
+    alter table if exists identityiq.spt_authentication_answer 
+       drop constraint if exists FKg7ahr1e8ce0qnpwy5ukybfdlc;
+
+    alter table if exists identityiq.spt_authentication_answer 
+       drop constraint if exists FKeadtkbftr4xwev6djc6bt0crh;
+
+    alter table if exists identityiq.spt_authentication_answer 
+       drop constraint if exists FKt1ogpk91rvbm8w1e532nocdif;
+
+    alter table if exists identityiq.spt_authentication_question 
+       drop constraint if exists FKo1do8f67g11idf1a7147kjvvi;
+
+    alter table if exists identityiq.spt_authentication_question 
+       drop constraint if exists FKhwy7jvglm1yvvhjej8npruff2;
+
+    alter table if exists identityiq.spt_batch_request 
+       drop constraint if exists FKkv0v31yspj4ga5o9x6pigtmbk;
+
+    alter table if exists identityiq.spt_batch_request 
+       drop constraint if exists FKmi63tgq6kqghkrypoin7pqh5a;
+
+    alter table if exists identityiq.spt_batch_request_item 
+       drop constraint if exists FK4uxgxj681uaiqpw0qku9fu49p;
+
+    alter table if exists identityiq.spt_batch_request_item 
+       drop constraint if exists FK8utyq880cffo95ui7mxr5tok8;
+
+    alter table if exists identityiq.spt_batch_request_item 
+       drop constraint if exists FKocx3j2y8pqextntj6l74qvlcj;
+
+    alter table if exists identityiq.spt_bundle 
+       drop constraint if exists FKo1g4dgf57gojmopj8cmavgxjk;
+
+    alter table if exists identityiq.spt_bundle 
+       drop constraint if exists FKbke0asxsp6fxyv9i8ax4dfis0;
+
+    alter table if exists identityiq.spt_bundle 
+       drop constraint if exists FKimfl4xyw45yyv2wvsq9ymploe;
+
+    alter table if exists identityiq.spt_bundle 
+       drop constraint if exists FKg6aah205ahbj6cdnu067npuqn;
+
+    alter table if exists identityiq.spt_bundle 
+       drop constraint if exists FKouwy1vyabs54byfgq0md6xg98;
+
+    alter table if exists identityiq.spt_bundle 
+       drop constraint if exists FK8q7rqxa31n8e4byky2su1aul7;
+
+    alter table if exists identityiq.spt_bundle_archive 
+       drop constraint if exists FK9ikprcio0wk332m95ja8i99nm;
+
+    alter table if exists identityiq.spt_bundle_archive 
+       drop constraint if exists FKsoj8lev1leryowpm7imnqq2g1;
+
+    alter table if exists identityiq.spt_bundle_children 
+       drop constraint if exists FKb47g0894bupcgkm3ram9lepgi;
+
+    alter table if exists identityiq.spt_bundle_children 
+       drop constraint if exists FKsislghstl6iawguwrnvx76rpk;
+
+    alter table if exists identityiq.spt_bundle_permits 
+       drop constraint if exists FKi5wtu493fivl2kxblg9ei0f51;
+
+    alter table if exists identityiq.spt_bundle_permits 
+       drop constraint if exists FKcclfiby5ny4jprvjkhd2wyy14;
+
+    alter table if exists identityiq.spt_bundle_profile_relation 
+       drop constraint if exists FKmagmq7lgmic1artsln48lpcaw;
+
+    alter table if exists identityiq.spt_bundle_profile_relation_step 
+       drop constraint if exists FK9ge6smvhp8n0fcl408e86tvia;
+
+    alter table if exists identityiq.spt_bundle_requirements 
+       drop constraint if exists FKf5ff4s6ac2kr4tdan3hoxpogn;
+
+    alter table if exists identityiq.spt_bundle_requirements 
+       drop constraint if exists FKmwhuhsy3pxr2qfitnua7s12rf;
+
+    alter table if exists identityiq.spt_capability 
+       drop constraint if exists FKfc37j2eq2ue3bkwjujokswgwv;
+
+    alter table if exists identityiq.spt_capability 
+       drop constraint if exists FKhw853kl2ued70sd1fofo2fo2f;
+
+    alter table if exists identityiq.spt_capability_children 
+       drop constraint if exists FKcustr3gvq1r7v2dsv0635gyal;
+
+    alter table if exists identityiq.spt_capability_children 
+       drop constraint if exists FKj5rdhd8hf7vrwg06pvvnewevy;
+
+    alter table if exists identityiq.spt_capability_rights 
+       drop constraint if exists FK2ly05h392vp6y87sw157to4if;
+
+    alter table if exists identityiq.spt_capability_rights 
+       drop constraint if exists FK5hked97sfwstl920p4xpbj7d9;
+
+    alter table if exists identityiq.spt_category 
+       drop constraint if exists FK6ly2lvlw1x3co3kllh32w9it;
+
+    alter table if exists identityiq.spt_category 
+       drop constraint if exists FKh9mqo4to3wcj85auwfd1v0vuq;
+
+    alter table if exists identityiq.spt_cert_action_assoc 
+       drop constraint if exists FK7lf26b9a79fiq8ra40n6c9jox;
+
+    alter table if exists identityiq.spt_cert_action_assoc 
+       drop constraint if exists FKimetcxjfnxeb3uxisl0re6h7c;
+
+    alter table if exists identityiq.spt_certification 
+       drop constraint if exists FKkam40wtg536xdls5oxfov4o42;
+
+    alter table if exists identityiq.spt_certification 
+       drop constraint if exists FKnqhv931l5n1bu20lpcqwplr6x;
+
+    alter table if exists identityiq.spt_certification 
+       drop constraint if exists FKawqph0q6n3ikiqhhytcm8dnbe;
+
+    alter table if exists identityiq.spt_certification_def_tags 
+       drop constraint if exists FKiqp17o6qbtywuq5xa0i7ftbdq;
+
+    alter table if exists identityiq.spt_certification_def_tags 
+       drop constraint if exists FK874kcq4p7hyw2ai9h2ctm1olh;
+
+    alter table if exists identityiq.spt_certification_groups 
+       drop constraint if exists FKex7xpxslou4ye7adrputklihy;
+
+    alter table if exists identityiq.spt_certification_groups 
+       drop constraint if exists FKil0cc1sbmueu7oiptxr3j62px;
+
+    alter table if exists identityiq.spt_certification_tags 
+       drop constraint if exists FK841eyy68p6495npv6dwpi04j0;
+
+    alter table if exists identityiq.spt_certification_tags 
+       drop constraint if exists FKgpbsjaoc1wocq3euppijv9p15;
+
+    alter table if exists identityiq.spt_certification_action 
+       drop constraint if exists FKi48dvgroqefpxtfa7pweh6o8b;
+
+    alter table if exists identityiq.spt_certification_action 
+       drop constraint if exists FK6vi46tjqxbjj146o4o2g4nyfs;
+
+    alter table if exists identityiq.spt_certification_action 
+       drop constraint if exists FKqfesh5gjixog7vmn3smfijoij;
+
+    alter table if exists identityiq.spt_certification_archive 
+       drop constraint if exists FK1hkx6vis9eb73wy7c4pc1b8vf;
+
+    alter table if exists identityiq.spt_certification_archive 
+       drop constraint if exists FK7mfm8h2b8nn9atr7qh5qly4l5;
+
+    alter table if exists identityiq.spt_certification_challenge 
+       drop constraint if exists FKf7hyeykya823607fv2qvgdloe;
+
+    alter table if exists identityiq.spt_certification_challenge 
+       drop constraint if exists FK22gq5pf504r23jw4knwce7xs5;
+
+    alter table if exists identityiq.spt_certification_definition 
+       drop constraint if exists FKcr18syune0mkqk7ixr4jth5le;
+
+    alter table if exists identityiq.spt_certification_definition 
+       drop constraint if exists FKgd080tua8dkp274bq1wapbb1a;
+
+    alter table if exists identityiq.spt_certification_delegation 
+       drop constraint if exists FK23qqsi30cp25uv1am5yurcq0j;
+
+    alter table if exists identityiq.spt_certification_delegation 
+       drop constraint if exists FKgxejqcvofo95foucj5vg4u3qs;
+
+    alter table if exists identityiq.spt_certification_entity 
+       drop constraint if exists FKip367cn9lac3qe96fw0ccljd1;
+
+    alter table if exists identityiq.spt_certification_entity 
+       drop constraint if exists FK_8ldyhh9o0vcq3n294rbfjs415;
+
+    alter table if exists identityiq.spt_certification_entity 
+       drop constraint if exists FK_94kwlqdf1rlbuj6l25e71dg6c;
+
+    alter table if exists identityiq.spt_certification_entity 
+       drop constraint if exists FK_4kgyc7xxjq27248f3cpe2hhu;
+
+    alter table if exists identityiq.spt_certification_entity 
+       drop constraint if exists FK_hyixy5s22roljj5pk6ir6xd2p;
+
+    alter table if exists identityiq.spt_certification_group 
+       drop constraint if exists FKlhja2iwhg5a62sq6f1buj2axo;
+
+    alter table if exists identityiq.spt_certification_group 
+       drop constraint if exists FKqkcuv3m20nm9bgj5lp1f0pvae;
+
+    alter table if exists identityiq.spt_certification_group 
+       drop constraint if exists FKkekr0ucddvo7a8l6gcrccuudg;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FKlge6i5dbsbcsnxg6elephhq18;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FKnwb5vj6hwftfgtl9f283rvsfg;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FKns942qq8bd2upr6b66wbaiekj;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FK_2bwhd2rbxp1nvs39jxf4dothm;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FK_183ktprgvdwfefivf1699hd02;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FK_sqwuid379j4nfp6ykmbacjrk;
+
+    alter table if exists identityiq.spt_certification_item 
+       drop constraint if exists FK_1w71laay1l62qeujievv5l3gg;
+
+    alter table if exists identityiq.spt_certifiers 
+       drop constraint if exists FKq2kybcv1awb6cte2q45gkupei;
+
+    alter table if exists identityiq.spt_cert_item_applications 
+       drop constraint if exists FKmgki0koeep17cgfpir44de6mj;
+
+    alter table if exists identityiq.spt_cert_item_classifications 
+       drop constraint if exists FK9dehgtst8bbi31palx2ygp8hi;
+
+    alter table if exists identityiq.spt_child_certification_ids 
+       drop constraint if exists FK9syrav59593wgi39hrnt8kgk5;
+
+    alter table if exists identityiq.spt_cloud_access3way 
+       drop constraint if exists FK25ss4xxt4e2nvwcd8ne1iw3b4;
+
+    alter table if exists identityiq.spt_cloud_access3way 
+       drop constraint if exists FK6o7a9k31y9pc0xy7bd24uoqu5;
+
+    alter table if exists identityiq.spt_cloud_access3way 
+       drop constraint if exists FKe65krw4kpvcduwmsp1mggynbg;
+
+    alter table if exists identityiq.spt_configuration 
+       drop constraint if exists FKhjkwvbp3m63yllk6lbo4bqro7;
+
+    alter table if exists identityiq.spt_configuration 
+       drop constraint if exists FKp90cf11ijtygd9hxlgyo0psaa;
+
+    alter table if exists identityiq.spt_correlation_config 
+       drop constraint if exists FK8e7jfdj8slsjmmtl9saxefuep;
+
+    alter table if exists identityiq.spt_correlation_config 
+       drop constraint if exists FKrguogs2r8ljaxdto8u4h3e9tk;
+
+    alter table if exists identityiq.spt_custom 
+       drop constraint if exists FKn2tjdgfk4rvy3vosf1v3kac2t;
+
+    alter table if exists identityiq.spt_custom 
+       drop constraint if exists FKlkx2x8fdy1rwhtnntacydwmek;
+
+    alter table if exists identityiq.spt_deleted_object 
+       drop constraint if exists FK18xcbn9moxo06bcfyg6l7ggcy;
+
+    alter table if exists identityiq.spt_deleted_object 
+       drop constraint if exists FK187408eyxdoomujowu44neqde;
+
+    alter table if exists identityiq.spt_deleted_object 
+       drop constraint if exists FKe7dmgcmhkb13omi8dkh2ig89f;
+
+    alter table if exists identityiq.spt_dictionary 
+       drop constraint if exists FKauca1novn79fd19aug3bjsqya;
+
+    alter table if exists identityiq.spt_dictionary 
+       drop constraint if exists FK7kdy9g1knlowpv3v4rtn7w1py;
+
+    alter table if exists identityiq.spt_dictionary_term 
+       drop constraint if exists FKcyplq38o2e3ajj515xs3vfrf3;
+
+    alter table if exists identityiq.spt_dictionary_term 
+       drop constraint if exists FK1lnmjjwf7i80cupehvm066hdf;
+
+    alter table if exists identityiq.spt_dictionary_term 
+       drop constraint if exists FKrtfr7u5wa0hngye2pixfgfjtq;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FKibw7yhehyvo75yf2gqp4nj5iq;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FKpygxoi3poo3klc46c5o72qe48;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FK1v3xd4m55jijgosuof9e6glj8;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FKcv5id4r7gnsso13xjubxaqnkp;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FKktwyfv8gvs56q5ilfuguki5l5;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FKtktdhh12wn2ah31yrges9oiu1;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FKexhlawv29rux6bct75f19h91v;
+
+    alter table if exists identityiq.spt_dynamic_scope 
+       drop constraint if exists FK5qib64c7xdiovhut2k81054iu;
+
+    alter table if exists identityiq.spt_dynamic_scope_exclusions 
+       drop constraint if exists FKrmu2wy5qkgpggwyvtlssi5ehk;
+
+    alter table if exists identityiq.spt_dynamic_scope_exclusions 
+       drop constraint if exists FK6y9ox5g2qxpgjp2jp69qqsj1g;
+
+    alter table if exists identityiq.spt_dynamic_scope_inclusions 
+       drop constraint if exists FK3ggbccvk2ambqjdw8iynyt965;
+
+    alter table if exists identityiq.spt_dynamic_scope_inclusions 
+       drop constraint if exists FKol4cq5u3jcqik19amte10slgr;
+
+    alter table if exists identityiq.spt_email_template 
+       drop constraint if exists FKbgbd2hiyxohe6mp0wks9w7i6m;
+
+    alter table if exists identityiq.spt_email_template 
+       drop constraint if exists FKnn3hbn1pd7e492186rskdwd3c;
+
+    alter table if exists identityiq.spt_email_template_properties 
+       drop constraint if exists emailtemplateproperties;
+
+    alter table if exists identityiq.spt_entitlement_group 
+       drop constraint if exists FKhejppx2y8jb7gn2f5kow3rd4s;
+
+    alter table if exists identityiq.spt_entitlement_group 
+       drop constraint if exists FKtckmuosehsos4esc6e7aw96x2;
+
+    alter table if exists identityiq.spt_entitlement_group 
+       drop constraint if exists FKkgvp9pnx75witsnhfhmi2j3e;
+
+    alter table if exists identityiq.spt_entitlement_group 
+       drop constraint if exists FK2r4pe9yr6ieul6o7j3gbh4ek4;
+
+    alter table if exists identityiq.spt_entitlement_snapshot 
+       drop constraint if exists FKg28gich6xc717ufitfs9b7ho8;
+
+    alter table if exists identityiq.spt_file_bucket 
+       drop constraint if exists FK4j1imfpmt238fhglhfh95rrs8;
+
+    alter table if exists identityiq.spt_file_bucket 
+       drop constraint if exists FKaw7g3a6la8gky8coehtta2u32;
+
+    alter table if exists identityiq.spt_file_bucket 
+       drop constraint if exists FK59ymu1g5ld3l6j97mx7uq0jfb;
+
+    alter table if exists identityiq.spt_form 
+       drop constraint if exists FKblc1wv6n85ie3ajioskbhtb87;
+
+    alter table if exists identityiq.spt_form 
+       drop constraint if exists FK7j84f82idyeb2pu1giatg6b00;
+
+    alter table if exists identityiq.spt_form 
+       drop constraint if exists FKrwbs6jyeoe0f24q9u878kktna;
+
+    alter table if exists identityiq.spt_generic_constraint 
+       drop constraint if exists FK2vhfe3qafdd3ok28mm1h90om9;
+
+    alter table if exists identityiq.spt_generic_constraint 
+       drop constraint if exists FKi7nk6nu4vkvasene3f14mnykm;
+
+    alter table if exists identityiq.spt_generic_constraint 
+       drop constraint if exists FKkthxi9af57y8xjm6pps9h8lr4;
+
+    alter table if exists identityiq.spt_generic_constraint 
+       drop constraint if exists FKedawydx5t9h0xmnps51w6krpb;
+
+    alter table if exists identityiq.spt_generic_constraint 
+       drop constraint if exists FK6oqb9qqui7wajajasxflcfcnb;
+
+    alter table if exists identityiq.spt_group_definition 
+       drop constraint if exists FKku7t8vcce9maxmpgh025h8rpm;
+
+    alter table if exists identityiq.spt_group_definition 
+       drop constraint if exists FKgpkyterj8orw9ue1ecnaxcxac;
+
+    alter table if exists identityiq.spt_group_definition 
+       drop constraint if exists FKsswaiwl9wgq1x7x66w7dw73sr;
+
+    alter table if exists identityiq.spt_group_definition 
+       drop constraint if exists FKhxm0nnx7gf472ykocqgl9yxne;
+
+    alter table if exists identityiq.spt_group_factory 
+       drop constraint if exists FKh274opn41khwnbi0yj2n37ftm;
+
+    alter table if exists identityiq.spt_group_factory 
+       drop constraint if exists FK4l56xl5r807s9o9clecfa83sp;
+
+    alter table if exists identityiq.spt_group_factory 
+       drop constraint if exists FKhbdh4oyxsx9mqfsnvk57vqotk;
+
+    alter table if exists identityiq.spt_group_index 
+       drop constraint if exists FKf94ksv2vpcmefy7dtedsr4d8i;
+
+    alter table if exists identityiq.spt_group_index 
+       drop constraint if exists FKqvs2uruibvlbl9he3319jiy67;
+
+    alter table if exists identityiq.spt_group_index 
+       drop constraint if exists FKk8c1wd9ht5mtgdkgr6w2pwx07;
+
+    alter table if exists identityiq.spt_group_permissions 
+       drop constraint if exists FKcratih77tg9y9028xrpsiy0x5;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FKdco8at7cn3mnhjf6xaahalooj;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FKikbm1x7vdijclac4vu15u5ovv;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FKoq0aevty64ohgu1m3y5n2odfb;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FKkpuohy1m4u7hhicokkoixnh3v;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FK6yjqfgtb1teavu30xemwke50h;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FK996is5ceoc7ssc7n0cfgavp1n;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FKl62tfosnxhkn8al4i5m098g6l;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FK7l1j3c1e9yne2d7ercls5w169;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FK6erec9yefdkhc6gj4g6wpufv9;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FK8ro3qhcvypwaofa3yrnal3fsi;
+
+    alter table if exists identityiq.spt_identity 
+       drop constraint if exists FKaw4ye4m198dibbj2atxjg85m7;
+
+    alter table if exists identityiq.spt_identity_archive 
+       drop constraint if exists FKp8j75f2pk9xvqyimweu32w6f8;
+
+    alter table if exists identityiq.spt_identity_archive 
+       drop constraint if exists FKmridtwmjtph1265lllya9w2mn;
+
+    alter table if exists identityiq.spt_identity_assigned_roles 
+       drop constraint if exists FKheohgr0xuxklx9sfhjde58ig9;
+
+    alter table if exists identityiq.spt_identity_assigned_roles 
+       drop constraint if exists FKf367abg77497pwgtr61co5mc;
+
+    alter table if exists identityiq.spt_identity_bundles 
+       drop constraint if exists FKmr5pwrd4ysq4uiy970s0gpija;
+
+    alter table if exists identityiq.spt_identity_bundles 
+       drop constraint if exists FKcuq8yi3rh1dxbbr7nt33io0h4;
+
+    alter table if exists identityiq.spt_identity_capabilities 
+       drop constraint if exists FK8rvftn57xdt7vtg3oe2i3bn7i;
+
+    alter table if exists identityiq.spt_identity_capabilities 
+       drop constraint if exists FKe9bo37xbckkaq2k85omvmo9ld;
+
+    alter table if exists identityiq.spt_identity_controlled_scopes 
+       drop constraint if exists FKoahj6hw5kk9163bfes49lvasv;
+
+    alter table if exists identityiq.spt_identity_controlled_scopes 
+       drop constraint if exists FKqjnmhlsld4pvlix9kbrvlmsb1;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FKlnoli5e2k3cofry0kh5lqwvk2;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FKqy3hyiptyuoo0ik8nfewymdio;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FKjief1jwgixlilqiqsvkpx0k9e;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FK9p3id5o2as2stlq47md58fm3b;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FKcn0l4kl1lpjkg7usf4okua4d8;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FKbpm8wgk9stf16g8w9ujx10qw3;
+
+    alter table if exists identityiq.spt_identity_entitlement 
+       drop constraint if exists FK6cwcsuwgv6ydwqpnm6jto062q;
+
+    alter table if exists identityiq.spt_identity_history_item 
+       drop constraint if exists FKji55d6komkmaodbat8ykt27ut;
+
+    alter table if exists identityiq.spt_identity_history_item 
+       drop constraint if exists FKa9cu5shr2oefnkrrew96b98nc;
+
+    alter table if exists identityiq.spt_identity_request 
+       drop constraint if exists FKrnecq87gn8rjrj2vbn9koxwc1;
+
+    alter table if exists identityiq.spt_identity_request 
+       drop constraint if exists FKpstoy7u3dse9pl2h5ryub6h0w;
+
+    alter table if exists identityiq.spt_identity_request_item 
+       drop constraint if exists FKdrgm0omo927u9hkgtx0m4rbmb;
+
+    alter table if exists identityiq.spt_identity_request_item 
+       drop constraint if exists FKfax65ddwd2dwvkt9rsdqthshd;
+
+    alter table if exists identityiq.spt_identity_role_metadata 
+       drop constraint if exists FKlbwupgie8o3gpjt857djjipg9;
+
+    alter table if exists identityiq.spt_identity_role_metadata 
+       drop constraint if exists FKptvypo1q0ekqnlnt7tkl1u2na;
+
+    alter table if exists identityiq.spt_identity_snapshot 
+       drop constraint if exists FKh03yxqsq7ebvwlwcthihtym07;
+
+    alter table if exists identityiq.spt_identity_snapshot 
+       drop constraint if exists FKj24y3i8my2r0c3il58dlww3fa;
+
+    alter table if exists identityiq.spt_identity_trigger 
+       drop constraint if exists FKaoupv62m0yus73314iwn0fclq;
+
+    alter table if exists identityiq.spt_identity_trigger 
+       drop constraint if exists FK6est6a8xpuhjgqv7b0d8yvmal;
+
+    alter table if exists identityiq.spt_identity_trigger 
+       drop constraint if exists FK4yqufhetuoj6wig3t5n5rw7xh;
+
+    alter table if exists identityiq.spt_identity_workgroups 
+       drop constraint if exists FKew5309x0hinshtjed2o9p4lu8;
+
+    alter table if exists identityiq.spt_identity_workgroups 
+       drop constraint if exists FKdubcl4txlwq72y89p09vsokp3;
+
+    alter table if exists identityiq.spt_integration_config 
+       drop constraint if exists FK9i40hwin9s24k40gf9jbcjmyg;
+
+    alter table if exists identityiq.spt_integration_config 
+       drop constraint if exists FKkra0w53mfbawmb7tun0thw07j;
+
+    alter table if exists identityiq.spt_integration_config 
+       drop constraint if exists FK4m8ag5j3ca0w07n396xv4ovlx;
+
+    alter table if exists identityiq.spt_integration_config 
+       drop constraint if exists FKnn9f0lgf5ewip65a8t2mhi97u;
+
+    alter table if exists identityiq.spt_integration_config 
+       drop constraint if exists FK7dcjq7gk21x6gl2w55r9rgnnq;
+
+    alter table if exists identityiq.spt_jasper_files 
+       drop constraint if exists FKarvo68602qubbljqm974ejrao;
+
+    alter table if exists identityiq.spt_jasper_files 
+       drop constraint if exists FK38q00anepn1enkf14vh5kt0p0;
+
+    alter table if exists identityiq.spt_jasper_page_bucket 
+       drop constraint if exists FK7ajqlhkio1lj6deitro8rufr4;
+
+    alter table if exists identityiq.spt_jasper_page_bucket 
+       drop constraint if exists FKebcpjeggovthx5rfslffvm06l;
+
+    alter table if exists identityiq.spt_jasper_result 
+       drop constraint if exists FKaov2d8748uea72k8riblr9iw;
+
+    alter table if exists identityiq.spt_jasper_result 
+       drop constraint if exists FK48lfhuwg00rdb7lu24q8iqemj;
+
+    alter table if exists identityiq.spt_jasper_template 
+       drop constraint if exists FK9gqhh1f6h8uvb0ijwd2x8d3xd;
+
+    alter table if exists identityiq.spt_jasper_template 
+       drop constraint if exists FKd7fy4u4sv1o5q0oen7ip2trng;
+
+    alter table if exists identityiq.spt_link 
+       drop constraint if exists FKlt4unsy5cp7psyl716sjq527e;
+
+    alter table if exists identityiq.spt_link 
+       drop constraint if exists FKg0l571s3kkovl1l5q24wsn5h2;
+
+    alter table if exists identityiq.spt_link 
+       drop constraint if exists FK7do4oyl8j399aynq34dosvk6o;
+
+    alter table if exists identityiq.spt_link 
+       drop constraint if exists FKsc0du71d7t0p5jx4sqbwlrtc7;
+
+    alter table if exists identityiq.spt_localized_attribute 
+       drop constraint if exists FK4ahm8gyl5gwhj8d4qgbwyynv;
+
+    alter table if exists identityiq.spt_managed_attribute 
+       drop constraint if exists FK3gb72xtjki5mp7uosqt8y4pvn;
+
+    alter table if exists identityiq.spt_managed_attribute 
+       drop constraint if exists FKp22ur089e238refu7d4ey3vad;
+
+    alter table if exists identityiq.spt_managed_attribute 
+       drop constraint if exists FKh34qiq4aglfffr9xwpik781vj;
+
+    alter table if exists identityiq.spt_managed_attr_inheritance 
+       drop constraint if exists FK4ioitymnwqibnmecupdfuo3ri;
+
+    alter table if exists identityiq.spt_managed_attr_inheritance 
+       drop constraint if exists FK5w1va2uar8ndocw86uxw22fyx;
+
+    alter table if exists identityiq.spt_managed_attr_perms 
+       drop constraint if exists FKgb5h5u8b3v7q8thhsyw3a3x2d;
+
+    alter table if exists identityiq.spt_managed_attr_target_perms 
+       drop constraint if exists FKgxeh9kjs3fstpnq4tp0cch0h7;
+
+    alter table if exists identityiq.spt_message_template 
+       drop constraint if exists FKbhf643rsydyey69y4clalwes3;
+
+    alter table if exists identityiq.spt_message_template 
+       drop constraint if exists FK93cucj6fysk1u4s1mggidhsjw;
+
+    alter table if exists identityiq.spt_mining_config 
+       drop constraint if exists FKe2p3b82e1gpt5n75cfkj19573;
+
+    alter table if exists identityiq.spt_mining_config 
+       drop constraint if exists FKo5ji502vpitlcnl4ie54trv3a;
+
+    alter table if exists identityiq.spt_mitigation_expiration 
+       drop constraint if exists FKpym4olxxt5hvtw2h6h5qehsg5;
+
+    alter table if exists identityiq.spt_mitigation_expiration 
+       drop constraint if exists FKnq1a0dvm762fk9tcucs5ro4h3;
+
+    alter table if exists identityiq.spt_mitigation_expiration 
+       drop constraint if exists FKrp62md93f75jd1i1hof0pdr01;
+
+    alter table if exists identityiq.spt_mitigation_expiration 
+       drop constraint if exists FKdk2mv4vumkj87erjys2ecjjqy;
+
+    alter table if exists identityiq.spt_monitoring_statistic 
+       drop constraint if exists FK1oylxmpnab6ukcexs91d4d3ps;
+
+    alter table if exists identityiq.spt_monitoring_statistic 
+       drop constraint if exists FK66fxpvt139gb5aghd369t0q1s;
+
+    alter table if exists identityiq.spt_monitoring_statistic_tags 
+       drop constraint if exists FKa6efhhukixvrd4fucp8n3hrlm;
+
+    alter table if exists identityiq.spt_monitoring_statistic_tags 
+       drop constraint if exists FKk900lsdj83sd0cp9o59evn9nj;
+
+    alter table if exists identityiq.spt_object_classification 
+       drop constraint if exists FK4hfvqf5hc3a6rl944f4h171tn;
+
+    alter table if exists identityiq.spt_object_config 
+       drop constraint if exists FKtcjesncjqdcd4inr41kpgpwaj;
+
+    alter table if exists identityiq.spt_object_config 
+       drop constraint if exists FK1w6x1owivjjlgw0ojfk6aatm5;
+
+    alter table if exists identityiq.spt_partition_result 
+       drop constraint if exists FK9fa80qf6up4eunpumew96wmxr;
+
+    alter table if exists identityiq.spt_partition_result 
+       drop constraint if exists FKguaao9nkvy8wtshwdjls9qe17;
+
+    alter table if exists identityiq.spt_partition_result 
+       drop constraint if exists FK9svig87lf8npttavcvalbuipb;
+
+    alter table if exists identityiq.spt_password_policy 
+       drop constraint if exists FK15k2353b0bf4swvqkteyjutb8;
+
+    alter table if exists identityiq.spt_password_policy_holder 
+       drop constraint if exists FK47skxwy6vwmh6qdkoo76gao8c;
+
+    alter table if exists identityiq.spt_password_policy_holder 
+       drop constraint if exists FK4flfb6aud9uvwfhrdt228g7b7;
+
+    alter table if exists identityiq.spt_password_policy_holder 
+       drop constraint if exists FKsa0togid3d2ers5l0u8p0xxcp;
+
+    alter table if exists identityiq.spt_persisted_file 
+       drop constraint if exists FKay7i45q2li8p1lnvdybls0t3t;
+
+    alter table if exists identityiq.spt_persisted_file 
+       drop constraint if exists FKlj0anhv8hg741lmn738bahrek;
+
+    alter table if exists identityiq.spt_plugin 
+       drop constraint if exists FKr3gksq71itxj5f837unefrg31;
+
+    alter table if exists identityiq.spt_policy 
+       drop constraint if exists FKij2xlldhccmq534sl8n6587od;
+
+    alter table if exists identityiq.spt_policy 
+       drop constraint if exists FKoebw2yqhc4j26mx83v49qyw1n;
+
+    alter table if exists identityiq.spt_policy 
+       drop constraint if exists FK3cfyso96b28h21yaml8hbc3xi;
+
+    alter table if exists identityiq.spt_policy 
+       drop constraint if exists FKgsvi652nk5hayfr8kc7p5ydy;
+
+    alter table if exists identityiq.spt_policy_violation 
+       drop constraint if exists FKgxlmr2yos1bq05bqb3kxjyhdy;
+
+    alter table if exists identityiq.spt_policy_violation 
+       drop constraint if exists FKlfnu8q3fgqq6w8l9t0v15gsjb;
+
+    alter table if exists identityiq.spt_policy_violation 
+       drop constraint if exists FKphiamrjv42wu7uw5tcsbexjyw;
+
+    alter table if exists identityiq.spt_policy_violation 
+       drop constraint if exists FKcfjl95jng7hghpw478qqgajyn;
+
+    alter table if exists identityiq.spt_process_log 
+       drop constraint if exists FK7ll5fatw1p90l1quxoovyijej;
+
+    alter table if exists identityiq.spt_process_log 
+       drop constraint if exists FKtgm6rfk5nrdbjswf140ad6jir;
+
+    alter table if exists identityiq.spt_profile 
+       drop constraint if exists FKm77hrlacp3ynlthagggqmq8mn;
+
+    alter table if exists identityiq.spt_profile 
+       drop constraint if exists FKdpexklt6enpa3qq3tg34t2i72;
+
+    alter table if exists identityiq.spt_profile 
+       drop constraint if exists FKb6xsupwlh8e9b6sxrsojaq107;
+
+    alter table if exists identityiq.spt_profile 
+       drop constraint if exists FKh7gmx9te7hdnjh138f0ys70bb;
+
+    alter table if exists identityiq.spt_profile_constraints 
+       drop constraint if exists FKfnwocslrb1d7i22e0eyyonvu6;
+
+    alter table if exists identityiq.spt_profile_permissions 
+       drop constraint if exists FK9wkru2lsxssnhaus718md3f2o;
+
+    alter table if exists identityiq.spt_provisioning_request 
+       drop constraint if exists FKb0jveyf9sv2e042bjarn190pq;
+
+    alter table if exists identityiq.spt_provisioning_request 
+       drop constraint if exists FKgtk4uysamt32hwwqxrdnceodg;
+
+    alter table if exists identityiq.spt_provisioning_request 
+       drop constraint if exists FKe06usqanbltc3jw079m568c9d;
+
+    alter table if exists identityiq.spt_quick_link 
+       drop constraint if exists FKr34ji3ugpva0sp95usrgaooih;
+
+    alter table if exists identityiq.spt_quick_link 
+       drop constraint if exists FK8ircuuuw7sidwf8xmatked859;
+
+    alter table if exists identityiq.spt_quick_link_options 
+       drop constraint if exists FKr2janfsixof6pqahju9ab112u;
+
+    alter table if exists identityiq.spt_quick_link_options 
+       drop constraint if exists FK159pqn1fd0ubpapm62cy37akd;
+
+    alter table if exists identityiq.spt_quick_link_options 
+       drop constraint if exists FKihngfm8iqb21en8gyeebmpj7h;
+
+    alter table if exists identityiq.spt_remediation_item 
+       drop constraint if exists FKfd9yg9q55msovcqueyjodr6ui;
+
+    alter table if exists identityiq.spt_remediation_item 
+       drop constraint if exists FKhlirh9cempdr7546c4oegeska;
+
+    alter table if exists identityiq.spt_remediation_item 
+       drop constraint if exists FK6bb5fufbeok63cycwmdv1h0b3;
+
+    alter table if exists identityiq.spt_remediation_item 
+       drop constraint if exists FK1vhqs5ybkgm91lv51hdyj68va;
+
+    alter table if exists identityiq.spt_remote_login_token 
+       drop constraint if exists FKe2ofoif1sjdi94r0rhwsc6aqg;
+
+    alter table if exists identityiq.spt_remote_login_token 
+       drop constraint if exists FK57qeahvi3aybfwrgf2mft28b0;
+
+    alter table if exists identityiq.spt_request 
+       drop constraint if exists FK4wuia2w4ylm95aja22jnw6upf;
+
+    alter table if exists identityiq.spt_request 
+       drop constraint if exists FK1st2f3b62703t2anet5iykocf;
+
+    alter table if exists identityiq.spt_request 
+       drop constraint if exists FK2oj2nqukawo2p60yiloa72li9;
+
+    alter table if exists identityiq.spt_request 
+       drop constraint if exists FKgwavtgcmunyt6bx3fvka2a5t2;
+
+    alter table if exists identityiq.spt_request_arguments 
+       drop constraint if exists FK113ggg7785j6vdwb9xham03dc;
+
+    alter table if exists identityiq.spt_request_definition 
+       drop constraint if exists FKgao87b86v1y7mrylu96ow04en;
+
+    alter table if exists identityiq.spt_request_definition 
+       drop constraint if exists FKhe297ysa9fn4dmdljoq54njbs;
+
+    alter table if exists identityiq.spt_request_definition 
+       drop constraint if exists FK2ttetyvbubn1jvp2n9urb6m5v;
+
+    alter table if exists identityiq.spt_request_definition_rights 
+       drop constraint if exists FKp94t40blskwg0fuh854lfml1s;
+
+    alter table if exists identityiq.spt_request_definition_rights 
+       drop constraint if exists FK3drvcyrlgw6waricqagimmd8e;
+
+    alter table if exists identityiq.spt_request_returns 
+       drop constraint if exists FKpbhfh39gtywh48gc1hlfgngox;
+
+    alter table if exists identityiq.spt_request_state 
+       drop constraint if exists FKqqjbvp3qvso1sb1ca6ombgter;
+
+    alter table if exists identityiq.spt_resource_event 
+       drop constraint if exists FKt1snjotqsqvmoubnwv5vtpri6;
+
+    alter table if exists identityiq.spt_right_config 
+       drop constraint if exists FKt1r57dhmuc884wt2ymu101hde;
+
+    alter table if exists identityiq.spt_right_config 
+       drop constraint if exists FKdx0b0oat38fxsye0jgg5ulu9k;
+
+    alter table if exists identityiq.spt_role_index 
+       drop constraint if exists FKo7ho4tlthd9rr80looh1ooito;
+
+    alter table if exists identityiq.spt_role_index 
+       drop constraint if exists FKf0j6gmnubunnb5h7kfe33awf9;
+
+    alter table if exists identityiq.spt_role_index 
+       drop constraint if exists FKl988ko9bkq0epm8ktn25tqpru;
+
+    alter table if exists identityiq.spt_role_metadata 
+       drop constraint if exists FKaa82j55vly3sm9ftky9obxd38;
+
+    alter table if exists identityiq.spt_role_metadata 
+       drop constraint if exists FKt5qt571k5ftna1xswfi723tat;
+
+    alter table if exists identityiq.spt_role_metadata 
+       drop constraint if exists FK78iwr88o7i8dt8ibvi3vusjq8;
+
+    alter table if exists identityiq.spt_role_mining_result 
+       drop constraint if exists FKjpslqep9tigfo52crhjg3hf5v;
+
+    alter table if exists identityiq.spt_role_mining_result 
+       drop constraint if exists FKtok5e8qk7b61q9h76g7h7pr86;
+
+    alter table if exists identityiq.spt_role_scorecard 
+       drop constraint if exists FKt6yfcgq98ed4bfi5ky81wjwdf;
+
+    alter table if exists identityiq.spt_role_scorecard 
+       drop constraint if exists FKqrtue6hcnlf6qyr5qm0vfpwfn;
+
+    alter table if exists identityiq.spt_role_scorecard 
+       drop constraint if exists FK4uodpdnn6r77dbqqa4ifdqja3;
+
+    alter table if exists identityiq.spt_rule 
+       drop constraint if exists FKebikrnbibarckvm36915k8dc7;
+
+    alter table if exists identityiq.spt_rule 
+       drop constraint if exists FKe7tgffr3v5sd2q739bndc72wr;
+
+    alter table if exists identityiq.spt_rule_registry_callouts 
+       drop constraint if exists FKiescqm7tqapb2r71sgdcy20jk;
+
+    alter table if exists identityiq.spt_rule_registry_callouts 
+       drop constraint if exists FK8csco7epf6euipthxuj0awqjp;
+
+    alter table if exists identityiq.spt_rule_dependencies 
+       drop constraint if exists FKbju0wunboll2jdihl7c4xa0no;
+
+    alter table if exists identityiq.spt_rule_dependencies 
+       drop constraint if exists FKgvxim0ew7xui4cfpk0gibucxa;
+
+    alter table if exists identityiq.spt_rule_registry 
+       drop constraint if exists FKlswclannoqopuaet63sct4p74;
+
+    alter table if exists identityiq.spt_rule_registry 
+       drop constraint if exists FKthpyc5ikucmt8mbhdcr980ucg;
+
+    alter table if exists identityiq.spt_rule_signature_arguments 
+       drop constraint if exists FKdys6el89un39n7cyqey0sbdtt;
+
+    alter table if exists identityiq.spt_rule_signature_returns 
+       drop constraint if exists FKrbsto8otv99kfe9kgyij37iml;
+
+    alter table if exists identityiq.spt_schema_attributes 
+       drop constraint if exists FKhl9i3n7y97lpqq98etsp4urds;
+
+    alter table if exists identityiq.spt_scope 
+       drop constraint if exists FKht5d7wfgqvify7p0nag6egr2;
+
+    alter table if exists identityiq.spt_scope 
+       drop constraint if exists FK984w9lkkhtcrm8ib3y6b2qj8;
+
+    alter table if exists identityiq.spt_scope 
+       drop constraint if exists FKpmmdhx9itj086j9dnu8ydh6gx;
+
+    alter table if exists identityiq.spt_scorecard 
+       drop constraint if exists FK4cgtntcjhmqgrb6fcgion7psd;
+
+    alter table if exists identityiq.spt_scorecard 
+       drop constraint if exists FKjlaay4af9d847oiooq03nwrkb;
+
+    alter table if exists identityiq.spt_scorecard 
+       drop constraint if exists FKhwgs2272xcw9kr4uobastkiqj;
+
+    alter table if exists identityiq.spt_score_config 
+       drop constraint if exists FK58s5g8wnl1pd9ckev17xhlfif;
+
+    alter table if exists identityiq.spt_score_config 
+       drop constraint if exists FKj2ff5smsk1haaiyo1w7q7pj99;
+
+    alter table if exists identityiq.spt_score_config 
+       drop constraint if exists FKdct987qb7na0fe12fov9gtp90;
+
+    alter table if exists identityiq.spt_server_statistic 
+       drop constraint if exists FKo4ubx9xkjeqxgnsil2kq8863b;
+
+    alter table if exists identityiq.spt_server_statistic 
+       drop constraint if exists FK5q7ultbynm7wn0wki1a0vhse7;
+
+    alter table if exists identityiq.spt_service_lock 
+       drop constraint if exists FKiq6v3rrxwrku71j0ghepn66p5;
+
+    alter table if exists identityiq.spt_service_status 
+       drop constraint if exists FKanvkx3ughno0yc6s33p8px5cu;
+
+    alter table if exists identityiq.spt_sign_off_history 
+       drop constraint if exists FKgltduyt883x1og6dkgpt9n0uj;
+
+    alter table if exists identityiq.spt_sign_off_history 
+       drop constraint if exists FK2ipk68cdtj3e4p6u5cp3y3ojc;
+
+    alter table if exists identityiq.spt_sign_off_history 
+       drop constraint if exists FKoqlo63ls25h06ufiwokvd8l9g;
+
+    alter table if exists identityiq.spt_snapshot_permissions 
+       drop constraint if exists FKd1pddppbj51lje4diqtw7ycs0;
+
+    alter table if exists identityiq.spt_sodconstraint 
+       drop constraint if exists FKl4mjpujrolswau1wcu0mhn5yr;
+
+    alter table if exists identityiq.spt_sodconstraint 
+       drop constraint if exists FKkdcp13gq48ggdtye8pas782pb;
+
+    alter table if exists identityiq.spt_sodconstraint 
+       drop constraint if exists FKaoh6dc5hnbdth3l5s5el0ysg1;
+
+    alter table if exists identityiq.spt_sodconstraint 
+       drop constraint if exists FK4o50l0rmgaju9n8exvb3pdf5b;
+
+    alter table if exists identityiq.spt_sodconstraint 
+       drop constraint if exists FKsb73wu7qhwhp6dsypgpor8dsi;
+
+    alter table if exists identityiq.spt_sodconstraint_left 
+       drop constraint if exists FKiaye28ptj6gmsp4tflo13r0qy;
+
+    alter table if exists identityiq.spt_sodconstraint_left 
+       drop constraint if exists FKihnxab3mjkx483ftgngk6g0h1;
+
+    alter table if exists identityiq.spt_sodconstraint_right 
+       drop constraint if exists FK1k33mlfft6ir3ao0scmod2y0i;
+
+    alter table if exists identityiq.spt_sodconstraint_right 
+       drop constraint if exists FKi4p81605xg3ojoycpm4lyfa85;
+
+    alter table if exists identityiq.spt_archived_cert_entity 
+       drop constraint if exists FKt3lg6vlrrdfqy5xo76lb5p06x;
+
+    alter table if exists identityiq.spt_archived_cert_entity 
+       drop constraint if exists FKo4mknf6x4lxygjwvgyoxu3me3;
+
+    alter table if exists identityiq.spt_archived_cert_entity 
+       drop constraint if exists FK8salwd54pmcixneotwbg1e8t1;
+
+    alter table if exists identityiq.spt_archived_cert_item 
+       drop constraint if exists FK877k5d95c04j14sdw91fyrnth;
+
+    alter table if exists identityiq.spt_archived_cert_item 
+       drop constraint if exists FKhoc03daa5guh1iq2isa67wnrg;
+
+    alter table if exists identityiq.spt_archived_cert_item 
+       drop constraint if exists FKhsl975h3fmcssmrsnav0xp0be;
+
+    alter table if exists identityiq.spt_identity_req_item_attach 
+       drop constraint if exists FK9j07eg4emep4vaseaa779fatl;
+
+    alter table if exists identityiq.spt_identity_req_item_attach 
+       drop constraint if exists FK32c6p6xsumvu31gciybgj93f8;
+
+    alter table if exists identityiq.spt_right 
+       drop constraint if exists FKloubwfokw065ojaeb71h1oa3t;
+
+    alter table if exists identityiq.spt_right 
+       drop constraint if exists FK7xk9w0l2a9p6c0nk9vfdlgyty;
+
+    alter table if exists identityiq.spt_sync_roles 
+       drop constraint if exists FKh7gqwjigw9iepfoix8tu2u0s1;
+
+    alter table if exists identityiq.spt_sync_roles 
+       drop constraint if exists FKda7requ6nyli1ya6k205cvd9o;
+
+    alter table if exists identityiq.spt_tag 
+       drop constraint if exists FKmgrthcu01wv36q32tftwjeqhl;
+
+    alter table if exists identityiq.spt_tag 
+       drop constraint if exists FK12ckbtpjb7t24wtg5p8mfjcks;
+
+    alter table if exists identityiq.spt_target 
+       drop constraint if exists FKey1ldelkwgfnih0bfqsxdy54w;
+
+    alter table if exists identityiq.spt_target 
+       drop constraint if exists FKpod5pba81d9huchum3nsgmpta;
+
+    alter table if exists identityiq.spt_target 
+       drop constraint if exists FKai0hmu3219oowiyrjm6ejvh9n;
+
+    alter table if exists identityiq.spt_target 
+       drop constraint if exists FKb3tg6yji6uf5blcn269udqlc7;
+
+    alter table if exists identityiq.spt_target 
+       drop constraint if exists FKn6mv8xwf0vmk1boohfqq13gyy;
+
+    alter table if exists identityiq.spt_target_association 
+       drop constraint if exists FKqxsb4h4ti40gf0t8ljtscryya;
+
+    alter table if exists identityiq.spt_target_association 
+       drop constraint if exists FKacuykan45qff45db9sj11osbl;
+
+    alter table if exists identityiq.spt_target_association 
+       drop constraint if exists FKhb5il4oxcsn64hbdebuinih52;
+
+    alter table if exists identityiq.spt_target_source 
+       drop constraint if exists FKj89r4te5s353ptcfnd2d7q5u8;
+
+    alter table if exists identityiq.spt_target_source 
+       drop constraint if exists FKrnt6pd9p8kkfv61w0330xhib6;
+
+    alter table if exists identityiq.spt_target_source 
+       drop constraint if exists FK2j9mi5mcplk3qdb3j0fs4id0t;
+
+    alter table if exists identityiq.spt_target_source 
+       drop constraint if exists FKiu2mtbwoueit24pmdr3lhjrk6;
+
+    alter table if exists identityiq.spt_target_source 
+       drop constraint if exists FK777oa2vyijp2mq02nuosr81rj;
+
+    alter table if exists identityiq.spt_target_source 
+       drop constraint if exists FKrtx5xfiieasobegbhbn9i6f2q;
+
+    alter table if exists identityiq.spt_target_sources 
+       drop constraint if exists FKeoqgr9sni7dx3wv0jo0kurppy;
+
+    alter table if exists identityiq.spt_target_sources 
+       drop constraint if exists FK40hwxe8hphgbyoudtsmolx954;
+
+    alter table if exists identityiq.spt_task_definition 
+       drop constraint if exists FKj73ffat8whj2sjle6vcnmit5s;
+
+    alter table if exists identityiq.spt_task_definition 
+       drop constraint if exists FKijib486kukyyjtf2i4jl4r8x7;
+
+    alter table if exists identityiq.spt_task_definition 
+       drop constraint if exists FK186b24jneods52l19ovut3k25;
+
+    alter table if exists identityiq.spt_task_definition 
+       drop constraint if exists FKq967ll6qee151kju0h7uwn0sj;
+
+    alter table if exists identityiq.spt_task_definition_rights 
+       drop constraint if exists FK9ah4pq0yle4556apcis8agx3w;
+
+    alter table if exists identityiq.spt_task_definition_rights 
+       drop constraint if exists FKf7c9o0fl64otsf323bw9lmq3l;
+
+    alter table if exists identityiq.spt_task_event 
+       drop constraint if exists FKdr9qfdwq639526kr0s8sn7bsv;
+
+    alter table if exists identityiq.spt_task_event 
+       drop constraint if exists FK37pe16gm4jk5rq0iqhoxu1flp;
+
+    alter table if exists identityiq.spt_task_event 
+       drop constraint if exists FKjbek8dno75kki81omnix1vn8e;
+
+    alter table if exists identityiq.spt_task_event 
+       drop constraint if exists FKsvucgoph5pot9sayepcakum3t;
+
+    alter table if exists identityiq.spt_task_result 
+       drop constraint if exists FK92o7l61ctqgwtb3hnpk8m6nsi;
+
+    alter table if exists identityiq.spt_task_result 
+       drop constraint if exists FKc3i98bcpobratwtdvynrb0d8p;
+
+    alter table if exists identityiq.spt_task_result 
+       drop constraint if exists FKgv5931h4qht8l60ds42fhay5n;
+
+    alter table if exists identityiq.spt_task_result 
+       drop constraint if exists FKhmia6kghdf1stidg0tjawwrqh;
+
+    alter table if exists identityiq.spt_task_signature_arguments 
+       drop constraint if exists FK6lxnqcijv324bs8sgqjaclh84;
+
+    alter table if exists identityiq.spt_task_signature_returns 
+       drop constraint if exists FKo0dpi7g348h1boy75cfec0khg;
+
+    alter table if exists identityiq.spt_time_period 
+       drop constraint if exists FKm868jhewgm53i6bl4y59nbefl;
+
+    alter table if exists identityiq.spt_time_period 
+       drop constraint if exists FKgrcbpbx476sf3yc5jq81wh0se;
+
+    alter table if exists identityiq.spt_uiconfig 
+       drop constraint if exists FK16y8ue1ela4vu4nww3kswhtji;
+
+    alter table if exists identityiq.spt_uiconfig 
+       drop constraint if exists FKqj3gj76e5girakxi3nejkch3s;
+
+    alter table if exists identityiq.spt_uipreferences 
+       drop constraint if exists FK5rj3vu68py43jjx519hqwnh3t;
+
+    alter table if exists identityiq.spt_widget 
+       drop constraint if exists FKi51uo1quso8fdclqgeoj1q5hq;
+
+    alter table if exists identityiq.spt_widget 
+       drop constraint if exists FK7tc8b6i3k86o36mru85lyhw3p;
+
+    alter table if exists identityiq.spt_workflow 
+       drop constraint if exists FKyvogiw1fu3oegof5fxs2vku8;
+
+    alter table if exists identityiq.spt_workflow 
+       drop constraint if exists FK1i4qorrnciecvgdvblwrp125e;
+
+    alter table if exists identityiq.spt_workflow_rule_libraries 
+       drop constraint if exists FKc3ft08r09xw4cwx2tqqnevcxp;
+
+    alter table if exists identityiq.spt_workflow_rule_libraries 
+       drop constraint if exists FKec9mwyk8lv87b7fknm22ax1by;
+
+    alter table if exists identityiq.spt_workflow_case 
+       drop constraint if exists FK3u37v00ff74e4vm5plubtlqx1;
+
+    alter table if exists identityiq.spt_workflow_case 
+       drop constraint if exists FKklde6fd36kr42tbcep5f16dj9;
+
+    alter table if exists identityiq.spt_workflow_registry 
+       drop constraint if exists FK46n0i40i7596wrm4r19mkf95o;
+
+    alter table if exists identityiq.spt_workflow_registry 
+       drop constraint if exists FKg1y46rf6jkacnl8vtiie6wp5i;
+
+    alter table if exists identityiq.spt_workflow_target 
+       drop constraint if exists FKnhcve6g96fyukhtjqu5utjf16;
+
+    alter table if exists identityiq.spt_workflow_target 
+       drop constraint if exists FKjngjkgjmpbwwn9utpq60r7lid;
+
+    alter table if exists identityiq.spt_workflow_target 
+       drop constraint if exists FKj7uvhprilx2f9fb2u5bcoixwj;
+
+    alter table if exists identityiq.spt_work_item 
+       drop constraint if exists FK2arasbenw5pc3vrsnwvxqmc1n;
+
+    alter table if exists identityiq.spt_work_item 
+       drop constraint if exists FKaqhklr6jna0canhsmjv6q3ttv;
+
+    alter table if exists identityiq.spt_work_item 
+       drop constraint if exists FKgkr4i2su940s244kebgc1f4ak;
+
+    alter table if exists identityiq.spt_work_item 
+       drop constraint if exists FKb5kty2abf9yebckhbo6vqjv2l;
+
+    alter table if exists identityiq.spt_work_item 
+       drop constraint if exists FKnq8ngnioi09kpss4md9jkr4dq;
+
+    alter table if exists identityiq.spt_work_item 
+       drop constraint if exists FK77ut3s987e5m9gcoj1yi7ifvo;
+
+    alter table if exists identityiq.spt_work_item_comments 
+       drop constraint if exists FKrcoqbshrurwy6exnqljnk9147;
+
+    alter table if exists identityiq.spt_work_item_archive 
+       drop constraint if exists FKi7l692hi3ind4q445liu4vnjt;
+
+    alter table if exists identityiq.spt_work_item_archive 
+       drop constraint if exists FKr1av5cjgksel3fq0cop2449dm;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FKsaklnun9f7m1ur66reimsj0uh;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FKainfds5d2eyh6kt0nudndtjhq;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FK9fsd71n6x6rgg14g3ipecbei7;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FKml61l0hu4ipdc0uyusn0u0s4q;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FKlmrrs1xltdogce59jno83xvqv;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FK2p700iypxpxmrijecptg3bfc9;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FKobeui00a317gyix189atb3dt8;
+
+    alter table if exists identityiq.spt_work_item_config 
+       drop constraint if exists FK8ya24kn74wr4rmd8ukl7vuv9d;
+
+    alter table if exists identityiq.spt_work_item_owners 
+       drop constraint if exists FK4m6v8uagrglqptlephg9ecbm5;
+
+    alter table if exists identityiq.spt_work_item_owners 
+       drop constraint if exists FKjpvcxuqhodero8m8cyucavel9;
+
+    alter table if exists identityiq.spt_yamlconfig 
+       drop constraint if exists FKsur3p44hpishjiel9igc33vjk;
+
+    alter table if exists identityiq.spt_yamlconfig 
+       drop constraint if exists FKfhet5kiyexa0fgx6jj820p6si;
+
+    drop table if exists identityiq.spt_account_group cascade;
+
+    drop table if exists identityiq.spt_account_group_inheritance cascade;
+
+    drop table if exists identityiq.spt_account_group_perms cascade;
+
+    drop table if exists identityiq.spt_account_group_target_perms cascade;
+
+    drop table if exists identityiq.spt_activity_constraint cascade;
+
+    drop table if exists identityiq.spt_activity_data_source cascade;
+
+    drop table if exists identityiq.spt_activity_time_periods cascade;
+
+    drop table if exists identityiq.spt_adaptive_card_notification_template cascade;
+
+    drop table if exists identityiq.spt_alert cascade;
+
+    drop table if exists identityiq.spt_alert_action cascade;
+
+    drop table if exists identityiq.spt_alert_definition cascade;
+
+    drop table if exists identityiq.spt_app_dependencies cascade;
+
+    drop table if exists identityiq.spt_application cascade;
+
+    drop table if exists identityiq.spt_application_remediators cascade;
+
+    drop table if exists identityiq.spt_application_activity cascade;
+
+    drop table if exists identityiq.spt_application_schema cascade;
+
+    drop table if exists identityiq.spt_application_scorecard cascade;
+
+    drop table if exists identityiq.spt_app_secondary_owners cascade;
+
+    drop table if exists identityiq.spt_arch_cert_item_apps cascade;
+
+    drop table if exists identityiq.spt_async_request cascade;
+
+    drop table if exists identityiq.spt_attachment cascade;
+
+    drop table if exists identityiq.spt_audit_config cascade;
+
+    drop table if exists identityiq.spt_audit_event cascade;
+
+    drop table if exists identityiq.spt_authentication_answer cascade;
+
+    drop table if exists identityiq.spt_authentication_question cascade;
+
+    drop table if exists identityiq.spt_batch_request cascade;
+
+    drop table if exists identityiq.spt_batch_request_item cascade;
+
+    drop table if exists identityiq.spt_bulk_id_join cascade;
+
+    drop table if exists identityiq.spt_bundle cascade;
+
+    drop table if exists identityiq.spt_bundle_archive cascade;
+
+    drop table if exists identityiq.spt_bundle_children cascade;
+
+    drop table if exists identityiq.spt_bundle_permits cascade;
+
+    drop table if exists identityiq.spt_bundle_profile_relation cascade;
+
+    drop table if exists identityiq.spt_bundle_profile_relation_object cascade;
+
+    drop table if exists identityiq.spt_bundle_profile_relation_step cascade;
+
+    drop table if exists identityiq.spt_bundle_requirements cascade;
+
+    drop table if exists identityiq.spt_capability cascade;
+
+    drop table if exists identityiq.spt_capability_children cascade;
+
+    drop table if exists identityiq.spt_capability_rights cascade;
+
+    drop table if exists identityiq.spt_category cascade;
+
+    drop table if exists identityiq.spt_cert_action_assoc cascade;
+
+    drop table if exists identityiq.spt_certification cascade;
+
+    drop table if exists identityiq.spt_certification_def_tags cascade;
+
+    drop table if exists identityiq.spt_certification_groups cascade;
+
+    drop table if exists identityiq.spt_certification_tags cascade;
+
+    drop table if exists identityiq.spt_certification_action cascade;
+
+    drop table if exists identityiq.spt_certification_archive cascade;
+
+    drop table if exists identityiq.spt_certification_challenge cascade;
+
+    drop table if exists identityiq.spt_certification_definition cascade;
+
+    drop table if exists identityiq.spt_certification_delegation cascade;
+
+    drop table if exists identityiq.spt_certification_entity cascade;
+
+    drop table if exists identityiq.spt_certification_group cascade;
+
+    drop table if exists identityiq.spt_certification_item cascade;
+
+    drop table if exists identityiq.spt_certifiers cascade;
+
+    drop table if exists identityiq.spt_cert_item_applications cascade;
+
+    drop table if exists identityiq.spt_cert_item_classifications cascade;
+
+    drop table if exists identityiq.spt_child_certification_ids cascade;
+
+    drop table if exists identityiq.spt_classification cascade;
+
+    drop table if exists identityiq.spt_cloud_access3way cascade;
+
+    drop table if exists identityiq.spt_cloud_access_group cascade;
+
+    drop table if exists identityiq.spt_cloud_access_role cascade;
+
+    drop table if exists identityiq.spt_cloud_access_scope cascade;
+
+    drop table if exists identityiq.spt_configuration cascade;
+
+    drop table if exists identityiq.spt_correlation_config cascade;
+
+    drop table if exists identityiq.spt_custom cascade;
+
+    drop table if exists identityiq.spt_database_version cascade;
+
+    drop table if exists identityiq.spt_deleted_object cascade;
+
+    drop table if exists identityiq.spt_dictionary cascade;
+
+    drop table if exists identityiq.spt_dictionary_term cascade;
+
+    drop table if exists identityiq.spt_dynamic_scope cascade;
+
+    drop table if exists identityiq.spt_dynamic_scope_exclusions cascade;
+
+    drop table if exists identityiq.spt_dynamic_scope_inclusions cascade;
+
+    drop table if exists identityiq.spt_email_template cascade;
+
+    drop table if exists identityiq.spt_email_template_properties cascade;
+
+    drop table if exists identityiq.spt_entitlement_group cascade;
+
+    drop table if exists identityiq.spt_entitlement_snapshot cascade;
+
+    drop table if exists identityiq.spt_file_bucket cascade;
+
+    drop table if exists identityiq.spt_form cascade;
+
+    drop table if exists identityiq.spt_full_text_index cascade;
+
+    drop table if exists identityiq.spt_generic_constraint cascade;
+
+    drop table if exists identityiq.spt_group_definition cascade;
+
+    drop table if exists identityiq.spt_group_factory cascade;
+
+    drop table if exists identityiq.spt_group_index cascade;
+
+    drop table if exists identityiq.spt_group_permissions cascade;
+
+    drop table if exists identityiq.spt_identity cascade;
+
+    drop table if exists identityiq.spt_identity_archive cascade;
+
+    drop table if exists identityiq.spt_identity_assigned_roles cascade;
+
+    drop table if exists identityiq.spt_identity_bundles cascade;
+
+    drop table if exists identityiq.spt_identity_capabilities cascade;
+
+    drop table if exists identityiq.spt_identity_controlled_scopes cascade;
+
+    drop table if exists identityiq.spt_identity_entitlement cascade;
+
+    drop table if exists identityiq.spt_identity_external_attr cascade;
+
+    drop table if exists identityiq.spt_identity_history_item cascade;
+
+    drop table if exists identityiq.spt_identity_request cascade;
+
+    drop table if exists identityiq.spt_identity_request_item cascade;
+
+    drop table if exists identityiq.spt_identity_role_metadata cascade;
+
+    drop table if exists identityiq.spt_identity_snapshot cascade;
+
+    drop table if exists identityiq.spt_identity_trigger cascade;
+
+    drop table if exists identityiq.spt_identity_workgroups cascade;
+
+    drop table if exists identityiq.spt_integration_config cascade;
+
+    drop table if exists identityiq.spt_intercepted_delete cascade;
+
+    drop table if exists identityiq.spt_jasper_files cascade;
+
+    drop table if exists identityiq.spt_jasper_page_bucket cascade;
+
+    drop table if exists identityiq.spt_jasper_result cascade;
+
+    drop table if exists identityiq.spt_jasper_template cascade;
+
+    drop table if exists identityiq.spt_link cascade;
+
+    drop table if exists identityiq.spt_link_external_attr cascade;
+
+    drop table if exists identityiq.spt_localized_attribute cascade;
+
+    drop table if exists identityiq.spt_managed_attribute cascade;
+
+    drop table if exists identityiq.spt_managed_attr_inheritance cascade;
+
+    drop table if exists identityiq.spt_managed_attr_perms cascade;
+
+    drop table if exists identityiq.spt_managed_attr_target_perms cascade;
+
+    drop table if exists identityiq.spt_message_template cascade;
+
+    drop table if exists identityiq.spt_mining_config cascade;
+
+    drop table if exists identityiq.spt_mitigation_expiration cascade;
+
+    drop table if exists identityiq.spt_module cascade;
+
+    drop table if exists identityiq.spt_monitoring_statistic cascade;
+
+    drop table if exists identityiq.spt_monitoring_statistic_tags cascade;
+
+    drop table if exists identityiq.spt_named_timestamp cascade;
+
+    drop table if exists identityiq.spt_native_identity_change_event cascade;
+
+    drop table if exists identityiq.spt_object_classification cascade;
+
+    drop table if exists identityiq.spt_object_config cascade;
+
+    drop table if exists identityiq.spt_partition_result cascade;
+
+    drop table if exists identityiq.spt_password_policy cascade;
+
+    drop table if exists identityiq.spt_password_policy_holder cascade;
+
+    drop table if exists identityiq.spt_persisted_file cascade;
+
+    drop table if exists identityiq.spt_plugin cascade;
+
+    drop table if exists identityiq.spt_policy cascade;
+
+    drop table if exists identityiq.spt_policy_violation cascade;
+
+    drop table if exists identityiq.spt_post_commit_notification_object cascade;
+
+    drop table if exists identityiq.spt_process_log cascade;
+
+    drop table if exists identityiq.spt_profile cascade;
+
+    drop table if exists identityiq.spt_profile_constraints cascade;
+
+    drop table if exists identityiq.spt_profile_permissions cascade;
+
+    drop table if exists identityiq.spt_provisioning_request cascade;
+
+    drop table if exists identityiq.spt_provisioning_transaction cascade;
+
+    drop table if exists identityiq.spt_quick_link cascade;
+
+    drop table if exists identityiq.spt_quick_link_options cascade;
+
+    drop table if exists identityiq.spt_recommender_definition cascade;
+
+    drop table if exists identityiq.spt_remediation_item cascade;
+
+    drop table if exists identityiq.spt_remote_login_token cascade;
+
+    drop table if exists identityiq.spt_request cascade;
+
+    drop table if exists identityiq.spt_request_arguments cascade;
+
+    drop table if exists identityiq.spt_request_definition cascade;
+
+    drop table if exists identityiq.spt_request_definition_rights cascade;
+
+    drop table if exists identityiq.spt_request_returns cascade;
+
+    drop table if exists identityiq.spt_request_state cascade;
+
+    drop table if exists identityiq.spt_resource_event cascade;
+
+    drop table if exists identityiq.spt_right_config cascade;
+
+    drop table if exists identityiq.spt_role_change_event cascade;
+
+    drop table if exists identityiq.spt_role_index cascade;
+
+    drop table if exists identityiq.spt_role_metadata cascade;
+
+    drop table if exists identityiq.spt_role_mining_result cascade;
+
+    drop table if exists identityiq.spt_role_scorecard cascade;
+
+    drop table if exists identityiq.spt_rule cascade;
+
+    drop table if exists identityiq.spt_rule_registry_callouts cascade;
+
+    drop table if exists identityiq.spt_rule_dependencies cascade;
+
+    drop table if exists identityiq.spt_rule_registry cascade;
+
+    drop table if exists identityiq.spt_rule_signature_arguments cascade;
+
+    drop table if exists identityiq.spt_rule_signature_returns cascade;
+
+    drop table if exists identityiq.spt_samltoken cascade;
+
+    drop table if exists identityiq.spt_schema_attributes cascade;
+
+    drop table if exists identityiq.spt_scope cascade;
+
+    drop table if exists identityiq.spt_scorecard cascade;
+
+    drop table if exists identityiq.spt_score_config cascade;
+
+    drop table if exists identityiq.spt_server cascade;
+
+    drop table if exists identityiq.spt_server_statistic cascade;
+
+    drop table if exists identityiq.spt_service_definition cascade;
+
+    drop table if exists identityiq.spt_service_lock cascade;
+
+    drop table if exists identityiq.spt_service_status cascade;
+
+    drop table if exists identityiq.spt_sign_off_history cascade;
+
+    drop table if exists identityiq.spt_snapshot_permissions cascade;
+
+    drop table if exists identityiq.spt_sodconstraint cascade;
+
+    drop table if exists identityiq.spt_sodconstraint_left cascade;
+
+    drop table if exists identityiq.spt_sodconstraint_right cascade;
+
+    drop table if exists identityiq.spt_archived_cert_entity cascade;
+
+    drop table if exists identityiq.spt_archived_cert_item cascade;
+
+    drop table if exists identityiq.spt_identity_req_item_attach cascade;
+
+    drop table if exists identityiq.spt_pending_req_attach cascade;
+
+    drop table if exists identityiq.spt_right cascade;
+
+    drop table if exists identityiq.spt_sync_roles cascade;
+
+    drop table if exists identityiq.spt_syslog_event cascade;
+
+    drop table if exists identityiq.spt_tag cascade;
+
+    drop table if exists identityiq.spt_target cascade;
+
+    drop table if exists identityiq.spt_target_association cascade;
+
+    drop table if exists identityiq.spt_target_source cascade;
+
+    drop table if exists identityiq.spt_target_sources cascade;
+
+    drop table if exists identityiq.spt_task_definition cascade;
+
+    drop table if exists identityiq.spt_task_definition_rights cascade;
+
+    drop table if exists identityiq.spt_task_event cascade;
+
+    drop table if exists identityiq.spt_task_result cascade;
+
+    drop table if exists identityiq.spt_task_signature_arguments cascade;
+
+    drop table if exists identityiq.spt_task_signature_returns cascade;
+
+    drop table if exists identityiq.spt_time_period cascade;
+
+    drop table if exists identityiq.spt_uiconfig cascade;
+
+    drop table if exists identityiq.spt_uipreferences cascade;
+
+    drop table if exists identityiq.spt_widget cascade;
+
+    drop table if exists identityiq.spt_workflow cascade;
+
+    drop table if exists identityiq.spt_workflow_rule_libraries cascade;
+
+    drop table if exists identityiq.spt_workflow_case cascade;
+
+    drop table if exists identityiq.spt_workflow_registry cascade;
+
+    drop table if exists identityiq.spt_workflow_target cascade;
+
+    drop table if exists identityiq.spt_workflow_test_suite cascade;
+
+    drop table if exists identityiq.spt_work_item cascade;
+
+    drop table if exists identityiq.spt_work_item_comments cascade;
+
+    drop table if exists identityiq.spt_work_item_archive cascade;
+
+    drop table if exists identityiq.spt_work_item_config cascade;
+
+    drop table if exists identityiq.spt_work_item_owners cascade;
+
+    drop table if exists identityiq.spt_yamlconfig cascade;
+
+    drop sequence if exists identityiq.spt_identity_request_sequence;
+
+    drop sequence if exists identityiq.spt_work_item_sequence;
+
+    drop sequence if exists identityiq.spt_syslog_event_sequence;
+
+    drop sequence if exists identityiq.spt_prv_trans_sequence;
+
+    drop sequence if exists identityiq.spt_alert_sequence;
+
+-- 
+-- IIQ schema delete end
+-- 
+
+
+-- 
+-- ACCESS HISTORY schema delete begin
+-- 
+
+\connect identityiqah identityiqah;
+
+
+    alter table if exists identityiqah.spt_hist_accounts 
+       drop constraint if exists FK605klb45cwnh86urs1aw07cue;
+
+    alter table if exists identityiqah.spt_hist_assigned_roles 
+       drop constraint if exists FK57arq9l8c10fbrtbixsryavgg;
+
+    alter table if exists identityiqah.spt_hist_detected_roles 
+       drop constraint if exists FKsvem4m5n0f7dqasy8pht1m0dj;
+
+    alter table if exists identityiqah.spt_hist_entitlements 
+       drop constraint if exists FKslsba39xq240608yr2vc59rn3;
+
+    alter table if exists identityiqah.spt_hist_policy_violation_remediation_bundle_ids 
+       drop constraint if exists FKitaxnoflkhnq6ijo5yqmh29jc;
+
+    alter table if exists identityiqah.spt_hist_policy_violation_remediation_entitlements 
+       drop constraint if exists FKjie8pn4nfhcfi3t92br291fc1;
+
+    alter table if exists identityiqah.spt_hist_policy_violations 
+       drop constraint if exists FK431cy516ss4k08rgrpq20x1wb;
+
+    alter table if exists identityiqah.spt_hist_role_remediation_entitlements 
+       drop constraint if exists FKhvwj97ncucp9u2flf5llenlcs;
+
+    alter table if exists identityiqah.spt_hist_identity_req_item_capture 
+       drop constraint if exists FK6dn4yl1mqiub2ejxsgms1vex8;
+
+    drop table if exists identityiqah.spt_hist_accounts cascade;
+
+    drop table if exists identityiqah.spt_hist_assigned_roles cascade;
+
+    drop table if exists identityiqah.spt_hist_detected_roles cascade;
+
+    drop table if exists identityiqah.spt_hist_entitlements cascade;
+
+    drop table if exists identityiqah.spt_hist_policy_violation_remediation_bundle_ids cascade;
+
+    drop table if exists identityiqah.spt_hist_policy_violation_remediation_entitlements cascade;
+
+    drop table if exists identityiqah.spt_hist_policy_violations cascade;
+
+    drop table if exists identityiqah.spt_hist_role_remediation_entitlements cascade;
+
+    drop table if exists identityiqah.spt_hist_account_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_capability cascade;
+
+    drop table if exists identityiqah.spt_hist_capability_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_cert_remediation_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_certification cascade;
+
+    drop table if exists identityiqah.spt_hist_database_version cascade;
+
+    drop table if exists identityiqah.spt_hist_entitlement_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_identity cascade;
+
+    drop table if exists identityiqah.spt_hist_identity_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_identity_event cascade;
+
+    drop table if exists identityiqah.spt_hist_identity_req_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_identity_req_item_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_mattr cascade;
+
+    drop table if exists identityiqah.spt_hist_mattr_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_mattr_event cascade;
+
+    drop table if exists identityiqah.spt_hist_object_config_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_policy_violation_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_policy_violation_remediation_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_role cascade;
+
+    drop table if exists identityiqah.spt_hist_role_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_role_event cascade;
+
+    drop table if exists identityiqah.spt_hist_workgroup cascade;
+
+    drop table if exists identityiqah.spt_hist_workgroup_capture cascade;
+
+    drop table if exists identityiqah.spt_hist_workgroup_event cascade;
+
+-- 
+-- ACCESS HISTORY schema delete end
+-- 
+
+
+-- In order to drop the identityiq database, Postgres requires a connection to a database other than the one being dropped.
+
+-- You must switch here to a different non-SailPoint database connection while dropping the
+-- SailPoint databases. If postgres/postgres isn't available, change the line below to a
+-- different available connection.
+
+\connect postgres postgres;
+ALTER DATABASE identityiq OWNER TO postgres;
+DROP DATABASE IF EXISTS identityiq;
+DROP USER IF EXISTS identityiq;
+
+--
+-- ACCESS HISTORY database drop begin
+--
+
+ALTER DATABASE identityiqah OWNER TO postgres;
+DROP DATABASE IF EXISTS identityiqah;
+DROP USER IF EXISTS identityiqah;
+
+--
+-- ACCESS HISTORY database drop end
+--
+
+
+--
+-- PLUGIN database drop begin
+--
+
+ALTER DATABASE "identityiqPlugin" OWNER TO postgres;
+DROP DATABASE IF EXISTS "identityiqPlugin";
+DROP USER IF EXISTS "identityiqPlugin";
+
+--
+-- PLUGIN database drop end
+--
+
+

@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+<Workflow handler="sailpoint.api.StandardWorkflowHandler" name="Role Owner Approval with Role Push">
+  <Step name="start">
+    <Transition to="Check Approvals" when="impactAnalysisOwner == unbound || impactAnalysisOwner == null"/>
+  </Step>
+  <Step action="launchImpactAnalysis" name="Impact Analysis"/>
+  <Step name="Review Analysis">
+    <Approval owner="ref:impactAnalysisOwner">
+      <Arg name="workItemDescription" value="Review impact analysis of $(call:getObjectClass): $(call:getObjectName)"/>
+    </Approval>
+    <Transition to="stop" when="!approved"/>
+  </Step>
+  <Step name="Check Approvals">
+    <Transition to="Commit" when="call:isSelfApproval"/>
+  </Step>
+  <Step name="Approve">
+    <Approval owner="call:buildOwnerApproval"/>
+    <Transition to="Commit" when="approved"/>
+  </Step>
+  <Step action="audit" name="Audit Failure">
+    <Arg name="source" value="ref:launcher"/>
+    <Arg name="action" value="call:getApprovalAuditAction"/>
+    <Arg name="target" value="Role: $(targetName)"/>
+    <Arg name="string1" value="failure"/>
+    <Transition to="stop"/>
+  </Step>
+  <Step action="commit" name="Commit"/>
+  <Step action="call:launchTask">
+    <Arg name="taskDefinition" value="Synchronize Roles"/>
+    <Arg name="role" value="script:approvalObject.getName()"/>
+    <Arg name="sync" value="true"/>
+    <Transition to="Launch Error" when="taskLaunchError != null"/>
+    <Transition to="stop"/>
+  </Step>
+  <Step name="Launch Error"/>
+  <Step action="audit" name="Audit Sucess">
+    <Arg name="source" value="ref:launcher"/>
+    <Arg name="action" value="call:getApprovalAuditAction"/>
+    <Arg name="target" value="Role: $(targetName)"/>
+    <Arg name="string1" value="success"/>
+    <Transition to="stop"/>
+  </Step>
+  <Step name="stop"/>
+</Workflow>
+
+<Workflow handler="sailpoint.api.StandardWorkflowHandler" name="Impact Analysis Only with Role Push">
+  <Step name="start">
+    <Transition to="Commit" when="impactAnalysisOwner == unbound || impactAnalysisOwner == null"/>
+  </Step>
+  <Step action="launchImpactAnalysis" name="Impact Analysis"/>
+  <Step name="Review Analysis">
+    <Approval owner="ref:impactAnalysisOwner">
+      <Arg name="workItemDescription" value="Review impact analysis of $(call:getObjectClass): $(call:getObjectName)"/>
+    </Approval>
+    <Transition to="stop" when="!approved"/>
+  </Step>
+  <Step action="commit" name="Commit"/>
+  <Step action="call:launchTask">
+    <Arg name="taskDefinition" value="Synchronize Roles"/>
+    <Arg name="role" value="script:approvalObject.getName()"/>
+    <Arg name="sync" value="true"/>
+    <Transition to="Launch Error" when="taskLaunchError != null"/>
+    <Transition to="stop"/>
+  </Step>
+  <Step name="Launch Error"/>
+  <Step name="stop"/>
+</Workflow>
+
+</sailpoint>

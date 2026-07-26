@@ -1,0 +1,15 @@
+apiVersion: v2
+name: sailpoint
+description: Umbrella chart — IdentityIQ app + CNPG data plane (namespace sailpoint)
+type: application
+version: 0.1.0
+appVersion: "8.5"
+dependencies:
+  - name: identityiq-data
+    version: 0.1.0
+    repository: "file://../identityiq-data"
+    condition: identityiq-data.enabled
+  - name: identityiq
+    version: 0.1.0
+    repository: "file://../identityiq"
+    condition: identityiq.enabled

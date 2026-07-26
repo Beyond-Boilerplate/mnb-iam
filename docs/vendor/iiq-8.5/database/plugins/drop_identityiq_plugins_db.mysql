@@ -1,0 +1,15 @@
+
+--
+-- PLUGIN database drop begin
+--
+
+DROP USER 'identityiqPlugin'@'%'; 
+DROP USER 'identityiqPlugin'@'localhost'; 
+FLUSH PRIVILEGES;
+DROP DATABASE IF EXISTS identityiqPlugin;
+
+--
+-- PLUGIN database drop end
+--
+
+

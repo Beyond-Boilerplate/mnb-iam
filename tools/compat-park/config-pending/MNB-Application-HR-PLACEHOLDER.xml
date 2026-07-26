@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+  Meridian National Bank — placeholder Application object.
+  Replace/extend this after Lesson 02 by exporting the real MNB-HR app from the UI.
+  Tokens like %%MNB_HR_FILE%% are substituted from *.target.properties during SSB build.
+-->
+<sailpoint>
+  <Application name="MNB-HR" type="DelimitedFile" connector="sailpoint.connector.DelimitedFileConnector">
+    <Attributes>
+      <Map>
+        <entry key="file" value="%%MNB_HR_FILE%%"/>
+        <entry key="delimiter" value=","/>
+        <entry key="parseHeader" value="true"/>
+      </Map>
+    </Attributes>
+  </Application>
+</sailpoint>

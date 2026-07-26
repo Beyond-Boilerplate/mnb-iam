@@ -1,0 +1,55 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/beyond-boilerplate/identityiq
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: ghcr-pull
+
+nameOverride: ""
+fullnameOverride: "identityiq"
+
+service:
+  type: ClusterIP
+  port: 8080
+  # Sticky sessions for IIQ UI across 2 replicas (DB-backed Quartz still shared)
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+env:
+  IIQ_DB_TYPE: postgresql
+
+# Secret created by identityiq-data chart (or external)
+dbSecretName: sailpoint-iiq-db
+
+probes:
+  readiness:
+    path: /identityiq/login.jsf
+    initialDelaySeconds: 90
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 20
+  liveness:
+    path: /identityiq/login.jsf
+    initialDelaySeconds: 180
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+podAnnotations: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

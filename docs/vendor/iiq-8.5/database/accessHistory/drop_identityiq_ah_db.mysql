@@ -1,0 +1,16 @@
+
+--
+-- ACCESS HISTORY database drop begin
+--
+
+DROP USER 'identityiqah'@'%';
+DROP USER 'identityiqah'@'localhost';
+
+FLUSH PRIVILEGES;
+DROP DATABASE IF EXISTS identityiqah;
+
+--
+-- ACCESS HISTORY database drop end
+--
+
+

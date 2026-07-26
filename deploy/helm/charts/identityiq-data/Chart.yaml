@@ -1,0 +1,6 @@
+apiVersion: v2
+name: identityiq-data
+description: CloudNativePG cluster for Meridian IdentityIQ (PostgreSQL)
+type: application
+version: 0.1.0
+appVersion: "16"

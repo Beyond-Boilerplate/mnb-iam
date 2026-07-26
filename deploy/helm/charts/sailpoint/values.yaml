@@ -1,0 +1,10 @@
+# Defaults — override in values/local-homelab.yaml
+identityiq-data:
+  enabled: true
+
+identityiq:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/beyond-boilerplate/identityiq
+    tag: "0.1.0"
