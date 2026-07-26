@@ -32,7 +32,8 @@ identityiq-data:
 
 identityiq:
   enabled: true
-  replicaCount: 2
+  # Single replica: faster CD (one image pull / one Ready). Bump to 2 for HA demos.
+  replicaCount: 1
   image:
     repository: ghcr.io/beyond-boilerplate/identityiq
     tag: "0.1.0"

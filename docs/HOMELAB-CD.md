@@ -104,7 +104,7 @@ Helm-only fixes (probes, values, install scripts) no longer require a manual dis
 
 - **Phased Helm install**: data (CNPG + schema) then app
 - **CNPG**: 1 instance in lab values (no hard anti-affinity); storage stays at provisioned size (cannot shrink)
-- **2 IdentityIQ replicas**, Service `sessionAffinity: ClientIP`; readiness **TCP:8080** (smoke still hits login.jsf)
+- **1 IdentityIQ replica** (lab speed; set `replicaCount: 2` for HA demos), Service `sessionAffinity: ClientIP`; readiness **TCP:8080** (smoke still hits login.jsf)
 - Schema Job applies SailPoint Postgres DDL once (skip if `spt_identity` exists)
 - DB credentials: Secret `sailpoint-iiq-db`
 
