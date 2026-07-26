@@ -11,7 +11,7 @@ metadata:
     helm.sh/hook-weight: "5"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
-  backoffLimit: 8
+  backoffLimit: 4
   ttlSecondsAfterFinished: 900
   template:
     metadata:
@@ -74,6 +74,12 @@ spec:
                 sleep 5
               done
 
+              # Verify superuser password works (CNPG secret can drift after interrupted installs)
+              if ! psql -d postgres -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null; then
+                echo "ERROR: superuser auth failed for ${PGUSER}@${PGHOST} — reset password from primary or recreate cluster"
+                exit 1
+              fi
+
               if psql -d postgres -Atc "SELECT 1 FROM pg_database WHERE datname='identityiq'" | grep -qx 1; then
                 if psql -d identityiq -Atc "SELECT 1 FROM information_schema.tables WHERE table_schema='identityiq' AND table_name='spt_identity'" 2>/dev/null | grep -qx 1; then
                   echo "IIQ schema already present — skipping"
@@ -81,16 +87,29 @@ spec:
                 fi
               fi
 
-              echo "Patching SailPoint sample passwords to match app secret…"
+              echo "Preparing SailPoint SQL for superuser + SET ROLE (PGPASSWORD stays postgres)…"
+              # CREATE USER passwords must match app secret; \\connect as app users would
+              # incorrectly reuse PGPASSWORD=superuser — connect as postgres then SET ROLE.
               sed \
                 -e "s/ENCRYPTED PASSWORD 'identityiq'/ENCRYPTED PASSWORD '${IIQ_DB_PASSWORD}'/g" \
                 -e "s/ENCRYPTED PASSWORD 'identityiqPlugin'/ENCRYPTED PASSWORD '${IIQ_PLUGIN_DB_PASSWORD}'/g" \
                 -e "s/ENCRYPTED PASSWORD 'identityiqah'/ENCRYPTED PASSWORD '${IIQ_AH_DB_PASSWORD}'/g" \
+                -e 's/\\connect identityiq identityiq/\\connect identityiq postgres\nSET ROLE identityiq;/' \
+                -e 's/\\connect identityiqah identityiqah/\\connect identityiqah postgres\nSET ROLE identityiqah;/' \
+                -e 's/\\connect "identityiqPlugin" "identityiqPlugin"/\\connect "identityiqPlugin" postgres\nSET ROLE "identityiqPlugin";/' \
                 /sql/create_identityiq_tables-8.5.postgresql > /tmp/iiq-schema.sql
 
-              echo "Applying IdentityIQ 8.5 PostgreSQL schema (idempotent-ish; first install)…"
-              # Sample script uses \\connect; requires psql meta-commands
-              psql -v ON_ERROR_STOP=1 -d postgres -f /tmp/iiq-schema.sql
+              echo "Applying IdentityIQ 8.5 PostgreSQL schema…"
+              # Ignore duplicate role/db on re-run; fail on real DDL errors after bootstrap
+              set +e
+              psql -v ON_ERROR_STOP=0 -d postgres -f /tmp/iiq-schema.sql 2>&1 | tee /tmp/schema.out
+              rc=${PIPESTATUS[0]}
+              set -e
+              if ! psql -d identityiq -Atc "SELECT 1 FROM information_schema.tables WHERE table_schema='identityiq' AND table_name='spt_identity'" | grep -qx 1; then
+                echo "ERROR: spt_identity missing after schema apply (psql rc=${rc})"
+                tail -50 /tmp/schema.out || true
+                exit 1
+              fi
               echo "Schema init complete"
       volumes:
         - name: sql

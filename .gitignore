@@ -23,6 +23,7 @@ node_modules/
 *.class
 *.jar
 !lib/**/*.jar
+!web/**/*.jar
 !SSDDeployer.jar
 !servicestools/**/*.jar
 !externaltools/**/*.jar
@@ -41,6 +42,7 @@ deploy/helm/values/*.secrets.yaml
 
 # Build output
 /build/
+/learn/dist/
 
 # Local lab DB dumps / archives (not for CD)
 /IIQDBDump/
