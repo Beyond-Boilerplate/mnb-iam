@@ -1,0 +1,103 @@
+name: Publish IIQ base image
+
+# Rare: GA expand + JDBC → ghcr.io/<owner>/identityiq-base:8.5
+# Routine app publishes FROM this image (no GA re-expand).
+
+on:
+  workflow_dispatch:
+    inputs:
+      iiq_version:
+        description: IIQ major.minor tag (matches GA OCI + base image tag)
+        required: true
+        default: "8.5"
+        type: string
+  push:
+    branches: [main, master]
+    paths:
+      - docker/Dockerfile.base
+      - web/WEB-INF/lib/postgresql-*.jar
+      - .github/workflows/publish-base.yml
+
+concurrency:
+  group: publish-base-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  publish-base:
+    name: Build identityiq-base
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install oras
+        uses: oras-project/setup-oras@v1
+
+      - name: Log in to GHCR (read GA)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME || github.actor }}
+          password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Pull GA zip from OCI
+        env:
+          IIQ_VERSION: ${{ github.event.inputs.iiq_version || '8.5' }}
+        run: |
+          set -euo pipefail
+          mkdir -p base/ga
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          ZIP="base/ga/identityiq-${IIQ_VERSION}.zip"
+          if [ -f "$ZIP" ]; then
+            ls -lh "$ZIP"
+            exit 0
+          fi
+          REF="ghcr.io/${OWNER}/mnb-iam-ga:${IIQ_VERSION}"
+          echo "oras pull ${REF}"
+          oras pull "$REF" -o base/ga
+          if [ ! -f "$ZIP" ]; then
+            found=$(find base/ga -name "identityiq-${IIQ_VERSION}.zip" -o -name '*.zip' | head -1)
+            test -n "$found"
+            mv "$found" "$ZIP"
+          fi
+          ls -lh "$ZIP"
+          test -f web/WEB-INF/lib/postgresql-42.7.4.jar
+
+      - name: Log in to GHCR (push)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push identityiq-base
+        env:
+          IIQ_VERSION: ${{ github.event.inputs.iiq_version || '8.5' }}
+        run: |
+          set -euo pipefail
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          TAG="ghcr.io/${OWNER}/identityiq-base:${IIQ_VERSION}"
+          docker buildx build \
+            --platform linux/amd64 \
+            --file docker/Dockerfile.base \
+            --tag "${TAG}" \
+            --tag "ghcr.io/${OWNER}/identityiq-base:latest" \
+            --cache-from "type=gha,scope=ghcr-identityiq-base" \
+            --cache-from "type=registry,ref=ghcr.io/${OWNER}/identityiq-base:buildcache" \
+            --cache-to "type=gha,mode=max,scope=ghcr-identityiq-base" \
+            --cache-to "type=registry,ref=ghcr.io/${OWNER}/identityiq-base:buildcache,mode=max" \
+            --provenance=false \
+            --sbom=false \
+            --push \
+            .
+          echo "### Base image" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`${TAG}\`" >> "$GITHUB_STEP_SUMMARY"

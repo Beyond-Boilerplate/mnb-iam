@@ -1,0 +1,47 @@
+# syntax=docker/dockerfile:1.6
+# Rare rebuild: IdentityIQ 8.5 GA exploded + Postgres JDBC on Tomcat 9 / JDK 11.
+# Tag: ghcr.io/beyond-boilerplate/identityiq-base:8.5
+# CI must supply base/ga/identityiq-8.5.zip (oras pull from mnb-iam-ga:8.5).
+
+FROM eclipse-temurin:11-jdk-jammy AS expand
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends unzip ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work
+COPY base/ga/identityiq-8.5.zip /work/identityiq-8.5.zip
+# JDBC is not shipped with IIQ GA — bake into stock tree for all app images
+COPY web/WEB-INF/lib/postgresql-42.7.4.jar /work/postgresql-42.7.4.jar
+
+RUN mkdir -p /opt/iiq-stock \
+  && unzip -q /work/identityiq-8.5.zip -d /tmp/ga \
+  && unzip -q /tmp/ga/identityiq.war -d /opt/iiq-stock \
+  && cp /work/postgresql-42.7.4.jar /opt/iiq-stock/WEB-INF/lib/ \
+  && rm -rf /tmp/ga /work/identityiq-8.5.zip \
+  && mkdir -p /opt/ga-placeholder \
+  && : > /opt/ga-placeholder/identityiq-8.5.zip
+
+# Runtime-capable base (nodes cache this large layer; app images stay thin)
+FROM tomcat:9.0-jdk11-temurin
+
+ENV CATALINA_HOME=/usr/local/tomcat \
+    IIQ_HOME=/usr/local/tomcat/webapps/identityiq \
+    IIQ_STOCK=/opt/iiq-stock \
+    JAVA_OPTS="-Xms1024m -Xmx2048m -Djava.awt.headless=true -Dfile.encoding=UTF-8"
+
+RUN rm -rf "${CATALINA_HOME}/webapps/*" \
+  && mkdir -p "${IIQ_HOME}" \
+  && groupadd --system iiq \
+  && useradd --system --gid iiq --home-dir /usr/local/tomcat iiq
+
+COPY --from=expand /opt/iiq-stock /opt/iiq-stock
+COPY --from=expand /opt/ga-placeholder /opt/ga-placeholder
+
+# Default: stock IIQ (uncustomized). App image replaces IIQ_HOME.
+RUN cp -a /opt/iiq-stock/. "${IIQ_HOME}/" \
+  && chown -R iiq:iiq /usr/local/tomcat /opt/iiq-stock /opt/ga-placeholder
+
+USER iiq
+EXPOSE 8080
+# entrypoint comes from app image; stock base can still start Tomcat for debug
+CMD ["catalina.sh", "run"]

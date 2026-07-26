@@ -4,23 +4,41 @@ Public URL: **https://sailpoint.lmsapp.us/identityiq/login.jsf**
 Namespace: **`sailpoint`** (isolated from `platform`)  
 Pattern: same Tailscale + Helm + GHCR flow as [nepaledu-platform](https://github.com/Beyond-Boilerplate/nepaledu-platform).
 
-## Pipeline
+## What is CNPG?
+
+**CloudNativePG** runs PostgreSQL in-cluster (`sailpoint-pg`). It is deploy-time only — it does **not** make GitHub Actions image builds slow.
+
+## Fast image pipeline
+
+Routine publishes no longer expand the ~708MB GA zip. Two images:
+
+| Image | When to rebuild | Target time |
+|-------|-----------------|-------------|
+| `identityiq-base:8.5` | Rare — GA / `Dockerfile.base` / JDBC jar | ~10–15 min OK |
+| `identityiq:{VERSION,sha}` | Every `config/` `src/` `web/` change | **≤ 3 min** |
 
 ```text
-push main
-  → oras pull  ghcr.io/beyond-boilerplate/mnb-iam-ga:8.5  → base/ga/
-  → docker build (SSB clean war, SPTARGET=homelab)
-  → push        ghcr.io/beyond-boilerplate/identityiq:{VERSION,sha7,latest}
-  → Tailscale + Helm -n sailpoint
-  → smoke       https://sailpoint.lmsapp.us/identityiq/login.jsf
+rare:   oras pull mnb-iam-ga:8.5 → docker build Dockerfile.base → identityiq-base:8.5
+often:  FROM identityiq-base → SSB overlay (no GA expand) → identityiq:{tag}
+        → Tailscale + Helm -n sailpoint
+        → smoke https://sailpoint.lmsapp.us/identityiq/login.jsf
 ```
+
+Nodes keep the large **base** layers cached; app deploys pull thin overlay layers.
 
 | Workflow | Purpose |
 |----------|---------|
 | `publish-ga-oci.yml` | One-time / rare: GA zip → OCI artifact |
-| `publish-ghcr.yml` | Build & push IdentityIQ app image |
+| `publish-base.yml` | Rare: GA expand + JDBC → `identityiq-base:8.5` |
+| `publish-ghcr.yml` | Frequent: thin app image FROM base |
 | `deploy-homelab.yml` | Helm upgrade + public smoke |
-| `ssb-ci.yml` | PR/CI war build (pulls GA from OCI when zip absent) |
+| `ssb-ci.yml` | PR/develop full war; **skipped on main** when Publish covers same paths |
+
+### Rebuild rules
+
+- Change **GA or JDBC or `docker/Dockerfile.base`** → run **Publish IIQ base image**, then Publish GHCR (or push app files).
+- Change **config / src / web / entrypoint** only → Publish GHCR only (thin).
+- Do **not** expect a full GA expand on every app commit.
 
 ## One-time setup
 
@@ -37,24 +55,26 @@ push main
    Longer-term: Package settings → **Manage Actions access** → add `Beyond-Boilerplate/mnb-iam` (Read),
    then CI can use `GITHUB_TOKEN` alone.
 
-2. **GitHub Environments / secrets** on `mnb-iam` (same values as `nepaledu-platform` repo secrets):
-   - Create Environment **`homelab`** (already present)
-   - Copy from nepaledu-platform → mnb-iam (Settings → Secrets and variables → Actions):
-     - `TS_OAUTH_CLIENT_ID`
-     - `TS_OAUTH_SECRET`
-     - `HOMELAB_KUBECONFIG`
-   - Already set for GA pulls: `GHCR_READ_TOKEN`, `GHCR_USERNAME`
+2. **Publish base image once** (Actions → **Publish IIQ base image** → Run), or:
+
+   ```bash
+   # after GA is in GHCR and Dockerfile.base is on main
+   gh workflow run "Publish IIQ base image" --repo Beyond-Boilerplate/mnb-iam
+   ```
+
+3. **GitHub Environments / secrets** on `mnb-iam` (same values as `nepaledu-platform` repo secrets):
+   - Environment **`homelab`**
+   - `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, `HOMELAB_KUBECONFIG`
+   - `GHCR_READ_TOKEN`, `GHCR_USERNAME`
    - Optional: `GHCR_PULL_TOKEN` for cluster pulls if images stay private
 
-   After secrets are in place: **Actions → Deploy homelab → Run workflow** (or re-run the failed `workflow_run`).
+   Then: **Actions → Deploy homelab → Run workflow**.
 
-
-3. **Cluster**
+4. **Cluster**
    - CNPG operator already installed (same as LMS)
-   - `kubectl create ns sailpoint` (install script also creates it)
    - `ghcr-pull` docker-registry secret in `sailpoint` (deploy workflow can create it)
 
-4. **Cloudflare Tunnel** public hostname (no Access for now):
+5. **Cloudflare Tunnel** public hostname (no Access for now):
 
    | Field | Value |
    |-------|--------|
@@ -63,24 +83,25 @@ push main
    | Type | HTTP |
    | URL | `identityiq.sailpoint.svc.cluster.local:8080` |
 
-5. **Helm install (manual)**
+6. **Helm install (manual)**
 
    ```bash
-   export KUBECONFIG=…   # or Tailscale path to cluster
+   export KUBECONFIG=…
    export IMAGE_TAG=0.1.0
    ./deploy/helm/scripts/install-sailpoint.sh deploy/helm/values/local-homelab.yaml
    ```
 
 ## Runtime shape
 
-- **Phased Helm install**: data (CNPG + schema) then app — avoids a silent 15m `--wait` on IIQ cold start
-- **CNPG**: 1 instance in lab (no hard anti-affinity); scale up later if you have ≥2 nodes
-- **2 IdentityIQ replicas**, Service `sessionAffinity: ClientIP`; readiness uses **TCP:8080** (smoke still hits login.jsf)
-- Schema Job applies SailPoint `create_identityiq_tables-8.5.postgresql` once (5m PG ready timeout)
-- DB credentials: Secret `sailpoint-iiq-db` (override via `local-homelab.secrets.yaml`)
+- **Phased Helm install**: data (CNPG + schema) then app
+- **CNPG**: 1 instance in lab values (no hard anti-affinity); storage stays at provisioned size (cannot shrink)
+- **2 IdentityIQ replicas**, Service `sessionAffinity: ClientIP`; readiness **TCP:8080** (smoke still hits login.jsf)
+- Schema Job applies SailPoint Postgres DDL once (skip if `spt_identity` exists)
+- DB credentials: Secret `sailpoint-iiq-db`
 
 ## Notes
 
-- IIQ 8.5 supports PostgreSQL; CNPG is the in-cluster choice (not MySQL).
-- Shared IIQ filesystem (uploads/plugins) is not PVC-shared on typical k3s RWO — keep plugins in the image or accept single-writer limits.
+- IIQ 8.5 supports PostgreSQL; JDBC jar is baked into `identityiq-base` (`web/WEB-INF/lib/postgresql-42.7.4.jar`).
+- Shared IIQ filesystem is not PVC-shared on typical k3s RWO.
 - Default login after first successful schema + boot: `spadmin` / `admin` (change immediately in any shared lab).
+- Routine Publish uses `cancel-in-progress: true`; provenance/SBOM only on SemVer bumps via workflow_dispatch.

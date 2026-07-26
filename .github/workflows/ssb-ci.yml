@@ -1,7 +1,8 @@
 name: SSB CI
 
-# Builds IdentityIQ with SailPoint Services Standard Build (SSB).
-# GA zip: prefer workspace file; else oras pull from GHCR OCI artifact.
+# PR / develop / manual: full sandbox war (needs GA OCI).
+# main/master push: skip full war when Publish GHCR path filter would also run
+# (thin Docker build owns those paths — avoid paying Ant+GA twice).
 
 on:
   push:
@@ -17,15 +18,44 @@ jobs:
   ssb-war:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide whether to run full war
+        id: gate
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ] \
+            || [ "${{ github.event_name }}" = "workflow_dispatch" ] \
+            || [ "${{ github.ref_name }}" = "develop" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # main/master push — skip if publish-relevant paths changed
+          BEFORE="${{ github.event.before }}"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" || true)
+          else
+            CHANGED=$(git show --name-only --pretty='' HEAD || true)
+          fi
+          echo "Changed files:"
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -qE '^(config/|src/|web/|docker/Dockerfile$|docker/entrypoint\.sh|docker/setenv\.sh|build\.xml|build\.sh|build\.properties|homelab\.|sandbox\.|servers\.properties|VERSION|\.github/workflows/publish-ghcr\.yml)'; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Publish GHCR covers these paths — skipping duplicate SSB war on main"
+            exit 0
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
 
       - name: Install oras
+        if: steps.gate.outputs.run == 'true'
         uses: oras-project/setup-oras@v1
 
       - name: Log in to GHCR
+        if: steps.gate.outputs.run == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -33,6 +63,7 @@ jobs:
           password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Ensure GA zip
+        if: steps.gate.outputs.run == 'true'
         run: |
           set -euo pipefail
           mkdir -p base/ga
@@ -52,12 +83,14 @@ jobs:
           ls -lh base/ga/identityiq-8.5.zip
 
       - name: Set up JDK 11
+        if: steps.gate.outputs.run == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "11"
 
       - name: SSB clean war (sandbox)
+        if: steps.gate.outputs.run == 'true'
         env:
           SPTARGET: sandbox
         run: |
@@ -65,6 +98,7 @@ jobs:
           ./build.sh -Dtarget=sandbox clean war
 
       - name: Upload WAR artifact
+        if: steps.gate.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: identityiq-war-sandbox
@@ -72,3 +106,7 @@ jobs:
             build/deploy/identityiq.war
             build/deploy/identityiq.war.MD5
           if-no-files-found: error
+
+      - name: Skipped notice
+        if: steps.gate.outputs.run != 'true'
+        run: echo "Skipped full SSB war — covered by Publish GHCR thin image build"

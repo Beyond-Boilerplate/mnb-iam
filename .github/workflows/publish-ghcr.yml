@@ -1,7 +1,8 @@
 name: Publish GHCR images
 
-# Pull GA zip from OCI → SSB war inside Docker → push identityiq image.
-# Tags: VERSION file (semver) + latest + short SHA.
+# Thin app image FROM identityiq-base (no GA oras / no full expand).
+# Tags: VERSION + latest + short SHA.
+# Provenance/SBOM only when SemVer is bumped via workflow_dispatch.
 
 on:
   workflow_dispatch:
@@ -18,7 +19,9 @@ on:
       - config/**
       - src/**
       - web/**
-      - docker/**
+      - docker/Dockerfile
+      - docker/entrypoint.sh
+      - docker/setenv.sh
       - build.xml
       - build.sh
       - build.properties
@@ -30,7 +33,7 @@ on:
 
 concurrency:
   group: publish-ghcr-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions: {}
 
@@ -47,6 +50,7 @@ jobs:
       owner: ${{ steps.meta.outputs.owner }}
       sha_short: ${{ steps.meta.outputs.sha_short }}
       commit_sha: ${{ steps.meta.outputs.commit_sha }}
+      attest: ${{ steps.meta.outputs.attest }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -124,18 +128,23 @@ jobs:
           set -euo pipefail
           TAG=$(tr -d '[:space:]' < VERSION)
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          ATTEST=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.increment_type || 'none' }}" != "none" ]; then
+            ATTEST=true
+          fi
           {
             echo "image_tag=${TAG}"
             echo "owner=${OWNER}"
             echo "sha_short=${GITHUB_SHA::7}"
             echo "commit_sha=$(git rev-parse HEAD)"
+            echo "attest=${ATTEST}"
           } >> "$GITHUB_OUTPUT"
 
   build:
     name: Build identityiq
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 45
     permissions:
       contents: read
       packages: write
@@ -146,41 +155,14 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.commit_sha }}
 
-      - name: Install oras
-        uses: oras-project/setup-oras@v1
-
-      - name: Log in to GHCR (read GA package)
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USERNAME || github.actor }}
-          # Prefer PAT with read:packages until mnb-iam-ga Grants Actions access to this repo
           password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Pull GA zip from OCI
-        env:
-          OWNER: ${{ needs.prepare.outputs.owner }}
-        run: |
-          set -euo pipefail
-          mkdir -p base/ga
-          if [ -f base/ga/identityiq-8.5.zip ]; then
-            echo "GA zip already in workspace"
-            ls -lh base/ga/identityiq-8.5.zip
-            exit 0
-          fi
-          REF="ghcr.io/${OWNER}/mnb-iam-ga:8.5"
-          echo "oras pull ${REF}"
-          oras pull "$REF" -o base/ga
-          # oras may write under nested path (base/ga/...)
-          if [ ! -f base/ga/identityiq-8.5.zip ]; then
-            found=$(find base/ga -name 'identityiq-8.5.zip' -o -name '*.zip' | head -1)
-            test -n "$found"
-            mkdir -p base/ga
-            mv "$found" base/ga/identityiq-8.5.zip
-          fi
-          ls -lh base/ga/identityiq-8.5.zip
-
-      - name: Log in to GHCR (push app image)
+      - name: Log in to GHCR (push)
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -190,7 +172,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push identityiq
+      - name: Build and push identityiq (thin)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -199,14 +181,20 @@ jobs:
           platforms: linux/amd64
           build-args: |
             SPTARGET=homelab
-          provenance: mode=max
-          sbom: true
+            IIQ_BASE_IMAGE=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq-base:8.5
+          provenance: ${{ needs.prepare.outputs.attest == 'true' && 'mode=max' || 'false' }}
+          sbom: ${{ needs.prepare.outputs.attest == 'true' }}
           tags: |
             ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.image_tag }}
             ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:latest
             ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.sha_short }}
-          cache-from: type=gha,scope=ghcr-identityiq
-          cache-to: type=gha,mode=max,scope=ghcr-identityiq
+          cache-from: |
+            type=gha,scope=ghcr-identityiq
+            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache
+            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq-base:8.5
+          cache-to: |
+            type=gha,mode=max,scope=ghcr-identityiq
+            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache,mode=max
 
   summarize:
     name: Publish summary
@@ -221,19 +209,22 @@ jobs:
           TAG: ${{ needs.prepare.outputs.image_tag }}
           OWNER: ${{ needs.prepare.outputs.owner }}
           SHA: ${{ needs.prepare.outputs.sha_short }}
+          ATTEST: ${{ needs.prepare.outputs.attest }}
         run: |
           set -euo pipefail
           {
-            echo "## GHCR publish"
+            echo "## GHCR publish (thin)"
             echo ""
             echo "- Image tag: \`${TAG}\`"
             echo "- SHA tag: \`${SHA}\`"
             echo "- Owner: \`${OWNER}\`"
+            echo "- Base: \`ghcr.io/${OWNER}/identityiq-base:8.5\`"
+            echo "- Attest/SBOM: \`${ATTEST}\`"
             echo "- Build: \`${BUILD}\`"
             echo ""
             echo "\`ghcr.io/${OWNER}/identityiq:${TAG}\`"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$BUILD" != "success" ]; then
-            echo "::error::identityiq image build failed"
+            echo "::error::identityiq image build failed (is identityiq-base:8.5 published?)"
             exit 1
           fi
