@@ -75,14 +75,18 @@ spec:
                 name: {{ .Values.dbSecretName | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          # Null the unused handler so Helm 3-way merge can switch httpGet↔tcpSocket
+          # (K8s rejects probes with more than one handler type).
           readinessProbe:
             {{- if eq (.Values.probes.readiness.type | default "http") "tcp" }}
             tcpSocket:
               port: http
+            httpGet: null
             {{- else }}
             httpGet:
               path: {{ .Values.probes.readiness.path }}
               port: http
+            tcpSocket: null
             {{- end }}
             initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
@@ -92,10 +96,12 @@ spec:
             {{- if eq (.Values.probes.liveness.type | default "http") "tcp" }}
             tcpSocket:
               port: http
+            httpGet: null
             {{- else }}
             httpGet:
               path: {{ .Values.probes.liveness.path }}
               port: http
+            tcpSocket: null
             {{- end }}
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
