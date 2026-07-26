@@ -1,4 +1,5 @@
 #!/bin/sh
+# Runtime iiq.properties overlay (homelab CD e2e marker: 2026-07-26)
 set -eu
 
 IIQ_PROPS="${IIQ_HOME}/WEB-INF/classes/iiq.properties"
