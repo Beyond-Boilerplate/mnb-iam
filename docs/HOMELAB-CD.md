@@ -37,11 +37,17 @@ push main
    Longer-term: Package settings → **Manage Actions access** → add `Beyond-Boilerplate/mnb-iam` (Read),
    then CI can use `GITHUB_TOKEN` alone.
 
-2. **GitHub Environments / secrets** (org secrets can be inherited):
-   - `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`
-   - `HOMELAB_KUBECONFIG`
-   - Optional: `GHCR_PULL_TOKEN` (PAT with `read:packages` if images are private)
-   - Create Environment **`homelab`** on `mnb-iam` (same pattern as nepaledu-platform)
+2. **GitHub Environments / secrets** on `mnb-iam` (same values as `nepaledu-platform` repo secrets):
+   - Create Environment **`homelab`** (already present)
+   - Copy from nepaledu-platform → mnb-iam (Settings → Secrets and variables → Actions):
+     - `TS_OAUTH_CLIENT_ID`
+     - `TS_OAUTH_SECRET`
+     - `HOMELAB_KUBECONFIG`
+   - Already set for GA pulls: `GHCR_READ_TOKEN`, `GHCR_USERNAME`
+   - Optional: `GHCR_PULL_TOKEN` for cluster pulls if images stay private
+
+   After secrets are in place: **Actions → Deploy homelab → Run workflow** (or re-run the failed `workflow_run`).
+
 
 3. **Cluster**
    - CNPG operator already installed (same as LMS)
