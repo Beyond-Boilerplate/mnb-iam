@@ -8,6 +8,12 @@ name: Deploy homelab
 # Setup: docs/HOMELAB-CD.md
 
 on:
+  # Helm/ops-only: redeploy without rebuilding the image
+  push:
+    branches: [main, master]
+    paths:
+      - deploy/**
+      - .github/workflows/deploy-homelab.yml
   workflow_dispatch:
     inputs:
       skip_smoke:
@@ -19,6 +25,7 @@ on:
         type: string
         required: false
         default: ""
+  # After a successful Publish GHCR on main — pin IMAGE_TAG to that commit's sha7
   workflow_run:
     workflows: ["Publish GHCR images"]
     types: [completed]
@@ -39,6 +46,7 @@ jobs:
     name: Helm upgrade
     if: >
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        (github.event.workflow_run.head_branch == 'main' ||
@@ -127,15 +135,15 @@ jobs:
             REF="${{ github.event.workflow_run.head_sha }}"
             export IMAGE_TAG="${REF:0:7}"
             echo "Deploying IMAGE_TAG=${IMAGE_TAG} (from Publish GHCR)"
-          elif [ -n "${{ inputs.image_tag }}" ]; then
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.image_tag }}" ]; then
             export IMAGE_TAG="${{ inputs.image_tag }}"
             echo "Deploying IMAGE_TAG=${IMAGE_TAG} (workflow_dispatch)"
           else
-            # Ops-only: pin to currently running tag if any, else VERSION
+            # Ops-only (push to deploy/** or empty dispatch): keep live tag, else VERSION
             LIVE=$(kubectl -n sailpoint get deploy identityiq -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
             if [[ "$LIVE" == *:* ]]; then
               export IMAGE_TAG="${LIVE##*:}"
-              echo "Preserving live IMAGE_TAG=${IMAGE_TAG}"
+              echo "Preserving live IMAGE_TAG=${IMAGE_TAG} (${{ github.event_name }})"
             else
               export IMAGE_TAG="$(tr -d '[:space:]' < VERSION)"
               echo "Bootstrap IMAGE_TAG=${IMAGE_TAG} from VERSION"

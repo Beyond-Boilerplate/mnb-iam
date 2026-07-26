@@ -32,7 +32,16 @@ Nodes keep the large **base** layers cached; app deploys pull thin overlay layer
 | `publish-base.yml` | Rare: GA expand + JDBC → `identityiq-base:8.5` |
 | `publish-ghcr.yml` | Frequent: thin app image FROM base |
 | `deploy-homelab.yml` | Helm upgrade + public smoke |
-| `ssb-ci.yml` | PR/develop full war; **skipped on main** when Publish covers same paths |
+
+### When Deploy runs (automatic)
+
+| Trigger | `IMAGE_TAG` |
+|---------|-------------|
+| Push to `main` touching `deploy/**` or this workflow | Live tag on cluster (else `VERSION`) |
+| Successful **Publish GHCR images** on `main` (`workflow_run`) | Short SHA of that publish commit |
+| Manual **Run workflow** | Optional input; empty → live / `VERSION` |
+
+Helm-only fixes (probes, values, install scripts) no longer require a manual dispatch.
 
 ### Rebuild rules
 
@@ -68,7 +77,7 @@ Nodes keep the large **base** layers cached; app deploys pull thin overlay layer
    - `GHCR_READ_TOKEN`, `GHCR_USERNAME`
    - Optional: `GHCR_PULL_TOKEN` for cluster pulls if images stay private
 
-   Then: **Actions → Deploy homelab → Run workflow**.
+   Then first deploy: **Actions → Deploy homelab → Run workflow** (or push any change under `deploy/`).
 
 4. **Cluster**
    - CNPG operator already installed (same as LMS)
