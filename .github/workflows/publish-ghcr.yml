@@ -172,18 +172,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push identityiq (thin)
+      - name: Build and push identityiq (thin, no attest)
+        if: needs.prepare.outputs.attest != 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/Dockerfile
           push: true
           platforms: linux/amd64
+          pull: true
           build-args: |
             SPTARGET=homelab
             IIQ_BASE_IMAGE=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq-base:8.5
-          provenance: ${{ needs.prepare.outputs.attest == 'true' && 'mode=max' || 'false' }}
-          sbom: ${{ needs.prepare.outputs.attest == 'true' }}
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.image_tag }}
             ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:latest
@@ -191,10 +193,30 @@ jobs:
           cache-from: |
             type=gha,scope=ghcr-identityiq
             type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache
-            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq-base:8.5
-          cache-to: |
-            type=gha,mode=max,scope=ghcr-identityiq
-            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache,mode=max
+          cache-to: type=gha,mode=max,scope=ghcr-identityiq
+
+      - name: Build and push identityiq (thin, attest)
+        if: needs.prepare.outputs.attest == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          platforms: linux/amd64
+          pull: true
+          build-args: |
+            SPTARGET=homelab
+            IIQ_BASE_IMAGE=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq-base:8.5
+          provenance: mode=max
+          sbom: true
+          tags: |
+            ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.image_tag }}
+            ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:latest
+            ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:${{ needs.prepare.outputs.sha_short }}
+          cache-from: |
+            type=gha,scope=ghcr-identityiq
+            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache
+          cache-to: type=gha,mode=max,scope=ghcr-identityiq
 
   summarize:
     name: Publish summary
