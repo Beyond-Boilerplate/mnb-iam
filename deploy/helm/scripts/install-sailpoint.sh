@@ -99,12 +99,13 @@ run_helm() {
   # shellcheck disable=SC2064
   trap "kill ${ticker_pid} 2>/dev/null || true" RETURN
 
+  # "${arr[@]}" is unbound under `set -u` when empty — expand only if set/nonempty.
   if ! helm "${HELM_BASE[@]}" \
       --timeout "$timeout" \
       --wait \
-      "${IMAGE_SETS[@]}" \
+      ${IMAGE_SETS[@]+"${IMAGE_SETS[@]}"} \
       "$@" \
-      "${EXTRA_ARGS[@]}"; then
+      ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}; then
     echo "ERROR: Helm phase ${label} failed"
     dump_status
     return 1
