@@ -31,10 +31,15 @@ push main
    ./.github/scripts/publish-ga-oci.sh 8.5
    ```
 
+   Already published: `ghcr.io/beyond-boilerplate/mnb-iam-ga:8.5` (private).
+
+   In GitHub → Packages → **mnb-iam-ga** → Package settings → **Manage Actions access**, add repository `Beyond-Boilerplate/mnb-iam` with **Read** so CI `GITHUB_TOKEN` can `oras pull`.
+
 2. **GitHub Environments / secrets** (org secrets can be inherited):
    - `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`
    - `HOMELAB_KUBECONFIG`
    - Optional: `GHCR_PULL_TOKEN` (PAT with `read:packages` if images are private)
+   - Create Environment **`homelab`** on `mnb-iam` (same pattern as nepaledu-platform)
 
 3. **Cluster**
    - CNPG operator already installed (same as LMS)
