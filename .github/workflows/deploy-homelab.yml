@@ -90,28 +90,39 @@ jobs:
       - name: Ensure ghcr-pull secret
         env:
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
           kubectl get ns sailpoint >/dev/null 2>&1 || kubectl create namespace sailpoint
-          if kubectl -n sailpoint get secret ghcr-pull >/dev/null 2>&1; then
-            echo "ghcr-pull already present"
-            exit 0
-          fi
-          TOKEN="${GHCR_PULL_TOKEN:-$GITHUB_TOKEN}"
+          TOKEN="${GHCR_PULL_TOKEN:-${GHCR_READ_TOKEN:-$GITHUB_TOKEN}}"
+          USER="${GHCR_USERNAME:-${{ github.actor }}}"
+          kubectl -n sailpoint delete secret ghcr-pull --ignore-not-found
           kubectl -n sailpoint create secret docker-registry ghcr-pull \
             --docker-server=ghcr.io \
-            --docker-username="${{ github.actor }}" \
+            --docker-username="${USER}" \
             --docker-password="${TOKEN}"
 
       - name: Helm upgrade sailpoint
         env:
           VERIFY_IMAGE_TAGS: "true"
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
           chmod +x deploy/helm/scripts/install-sailpoint.sh deploy/helm/scripts/update-deps.sh
+
+          # Private GHCR packages need auth for imagetools inspect
+          if [ -n "${GHCR_READ_TOKEN:-}" ]; then
+            echo "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME:-${{ github.actor }}}" --password-stdin
+          else
+            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          fi
+
           if [ "${{ github.event_name }}" = "workflow_run" ]; then
             REF="${{ github.event.workflow_run.head_sha }}"
             export IMAGE_TAG="${REF:0:7}"
