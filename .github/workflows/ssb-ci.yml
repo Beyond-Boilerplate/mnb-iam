@@ -29,8 +29,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_USERNAME || github.actor }}
+          password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Ensure GA zip
         run: |
@@ -45,7 +45,7 @@ jobs:
           echo "Pulling ${REF}"
           oras pull "$REF" -o base/ga
           if [ ! -f base/ga/identityiq-8.5.zip ]; then
-            found=$(find base/ga -name '*.zip' | head -1)
+            found=$(find base/ga -name 'identityiq-8.5.zip' -o -name '*.zip' | head -1)
             test -n "$found"
             mv "$found" base/ga/identityiq-8.5.zip
           fi

@@ -33,7 +33,9 @@ push main
 
    Already published: `ghcr.io/beyond-boilerplate/mnb-iam-ga:8.5` (private).
 
-   In GitHub → Packages → **mnb-iam-ga** → Package settings → **Manage Actions access**, add repository `Beyond-Boilerplate/mnb-iam` with **Read** so CI `GITHUB_TOKEN` can `oras pull`.
+   CI pulls via repo secrets `GHCR_READ_TOKEN` + `GHCR_USERNAME` (PAT with `read:packages`).
+   Longer-term: Package settings → **Manage Actions access** → add `Beyond-Boilerplate/mnb-iam` (Read),
+   then CI can use `GITHUB_TOKEN` alone.
 
 2. **GitHub Environments / secrets** (org secrets can be inherited):
    - `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`
