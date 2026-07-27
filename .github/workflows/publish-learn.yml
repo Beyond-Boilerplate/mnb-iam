@@ -10,7 +10,7 @@ on:
     paths:
       - "docs/lessons/**"
       - "learn/**"
-      - ".github/workflows/publish-learn.yml"
+      # Intentionally omit this workflow file: editing CD YAML alone should not rebuild academy.
   workflow_dispatch:
     inputs:
       skip_deploy:
