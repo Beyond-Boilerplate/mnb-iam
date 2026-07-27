@@ -55,21 +55,19 @@ identityiq:
   probes:
     startup:
       enabled: true
-      path: /identityiq/login.jsf
+      type: tcp
       periodSeconds: 10
       timeoutSeconds: 5
-      failureThreshold: 72
+      failureThreshold: 60
     readiness:
-      type: http
-      path: /identityiq/login.jsf
-      initialDelaySeconds: 0
+      type: tcp
+      initialDelaySeconds: 30
       periodSeconds: 10
       timeoutSeconds: 3
-      failureThreshold: 6
+      failureThreshold: 30
     liveness:
       type: tcp
-      path: /identityiq/login.jsf
-      initialDelaySeconds: 30
+      initialDelaySeconds: 180
       periodSeconds: 30
       timeoutSeconds: 5
-      failureThreshold: 5
+      failureThreshold: 6

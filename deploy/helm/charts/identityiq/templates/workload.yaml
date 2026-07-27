@@ -80,9 +80,16 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- if .Values.probes.startup.enabled }}
           startupProbe:
+            {{- if eq (.Values.probes.startup.type | default "tcp") "http" }}
             httpGet:
               path: {{ .Values.probes.startup.path }}
               port: http
+            tcpSocket: null
+            {{- else }}
+            tcpSocket:
+              port: http
+            httpGet: null
+            {{- end }}
             periodSeconds: {{ .Values.probes.startup.periodSeconds }}
             timeoutSeconds: {{ .Values.probes.startup.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.startup.failureThreshold }}
@@ -90,7 +97,7 @@ spec:
           # Null the unused handler so Helm 3-way merge can switch httpGet↔tcpSocket
           # (K8s rejects probes with more than one handler type).
           readinessProbe:
-            {{- if eq (.Values.probes.readiness.type | default "http") "tcp" }}
+            {{- if eq (.Values.probes.readiness.type | default "tcp") "tcp" }}
             tcpSocket:
               port: http
             httpGet: null
@@ -105,7 +112,7 @@ spec:
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           livenessProbe:
-            {{- if eq (.Values.probes.liveness.type | default "http") "tcp" }}
+            {{- if eq (.Values.probes.liveness.type | default "tcp") "tcp" }}
             tcpSocket:
               port: http
             httpGet: null
