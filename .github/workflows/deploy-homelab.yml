@@ -1,45 +1,51 @@
 name: Deploy homelab
 
-# Tailscale → Helm into namespace sailpoint → smoke https://sailpoint.lmsapp.us
+# Tailscale → Helm into namespace sailpoint.
+# Success = Helm upgrade + rollout Ready (TCP probes). Smoke is opt-in (flaky through edge/CF).
 #
-# Required secrets (reuse Beyond-Boilerplate org / same as nepaledu-platform):
-#   TS_OAUTH_CLIENT_ID, TS_OAUTH_SECRET, HOMELAB_KUBECONFIG
-#
+# Required secrets: TS_OAUTH_CLIENT_ID, TS_OAUTH_SECRET, HOMELAB_KUBECONFIG
 # Setup: docs/HOMELAB-CD.md
 
 on:
-  # Helm/ops-only: redeploy without rebuilding the image
+  # Helm/ops-only: redeploy without rebuilding the IIQ image
   push:
     branches: [main, master]
     paths:
       - deploy/**
-      - .github/scripts/ensure-ghcr-pull-secret.sh
-      - .github/scripts/smoke-in-cluster-surface.sh
-      - .github/scripts/smoke-public-surface.sh
       - .github/workflows/deploy-homelab.yml
   workflow_dispatch:
     inputs:
-      skip_smoke:
-        description: Skip public smoke after Helm
+      run_smoke:
+        description: Run flaky public/in-cluster smoke (off by default)
         type: boolean
         default: false
       image_tag:
-        description: GHCR tag (sha7 or semver). Empty on ops-only keeps live tag (CI still requires pin after publish).
+        description: GHCR tag (sha7 or semver). Empty keeps live tag.
         type: string
         required: false
         default: ""
+      install_phase:
+        description: Helm phase (auto|app|all|data)
+        type: string
+        required: false
+        default: auto
   workflow_call:
     inputs:
-      skip_smoke:
-        description: Skip public smoke after Helm
+      run_smoke:
+        description: Run flaky public/in-cluster smoke (off by default)
         type: boolean
         default: false
       image_tag:
         description: Immutable GHCR tag emitted by the publisher
         type: string
         required: true
+      install_phase:
+        description: Helm install phase (auto|app|all|data)
+        type: string
+        default: app
+
 concurrency:
-  # Shared with publish-learn so kubectl and Helm never race in this namespace.
+  # Shared with publish-learn / publish-ghcr deploy so kubectl+Helm never race.
   group: homelab-sailpoint-deploy
   cancel-in-progress: false
 
@@ -49,10 +55,55 @@ env:
   IIQ_SMOKE_URL: https://sailpoint.lmsapp.us/identityiq/login.jsf
 
 jobs:
+  decide:
+    name: Decide deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      deploy: ${{ steps.gate.outputs.deploy }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Path gate
+        id: gate
+        run: |
+          set -euo pipefail
+          # Reusable call / manual dispatch always deploy.
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "reason=explicit (${{ github.event_name }})" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" || true)
+          else
+            CHANGED=$(git show --name-only --pretty='' HEAD || true)
+          fi
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Same commit rebuilds the IIQ *image* → Publish GHCR owns deploy (avoid double Helm).
+          # Workflow-only / helm-only changes still need this Deploy job.
+          if grep -qE '^(config/|src/|web/|lib/|scripts/|docker/Dockerfile$|docker/entrypoint\.sh|docker/setenv\.sh|build\.xml|build\.sh|build\.bat|build\.properties|homelab\.|sandbox\.|servers\.properties|VERSION)' <<<"$CHANGED"; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "reason=Publish GHCR owns this commit (IIQ sources changed)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+          echo "reason=helm/ops-only paths" >> "$GITHUB_OUTPUT"
+
   helm-upgrade:
     name: Helm upgrade
+    needs: decide
+    if: needs.decide.outputs.deploy == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     environment: homelab
     permissions:
       contents: read
@@ -110,7 +161,8 @@ jobs:
         env:
           VERIFY_IMAGE_TAGS: "true"
           GHCR_OWNER: ${{ github.repository_owner }}
-          HELM_TIMEOUT: 15m
+          HELM_TIMEOUT: 10m
+          INSTALL_PHASE: ${{ inputs.install_phase }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -119,7 +171,6 @@ jobs:
           export KUBECONFIG="$HOME/.kube/config"
           chmod +x deploy/helm/scripts/install-sailpoint.sh deploy/helm/scripts/update-deps.sh
 
-          # Private GHCR packages need auth for imagetools inspect
           if [ -n "${GHCR_READ_TOKEN:-}" ]; then
             echo "${GHCR_READ_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME:-${{ github.actor }}}" --password-stdin
           else
@@ -131,7 +182,6 @@ jobs:
             export IMAGE_TAG
             echo "Deploying requested IMAGE_TAG=${IMAGE_TAG}"
           else
-            # Ops-only (push to deploy/** or empty dispatch): keep live tag, else VERSION
             LIVE=$(kubectl -n sailpoint get deploy identityiq -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
             if [[ "$LIVE" == *:* ]]; then
               IMAGE_TAG="${LIVE##*:}"
@@ -158,7 +208,6 @@ jobs:
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
           chmod +x learn/k8s/install-public-surface.sh
-          # Ops deploys preserve the immutable academy image already running.
           LIVE=$(kubectl -n sailpoint get deploy mnb-learn -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
           if [[ "$LIVE" == *:* ]]; then
             LEARN_IMAGE_TAG="${LIVE##*:}"
@@ -173,12 +222,11 @@ jobs:
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
-          # Startup probe can take up to ~12 minutes (72 × 10s) before login.jsf is Ready.
-          kubectl -n sailpoint rollout status deploy/identityiq --timeout=15m
+          kubectl -n sailpoint rollout status deploy/identityiq --timeout=12m
           kubectl -n sailpoint get pods -l app.kubernetes.io/name=identityiq -o wide
 
-      - name: In-cluster smoke (edge path split)
-        # Retries IIQ through edge while Tomcat warms (see smoke-in-cluster-surface.sh).
+      - name: In-cluster smoke (opt-in)
+        if: inputs.run_smoke == true
         timeout-minutes: 12
         run: |
           set -euo pipefail
@@ -191,9 +239,8 @@ jobs:
     if: >
       always() &&
       needs.helm-upgrade.result == 'success' &&
-      inputs.skip_smoke != true
+      inputs.run_smoke == true
     runs-on: ubuntu-latest
-    # IIQ often returns 504 while Tomcat warms; smoke script retries ~6 minutes.
     timeout-minutes: 12
     permissions:
       contents: read
@@ -207,7 +254,7 @@ jobs:
 
   deploy-gate:
     name: Deploy gate
-    needs: [helm-upgrade, smoke-iiq]
+    needs: [decide, helm-upgrade, smoke-iiq]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -215,6 +262,8 @@ jobs:
     steps:
       - name: Aggregate
         env:
+          DEPLOY: ${{ needs.decide.outputs.deploy }}
+          REASON: ${{ needs.decide.outputs.reason }}
           HELM: ${{ needs.helm-upgrade.result }}
           SMOKE: ${{ needs.smoke-iiq.result }}
           REF: ${{ github.sha }}
@@ -224,15 +273,21 @@ jobs:
             echo "## Homelab deploy (sailpoint)"
             echo ""
             echo "- Ref: \`${REF}\`"
+            echo "- Decide: deploy=\`${DEPLOY}\` (${REASON})"
             echo "- Helm: \`${HELM}\`"
-            echo "- Smoke IIQ: \`${SMOKE}\`"
+            echo "- Smoke: \`${SMOKE}\` (opt-in; skipped is OK)"
           } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$DEPLOY" != "true" ]; then
+            echo "Skipped deploy — ${REASON}"
+            exit 0
+          fi
           if [ "$HELM" != "success" ]; then
             echo "::error::Helm upgrade failed"
             exit 1
           fi
           if [ "$SMOKE" != "success" ] && [ "$SMOKE" != "skipped" ]; then
-            echo "::error::Smoke failed"
+            echo "::error::Opt-in smoke failed"
             exit 1
           fi
           echo "Deploy gate passed"

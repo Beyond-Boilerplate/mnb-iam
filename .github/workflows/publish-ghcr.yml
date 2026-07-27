@@ -61,6 +61,7 @@ jobs:
       sha_short: ${{ steps.meta.outputs.sha_short }}
       commit_sha: ${{ steps.meta.outputs.commit_sha }}
       attest: ${{ steps.meta.outputs.attest }}
+      build_image: ${{ steps.meta.outputs.build_image }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -150,17 +151,36 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.increment_type || 'none' }}" != "none" ]; then
             ATTEST=true
           fi
+
+          BUILD_IMAGE=true
+          if [ "${{ github.event_name }}" = "push" ]; then
+            BEFORE="${{ github.event.before }}"
+            if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+              CHANGED=$(git diff --name-only "$BEFORE" "${COMMIT_SHA}" || true)
+            else
+              CHANGED=$(git show --name-only --pretty='' HEAD || true)
+            fi
+            echo "Changed files:"
+            echo "$CHANGED"
+            if ! grep -qE '^(config/|src/|web/|lib/|scripts/|docker/Dockerfile$|docker/entrypoint\.sh|docker/setenv\.sh|build\.xml|build\.sh|build\.bat|build\.properties|homelab\.|sandbox\.|servers\.properties|VERSION)' <<<"$CHANGED"; then
+              BUILD_IMAGE=false
+              echo "No IIQ source changes — skipping thin image rebuild (workflow-only)"
+            fi
+          fi
+
           {
             echo "image_tag=${TAG}"
             echo "owner=${OWNER}"
             echo "sha_short=${COMMIT_SHA::7}"
             echo "commit_sha=${COMMIT_SHA}"
             echo "attest=${ATTEST}"
+            echo "build_image=${BUILD_IMAGE}"
           } >> "$GITHUB_OUTPUT"
 
   build:
     name: Build identityiq
     needs: prepare
+    if: needs.prepare.outputs.build_image == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -269,6 +289,7 @@ jobs:
     name: Deploy homelab
     needs: [prepare, build]
     if: >
+      needs.prepare.outputs.build_image == 'true' &&
       needs.build.result == 'success' &&
       (github.event_name == 'workflow_run' ||
        github.ref_name == 'main' ||
@@ -279,7 +300,8 @@ jobs:
       packages: read
     with:
       image_tag: ${{ needs.prepare.outputs.sha_short }}
-      skip_smoke: false
+      install_phase: app
+      run_smoke: false
     secrets: inherit
 
   summarize:
@@ -291,6 +313,7 @@ jobs:
     steps:
       - name: Aggregate
         env:
+          BUILD_IMAGE: ${{ needs.prepare.outputs.build_image }}
           BUILD: ${{ needs.build.result }}
           TAG: ${{ needs.prepare.outputs.image_tag }}
           OWNER: ${{ needs.prepare.outputs.owner }}
@@ -302,6 +325,7 @@ jobs:
           {
             echo "## GHCR publish (thin)"
             echo ""
+            echo "- Build image: \`${BUILD_IMAGE}\`"
             echo "- Image tag: \`${TAG}\`"
             echo "- SHA tag: \`${SHA}\`"
             echo "- Owner: \`${OWNER}\`"
@@ -309,9 +333,14 @@ jobs:
             echo "- Attest/SBOM: \`${ATTEST}\`"
             echo "- Build: \`${BUILD}\`"
             echo "- Homelab deploy: \`${DEPLOY}\`"
+            echo "- Smoke: skipped (opt-in via Deploy homelab run_smoke)"
             echo ""
             echo "\`ghcr.io/${OWNER}/identityiq:${TAG}\`"
           } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$BUILD_IMAGE" != "true" ]; then
+            echo "No IIQ source changes — skipped rebuild/deploy (ops Deploy handles helm-only)."
+            exit 0
+          fi
           if [ "$BUILD" != "success" ]; then
             echo "::error::identityiq image build failed (is identityiq-base:8.5 published?)"
             exit 1

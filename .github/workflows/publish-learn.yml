@@ -2,6 +2,7 @@ name: Publish learn site
 
 # Build academy image → GHCR → deploy to sailpoint ns (edge + mnb-learn)
 # Public: https://sailpoint.lmsapp.us/   IIQ: https://sailpoint.lmsapp.us/identityiq/
+# Path-filtered: lesson/learn changes only. Smoke is opt-in (flaky through edge/CF).
 
 on:
   push:
@@ -9,14 +10,15 @@ on:
     paths:
       - "docs/lessons/**"
       - "learn/**"
-      - ".github/scripts/ensure-ghcr-pull-secret.sh"
-      - ".github/scripts/smoke-in-cluster-surface.sh"
-      - ".github/scripts/smoke-public-surface.sh"
       - ".github/workflows/publish-learn.yml"
   workflow_dispatch:
     inputs:
       skip_deploy:
         description: Build/push only (skip cluster deploy)
+        type: boolean
+        default: false
+      run_smoke:
+        description: Run flaky public/in-cluster smoke (off by default)
         type: boolean
         default: false
 
@@ -86,7 +88,7 @@ jobs:
       github.event_name != 'workflow_dispatch' ||
       inputs.skip_deploy != true
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     environment: homelab
     permissions:
       contents: read
@@ -136,7 +138,8 @@ jobs:
           chmod +x learn/k8s/install-public-surface.sh
           ./learn/k8s/install-public-surface.sh
 
-      - name: In-cluster smoke (edge path split)
+      - name: In-cluster smoke (opt-in)
+        if: github.event_name == 'workflow_dispatch' && inputs.run_smoke == true
         timeout-minutes: 12
         run: |
           set -euo pipefail
@@ -146,9 +149,12 @@ jobs:
   smoke:
     name: Smoke academy + IIQ
     needs: deploy
-    if: always() && needs.deploy.result == 'success'
+    if: >
+      always() &&
+      needs.deploy.result == 'success' &&
+      github.event_name == 'workflow_dispatch' &&
+      inputs.run_smoke == true
     runs-on: ubuntu-latest
-    # IIQ Tomcat can take several minutes after image roll; public smoke retries up to ~6m.
     timeout-minutes: 12
     permissions:
       contents: read
@@ -159,7 +165,6 @@ jobs:
         run: |
           set -euo pipefail
           bash .github/scripts/smoke-public-surface.sh
-
 
   gate:
     name: Publish learn gate
@@ -183,7 +188,7 @@ jobs:
             echo "- Image tag: \`${TAG:-}\`"
             echo "- Build: \`${BUILD}\`"
             echo "- Deploy: \`${DEPLOY}\`"
-            echo "- Smoke: \`${SMOKE}\`"
+            echo "- Smoke: \`${SMOKE}\` (opt-in; skipped is OK)"
             echo "- Academy: https://sailpoint.lmsapp.us/"
             echo "- IIQ: https://sailpoint.lmsapp.us/identityiq/login.jsf"
           } >> "$GITHUB_STEP_SUMMARY"

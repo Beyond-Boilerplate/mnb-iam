@@ -4,13 +4,22 @@
 # Phased for first-boot speed & diagnosis:
 #   1) data plane (CNPG + schema hook) with --wait
 #   2) app (IdentityIQ) with --wait
-# Progress dumps avoid silent 15m hangs.
+#
+# INSTALL_PHASE: auto|all|data|app
+#   auto (default) → app-only when data plane secret + deploy already exist
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VALUES="${1:-$ROOT/values/local-homelab.yaml}"
 NS="${NAMESPACE:-sailpoint}"
 RELEASE="${RELEASE_NAME:-sailpoint}"
-PHASE="${INSTALL_PHASE:-all}" # all | data | app
+PHASE_IN="${INSTALL_PHASE:-auto}"
+case "$PHASE_IN" in
+  auto|all|data|app) ;;
+  *)
+    echo "Unknown INSTALL_PHASE='${PHASE_IN}', using auto"
+    PHASE_IN=auto
+    ;;
+esac
 
 kubectl get ns "$NS" >/dev/null 2>&1 || kubectl create namespace "$NS"
 
@@ -21,6 +30,20 @@ dump_status() {
   kubectl -n "$NS" get events --sort-by=.lastTimestamp 2>/dev/null | tail -15 || true
   echo "------------------------------"
 }
+
+if [[ "$PHASE_IN" == "auto" ]]; then
+  if kubectl -n "$NS" get secret sailpoint-iiq-db >/dev/null 2>&1 \
+    && kubectl -n "$NS" get deploy identityiq >/dev/null 2>&1; then
+    PHASE=app
+    echo "INSTALL_PHASE=auto → app (data plane already present)"
+  else
+    PHASE=all
+    echo "INSTALL_PHASE=auto → all (bootstrap)"
+  fi
+else
+  PHASE="$PHASE_IN"
+  echo "INSTALL_PHASE=${PHASE}"
+fi
 
 if helm -n "$NS" status "$RELEASE" >/dev/null 2>&1; then
   REL_STATUS="$(helm -n "$NS" status "$RELEASE" -o json | jq -r '.info.status // empty')"
@@ -38,7 +61,10 @@ if helm -n "$NS" status "$RELEASE" >/dev/null 2>&1; then
   esac
 fi
 
-kubectl -n "$NS" delete job sailpoint-pg-schema-init --ignore-not-found --wait=false || true
+# Schema job reset only when (re)building the data plane — not on thin app rollouts.
+if [[ "$PHASE" == "all" || "$PHASE" == "data" ]]; then
+  kubectl -n "$NS" delete job sailpoint-pg-schema-init --ignore-not-found --wait=false || true
+fi
 
 "$ROOT/scripts/update-deps.sh"
 shift || true
@@ -60,11 +86,17 @@ IMAGE_SETS=()
 if [[ -n "${IMAGE_TAG:-}" ]]; then
   echo "Pinning identityiq.image.tag=${IMAGE_TAG}"
   IMAGE_SETS+=(--set-string "identityiq.image.tag=${IMAGE_TAG}")
-  # Force pull so mutable tags (0.1.0/latest) and retagged SHAs never reuse a stale node cache.
-  if [[ "${IMAGE_PULL_POLICY:-}" != "" ]]; then
+  if [[ -n "${IMAGE_PULL_POLICY:-}" ]]; then
     IMAGE_SETS+=(--set-string "identityiq.image.pullPolicy=${IMAGE_PULL_POLICY}")
   elif [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
-    IMAGE_SETS+=(--set-string "identityiq.image.pullPolicy=Always")
+    # Immutable short SHA → IfNotPresent (fast). Mutable tags → Always (avoid stale digest).
+    if [[ "${IMAGE_TAG}" =~ ^[0-9a-f]{7,40}$ ]]; then
+      IMAGE_SETS+=(--set-string "identityiq.image.pullPolicy=IfNotPresent")
+      echo "pullPolicy=IfNotPresent (immutable SHA tag)"
+    else
+      IMAGE_SETS+=(--set-string "identityiq.image.pullPolicy=Always")
+      echo "pullPolicy=Always (mutable tag ${IMAGE_TAG})"
+    fi
   fi
   if [[ "${VERIFY_IMAGE_TAGS:-}" == "true" ]]; then
     OWNER="$(tr '[:upper:]' '[:lower:]' <<<"${GHCR_OWNER:-beyond-boilerplate}")"
@@ -94,7 +126,6 @@ run_helm() {
   shift
   local timeout="${HELM_TIMEOUT:-8m}"
   echo "==> Helm phase: ${label} (timeout ${timeout})"
-  # Background status ticker while helm blocks
   (
     while true; do
       sleep 30
@@ -106,7 +137,6 @@ run_helm() {
   # shellcheck disable=SC2064
   trap "kill ${ticker_pid} 2>/dev/null || true" RETURN
 
-  # "${arr[@]}" is unbound under `set -u` when empty — expand only if set/nonempty.
   if ! helm "${HELM_BASE[@]}" \
       --timeout "$timeout" \
       --wait \
@@ -132,8 +162,7 @@ fi
 
 # Phase 2: IdentityIQ (DB already up / schema applied)
 if [[ "$PHASE" == "all" || "$PHASE" == "app" ]]; then
-  # Give schema job a moment if it just finished as a hook
-  if kubectl -n "$NS" get job sailpoint-pg-schema-init >/dev/null 2>&1; then
+  if [[ "$PHASE" == "all" ]] && kubectl -n "$NS" get job sailpoint-pg-schema-init >/dev/null 2>&1; then
     echo "Waiting for schema init job (up to 5m)…"
     if ! kubectl -n "$NS" wait --for=condition=complete "job/sailpoint-pg-schema-init" --timeout=5m; then
       echo "ERROR: schema initialization did not complete"

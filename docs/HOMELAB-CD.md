@@ -23,39 +23,56 @@ Routine publishes no longer expand the ~708MB GA zip. Two images:
 | Image | When to rebuild | Target time |
 |-------|-----------------|-------------|
 | `identityiq-base:8.5` | Rare — GA / `Dockerfile.base` / JDBC jar | ~10–15 min OK |
-| `identityiq:{VERSION,sha}` | Every `config/` `src/` `web/` change | **≤ 3 min** |
+| `identityiq:{VERSION,sha}` | Every `config/` `src/` `web/` change | **≤ 3–5 min** build |
 
 ```text
 rare:   oras pull mnb-iam-ga:8.5 → docker build Dockerfile.base → identityiq-base:8.5
-often:  FROM identityiq-base → SSB overlay (no GA expand) → identityiq:{tag}
-        → Tailscale + Helm -n sailpoint
-        → smoke https://sailpoint.lmsapp.us/identityiq/login.jsf
+often:  FROM identityiq-base → SSB overlay (no GA expand) → identityiq:{sha}
+        → Tailscale + Helm app-only upgrade -n sailpoint
+        → rollout Ready (TCP probes). Smoke is opt-in.
 ```
 
 Nodes keep the large **base** layers cached; app deploys pull thin overlay layers.
 
+### What runs on push to `main` (path-smart)
+
+| You change… | Workflows that run | What deploys |
+|-------------|-------------------|--------------|
+| `docs/lessons/**`, `learn/**` | CI quality + **Publish learn** | Academy + edge only |
+| `config/`, `src/`, `web/`, `docker/Dockerfile`, SSB files | CI quality + **Publish GHCR** (+ SSB skipped on main) | New IIQ image → Helm **app-only** |
+| `deploy/**` only | CI quality + **Deploy homelab** | Helm with **live** image tag (no rebuild) |
+| `deploy/**` **and** IIQ app paths (same commit) | Publish GHCR owns deploy; ops Deploy **skips** | Avoids double Helm |
+| `docker/Dockerfile.base`, JDBC jar | **Publish IIQ base** → then GHCR | Base then thin app |
+| Unrelated paths | CI quality only | Nothing |
+
 | Workflow | Purpose |
 |----------|---------|
-| `publish-ga-oci.yml` | One-time / rare: GA zip → OCI artifact |
+| `ci-quality.yml` | Fast validate: actionlint, shell, Helm render, academy build |
+| `publish-ga-oci.yml` | Rare: GA zip → OCI artifact |
 | `publish-base.yml` | Rare: GA expand + JDBC → `identityiq-base:8.5` |
-| `publish-ghcr.yml` | Frequent: thin app image FROM base; calls deploy with the exact SHA tag |
-| `deploy-homelab.yml` | Helm upgrade + in-cluster and public smoke |
-| `ci-quality.yml` | Workflow, shell, Helm, Python, and academy validation |
+| `publish-ghcr.yml` | Frequent: thin app image FROM base; deploys SHA tag |
+| `publish-learn.yml` | Frequent: academy image + public surface |
+| `deploy-homelab.yml` | Helm/ops-only OR called by Publish GHCR |
+| `ssb-ci.yml` | Full sandbox WAR on **PR/develop** only (skipped on main when GHCR covers) |
+
+### Deploy success criteria
+
+- **Pass** = Helm upgrade + `rollout status` Ready (startup/readiness use **TCP** so cold start does not flake).
+- **Smoke** (in-cluster + public URL probes) is **off by default**. Enable with `run_smoke=true` on workflow_dispatch when you need a deep check.
 
 ### When Deploy runs (automatic)
 
-| Trigger | `IMAGE_TAG` |
-|---------|-------------|
-| Push to `main` touching `deploy/**` or this workflow | Live tag on cluster (else `VERSION`) |
-| Successful **Publish GHCR images** on `main` (reusable workflow call) | Exact short SHA emitted by the publisher |
-| Manual **Run workflow** | Optional input; empty → live / `VERSION` |
-
-Helm-only fixes (probes, values, install scripts) no longer require a manual dispatch.
+| Trigger | `IMAGE_TAG` | Helm phase |
+|---------|-------------|------------|
+| Push to `main` touching **only** `deploy/**` | Live tag on cluster (else `VERSION`) | `auto` → app-only if DB already up |
+| **Publish GHCR** on `main` (reusable call) | Exact short SHA from the build | `app` (thin rollout) |
+| Manual **Run workflow** | Optional input; empty → live / `VERSION` | `auto` (or chosen) |
 
 ### Rebuild rules
 
-- Change **GA or JDBC or `docker/Dockerfile.base`** → run **Publish IIQ base image**, then Publish GHCR (or push app files).
-- Change **config / src / web / entrypoint** only → Publish GHCR only (thin).
+- Change **GA or JDBC or `docker/Dockerfile.base`** → **Publish IIQ base**, then Publish GHCR (or push app files).
+- Change **config / src / web / entrypoint** only → Publish GHCR only (thin) → auto deploy.
+- Change **lessons / learn** only → Publish learn only (IIQ untouched).
 - Do **not** expect a full GA expand on every app commit.
 
 ## One-time setup

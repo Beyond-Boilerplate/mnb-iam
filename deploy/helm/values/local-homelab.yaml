@@ -39,7 +39,7 @@ identityiq:
   image:
     repository: ghcr.io/beyond-boilerplate/identityiq
     tag: "0.1.0"
-    # Always: GHCR retags (0.1.0 / latest) must not stick on a stale local digest.
+    # CI overrides: immutable SHA → IfNotPresent; mutable tags → Always.
     pullPolicy: Always
   imagePullSecrets:
     - name: ghcr-pull
