@@ -72,11 +72,21 @@ jobs:
           ls -lh "$ZIP"
           shopt -s nullglob
           jdbc_jars=(web/WEB-INF/lib/postgresql-*.jar)
+          if (( ${#jdbc_jars[@]} == 0 )); then
+            echo "PostgreSQL JDBC jar missing from checkout; downloading 42.7.4 from Maven Central"
+            mkdir -p web/WEB-INF/lib
+            curl -fsSL \
+              -o web/WEB-INF/lib/postgresql-42.7.4.jar \
+              "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar"
+            jdbc_jars=(web/WEB-INF/lib/postgresql-*.jar)
+          fi
           if (( ${#jdbc_jars[@]} != 1 )); then
             echo "::error::Expected exactly one PostgreSQL JDBC jar; found ${#jdbc_jars[@]}"
+            ls -la web/WEB-INF/lib/postgresql-*.jar 2>/dev/null || true
             exit 1
           fi
           echo "Using JDBC driver ${jdbc_jars[0]}"
+          ls -lh "${jdbc_jars[0]}"
 
       - name: Log in to GHCR (push)
         uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
