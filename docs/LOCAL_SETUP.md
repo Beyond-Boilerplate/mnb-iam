@@ -324,7 +324,7 @@ Do these quickly before diving into lessons:
 ```bash
 mkdir -p ~/iiq-lab-data
 cp lab-data/HRApplications.txt lab-data/EmployeeData.txt ~/iiq-lab-data/
-cp -R lab-data/apps lab-data/scenarios lab-data/reference lab-data/notifications ~/iiq-lab-data/
+cp -R lab-data/apps lab-data/scenarios lab-data/reference lab-data/notifications lab-data/connectors ~/iiq-lab-data/
 ```
 
 ---

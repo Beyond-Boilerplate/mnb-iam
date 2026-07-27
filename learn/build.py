@@ -233,14 +233,18 @@ def parse_lesson_meta(path: Path) -> dict:
     m = re.search(r"^#\s+(.+)$", text, re.M)
     if m:
         title = m.group(1).strip()
-    track = ""
-    mt = re.search(r"\*\*Track:\*\*\s*(.+)", text)
-    if mt:
-        track = mt.group(1).strip()
-    level = ""
-    ml = re.search(r"\*\*Level:\*\*\s*(.+)", text)
-    if ml:
-        level = ml.group(1).strip()
+
+    def field(name: str) -> str:
+        mt = re.search(rf"\*\*{name}:\*\*\s*(.+)", text)
+        if mt:
+            return mt.group(1).strip()
+        mt = re.search(rf"\|\s*\*\*{name}\*\*\s*\|\s*([^|]+)\|", text)
+        if mt:
+            return mt.group(1).strip()
+        return ""
+
+    track = field("Track")
+    level = field("Level")
     why = ""
     mw = re.search(r"## Why this matters\n\n(.+?)(?:\n\n---|\n\n## )", text, re.S)
     if mw:
@@ -257,10 +261,13 @@ def build() -> None:
     shutil.copytree(ASSETS_SRC, assets_out, dirs_exist_ok=True)
 
     lesson_files = sorted(
-        [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2}-", p.name)],
-        key=lambda p: p.name,
+        [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2,3}-", p.name)],
+        key=lambda p: int(p.name.split("-", 1)[0]),
     )
     metas = [parse_lesson_meta(p) for p in lesson_files]
+
+    def lesson_num(stem: str) -> str:
+        return stem.split("-", 1)[0].zfill(2)
 
     # Group TOC by track
     toc_parts: list[str] = []
@@ -269,7 +276,7 @@ def build() -> None:
         if meta["track"] != current_track:
             current_track = meta["track"]
             toc_parts.append(f'<p class="toc-track">{html.escape(current_track or "Lessons")}</p>')
-        num = meta["stem"][:2]
+        num = lesson_num(meta["stem"])
         toc_parts.append(
             f'<a class="toc-item" data-title="{html.escape(meta["title"].lower())}" href="{html.escape(meta["stem"])}.html">'
             f'<span class="toc-num">{num}</span><span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}</span></a>'
@@ -279,7 +286,7 @@ def build() -> None:
     # Index
     cards = []
     for meta in metas:
-        num = meta["stem"][:2]
+        num = lesson_num(meta["stem"])
         cards.append(
             f'<a class="card" href="{html.escape(meta["stem"])}.html">'
             f'<span class="card-num">{num}</span>'
@@ -289,16 +296,16 @@ def build() -> None:
         )
 
     index_body = f"""
-    <p class="eyebrow">SailPoint IdentityIQ 8.5 · 50 enterprise modules</p>
+    <p class="eyebrow">SailPoint IdentityIQ 8.5 · {len(metas)} enterprise modules</p>
     <h1 class="display">Govern access like a bank that expects an exam.</h1>
-    <p class="lede">Interactive technical tutorials for <strong>Meridian National Bank</strong>—authoritative HR, payment dual-control, joiner/mover/leaver, SoD, and certifications—with expected results, troubleshooting, and training-binder evidence on every lesson.</p>
+    <p class="lede">Interactive technical tutorials for <strong>Meridian National Bank</strong>—from delimited HR through AD, JDBC, SCIM, Web Services, SAP, mainframe, rules, plugins, and production hardening—with expected results, troubleshooting, and training-binder evidence on every lesson.</p>
     <div class="hero-actions">
       <a class="btn primary" href="{metas[0]['stem']}.html">Start lesson 01</a>
       <a class="btn ghost" href="#path">View full path</a>
     </div>
     <section class="stats" aria-label="Curriculum snapshot">
-      <div><span>50</span> lessons</div>
-      <div><span>9</span> tracks</div>
+      <div><span>{len(metas)}</span> lessons</div>
+      <div><span>16+</span> tracks</div>
       <div><span>~80</span> workers in HR file</div>
       <div><span>@meridiannb.com</span> corp domain</div>
     </section>
@@ -308,7 +315,7 @@ def build() -> None:
 
     index_html = SHELL.format(
         title="Curriculum",
-        description="Meridian National Bank IdentityIQ 50-lesson academy",
+        description=f"Meridian National Bank IdentityIQ {len(metas)}-lesson academy",
         root="",
         toc=toc,
         crumb="<span>Curriculum</span>",
@@ -320,24 +327,27 @@ def build() -> None:
     for idx, meta in enumerate(metas):
         body = md_to_html(meta["text"])
         # Lesson-to-lesson markdown links → html
-        body = re.sub(r'href="(\d{2}-[^"]+)\.md"', r'href="\1.html"', body)
+        body = re.sub(r'href="(\d{2,3}-[^"]+)\.md"', r'href="\1.html"', body)
         # Sibling docs in repo (not published on learn site)
         doc_map = {
             "../LOCAL_SETUP.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/LOCAL_SETUP.md",
             "../INFRASTRUCTURE.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/INFRASTRUCTURE.md",
             "../HOMELAB-CD.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/HOMELAB-CD.md",
+            "../SSD.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/SSD.md",
         }
         for src, dst in doc_map.items():
             body = body.replace(f'href="{html.escape(src, quote=True)}"', f'href="{dst}"')
             body = body.replace(f'href="{src}"', f'href="{dst}"')
 
+        prev_n = lesson_num(metas[idx - 1]["stem"]) if idx else ""
+        next_n = lesson_num(metas[idx + 1]["stem"]) if idx < len(metas) - 1 else ""
         prev_link = (
-            f'<a href="{metas[idx-1]["stem"]}.html">← {metas[idx-1]["stem"][:2]}</a>'
+            f'<a href="{metas[idx-1]["stem"]}.html">← {prev_n}</a>'
             if idx
             else "<span></span>"
         )
         next_link = (
-            f'<a href="{metas[idx+1]["stem"]}.html">{metas[idx+1]["stem"][:2]} →</a>'
+            f'<a href="{metas[idx+1]["stem"]}.html">{next_n} →</a>'
             if idx < len(metas) - 1
             else "<span>Curriculum complete</span>"
         )
@@ -346,7 +356,7 @@ def build() -> None:
             description=meta["why"] or meta["title"],
             root="",
             toc=toc,
-            crumb=f'<a href="index.html">Curriculum</a><span>/</span><span>{html.escape(meta["stem"][:2])}</span>',
+            crumb=f'<a href="index.html">Curriculum</a><span>/</span><span>{html.escape(lesson_num(meta["stem"]))}</span>',
             body=body,
             pager=f'<div class="pager-row">{prev_link}{next_link}</div>',
         )
@@ -360,7 +370,7 @@ def build() -> None:
 
     # README copy into dist
     (OUT / "README.txt").write_text(
-        "Meridian IAM Academy static build. Serve this folder at /learn on iam.lmsapp.us\n",
+        "Meridian IAM Academy static build. Serve at https://sailpoint.lmsapp.us/\n",
         encoding="utf-8",
     )
     print(f"Built {len(metas)} lessons → {OUT}")

@@ -1,0 +1,23 @@
+# Optional connector backends for Meridian labs
+services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    environment:
+      LDAP_ORGANISATION: "Meridian National Bank"
+      LDAP_DOMAIN: "meridiannb.com"
+      LDAP_ADMIN_PASSWORD: "admin"
+    ports:
+      - "389:389"
+    volumes:
+      - ./lab-data/connectors/ldap/mnb-openldap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/mnb.ldif
+
+  jdbc-pg:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mnb
+      POSTGRES_PASSWORD: mnb
+      POSTGRES_DB: mnb_apps
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./lab-data/connectors/jdbc/mnb_core_accounts.sql:/docker-entrypoint-initdb.d/01-schema.sql

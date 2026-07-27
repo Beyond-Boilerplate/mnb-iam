@@ -1,0 +1,26 @@
+system,preferredConnector,alternate,notes
+Corporate AD,Active Directory - Direct,LDAP,"Requires IQService for password/enable/Exchange"
+Entra ID / Azure AD,Azure Active Directory,SCIM 2.0,Cloud directory + SaaS SSO apps
+OpenLDAP / FreeIPA,OpenLDAP - Direct,LDAP,Generic RFC directory
+HRIS extract,DelimitedFile,JDBC,Authoritative file still valid for labs
+Core banking DB,JDBC,Microsoft SQL Server - Direct,Prefer stored-proc provisioning
+Wire Portal API,Web Services,SCIM 2.0,REST JSON bank custom apps
+SCIM-compliant SaaS,SCIM 2.0,Web Services,Prefer SCIM when vendor supports it
+Salesforce CRM,Salesforce,Web Services,Use native SFDC connector
+ServiceNow ITSM,ServiceNow,Web Services,Accounts + ticket integrations
+SAP ECC security,SAP - Direct,SAP HR/HCM,App security vs HR authoritative
+SAP HR,SAP HR/HCM,DelimitedFile,Authoritative HR alternative
+Workday,Workday,Workday Accounts,Cloud HCM
+PeopleSoft,PeopleSoft HCM Database,PeopleSoft - Direct,HCM DB vs app
+Mainframe RACF,RACF - Full,RACF LDAP,Banking core security
+Unix jump hosts,Linux - Direct,Unix,Bastion / midrange
+Windows servers,Windows Local - Direct,Active Directory - Direct,Local SAM when not domain
+Oracle DB,Oracle Database - Direct,JDBC,Fine-grained DB roles
+SQL Server,Microsoft SQL Server - Direct,JDBC,Bank reporting DBs
+Privileged vault,CyberArk,PAM module,Privileged account governance
+Logical composite,Logical,n/a,Bundle multiple apps into one cert surface
+Office 365,Microsoft Office365,Azure Active Directory,Mailbox / M365
+SharePoint Online,Microsoft SharePoint Online,Azure Active Directory,Sites / groups
+Okta,Okta,SCIM 2.0,Workforce IdP
+AWS IAM,AWS IAM,AWS,Cloud IAM roles/users
+Custom plugin target,Custom OpenConnector,Web Services,When no OOTB connector fits

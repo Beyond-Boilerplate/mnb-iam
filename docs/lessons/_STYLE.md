@@ -36,8 +36,10 @@ Use this for every lesson rewrite. Pure technical tutorial voice. No fluff marke
 ## Length target
 
 - Foundations / early: ~180–280 lines
-- Intermediate / advanced: ~200–320 lines
-- Capstone: ~280–350 lines
+- Intermediate / advanced / connectors: ~200–320 lines
+- Capstone modules (50, 110): ~280–350 lines
+
+Connector lessons (51+) **must** include a lab-without-live-target path (configure Application shell, schema maps, policies, checklists) when AD/SAP/etc. are unavailable.
 
 ## Filename
 

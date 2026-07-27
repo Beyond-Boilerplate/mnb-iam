@@ -1,0 +1,5 @@
+account_id,username,email,employee_id,status,entitlement
+jdbc-001,priya.wire,priya.wire@meridiannb.com,MNB00090,ACTIVE,WIRE_INIT
+jdbc-002,marcus.approve,marcus.approve@meridiannb.com,MNB00091,ACTIVE,WIRE_APPR
+jdbc-003,jordan.reed,jordan.reed@meridiannb.com,MNB00092,ACTIVE,SAP_FI
+jdbc-004,samir.hassan,samir.hassan@meridiannb.com,MNB00094,DISABLED,DWRP

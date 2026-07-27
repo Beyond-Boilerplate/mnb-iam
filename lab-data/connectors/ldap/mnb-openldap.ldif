@@ -1,0 +1,35 @@
+dn: dc=meridiannb,dc=com
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: Meridian National Bank
+dc: meridiannb
+
+dn: ou=people,dc=meridiannb,dc=com
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=meridiannb,dc=com
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+cn: Helen Ross
+sn: Ross
+uid: helen.ross
+mail: helen.ross@meridiannb.com
+employeeNumber: MNB00001
+
+dn: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+cn: Priya Mehta
+sn: Mehta
+uid: priya.wire
+mail: priya.wire@meridiannb.com
+employeeNumber: MNB00090
+
+dn: cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+cn: wire-initiators
+member: uid=priya.wire,ou=people,dc=meridiannb,dc=com

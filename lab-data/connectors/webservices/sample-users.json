@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "wp-90",
+      "username": "priya.wire",
+      "email": "priya.wire@meridiannb.com",
+      "employeeId": "MNB00090",
+      "active": true,
+      "entitlements": ["WIRE_INIT"]
+    },
+    {
+      "id": "wp-91",
+      "username": "marcus.approve",
+      "email": "marcus.approve@meridiannb.com",
+      "employeeId": "MNB00091",
+      "active": true,
+      "entitlements": ["WIRE_APPR"]
+    }
+  ]
+}
