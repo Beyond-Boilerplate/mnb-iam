@@ -48,6 +48,30 @@ Aggregation loads accounts; refresh recalculates the person. Without refresh, ma
 
 **SLA (lab):** Manual run after config changes. **SLA (prod target):** Nightly pipeline before business day (see Lesson 08).
 
+## How it works
+
+**Account Aggregation** moves connector data onto Links. **Identity Refresh** recompiles cube-derived state: manager links, attribute-driven role assignment, optional policy checks, and related maintenance. Running refresh without aggregating first recompiles stale inputs.
+
+```text
+Aggregate MNB-HR  ──►  Links / raw attrs current
+        │
+        ▼
+Refresh MNB Identities (checkboxes: manager, roles, policies, …)
+        │
+        ├── Resolve manager references
+        ├── Assign/remove birthright roles (when configured)
+        └── Evaluate policies / mark needs refresh flags
+```
+
+| Refresh option | Turn on when | Cost |
+| --- | --- | --- |
+| Refresh manager | After HR managerId changes | Moderate |
+| Refresh assigned roles | After role/birthright edits | Higher |
+| Check policies | After SoD policy changes | Higher |
+| Promote attributes | After map changes | Moderate |
+
+**Real-life Meridian example.** `priya.wire`’s `managerId` points at `rachel.evans`. Aggregation alone may leave the manager display unresolved; after `Refresh MNB Identities`, Rachel appears as manager so wire certifications and approvals route correctly.
+
 ## Before you start
 
 - [ ] `Aggregate MNB-HR` succeeds
@@ -58,6 +82,8 @@ Aggregation loads accounts; refresh recalculates the person. Without refresh, ma
 ## Lab procedure
 
 ### Task 1 — Cube deep-dive
+
+A cube is the examiner-facing unit of a person. Inventory one leadership cube end-to-end so you know which tabs prove attributes, accounts, and workflow state.
 
 1. Open identity `christopher.hayes` (MNB00002, Director of Technology).
 2. Inventory tabs: attributes, accounts, roles/bundles, work items, risk/history (as present).
@@ -182,6 +208,14 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 3. Long runtimes, lock contention, overlapping jobs, unexpected policy storms—scope and options must be intentional.
 4. `Refresh MNB Identities`.
 5. So later lessons see the intended baseline personas (amelia not stuck on leave).
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Identity Refresh” and “refresh identity attributes” for option meanings and performance guidance.
+- [SailPoint Community](https://community.sailpoint.com/) — search “refresh vs aggregation” for ops patterns that avoid overlapping nightly jobs.
+- [NIST SP 800-53 AC-2 / AU-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — maintaining current account state and reviewing automated processing outcomes.
+- [FFIEC IT Examination Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/it-booklets/architecture-infrastructure-and-operations.aspx) — batch job reliability and sequencing expectations for bank platforms.
+- [CIS Controls v8 — Control 5 (Account Management)](https://www.cisecurity.org/controls/account-management) — keeping account inventories and ownership current.
 
 ## Stretch lab
 

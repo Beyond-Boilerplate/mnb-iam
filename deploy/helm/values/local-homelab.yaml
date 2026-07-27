@@ -53,11 +53,23 @@ identityiq:
       cpu: "2"
       memory: 3Gi
   probes:
-    readiness:
-      type: tcp
-      initialDelaySeconds: 45
+    startup:
+      enabled: true
+      path: /identityiq/login.jsf
       periodSeconds: 10
-      failureThreshold: 30
+      timeoutSeconds: 5
+      failureThreshold: 72
+    readiness:
+      type: http
+      path: /identityiq/login.jsf
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 6
     liveness:
       type: tcp
-      initialDelaySeconds: 180
+      path: /identityiq/login.jsf
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 5

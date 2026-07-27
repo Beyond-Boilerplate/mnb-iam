@@ -4,7 +4,11 @@
 **Track:** Roles  
 **Time:** 60–75 minutes  
 **Prereq:** Lesson 27; AWS_ADMIN and PRIV_BREAK entitlements exist in dictionary/apps  
-**Lab data:** `entitlement-dictionary.csv` (AWS_ADMIN, PRIV_BREAK); cloud account extract; approval expectations for later LCM lessons
+
+**Lab data:**
+- `~/iiq-lab-data/reference/entitlement-dictionary.csv` (AWS_ADMIN, PRIV_BREAK)
+- Cloud account extract / MNB-AWS-Cloud; approval expectations for later LCM lessons
+- Personas: `amelia.brooks` (must never receive privilege); `raj.external` (contractor AWS risk); break-glass path for Lesson 37
 
 ---
 
@@ -17,18 +21,23 @@ You will be able to:
 - Define approval expectations (Technology Director + Security for break-glass)
 - Place privileged roles on a **monthly** certification scope list
 - Publish a privileged access runbook: joiners never auto-get; leavers revoke same day
+- Contrast standing CloudAdmin with time-boxed break-glass patterns
 
 ---
 
 ## Why this matters
 
-Privileged access needs time bounds, approvals, and monitoring. Standing cloud admin for convenience is a governance failure mode. Break-glass without logging and approval is theater.
+**Business.** Privileged access needs time bounds, approvals, and monitoring. Standing cloud admin for convenience is a governance failure mode—especially when contractors like `raj.external` hold `AWS_ADMIN` past SOW end. Break-glass without logging and approval is theater: outages tempt shared passwords; Meridian needs a governed emergency path instead (Lesson 37).
 
-**Control / audit:** Privileged roles are rare, owned, frequently certified, and excluded from birthright. Examiners ask for the privileged inventory, approval path, and revocation SLA. This lesson designs the IIQ role objects and control narrative; Lessons 35–37 wire request/approval flows.
+**Control / audit.** Privileged roles are rare, owned, frequently certified, and excluded from birthright. Examiners ask for the privileged inventory, approval path, and revocation SLA. This lesson designs the IIQ role objects and control narrative; Lessons 35–37 wire request/approval flows.
 
 ---
 
 ## Concepts
+
+### Request-only by design
+
+Birthright and job rules must never auto-grant CloudAdmin or BreakGlass—including for `CLD01`. Job creates eligibility to **request**, not standing privilege.
 
 ```
 Birthright / job rules ──✗──► CloudAdmin / BreakGlass
@@ -40,7 +49,40 @@ Access request (future) ──► approvals ──► assigned privileged role �
 | `MNB-Role-CloudAdmin` | AWS_ADMIN | Yes | No | Monthly | Manager + Technology / Cloud owner |
 | `MNB-Role-BreakGlass` | PRIV_BREAK | Yes | No | Monthly (or per-use) | Technology Director + Security |
 
-**Standing vs break-glass:** CloudAdmin may be standing but tightly controlled; BreakGlass is emergency, time-bounded, heavily logged (PAM integration noted even if not implemented in lab).
+### Standing vs break-glass
+
+**CloudAdmin** may be standing but tightly controlled (manager + tech owner, monthly cert, same-day leaver revoke). **BreakGlass** is emergency, time-bounded (≤8 hours lab standard), heavily logged, Security-approved—with PAM integration noted even if not implemented in lab. Standing break-glass accounts are forbidden.
+
+### Negative proof matters
+
+`amelia.brooks` (teller birthright) must never gain these roles after refresh. If she does, an accidental assignment rule exists—fix before Lessons 35–37 teach the request path.
+
+---
+
+## How it works
+
+Privileged roles are Bundles like any other—but with zero assignment rules and stricter operational controls. LCM later creates IdentityRequests; this lesson freezes objects and policy intent.
+
+```
+Dictionary / app entitlements
+   AWS_ADMIN, PRIV_BREAK (critical)
+        │
+        ▼
+Bundles: MNB-Role-CloudAdmin / MNB-Role-BreakGlass
+   requestable=YES, assignment rules=NONE
+        │
+        ├── Refresh ──► Amelia / job roles: no privileged assign
+        ├── LCM request (Lessons 35–37) ──► approvals ──► assign
+        └── Monthly cert scope + same-day leaver revoke
+```
+
+| Control | CloudAdmin | BreakGlass |
+| --- | --- | --- |
+| Catalog stance | Privileged / not casual CRM neighbor | Emergency path only |
+| Approvers | Manager + `christopher.hayes` (tech) | Tech Director + Security (`helen.ross`) |
+| TTL | Standing with monthly re-justify | ≤8 hours, same-day revoke |
+| Joiner | Never auto | Never auto |
+| Leaver | Same calendar day | Same calendar day |
 
 ---
 
@@ -56,6 +98,8 @@ Access request (future) ──► approvals ──► assigned privileged role �
 ## Lab procedure
 
 ### Task 1 — Confirm privileged entitlements
+
+You cannot package what does not exist as a managed attribute. Confirm critical labeling first.
 
 1. Verify **AWS_ADMIN** managed attribute / entitlement (critical).
 2. Verify or create **PRIV_BREAK** with display name “Break-Glass Admin” and risk critical.
@@ -90,6 +134,8 @@ Access request (future) ──► approvals ──► assigned privileged role �
 
 ### Task 4 — Birthright exclusion proof
 
+Examiners sample “does privilege leak into birthright?” Prove it does not.
+
 1. Open `MNB-Birthright-Employee` composition—confirm no AWS_ADMIN / PRIV_BREAK.
 2. Open Developer / RM / WireInitiator—confirm still clean.
 3. Run Refresh MNB Identities on `amelia.brooks`—confirm she does **not** gain privileged roles.
@@ -102,8 +148,8 @@ Access request (future) ──► approvals ──► assigned privileged role �
 
 | Role | Approver 1 | Approver 2 | Notes |
 | --- | --- | --- | --- |
-| CloudAdmin | Line manager | Cloud/Tech owner | No self-approval |
-| BreakGlass | Technology Director | Security | Emergency justification mandatory |
+| CloudAdmin | Line manager | Cloud/Tech owner (`christopher.hayes`) | No self-approval |
+| BreakGlass | Technology Director | Security (`helen.ross`) | Emergency justification mandatory |
 
 2. Note Lessons 36–37 will implement chains; this lesson freezes intent.
 
@@ -114,8 +160,9 @@ Access request (future) ──► approvals ──► assigned privileged role �
 1. Add both roles to `MNB-Cert-Scope-Privileged-Monthly`.
 2. Contrast: standard job roles quarterly (future campaigns).
 3. Record owner of the monthly campaign (Security / IAM).
+4. Note contractors with AWS_ADMIN (`raj.external`) belong on the weekly privileged subset (Lesson 32)—even before role assignment exists.
 
-**Expected result:** Scope list artifact with two role names and frequency Monthly.
+**Expected result:** Scope list artifact with two role names and frequency Monthly (+ contractor AWS weekly note).
 
 ### Task 7 — Privileged runbook
 
@@ -123,7 +170,8 @@ Access request (future) ──► approvals ──► assigned privileged role �
    - Joiner: never auto-assigned CloudAdmin/BreakGlass
    - Mover: privileged access re-justified within 5 business days
    - Leaver: revoke same calendar day as HR termination (Lesson 31)
-   - Break-glass: ticket ID + start/end time + MFA/PAM note
+   - Break-glass: ticket ID + start/end time + MFA/PAM note (Lesson 37)
+   - Contractor: mandatory end date; weekly review while AWS_ADMIN active
 2. Store as `MNB-Runbook-Privileged-Access`.
 
 **Expected result:** One-page runbook suitable for ops handoff.
@@ -178,6 +226,7 @@ Access request (future) ──► approvals ──► assigned privileged role �
 3. Are these roles birthright eligible?
 4. Which entitlement maps to CloudAdmin?
 5. What happens on joiner day regarding these roles?
+6. How do standing CloudAdmin and BreakGlass differ on TTL?
 
 ### Answers
 
@@ -186,6 +235,17 @@ Access request (future) ──► approvals ──► assigned privileged role �
 3. No.
 4. AWS_ADMIN.
 5. Joiners never auto-receive them—request/approval only when justified.
+6. CloudAdmin may be standing with monthly cert; BreakGlass is emergency time-boxed (≤8h lab standard) with same-day revoke.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “privileged access” and “requestable roles” for LCM-ready Bundle flags.
+- [SailPoint Community](https://community.sailpoint.com/) — search “break glass” / “privileged role certification” for monthly campaign patterns.
+- [NIST SP 800-53 AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — least privilege for standing admin access.
+- [NIST SP 800-53 AC-2(2)/AC-2(3)](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — automated audit and temporary accounts—language that maps to break-glass TTL.
+- [CIS Controls v8 — Control 5 & 6](https://www.cisecurity.org/controls) — admin account inventory and access control management for privileged roles.
 
 ---
 
@@ -193,7 +253,7 @@ Access request (future) ──► approvals ──► assigned privileged role �
 
 - Draft MFA / PAM requirement note attached to both roles (“IIQ role is necessary but not sufficient”).
 - Propose automatic sunset: BreakGlass assignment expires in 8 hours unless extended.
-- Build population of AWS_ADMIN account holders for the first monthly privileged campaign dry-run.
+- Build population of AWS_ADMIN account holders for the first monthly privileged campaign dry-run (include `raj.external`).
 
 ---
 

@@ -27,15 +27,17 @@ You will be able to:
 
 ## Why this matters
 
-**Business:** A terminated staff accountant with live SAP Finance and AWS Admin keys can move money, alter journals, or destroy cloud evidence. Same-day disablement is a board-level expectation—not a “nice to have” backlog item.
+**Business.** A terminated staff accountant with live SAP Finance and AWS Admin keys can move money, alter journals, or destroy cloud evidence. Same-day disablement is a board-level expectation — not a “nice to have” backlog item. Jordan Reed (`jordan.reed`) is Meridian’s flagship Sev-1 leaver for that reason.
 
-**Control / audit:** Examiners ask: *When HR marked the employee terminated, what systems were disabled, by whom, and within what SLA?* Your Aggregate → Refresh → residual inventory → disable → evidence pack is the answer. Control owner: IAM Ops with Finance and Technology app owners for privileged residuals.
+**Control / audit.** Examiners ask: *When HR marked the employee terminated, what systems were disabled, by whom, and within what SLA?* Your Aggregate → Refresh → residual inventory → disable → evidence pack is the answer. Control owner: IAM Ops with Finance and Technology app owners for privileged residuals.
 
 ---
 
 ## Concepts
 
 ### Leaver signal vs leave signal
+
+Do not confuse Jordan (terminate) with `sofia.torres` (leave). Wrong playbook = wrong outcome.
 
 | Attribute | Leaver (this lesson) | Leave of absence (Lesson 33) |
 | --- | --- | --- |
@@ -54,7 +56,19 @@ You will be able to:
 | Job | Staff Accountant (`FIN` / `GL01`) |
 | Known entitlements | `ELDAP`, `SAP_FI`, `AWS_ADMIN`, `GL_POST` |
 
-### Standard leaver pipeline (file lab)
+Jordan also embodies the **finance-cloud toxic pair** (`SAP_FI` + `AWS_ADMIN`) from the SoD matrix — Lesson 39 will detect it as policy; this lesson removes the employment signal that makes residual privilege indefensible.
+
+### Disable vs revoke
+
+- **Disable** marks an account link inactive (login blocked; account may still exist for audit/hold).
+- **Revoke** removes entitlements/roles from the account.
+- HR `status=0` alone does **not** disable SAP or AWS — residual inventory is mandatory.
+
+The wrong way: mark HR inactive, skip residual hunt, tell Audit “leavers are automatic.” That is how `AWS_ADMIN` survives termination.
+
+---
+
+## How it works
 
 ```text
 HR delta (status=0, terminationDate)
@@ -66,19 +80,27 @@ Account Aggregation task (MNB-HR)
 Refresh MNB Identities (roles + optional leaver workflow)
         │
         ▼
-Identity inactive / inactive flags visible
+Identity inactive / terminated flags visible
         │
         ▼
-Residual entitlement inventory (SAP / AWS / GL)
+Residual entitlement inventory (SAP / AWS / GL / ELDAP)
         │
         ▼
 Disable links / revoke roles / ticket residuals
         │
         ▼
-Notify manager + evidence pack
+Notify manager (deepa.nair) + evidence pack
 ```
 
-**IIQ terms:** *Account Aggregation task* pulls HR file changes. *Identity Refresh* re-evaluates attributes, roles, and (if configured) lifecycle events. *Disable* marks an account link inactive/disabled; *revoke* removes entitlements/roles. Do not conflate with LCM access-request objects (Lessons 35–38).
+| Stage | What IIQ does | What you prove |
+| --- | --- | --- |
+| HR terminate | File row update for `MNB00092` | `status=0`, `terminationDate` set |
+| Aggregate + refresh | Task Results | Inactive signals on cube |
+| Residual inventory | Read Accounts/Entitlements | `SAP_FI`, `AWS_ADMIN`, `GL_POST` disposition |
+| Disable / revoke | Manage Accounts / file + agg / LCM | Critical access dead or ticketed |
+| Evidence | Screenshots + tickets | Examiner-ready leaver pack |
+
+**IIQ terms:** *Account Aggregation task* pulls HR file changes. *Identity Refresh* re-evaluates attributes, roles, and (if configured) lifecycle events. Do not wait on LCM access-request objects (Lessons 35–38) to stop a terminated finance user.
 
 ---
 
@@ -89,7 +111,7 @@ Notify manager + evidence pack
 - [ ] Lab files under `~/iiq-lab-data/` including `scenarios/leaver/hr-delta-terminate-jordan.csv`.
 - [ ] `MNB-HR` (or your authoritative HR app) aggregates successfully.
 - [ ] Prior apps from Applications track present: at least IT inventory / SAP / AWS links for Jordan.
-- [ ] Optional: `init-lcm.xml` imported if you want automated leaver lifecycle events—**not required** for file-driven status change in this lesson.
+- [ ] Optional: `init-lcm.xml` imported if you want automated leaver lifecycle events — **not required** for file-driven status change in this lesson.
 - [ ] Notebook ready for residual inventory and control-standard draft.
 
 ---
@@ -97,6 +119,8 @@ Notify manager + evidence pack
 ## Lab procedure
 
 ### Task 1 — Inspect the leaver delta before you touch production HR
+
+Read the delta like a change ticket. Mixing Sofia’s leave flags with Jordan’s terminate columns is the classic lab mistake.
 
 1. Open `~/iiq-lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv` (or repo `lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv`).
 2. Confirm the row: `employeeId=MNB00092`, `userName=jordan.reed`, `status=0`, `onLeave=false`, `terminationDate=2026-07-26`, manager `MNB00003`.
@@ -106,21 +130,21 @@ Notify manager + evidence pack
 
 **If it fails:** Re-copy `lab-data/scenarios` into `~/iiq-lab-data/` per [README](README.md).
 
----
-
 ### Task 2 — Apply the terminate delta into the authoritative HR file
+
+Only Jordan’s row changes. Leave Sofia (`onLeave=true`) and Samir (already `status=0`) alone.
 
 1. Update Jordan’s HR row to match the leaver CSV (do not invent columns). Preferred approach: replace the `MNB00092` line with the delta line, preserving header column order.
 2. Validate column count matches the header (comma count / CSV lint).
-3. Leave other employees unchanged—especially `sofia.torres` (`onLeave=true`) and `samir.hassan` (already `status=0`).
+3. Leave other employees unchanged — especially `sofia.torres` (`onLeave=true`) and `samir.hassan` (already `status=0`).
 
 **Expected result:** Only Jordan’s authoritative row shows `status=0` and `terminationDate=2026-07-26`. `onLeave` remains `false`.
 
 **If it fails:** Restore from `lab-data/hr/MNB-HR-Employees.csv` and re-apply a single-line edit.
 
----
-
 ### Task 3 — Aggregate HR and refresh identities
+
+Aggregation first — refresh without a successful HR aggregate reads stale status.
 
 1. In IIQ, open **Setup → Tasks** (or equivalent Tasks menu).
 2. Run the **Account Aggregation** task for `MNB-HR` (or your HR application name). Wait for success.
@@ -131,9 +155,9 @@ Notify manager + evidence pack
 
 **If it fails:** Check aggregation task result for parse errors; confirm file path on the application; re-run aggregation only, then refresh.
 
----
-
 ### Task 4 — Inventory residual SAP / AWS / GL access
+
+HR inactive ≠ systems disabled. Build the residual table examiners will ask for.
 
 1. On Jordan’s cube, open **Accounts** / **Entitlements** / **Detected Roles** (or equivalent tabs).
 2. Build a residual table in your notebook:
@@ -147,15 +171,15 @@ Notify manager + evidence pack
 
 3. Cross-check source files if links are missing in IIQ: `MNB-SAP-Finance.csv`, `MNB-AWS-Cloud.csv`, `MNB-IT-Access.csv` still list Jordan as `active` until you remediate or re-aggregate after disable.
 
-**Expected result:** You can prove Jordan still holds (or recently held) finance + cloud privilege after HR termination—the classic residual-access finding.
+**Expected result:** You can prove Jordan still holds (or recently held) finance + cloud privilege after HR termination — the classic residual-access finding.
 
 **If it fails:** Re-run Account Aggregation on SAP/AWS/IT apps; confirm correlation from earlier lessons still maps Jordan’s accounts.
 
----
-
 ### Task 5 — Practice disable / revoke for critical access
 
-1. Using lab-available actions (Manage Accounts, certification remediation, manual entitlement remove, or CSV “disabled” status + re-aggregate—whichever your lab supports), disable or mark inactive:
+Order matters: directory first (blocks interactive login), then cloud Sev-1, then finance ents.
+
+1. Using lab-available actions (Manage Accounts, certification remediation, manual entitlement remove, or CSV “disabled” status + re-aggregate — whichever your lab supports), disable or mark inactive:
    - Directory / `ELDAP` link first (blocks interactive login).
    - `AWS_ADMIN` next (cloud Sev-1).
    - `SAP_FI` and `GL_POST` for Finance.
@@ -165,9 +189,7 @@ Notify manager + evidence pack
 
 **Expected result:** Written residual list with each critical item either disabled, revoked, or ticketed with owner and timestamp. No silent “assume it went away.”
 
-**If it fails:** Document the gap explicitly—examiners prefer known gaps over fake green checks. Stretch later with provisioning connectors.
-
----
+**If it fails:** Document the gap explicitly — examiners prefer known gaps over fake green checks. Stretch later with provisioning connectors.
 
 ### Task 6 — Notify manager and draft Meridian leaver standard
 
@@ -176,7 +198,7 @@ Notify manager + evidence pack
    - **Timing:** HR terminate → directory disable ≤ 1 hour; privileged (`SAP_FI`, `AWS_ADMIN`, wire, core) ≤ same business day / Sev-1.
    - **Scope:** All correlated accounts + orphan hunt for uncorrelated keys (Lesson 19 pattern).
    - **Notifications:** Manager, app owners for critical residuals, Security for privileged leavers.
-   - **Evidence retention:** Aggregation/refresh task results, identity screenshots, residual inventory, ticket IDs—retain per bank records policy (lab: keep in training binder).
+   - **Evidence retention:** Aggregation/refresh task results, identity screenshots, residual inventory, ticket IDs — retain per bank records policy (lab: keep in training binder).
 3. Add one examiner Q&A line: *“How do you know Jordan’s AWS key is dead?”* → point to disable evidence + re-aggregation showing inactive.
 
 **Expected result:** Control standard text you could hand to Internal Audit without rewriting. Jordan case used as the worked example.
@@ -226,20 +248,32 @@ Notify manager + evidence pack
 3. Name the four required parts of the Meridian leaver control standard.
 4. What runs first after editing HR: Account Aggregation or identity Refresh?
 5. Who is Jordan’s manager for notification purposes?
+6. Does HR `status=0` automatically remove `AWS_ADMIN`?
 
 ### Answers
 
 1. Leaver: `status=0` and populated `terminationDate` with `onLeave=false`. Leave: `onLeave=true`, typically still active employment status.
-2. Holds critical finance (`SAP_FI`, `GL_POST`) plus cloud admin (`AWS_ADMIN`)—material residual risk after exit.
+2. Holds critical finance (`SAP_FI`, `GL_POST`) plus cloud admin (`AWS_ADMIN`) — material residual risk after exit.
 3. Timing, scope, notifications, evidence retention.
 4. Account Aggregation task for HR, then Refresh MNB Identities.
 5. `deepa.nair` (`MNB00003`) / `deepa.nair@meridiannb.com`.
+6. No — residual inventory and explicit disable/revoke are required.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “leaver lifecycle” and “account disable provisioning.”
+- [SailPoint Community](https://community.sailpoint.com/) — search “termination residual access” for common post-leaver findings.
+- [NIST SP 800-53 AC-2 — Account Management](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — disablement and removal of accounts when employment ends.
+- [FFIEC Information Technology Examination Handbook](https://ithandbook.ffiec.gov/) — search information security / access controls for terminated-user expectations.
+- [ISACA — Access Management and SOX ITGC primers](https://www.isaca.org/) — search “user access management” and “termination controls” for evidence framing.
 
 ---
 
 ## Stretch lab
 
-1. Re-check `samir.hassan` (`status=0`) for residual `DWRP` / `SAP_FI` / `ODS` as a backlog defect—compare disabled flags in `MNB-IT-Access.csv`.
+1. Re-check `samir.hassan` (`status=0`) for residual `DWRP` / `SAP_FI` / `ODS` as a backlog defect — compare disabled flags in `MNB-IT-Access.csv`.
 2. If LCM is active, configure or inspect a leaver lifecycle event on `status` change and capture the workflow name in the binder.
 3. Draft a Sev-1 communications template (Security + Finance + Technology) for privileged leavers.
 

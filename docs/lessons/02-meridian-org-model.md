@@ -52,6 +52,33 @@ Entitlements are codes with a risk dictionary. SoD pairs encode toxic combinatio
 | `jordan.reed` | MNB00092 | `SAP_FI` + `AWS_ADMIN` | Finance SoR + cloud bypass |
 | `kai.nguyen` | MNB00096 | `IBSI` + `ECOM` | Digital support + channel promotion |
 
+## How it works
+
+Meridian’s org model is not invented in IIQ—it is **imported from HR codes** and **enriched by reference dictionaries**. Roles, populations, SoD policies, and certification scopes later consume the same `departmentCode`, `jobCode`, and entitlement risk tiers you learn here.
+
+```text
+departments.csv + job-codes.csv
+        │
+        ▼
+HR row (departmentCode, jobCode, workerType)
+        │
+        ▼
+Identity attributes after Aggregate MNB-HR / Refresh
+        │
+        ├── Birthright / IT roles (Lessons 23–28)
+        ├── Populations (Lesson 07)
+        └── SoD matrix + cert scope (Lessons 39–45)
+```
+
+| Artifact | Drives | Exam narrative |
+| --- | --- | --- |
+| `departmentCode` | Populations, role assignment filters | “Retail vs Treasury scope” |
+| `jobCode` | Birthright / IT role design | “WIR01 gets WIRE_INIT” |
+| Entitlement risk tier | Cert campaign priority | “Critical first” |
+| `sod-matrix.csv` | Policy objects | “Toxic pairs with rationale” |
+
+**Real-life Meridian example.** `priya.wire` (`WIR01`, `TRS`) should receive wire-initiation birthright—not `AWS_ADMIN`. `jordan.reed` holding `SAP_FI`+`AWS_ADMIN` is an intentional SoD finding, not a modeling accident.
+
 ## Before you start
 
 - [ ] Lesson 01 complete; IIQ login works
@@ -192,6 +219,14 @@ Assign owners you will reuse when apps are onboarded:
 3. Finance system of record plus cloud admin enables bypass of application controls—see sod-matrix.
 4. `TRS`.
 5. Non-corporate email (`@vendor-mail.invalid`) while appearing in IT access—correlation and lifecycle risk.
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “identity attributes” and “populations” to see how HR codes become selectable filters.
+- [SailPoint Community](https://community.sailpoint.com/) — search “birthright roles” and “job code based access” for bank-style role design patterns.
+- [NIST SP 800-53 AC-2 / AC-5](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management and separation of duties language behind Meridian’s risk glossary.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — examiner expectations for dual control and privileged access classification.
+- [ISACA — Segregation of Duties primers](https://www.isaca.org/) — search “segregation of duties” for SOX/ITGC vocabulary Risk uses with IAM.
 
 ## Stretch lab
 

@@ -22,6 +22,8 @@ You will be able to:
 
 Most banks start with a messy entitlement dump before perfect connectors. Meridian’s `EmployeeData.txt` is intentionally denormalized and duplicated—like production exports from a CMDB or access warehouse. You must onboard imperfect truth safely without letting IT invent people.
 
+> **Production reality.** An inventory dump like this is a legitimate *interim* production pattern (many programs really do start here), but its endgame is decomposition: each system inside the dump graduates to its own application with a native connector — AD (Lessons 56–57), databases via JDBC (Lesson 63), SaaS via API/SCIM (Lessons 68–76). Part II of this curriculum walks that graduation path system by system.
+
 **Control / audit:** Only HR creates identities. IT apps correlate. Examiners ask whether non-HR sources can create orphan identities. Your `MNB-IT-Access` config must show create-identities **off**.
 
 ## Concepts
@@ -186,6 +188,13 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 3. `jordan.reed` (SAP_FI+AWS_ADMIN) and `kai.nguyen` (IBSI+ECOM).
 4. Denormalized entitlement inventory—one entitlement per row.
 5. After `Aggregate MNB-HR`, before `Refresh MNB Identities`.
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Delimited File connector” and “authoritative application.”
+- [SailPoint Developer Community](https://developer.sailpoint.com/discuss/) — threads on inventory dumps vs per-app connectors.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — access inventory and ownership expectations.
+- Lessons 51–55 and 56+ — where each dump system graduates to a native connector.
 
 ## Stretch lab
 

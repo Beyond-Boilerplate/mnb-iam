@@ -189,6 +189,12 @@ Add one limitation: scores lag HR events; rapid offboarding (Lesson 34) must not
 
 ---
 
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “identity risk” and “risk score.”
+- [NIST SP 800-30](https://csrc.nist.gov/pubs/sp/800/30/r1/final) — risk assessment concepts underlying scoring models.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — risk-based access review expectations.
+
 ## Stretch lab
 
 Propose a weekly IAM huddle dashboard widget list: top 10 risk scores, open SoD count, cert completion %, terminated-with-access count. One sentence each on owner and SLA.

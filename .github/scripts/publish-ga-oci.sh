@@ -7,8 +7,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 TAG="${1:-8.5}"
-ZIP_REL="base/ga/identityiq-8.5.zip"
-OWNER="${GHCR_OWNER:-beyond-boilerplate}"
+if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+$ ]]; then
+  echo "Tag must be an IIQ major.minor version; got '${TAG}'" >&2
+  exit 1
+fi
+ZIP_REL="base/ga/identityiq-${TAG}.zip"
+OWNER="$(tr '[:upper:]' '[:lower:]' <<<"${GHCR_OWNER:-beyond-boilerplate}")"
 REF="ghcr.io/${OWNER}/mnb-iam-ga:${TAG}"
 
 test -f "$ZIP_REL" || { echo "Missing $ROOT/$ZIP_REL" >&2; exit 1; }

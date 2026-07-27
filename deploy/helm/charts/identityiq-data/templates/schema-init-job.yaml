@@ -101,10 +101,13 @@ spec:
 
               echo "Applying IdentityIQ 8.5 PostgreSQL schema…"
               # Ignore duplicate role/db on re-run; fail on real DDL errors after bootstrap
+              # The postgres image runs /bin/sh (not Bash), so do not use PIPESTATUS.
+              # Capture psql first, then print its output for the job log.
               set +e
-              psql -v ON_ERROR_STOP=0 -d postgres -f /tmp/iiq-schema.sql 2>&1 | tee /tmp/schema.out
-              rc=${PIPESTATUS[0]}
+              psql -v ON_ERROR_STOP=0 -d postgres -f /tmp/iiq-schema.sql > /tmp/schema.out 2>&1
+              rc=$?
               set -e
+              cat /tmp/schema.out
               if ! psql -d identityiq -Atc "SELECT 1 FROM information_schema.tables WHERE table_schema='identityiq' AND table_name='spt_identity'" | grep -qx 1; then
                 echo "ERROR: spt_identity missing after schema apply (psql rc=${rc})"
                 tail -50 /tmp/schema.out || true

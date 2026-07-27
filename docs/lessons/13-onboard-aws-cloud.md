@@ -54,6 +54,8 @@ MNB-AWS-Cloud.csv
 
 Extract size: **9** accounts (mix of active/disabled).
 
+> **Production reality.** A quarterly CSV of cloud admins is exactly the anti-pattern Lesson 76 dismantles: cloud access changes hourly, and a stale extract certifies a fiction. Production Meridian governs AWS with the **native AWS IAM connector** (Lesson 76) — continuous aggregation of users, groups, directly-attached policies, and access keys — plus Okta group governance (Lesson 73) for federated access. This lesson's CSV app `MNB-AWS-Cloud` is retired on a documented plan once the native app is proven (see Lesson 76, Task 8).
+
 ---
 
 ## Before you start
@@ -228,6 +230,13 @@ Examiner question: *“Show a privileged cloud admin that might not correlate on
 5. `christopher.hayes` (Director of Technology), with `spadmin` as lab proxy if needed.
 
 ---
+
+## Further reading
+
+- Lesson 76 — AWS IAM connector (native upgrade path from this CSV).
+- [CIS Amazon Web Services Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon_web_services) — IAM user and access-key controls.
+- [AWS IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) — why static extracts fail for cloud admin governance.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “AWS connector.”
 
 ## Stretch lab
 

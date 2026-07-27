@@ -4,7 +4,11 @@
 **Track:** Roles  
 **Time:** 60–90 minutes  
 **Prereq:** Lesson 23 catalog sketch; MNB-ActiveDirectory (or entitlement source containing **ELDAP**) aggregated  
-**Lab data:** HR identities `amelia.brooks` (active teller), `samir.hassan` (terminated); entitlement **ELDAP**
+
+**Lab data:**
+- HR identities: `amelia.brooks` (active teller), `samir.hassan` (terminated)
+- Entitlement: **ELDAP** (Enterprise Directory)
+- Catalog intent: Lesson 23 `MNB-Birthright-Employee` = ELDAP only
 
 ---
 
@@ -17,20 +21,23 @@ You will be able to:
 - Run identity refresh with role assignment enabled and verify birthright on `amelia.brooks`
 - Prove terminated identities (e.g. `samir.hassan`) do not retain birthright assignment intent
 - Document birthright composition, exclusions, and joiner SLA impact
+- Explain why contractors (`raj.external`) must never inherit this employee pack
 
 ---
 
 ## Why this matters
 
-Joiners should be productive on day one without tickets for baseline directory access. Birthright is Meridian’s promise—and a liability if over-scoped. A birthright that includes wire or cloud privilege is an automatic control failure.
+**Business.** Joiners should be productive on day one without tickets for baseline directory access. When `amelia.brooks` starts as a teller, Meridian’s promise is: HR goes active → refresh assigns birthright → ELDAP lands. Birthright that includes wire or cloud privilege turns that promise into an automatic control failure—every joiner becomes a privileged account factory.
 
-**Control / audit:** Birthright composition is dual-approved (IAM + Risk). Evidence = role definition + assignment criteria + sample identities (positive and negative). Examiners ask: “What does every employee get automatically, and what is excluded?”
+**Control / audit.** Birthright composition is dual-approved (IAM + Risk). Evidence = role definition + assignment criteria + sample identities (positive and negative). Examiners ask: *“What does every employee get automatically, and what is excluded?”* Your answer must name ELDAP and explicitly exclude `WIRE_*`, `AWS_ADMIN`, `SAP_FI`, and `PRIV_BREAK`.
 
 ---
 
 ## Concepts
 
-**Birthright role:** Automatically assigned when identity matches criteria; typically deprovisioned when criteria fail (via refresh / lifecycle).
+### Birthright is normative automation
+
+A **birthright role** is automatically assigned when an identity matches criteria and typically deprovisioned when criteria fail (via refresh / lifecycle). It is normative—“you should have this”—not a detection of what you already hold (Lesson 27).
 
 ```
 IF identity has MNB-HR account
@@ -42,11 +49,43 @@ THEN assign MNB-Birthright-Employee
 
 | Include | Exclude |
 | --- | --- |
-| Active Employee | Contractor (separate pack later) |
+| Active Employee | Contractor (`raj.external` and peers) |
 | ELDAP only | WIRE_*, AWS_ADMIN, SAP_FI, PRIV_BREAK |
-| Tellers, analysts, specialists | Terminated / status=0 |
+| Tellers, analysts, specialists | Terminated / status=0 (`samir.hassan`) |
 
-**IIQ terms:** Bundle (role), assignment rule / selector, role detection vs assignment (Lesson 27), provisioning policy (may be stubbed in file lab).
+### Why ELDAP alone
+
+Directory login is the shared baseline for employees. Payment initiate, cloud admin, and break-glass are never “everyone needs it on day one.” Over-scoping birthright is how banks accidentally automate privilege. Under-scoping (no birthright at all) floods the service desk and creates shadow access.
+
+### Contractors are a different promise
+
+`raj.external` is a Cloud Platform Engineer contractor with vendor email and `AWS_ADMIN` risk. He must **not** receive `MNB-Birthright-Employee`. Lesson 32 defines a stricter contingent path. If your assignment rule forgets `workerType=Employee`, every contractor inherits employee baseline—and examiners will find it in population reports.
+
+---
+
+## How it works
+
+Identity refresh is the engine that turns the rule into cube state. Without assign-roles options enabled, the Bundle exists but nobody receives it.
+
+```
+MNB-HR aggregation ──► identity attributes (workerType, status)
+        │
+        ▼
+Refresh MNB Identities (assign roles ON)
+        │
+        ├── match rule? ──yes──► Assigned: MNB-Birthright-Employee
+        │                              └── plan may grant ELDAP
+        └── no match ──► remove / do not assign birthright
+```
+
+| Step | IIQ object | Meridian evidence |
+| --- | --- | --- |
+| Define | Bundle `MNB-Birthright-Employee` | Composition screenshot (ELDAP only) |
+| Select | Assignment rule / Match Filter | Plain-English + pseudo-logic in binder |
+| Enforce | Identity Refresh task | Task Result + Amelia Roles tab |
+| Negative proof | Terminated / Contractor cubes | Samir without birthright; Raj excluded |
+
+**IIQ terms:** Bundle (role), assignment rule / selector, role detection vs assignment (Lesson 27), provisioning policy (may be stubbed in file lab—still verify **assignment**).
 
 ---
 
@@ -64,6 +103,8 @@ THEN assign MNB-Birthright-Employee
 
 ### Task 1 — Confirm ELDAP entitlement object
 
+Birthright can only grant what exists as a managed entitlement. Confirm the building block before the Bundle.
+
 1. Navigate to Applications / Entitlements (or equivalent Managed Attribute view).
 2. Find **ELDAP** — display name should resemble “Enterprise Directory”.
 3. Confirm risk tier medium (from dictionary)—birthright-worthy, not critical payment privilege.
@@ -73,6 +114,8 @@ THEN assign MNB-Birthright-Employee
 **If it fails:** Aggregate AD/IT inventory; promote group/entitlement; apply dictionary display name.
 
 ### Task 2 — Create `MNB-Birthright-Employee`
+
+Production teams treat this name as permanent—certifications and reports will key off it.
 
 1. Open **Roles** / **Business Roles** / Bundle editor (or equivalent menu path).
 2. Create new role named exactly `MNB-Birthright-Employee`.
@@ -86,14 +129,18 @@ THEN assign MNB-Birthright-Employee
 
 ### Task 3 — Attach ELDAP only
 
+Composition is the control. One extra critical entitlement here is a Sev-1 design defect.
+
 1. Add required entitlement/profile: **ELDAP** only.
 2. Save. Re-open and verify no WIRE_INIT, AWS_ADMIN, or CRM slipped in.
 
 **Expected result:** Composition list length = 1 (ELDAP).
 
-**If it fails:** Remove extras immediately; treat as Sev-1 design defect if critical ents were added.
+**If it fails:** Remove extras immediately; treat critical ents as Sev-1 if added by mistake.
 
 ### Task 4 — Assignment rule for active employees
+
+The rule is the difference between “every human” and “active employees only.”
 
 1. Configure assignment rule / identity selector approximately:
    - Application account on MNB-HR present (optional but recommended)
@@ -102,7 +149,7 @@ THEN assign MNB-Birthright-Employee
 2. Explicitly **exclude** `Contractor` (and terminated).
 3. Document the rule in binder in plain English and as pseudo-logic.
 
-**Expected result:** Rule text captured; matches Lesson 23 intent.
+**Expected result:** Rule text captured; matches Lesson 23 intent; Raj’s workerType would not match.
 
 **If it fails:** If UI rule builder differs by IIQ version, implement closest Match Filter / BeanShell per your lab guide—keep logic identical.
 
@@ -130,11 +177,13 @@ THEN assign MNB-Birthright-Employee
 
 ### Task 7 — Negative verify: terminated / non-employee
 
+Positive proof without negative proof fails exams—examiners sample leavers and contractors.
+
 1. Open `samir.hassan` (terminated developer pattern from earlier lessons).
 2. Confirm birthright is **not** assigned (or is flagged for removal if previously assigned).
-3. Optional: spot-check a Contractor identity—should not receive Employee birthright.
+3. Optional: spot-check `raj.external`—Contractor must not receive Employee birthright.
 
-**Expected result:** Terminated persona lacks active birthright assignment intent.
+**Expected result:** Terminated persona lacks active birthright assignment intent; contractor excluded if checked.
 
 **If it fails:** Tighten rule; ensure status mapping uses HR authoritative status (Lesson 22).
 
@@ -156,7 +205,7 @@ THEN assign MNB-Birthright-Employee
 - [ ] Assignment rule limits to active Employees
 - [ ] `amelia.brooks` shows assigned birthright after refresh
 - [ ] Terminated example does not keep birthright intent
-- [ ] Control document completed with exclusions
+- [ ] Control document completed with exclusions (contractors named)
 
 ---
 
@@ -193,14 +242,26 @@ THEN assign MNB-Birthright-Employee
 3. How do leavers lose birthright in the intended design?
 4. Should users request birthright from the catalog?
 5. Why is `amelia.brooks` a good positive test?
+6. Why check `raj.external` as a negative sample?
 
 ### Answers
 
 1. ELDAP only.
-2. No—Employee workerType only; contractors need a tighter separate pack.
+2. No—Employee workerType only; contractors need a tighter separate pack (Lesson 32).
 3. When HR status becomes inactive/terminated, refresh/lifecycle removes assignment (and provisioning disables/removes access in full implementations).
 4. No—automatic only; not requestable.
 5. She is an active Employee teller with ELDAP-appropriate baseline and no treasury privilege expectation.
+6. He is Contractor—if employee birthright assigns to him, the rule is broken and contingent controls fail.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “role assignment” and “birthright” for refresh options and Bundle profiles.
+- [SailPoint Community](https://community.sailpoint.com/) — search “assignment rule Match Filter” for version-specific selector patterns.
+- [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management; birthright is automated account/entitlement assignment with defined population.
+- [NIST SP 800-53 AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — least privilege; the reason birthright stays ELDAP-only.
+- [CIS Controls v8 — Control 5 & 6](https://www.cisecurity.org/controls) — account and access control management baselines for joiner automation.
 
 ---
 
@@ -215,7 +276,7 @@ THEN assign MNB-Birthright-Employee
 ## Summary
 
 - Birthright is minimal, automatic, and boring by design—ELDAP for active employees.
-- `amelia.brooks` validates positive assignment; terminated identities validate exclusion.
+- `amelia.brooks` validates positive assignment; terminated and contractor identities validate exclusion.
 - Over-scoping birthright is how banks accidentally automate privilege.
 
 ---

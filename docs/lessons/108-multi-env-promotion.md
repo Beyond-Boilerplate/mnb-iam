@@ -1,12 +1,15 @@
 # Lesson 108 — Multi-Environment Promotion
 
-| Field | Value |
-| --- | --- |
-| **Level** | Advanced |
-| **Track** | Enterprise Hardening & Mastery |
-| **Time** | 75–90 minutes |
-| **Prereq** | [Lesson 107 — Backup, DR & Object Recovery](107-backup-dr-object-recovery.md); Lesson 101 SSB discipline |
-| **Lab data** | `sandbox.*.properties`, `dev.*.properties`, `prod.*.properties`; [docs/SSD.md](../SSD.md); [docs/HOMELAB-CD.md](../HOMELAB-CD.md) |
+**Level:** Advanced  
+**Track:** Enterprise Hardening & Mastery  
+**Time:** 75–90 min  
+**Prereq:** Lesson 107 — Backup, DR & Object Recovery; Lesson 101 SSB discipline  
+
+**Lab data:**
+- `sandbox.*.properties`, `dev.*.properties`, `prod.*.properties`
+- [docs/SSD.md](../SSD.md); [docs/HOMELAB-CD.md](../HOMELAB-CD.md)
+
+---
 
 ## Learning objectives
 
@@ -17,22 +20,29 @@ You will be able to:
 - Build a promotion checklist with smoke tests and backout
 - Use property tokens so one `config/` tree serves all envs
 - Map homelab CD workflow roles to enterprise promotion gates
+- Attest against DB-clone contamination between environments
+
+---
 
 ## Why this matters
 
-Copying a sandbox database into prod copies test SoD exceptions and fake managers into the bank’s system of record. Promotion is artifact movement, not DB cloning.
+**Business.** Copying a sandbox database into prod copies test SoD exceptions and fake managers into the bank’s system of record. Promoting `nina.joiner`’s synthetic cube into production is not “helpful test data” — it is contamination. Promotion is **artifact movement**, not DB cloning.
 
-**Control / audit:** Each higher environment deploy cites git SHA, change ticket, smoke evidence, and approvers. Hotfixes still enter git—no eternal prod-only XML.
+**Control / audit.** Each higher environment deploy cites git SHA, change ticket, smoke evidence, and approvers. Hotfixes still enter git — no eternal prod-only XML. When the examiner asks *"how did this Policy reach prod,"* you show `CHG-MNB-108` + SHA + smoke screenshots — not a USB stick story.
+
+---
 
 ## Concepts
 
-```text
+### Env chain
+
+```
   Developer laptop / sandbox
-        |  export + PR
-        v
+        │  export + PR
+        ▼
   git main (config/src/web/plugins)
-        |  CI: ./build.sh -Dtarget=<env> clean war
-        v
+        │  CI: ./build.sh -Dtarget=<env> clean war
+        ▼
   dev  -->  uat/stage  -->  prod
         ^ smoke       ^ CAB     ^ dual control
 ```
@@ -46,12 +56,81 @@ Copying a sandbox database into prod copies test SoD exceptions and fake manager
 
 **Homelab parallel:** `publish-ghcr.yml` + `deploy-homelab.yml` approximate CI→deploy; enterprise adds CAB and multi-stage targets.
 
+### Data classification for lower environments
+
+| Data class | Sandbox/dev | Prod |
+| --- | --- | --- |
+| Synthetic Meridian personas | Required | N/A (real) |
+| Production entitlements mirrored | Masked / subset | Full |
+| Real SSN/account numbers | Forbidden | Per bank policy vaulting |
+| Admin passwords | Lab vault | Prod vault dual control |
+
+### Real-life Meridian example
+
+Someone cloned prod DB to “fix a cert bug” in sandbox. PII and open Wire entitlements landed on a laptop. The incident dwarfed the bug. Meridian’s rule: synthetic personas only downward; artifacts only upward.
+
+### Wrong way vs Meridian way
+
+| Wrong way | Why it fails | Meridian way |
+| --- | --- | --- |
+| DB clone sandbox→prod | Contaminates system of record | Artifact + token promotion |
+| Same banner all envs | Wrong-env edits (Lesson 103) | Tokenize banner per SPTARGET |
+| CAB bypass forever | Uncontrolled prod | Same-day retro ticket minimum |
+| Fix forward without SHA | Unrebuildable | Backout to previous tag |
+
+---
+
+## How it works
+
+| Gate | Who | Evidence |
+| --- | --- | --- |
+| PR to main | Peer review | Diff of `config/` + tokens |
+| CI war | Pipeline | Build log from clean checkout |
+| Dev deploy | IAM engineer | Smoke pack |
+| Stage/UAT | IAM + app owners | Extended smoke |
+| Prod | CAB + dual control | SHA + smoke + backout ready |
+
+Smoke evidence naming:
+
+- `MNB-Smoke-<env>-login-YYYY-MM-DD.png`
+- `MNB-Smoke-<env>-search-YYYY-MM-DD.png`
+- `MNB-Smoke-<env>-tasklist-YYYY-MM-DD.png`
+
+Failed smoke keeps previous tag running — do not “fix forward” without new SHA.
+
+Quarterly: diff all `*.target.properties` keys across envs; fail review if prod lacks a key present in sandbox without justification (token drift).
+
+---
+
+## Real-world setup (promotion as controlled change)
+
+### Step 1 — Draw envs and owners
+
+1. Names, URLs, SPTARGET, who may deploy.
+
+### Step 2 — Diff property keys
+
+1. ≥8 keys that must differ; file token gaps.
+
+### Step 3 — Package + smoke + backout
+
+1. One object package with CHG id; fail→backout within 30 minutes.
+
+### Step 4 — Attest forbidden promotions
+
+1. No prod DB to lower without masking; no sandbox cubes to prod.
+
+---
+
 ## Before you start
 
 - [ ] Lesson 101 promotion checklist available to extend
 - [ ] Identify which envs exist in your property files
 - [ ] Pick one object ready to “promote” on paper (or real sandbox→dev if available)
 - [ ] Banner standards from Lesson 103
+- [ ] Binder: `ops/promotion/`
+
+---
 
 ## Lab procedure
 
@@ -71,7 +150,7 @@ Copying a sandbox database into prod copies test SoD exceptions and fake manager
 
 **Expected result:** Key-diff table with gap flags.
 
-**If it fails:** Use SSD.md examples and invent Meridian-proposed keys—label as proposed.
+**If it fails:** Use SSD.md examples and invent Meridian-proposed keys — label as proposed.
 
 ### Task 3 — Promotion package definition
 
@@ -114,6 +193,32 @@ Copying a sandbox database into prod copies test SoD exceptions and fake manager
 
 **Expected result:** Signed attestation page in binder.
 
+### Task 7 — Promotion calendar + Lesson 50 mapping
+
+1. Propose weekly promotion window for non-urgent IAM config.
+2. Emergency path: same checklist, compressed approvals, still git SHA.
+3. Freeze windows before exams/quarter-end certs.
+4. Note: Part I go-live checklist (Lesson 50) remains necessary; Part II adds connector fidelity, plugin rights, and hardening gates — union them in Lesson 110.
+
+**Expected result:** Calendar paragraph + Lesson 50/110 pointer in runbook.
+
+### Task 8 — Homelab CD mapping
+
+1. Map what you automate today (GHCR publish / homelab deploy) vs enterprise gates still missing (CAB, multi-stage, secret injection maturity).
+2. One paragraph honesty check for Lesson 110 residual risks.
+
+**Expected result:** Homelab vs enterprise gates note.
+
+### Task 9 — Examiner question drill
+
+*"How did this Policy reach prod?"*
+
+Write the three-artifact answer: (1) promotion package with git path + SHA + `CHG-MNB-108`, (2) smoke screenshots with env banner correct, (3) attestation / property diff proving secrets and cubes were not cloned.
+
+**Expected result:** Written proof steps in the binder.
+
+---
+
 ## Acceptance criteria
 
 - [ ] Env chain diagram complete
@@ -122,6 +227,10 @@ Copying a sandbox database into prod copies test SoD exceptions and fake manager
 - [ ] Smoke battery + backout written
 - [ ] Forbidden DB-clone attestation recorded
 - [ ] Homelab CD mapping noted
+- [ ] Promotion calendar + Lesson 50/110 pointer
+- [ ] Examiner proof steps drafted
+
+---
 
 ## Troubleshooting
 
@@ -132,13 +241,20 @@ Copying a sandbox database into prod copies test SoD exceptions and fake manager
 | importdynamic wiped manual prod fix | Prod drift | Ban click-ops; reconcile into git |
 | Smoke pass but plugin 404 | Image missing plugins layer | Rebuild with plugins flag |
 | CAB bypassed | Emergency culture | Convert hotfix to retroactive ticket same day |
+| Token drift | Keys missing across envs | Quarterly key diff |
+
+---
 
 ## Training binder evidence
 
-- Env diagram  
-- Property diff table  
-- Package + smoke + backout  
-- Attestation  
+- Env diagram
+- Property diff table
+- Package + smoke + backout
+- Attestation
+- Calendar / CD mapping notes
+- Examiner proof steps
+
+---
 
 ## Knowledge check
 
@@ -147,59 +263,41 @@ Copying a sandbox database into prod copies test SoD exceptions and fake manager
 3. What SHA belongs on a change ticket?
 4. Name three post-deploy smokes.
 5. How does homelab CD relate to enterprise gates?
+6. What should you do when smoke fails?
 
 ### Answers
 
-1. Built artifacts/config move; secrets and runtime identity data do not casually copy upward.  
-2. Contaminates system of record with test access/cert history and breaks confidentiality.  
-3. The git commit (and image tag) actually deployed.  
-4. Login/banner, search, tasks, plugin ping, schedule presence (any three+).  
+1. Built artifacts/config move; secrets and runtime identity data do not casually copy upward.
+2. Contaminates system of record with test access/cert history and breaks confidentiality.
+3. The git commit (and image tag) actually deployed.
+4. Login/banner, search, tasks, plugin ping, schedule presence (any three+).
 5. Homelab automates build→deploy; enterprise adds multi-stage approvals/CAB and stricter secrets.
+6. Keep previous tag running; backout within the timebox — do not fix forward without a new SHA.
+
+---
+
+## Further reading
+
+- [docs/SSD.md](../SSD.md) — Meridian SSD layout, tokens, and CI shape.
+- [Get Started with the SSD](https://community.sailpoint.com/t5/Services-Standard-Deployment/Get-Started-with-the-SSD/ta-p/73449) — official Compass SSD entry.
+- [Services Standard Build User Guide](https://community.sailpoint.com/t5/Services-Standard-Deployment/Services-Standard-Build-User-Guide-SSB/ta-p/73434) — multi-target builds and property files.
+- [NIST SP 800-53 Rev. 5 — CM-3 / CM-4](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — configuration change control and impact analysis for promotions.
+- [FFIEC IT Handbook — Development and Acquisition](https://ithandbook.ffiec.gov/) — controlled promotion of software into production banking environments.
+- [OWASP SAMM — Deployment](https://owasp.org/www-project-samm/) — maturity for staged releases, secrets, and provenance.
+
+---
 
 ## Stretch lab
 
-Write a GitHub Actions outline with `workflow_dispatch` inputs `target=dev|stage|prod` and required reviewers for prod.
+Write a GitHub Actions outline with `workflow_dispatch` inputs `target=dev|stage|prod` and required reviewers for prod. Include smoke artifact upload names matching this lesson’s convention.
+
+---
 
 ## Summary
 
-- Promote artifacts with tokens—not databases.
+- Promote artifacts with tokens — not databases.
 - Smoke and backout are part of the change, not afterthoughts.
-- Attest against env contamination.
-
-## Data classification for lower environments
-
-| Data class | Sandbox/dev | Prod |
-| --- | --- | --- |
-| Synthetic Meridian personas | Required | N/A (real) |
-| Production entitlements mirrored | Masked / subset | Full |
-| Real SSN/account numbers | Forbidden | Per bank policy vaulting |
-| Admin passwords | Lab vault | Prod vault dual control |
-
-### Task 7 — Promotion calendar
-
-1. Propose weekly promotion window for non-urgent IAM config.
-2. Emergency path: same checklist, compressed approvals, still git SHA.
-3. Freeze windows before exams/quarter-end certs.
-
-**Expected result:** Calendar paragraph in runbook.
-
-### Mapping to Lesson 50 gates
-
-Part I go-live checklist remains necessary; Part II adds connector fidelity, plugin rights, and hardening gates—union them in Lesson 110.
-
-## Smoke test evidence naming
-
-Save post-deploy proofs as:
-
-- `MNB-Smoke-<env>-login-YYYY-MM-DD.png`
-- `MNB-Smoke-<env>-search-YYYY-MM-DD.png`
-- `MNB-Smoke-<env>-tasklist-YYYY-MM-DD.png`
-
-Attach to change ticket `CHG-MNB-108` (or real CHG). Failed smoke keeps previous tag running—do not “fix forward” without new SHA.
-
-### Token drift detection
-
-Once per quarter, diff all `*.target.properties` keys across envs; fail review if prod lacks a key present in sandbox or vice versa without justification.
+- Attest against env contamination; map homelab automation honestly to enterprise gates.
 
 ---
 

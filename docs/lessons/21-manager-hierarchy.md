@@ -17,28 +17,66 @@ You will be able to:
 - Simulate a manager field change, re-aggregate HR, refresh identities, and verify the cube
 - Document the certification and approval routing risk when a manager terminates or is wrong
 - Define a Meridian fallback certifier policy for broken hierarchy chains
+- State the production rule: HR owns managerId; IIQ must not invent permanent overrides
 
 ---
 
 ## Why this matters
 
-Approvals, access reviews, and escalations all assume every identity has a correct manager. At Meridian National Bank, a wrong managerId means wire exceptions land on the wrong inbox and quarterly certifications stall while IAM chases “who owns this person?”
+**Business.** Approvals, access reviews, and escalations all assume every identity has a correct manager. At Meridian National Bank, a wrong managerId means wire exceptions for `priya.wire` land on the wrong inbox and quarterly certifications stall while IAM chases “who owns this person?”
 
-**Control / audit:** Examiners ask who reviews employee access. Your answer is “the line manager resolved from authoritative HR.” Broken chains are a control failure, not a UI quirk. Evidence is a verified chain plus a documented fallback when HR data is incomplete.
+**Control / audit.** Examiners ask who reviews employee access. Your answer is “the line manager resolved from authoritative HR.” Broken chains are a control failure, not a UI quirk. Evidence is a verified chain plus a documented fallback when HR data is incomplete — never a silent admin edit on the cube.
 
 ---
 
 ## Concepts
 
-IdentityIQ resolves **manager** from an identity attribute (typically populated from MNB-HR `managerId` = employeeId of the manager). Refresh correlates that value to another identity cube. Certifications and many approval schemas use that link.
+### How IIQ gets a manager
+
+IdentityIQ resolves **manager** from an identity attribute typically populated from MNB-HR `managerId` (the employeeId of the manager). During aggregation and refresh, that value is correlated to another identity cube. Certifications and many approval schemas use that link for routing work items.
+
+**Real-life Meridian example.** Priya’s HR row carries `managerId=MNB00005`. After Aggregate MNB-HR + Refresh, her cube’s Manager field resolves to `rachel.evans`. Wire Portal access reviews and many approval schemas therefore land with Rachel — the Payments Ops manager who actually owns Priya’s line of work.
+
+### Intentional tops vs broken chains
+
+Empty `managerId` is not automatically a defect. Lab executives and branch tops (Rachel, Sanjay-style leaders) intentionally have empty manager fields — the chain has to end somewhere. A **broken chain** is a non-empty `managerId` that does not resolve to a live identity, or a blank manager on a mid-level specialist who is not an exec. Those break cert launches with “no certifier.”
+
+### Reassignment is an HR event, reflected in IIQ
+
+When someone changes managers, the durable fix is updating HR `managerId`, then running Account Aggregation for MNB-HR and Identity Refresh. Hand-editing the cube’s Manager field “for today’s cert” creates dual sources of truth that diverge again on the next HR load (Lesson 22 hygiene).
+
+### Fallback certifiers for campaign survival
+
+| Situation | Risk | Meridian response |
+| --- | --- | --- |
+| Manager terminated; HR still points reports at them | Open certs / approvals stall or route to inactive identity | Fallback certifier (Security IAM queue or named successor) + HR correction SLA |
+| Non-exec blank managerId | Campaign cannot assign reviewer | Defect to HR; population `MNB-Pop-Broken-Manager-Chain` |
+| Admin invents manager in IIQ only | Next HR aggregate overwrites or conflicts | Forbidden — HR owns the value |
+
+The wrong way is to launch a manager certification campaign and “fix” missing reviewers by assigning everything to `spadmin` or Helen Ross permanently. That passes the send button and fails the exam: reviewers must be accountable line management, with a **named temporary fallback** and an HR SLA to repair the chain — not a permanent IAM dump queue.
+
+**Examiner question:** “If Priya’s manager left yesterday, who certifies her Wire Portal access today?” You need a runbook answer before campaign launch.
+
+---
+
+## How it works
 
 ```
 HR row: priya.wire (MNB00090)
   managerId = MNB00005
        │
-       ▼
-Identity: rachel.evans (MNB00005)
-  managerId = (empty)  ← Payments Ops Manager / chain top for this branch
+       ▼  Aggregate MNB-HR + Refresh
+Identity: priya.wire
+  manager ──► rachel.evans (MNB00005)
+                 managerId = (empty)  ← intentional chain top
+```
+
+```
+        [empty]
+           │
+    rachel.evans (MNB00005)
+      ┌────┴────┐
+priya.wire   marcus.approve  (examples; both managerId=MNB00005)
 ```
 
 | Term | Meaning at Meridian |
@@ -46,10 +84,10 @@ Identity: rachel.evans (MNB00005)
 | `managerId` | HR employeeId of the person’s manager (authoritative) |
 | Manager link | IIQ identity attribute pointing at another Identity |
 | Broken chain | Non-empty managerId that does not resolve, or mid-level empty when not an exec |
-| Fallback certifier | Named role/person (e.g. `rachel.evans` or Security) when chain fails |
+| Fallback certifier | Named role/person (e.g. Security queue or successor) when chain fails |
 | Reassignment | Updating HR managerId then aggregating + refreshing so work items route correctly |
 
-**Examiner question:** “If Priya’s manager left yesterday, who certifies her Wire Portal access today?” You need a runbook answer before campaign launch.
+One operational consequence: mover events (Lesson 30) often change **both** department/job **and** managerId. Treating manager as a one-off IIQ edit while HR still points at Rachel means the next nightly Aggregate MNB-HR silently undoes your “fix” — and any open approvals may already have routed wrong.
 
 ---
 
@@ -67,6 +105,8 @@ Identity: rachel.evans (MNB00005)
 
 ### Task 1 — Locate Priya’s HR managerId
 
+Start in the authoritative file, not the cube. If HR and IIQ disagree later, you need a known baseline from source.
+
 1. Open `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`).
 2. Find the row for `priya.wire` / `MNB00090`.
 3. Record: `employeeId`, `managerId`, `departmentCode`, `jobCode`, `jobTitle`.
@@ -76,6 +116,8 @@ Identity: rachel.evans (MNB00005)
 **If it fails:** Confirm you did not already apply the Lesson 30 mover delta (that file switches manager to `MNB00006`).
 
 ### Task 2 — Resolve the manager identity in IIQ
+
+Prove the promotion path worked: HR employeeId of the manager became a live Manager link on the cube.
 
 1. Open **Identities → Identity Warehouse** (or equivalent).
 2. Search `priya.wire` and open the cube.
@@ -87,6 +129,8 @@ Identity: rachel.evans (MNB00005)
 **If it fails:** Re-run Account Aggregation for MNB-HR and Refresh MNB Identities; verify manager attribute promotion on the application schema.
 
 ### Task 3 — Draw a three-node chain (where data allows)
+
+Hierarchy is easier to defend when you can sketch it. Add at least one peer under Rachel so the diagram is not a single edge.
 
 1. From Priya, walk manager → manager’s manager if present.
 2. Pick two additional active employees who report to Rachel (search HR for `managerId,MNB00005` or browse cubes).
@@ -106,6 +150,8 @@ priya.wire   marcus.approve  (examples)
 
 ### Task 4 — Classify empty managerId
 
+Train yourself to separate intentional tops from data defects before you open tickets against executives.
+
 1. Open HR rows for leaders `MNB00001`–`MNB00008` (or search cubes for empty manager).
 2. Mark each empty managerId as **intentional executive top** or **data defect**.
 3. Search for any **non-executive** with blank managerId—those are defects.
@@ -115,6 +161,8 @@ priya.wire   marcus.approve  (examples)
 **If it fails:** Export a population “Active employees, manager is null” and triage each row with HR.
 
 ### Task 5 — Simulate a manager change (lab only)
+
+Prove the reassignment path end-to-end: edit HR, aggregate, refresh, verify — then restore so Lesson 30 and peers stay consistent.
 
 1. **Backup** `~/iiq-lab-data/HRApplications.txt`.
 2. Change `priya.wire`’s `managerId` temporarily to `MNB00006` (`sanjay.kapoor`)—do **not** change dept/job yet (that is Lesson 30).
@@ -129,6 +177,8 @@ priya.wire   marcus.approve  (examples)
 
 ### Task 6 — Broken-chain risk note for certifications
 
+Tabletop the failure mode before campaigns exist. The control note is the artifact exams want.
+
 1. Write a short control paragraph answering:
    - What happens to open manager certifications if Rachel terminates and HR still points people at her?
    - Who is Meridian’s fallback certifier for Treasury while HR corrects data?
@@ -139,6 +189,8 @@ priya.wire   marcus.approve  (examples)
 **If it fails:** Treat this as a tabletop—IIQ need not have a live cert campaign yet (campaigns arrive later).
 
 ### Task 7 — Do not invent managers in IIQ
+
+Close with the non-negotiable production rule. Temporary cube edits create Lesson 22 flip-flops.
 
 1. Confirm you did **not** hand-edit manager on the cube as a permanent fix.
 2. Record the rule: **HR owns managerId; IIQ reflects it.**
@@ -197,6 +249,16 @@ priya.wire   marcus.approve  (examples)
 3. No—lab executives/tops intentionally have empty managerId; mid-level blanks are defects.
 4. Account Aggregation for MNB-HR, then Refresh MNB Identities (with manager/identity attribute processing enabled).
 5. HR owns the authoritative value; IIQ must not permanently invent managers that HR does not know.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “manager correlation,” “identity attributes,” and “certification owner” for hierarchy resolution and fallback patterns.
+- [SailPoint Community (Compass)](https://community.sailpoint.com/) — search “broken manager chain” / “fallback certifier” for campaign launch failures peers have hit.
+- [NIST SP 800-53 Rev. 5 — AC-5 / AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — separation of duties and least privilege context for who should review access (line management).
+- [FFIEC Information Security Booklet](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — expectations that access reviews are performed by accountable management, not orphaned queues.
+- [ISACA — Identity and Access Management fundamentals](https://www.isaca.org/resources) — search “access certification” / “manager attestation” for industry framing of review routing.
 
 ---
 

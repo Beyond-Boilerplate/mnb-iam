@@ -61,7 +61,7 @@ if [[ -n "${IMAGE_TAG:-}" ]]; then
   echo "Pinning identityiq.image.tag=${IMAGE_TAG}"
   IMAGE_SETS+=(--set-string "identityiq.image.tag=${IMAGE_TAG}")
   if [[ "${VERIFY_IMAGE_TAGS:-}" == "true" ]]; then
-    OWNER="${GHCR_OWNER:-beyond-boilerplate}"
+    OWNER="$(tr '[:upper:]' '[:lower:]' <<<"${GHCR_OWNER:-beyond-boilerplate}")"
     MANIFEST="ghcr.io/${OWNER}/identityiq:${IMAGE_TAG}"
     echo "Verifying GHCR manifest exists: ${MANIFEST}"
     if command -v docker >/dev/null 2>&1; then
@@ -69,7 +69,8 @@ if [[ -n "${IMAGE_TAG:-}" ]]; then
     elif command -v crane >/dev/null 2>&1; then
       crane manifest "$MANIFEST" >/dev/null
     else
-      echo "WARNING: neither docker nor crane available — skipping manifest verify" >&2
+      echo "ERROR: VERIFY_IMAGE_TAGS=true but neither docker nor crane is available" >&2
+      exit 1
     fi
   fi
 elif [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
@@ -128,14 +129,16 @@ if [[ "$PHASE" == "all" || "$PHASE" == "app" ]]; then
   # Give schema job a moment if it just finished as a hook
   if kubectl -n "$NS" get job sailpoint-pg-schema-init >/dev/null 2>&1; then
     echo "Waiting for schema init job (up to 5m)…"
-    kubectl -n "$NS" wait --for=condition=complete "job/sailpoint-pg-schema-init" --timeout=5m \
-      || dump_status
+    if ! kubectl -n "$NS" wait --for=condition=complete "job/sailpoint-pg-schema-init" --timeout=5m; then
+      echo "ERROR: schema initialization did not complete"
+      kubectl -n "$NS" logs job/sailpoint-pg-schema-init --all-containers --tail=200 || true
+      dump_status
+      exit 1
+    fi
   fi
   run_helm "app" \
     --set identityiq.enabled=true \
     --set identityiq-data.enabled=true
-  echo "Waiting for IdentityIQ rollout…"
-  kubectl -n "$NS" rollout status deploy/identityiq --timeout="${ROLLOUT_TIMEOUT:-8m}"
 fi
 
 echo "Release ${RELEASE} installed in $NS"

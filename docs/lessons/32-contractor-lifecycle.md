@@ -9,6 +9,7 @@
 - `lab-data/hr/MNB-HR-Employees.csv` — filter `workerType=Contractor`
 - Spotlight identity: `raj.external` (`MNB00093`) — `lab-data/apps/MNB-AWS-Cloud.csv`
 - Related: `lab-data/reference/entitlement-dictionary.csv` (`AWS_ADMIN` critical)
+- Birthright exclusion: Lesson 24 `MNB-Birthright-Employee` requires `workerType=Employee`
 
 ---
 
@@ -16,20 +17,20 @@
 
 You will be able to:
 
-1. Inventory Meridian contractors from HR using `workerType=Contractor`.
-2. Define a contractor birthright policy that is stricter than employees (minimal or request-only directory access).
-3. Enforce expiry / end-date expectations for contractors holding `AWS_ADMIN`, using `raj.external` as the worked example.
-4. Draft a manager attestation cadence for contingent workers.
-5. Tie poor contractor onboarding data (vendor email) to correlation and offboarding risk.
-6. Explain to Risk why contractors must not inherit broad employee birthright packs.
+- Inventory Meridian contractors from HR using `workerType=Contractor`
+- Define a contractor birthright policy that is stricter than employees (minimal or request-only directory access)
+- Enforce expiry / end-date expectations for contractors holding `AWS_ADMIN`, using `raj.external` as the worked example
+- Draft a manager attestation cadence for contingent workers
+- Tie poor contractor onboarding data (vendor email) to correlation and offboarding risk
+- Explain to Risk why contractors must not inherit broad employee birthright packs
 
 ---
 
 ## Why this matters
 
-**Business:** Contractors often outlive their statement of work (SOW) in the directory and cloud. A Cloud Platform Engineer with standing `AWS_ADMIN` after SOW end is an unpaid insider with production keys.
+**Business.** Contractors often outlive their statement of work (SOW) in the directory and cloud. `raj.external` is a Cloud Platform Engineer with standing `AWS_ADMIN` and a vendor mailbox (`raj.contractor@vendor-mail.invalid`). After SOW end he is an unpaid insider with production keys—unless IAM treats contingent workers as a first-class lifecycle, not a watered-down employee.
 
-**Control / audit:** Regulators expect separate joiner/leaver SLAs and attestation for contingent workers. Control owner: IAM with Technology (cloud) and HR (worker type / end dates). Examiner question: *How do you prevent contractors from receiving employee birthright, and how do you expire cloud admin?*
+**Control / audit.** Regulators expect separate joiner/leaver SLAs and attestation for contingent workers. Control owner: IAM with Technology (cloud) and HR (worker type / end dates). Examiner question: *How do you prevent contractors from receiving employee birthright, and how do you expire cloud admin?*
 
 ---
 
@@ -39,7 +40,7 @@ You will be able to:
 
 | `workerType` | Birthright expectation | Privileged access | Attestation |
 | --- | --- | --- | --- |
-| `Employee` | `MNB-Role-Employee` / ELDAP pack (Lesson 24) | Role / request with approvals | Periodic manager cert |
+| `Employee` | `MNB-Birthright-Employee` / ELDAP (Lesson 24) | Role / request with approvals | Periodic manager cert |
 | `Contractor` | Minimal or request-only; no broad packs | Mandatory end date + tighter SLA | Monthly manager attestation |
 
 ### Spotlight — `raj.external`
@@ -52,9 +53,21 @@ You will be able to:
 | job | Cloud Platform Engineer (`ITP` / `CLD01`) | AWS entitlement expected but must expire |
 | entitlement | `AWS_ADMIN` active in AWS extract | Critical — weekly review while active |
 
-### Contractor lifecycle (ASCII)
+### Why vendor email is a governance defect
 
-```text
+Lessons 17–18 taught precision correlation. Raj’s vendor domain means email-only policies create orphans—or false merges if you loosen matching. Privileged orphans delay leaver disablement. Onboarding must require a `@meridiannb.com` alias **before** AWS grant, or correlate strictly on `employeeId`.
+
+### The wrong way
+
+Broadening `MNB-Birthright-Employee` to “fix” contractors who cannot log in. That grants every contingent worker the employee pack forever. Correct path: exclude contractors from employee birthright; define a minimal contingent pack or request-only directory; privilege only via request with end date.
+
+---
+
+## How it works
+
+Contractor lifecycle is HR signal → role exclusion → privileged request with expiry → attestation → same-day privileged disable at SOW end.
+
+```
 SOW start ──► HR row (workerType=Contractor, end date)
                     │
                     ▼
@@ -68,29 +81,40 @@ SOW start ──► HR row (workerType=Contractor, end date)
         └───────────┬───────────┘
                     ▼
          Monthly manager attestation
+         (weekly if AWS_ADMIN)
                     │
          SOW end / status=0
                     ▼
          Same-day privileged disable (Lesson 31 rigor)
 ```
 
-**IIQ terms:** *Population* (e.g. `MNB-Contractors`) filters identities for certs and reports. *Birthright* is automatic role assignment—contractors should usually be excluded via assignment rule (`workerType == "Employee"`). *Attestation / certification* is the evidence that the manager still needs the contractor.
+| Control | Meridian rule |
+| --- | --- |
+| Birthright | Employee pack excludes Contractor |
+| End date source | HR `terminationDate` or companion SOW end-date attribute |
+| Max standing AWS | Align to SOW end; never open-ended |
+| While AWS active | Weekly manager + cloud owner review |
+| After SOW | Same-day disable (Sev-1) |
+
+**IIQ terms:** *Population* (e.g. `MNB-Contractors`) filters identities for certs and reports. *Birthright* assignment rules must require `workerType == "Employee"`. *Attestation / certification* is evidence the manager still needs the contractor.
 
 ---
 
 ## Before you start
 
-- [ ] IIQ up at `http://localhost:8080/identityiq`; login as `spadmin`.
-- [ ] `~/iiq-lab-data/` includes HR and `apps/MNB-AWS-Cloud.csv`.
-- [ ] Population `MNB-Contractors` exists (Lesson 07) or you can recreate: `workerType equals Contractor`.
-- [ ] You understand Jordan’s leaver residual pattern (Lesson 31)—contractors use the same privileged urgency.
-- [ ] Notebook for policy and attestation cadence.
+- [ ] IIQ up at `http://localhost:8080/identityiq`; login as `spadmin`
+- [ ] `~/iiq-lab-data/` includes HR and `apps/MNB-AWS-Cloud.csv`
+- [ ] Population `MNB-Contractors` exists (Lesson 07) or you can recreate: `workerType equals Contractor`
+- [ ] You understand Jordan’s leaver residual pattern (Lesson 31)—contractors use the same privileged urgency
+- [ ] Notebook for policy and attestation cadence
 
 ---
 
 ## Lab procedure
 
 ### Task 1 — Inventory contractors from HR
+
+You cannot control what you cannot list. Start with a roster.
 
 1. Open `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or your live HR feed).
 2. Filter / search `Contractor` in the `workerType` column.
@@ -101,11 +125,11 @@ SOW start ──► HR row (workerType=Contractor, end date)
 
 **If it fails:** Confirm `workerType` is mapped on the HR application schema (Lesson 05).
 
----
-
 ### Task 2 — Define contractor birthright policy
 
-1. Open the employee birthright role from Lesson 24 (e.g. `MNB-Role-Employee` or equivalent).
+Employee birthright must already exclude contractors—verify, then write policy text Risk can sign.
+
+1. Open the employee birthright role from Lesson 24 (`MNB-Birthright-Employee`).
 2. Confirm assignment logic requires `workerType` = `Employee` (or excludes Contractor).
 3. Write Meridian policy text:
 
@@ -117,15 +141,15 @@ MNB Contractor Birthright Policy
 - Joiner SLA: identity created within 1 business day of HR active row; access only via request or explicit SOW pack.
 ```
 
-4. Identify one contractor who incorrectly looks “employee-like” in access (notebook).
+4. Identify one contractor who incorrectly looks “employee-like” in access (notebook). Confirm `raj.external` does **not** hold `MNB-Birthright-Employee`.
 
 **Expected result:** Policy paragraph + confirmation that employee birthright does not assign to `workerType=Contractor`.
 
 **If it fails:** Document the gap and open a config ticket—do not broaden birthright to “fix” contractors.
 
----
-
 ### Task 3 — AWS contractor expiry for `raj.external`
+
+Raj is the poster child: critical entitlement + dirty identity data.
 
 1. Open identity `raj.external` in the Identity Warehouse.
 2. Confirm AWS / `AWS_ADMIN` linkage (or note uncorrelated account if email blocked correlation—Lesson 17/18).
@@ -135,7 +159,7 @@ MNB Contractor Birthright Policy
 raj.external,...,AWS_ADMIN,active
 ```
 
-4. Draft expiry controls (lab standard):
+4. Draft expiry controls:
 
 | Control | Meridian rule |
 | --- | --- |
@@ -144,13 +168,11 @@ raj.external,...,AWS_ADMIN,active
 | While active | Weekly manager + cloud owner review |
 | After SOW | Same-day disable (Sev-1), same as privileged leaver |
 
-5. Add remediation note for vendor email: onboarding must use `@meridiannb.com` alias or correlation on `employeeId` only—tie to “contractor onboarding email quality.”
+5. Add remediation note for vendor email: onboarding must use `@meridiannb.com` alias or correlation on `employeeId` only.
 
 **Expected result:** Worked example showing `raj.external` as the poster child for AWS expiry + correlation hygiene.
 
 **If it fails:** If identity missing, aggregate HR + AWS; if uncorrelated, record as finding and continue with file evidence.
-
----
 
 ### Task 4 — Manager attestation cadence
 
@@ -168,8 +190,6 @@ raj.external,...,AWS_ADMIN,active
 
 **If it fails:** Use monthly as minimum; privileged weekly is non-negotiable in Meridian training.
 
----
-
 ### Task 5 — Ghost / orphan risk write-up
 
 1. Compare Raj’s HR email (`vendor-mail.invalid`) to Meridian domain standard `@meridiannb.com`.
@@ -181,19 +201,28 @@ and delays leaver disablement. Remediation: require Meridian alias before AWS gr
 correlate on employeeId; include contractors in orphan hunt (Lesson 20).
 ```
 
-3. Link to Lesson 31: when Raj’s SOW ends, treat AWS disable with Jordan-level urgency.
+3. Link to Lesson 31: when Raj’s SOW ends, treat AWS disable with Jordan-level urgency. Link to Lesson 28: CloudAdmin is request-only—contractors never inherit employee packs to “get AWS.”
 
 **Expected result:** Finding suitable for training binder and for Technology onboarding checklist.
+
+### Task 6 — Dual-control and payments exclusion
+
+Contractors must never receive wire initiate/approve birthright. Dual control is employee job packs only.
+
+1. Confirm policy text forbids `WIRE_INIT` / `WIRE_APPR` as contractor birthright.
+2. Note: if a contractor needs payments access for a SOW, it is request + Treasury owner approval—never automatic.
+
+**Expected result:** Explicit payments exclusion line in the contractor policy page.
 
 ---
 
 ## Acceptance criteria
 
-- [ ] Contractor inventory produced from HR / population.
-- [ ] Birthright policy excludes broad employee packs for contractors.
-- [ ] `raj.external` AWS_ADMIN expiry + weekly review documented.
-- [ ] Monthly (and privileged weekly) attestation cadence written.
-- [ ] Vendor-email / correlation finding recorded.
+- [ ] Contractor inventory produced from HR / population
+- [ ] Birthright policy excludes broad employee packs for contractors
+- [ ] `raj.external` AWS_ADMIN expiry + weekly review documented
+- [ ] Monthly (and privileged weekly) attestation cadence written
+- [ ] Vendor-email / correlation finding recorded
 
 ---
 
@@ -211,12 +240,15 @@ correlate on employeeId; include contractors in orphan hunt (Lesson 20).
 
 ## Training binder evidence
 
-1. Filtered HR screenshot or exported contractor list.
-2. Population `MNB-Contractors` membership count.
-3. Birthright policy text excluding contractors.
-4. `raj.external` cube + AWS CSV line.
-5. Attestation cadence table.
-6. Vendor-email finding note.
+1. Filtered HR screenshot or exported contractor list
+2. Population `MNB-Contractors` membership count
+3. Birthright policy text excluding contractors
+4. `raj.external` cube + AWS CSV line
+5. Attestation cadence table
+6. Vendor-email finding note
+
+**Control owner:** IAM + Technology (cloud) + HR (worker type / end dates)  
+**Examiner question:** “How do you prevent contractors from receiving employee birthright, and how do you expire cloud admin?”
 
 ---
 
@@ -227,6 +259,7 @@ correlate on employeeId; include contractors in orphan hunt (Lesson 20).
 3. Why is `raj.external` a special risk beyond “is a contractor”?
 4. Which manager owns Raj’s attestation in the lab data?
 5. Should `CRM` or `WIRE_INIT` ever be contractor birthright?
+6. Why does vendor email threaten the leaver SLA?
 
 ### Answers
 
@@ -235,6 +268,17 @@ correlate on employeeId; include contractors in orphan hunt (Lesson 20).
 3. Holds critical `AWS_ADMIN` and uses a vendor email that undermines correlation and timely offboarding.
 4. `christopher.hayes` (`MNB00002`).
 5. No—those are request or job-pack only with approvals, never contractor birthright.
+6. Uncorrelated privileged accounts delay disablement—the cube never owns the account when HR says SOW ended.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “populations” and “lifecycle events” for contingent-worker filtering and LCM hooks.
+- [SailPoint Community](https://community.sailpoint.com/) — search “contractor” / “contingent worker” for birthright exclusion patterns.
+- [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management for temporary and third-party accounts.
+- [NIST SP 800-53 PS-7](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — third-party personnel security; maps to SOW end and attestation.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/) — third-party and access administration expectations for banks.
 
 ---
 

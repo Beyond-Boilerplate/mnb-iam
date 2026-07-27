@@ -7,7 +7,7 @@
 
 **Lab data:**
 - `lab-data/reference/entitlement-dictionary.csv` — `CRM`, `DWRP` requestable; `AWS_ADMIN`, `PRIV_BREAK` controlled
-- Roles from prior lessons: e.g. `MNB-Role-RelationshipManager`, developer packs
+- Roles from prior lessons: e.g. `MNB-Role-RelationshipManager`, developer packs, `MNB-Role-CloudAdmin` / `MNB-Role-BreakGlass`
 - **Requires LCM:** import `init-lcm.xml` via `iiq console` if Access Request menus are missing ([LOCAL_SETUP.md](../LOCAL_SETUP.md))
 
 ---
@@ -16,20 +16,20 @@
 
 You will be able to:
 
-1. Mark appropriate Meridian entitlements/roles as **requestable** (`CRM`, `DWRP`) for the LCM catalog.
-2. Keep critical items (`AWS_ADMIN`, `PRIV_BREAK`) hidden or strongly controlled—not casual self-service.
-3. Submit an access request (self or on-behalf) for a CRM-aligned user and observe the IdentityRequest.
-4. Verify catalog display names match the entitlement dictionary.
-5. Explain why birthright items should not clutter the request catalog.
-6. Confirm LCM prerequisites when Manage Access / Access Request UI is unavailable.
+- Mark appropriate Meridian entitlements/roles as **requestable** (`CRM`, `DWRP`) for the LCM catalog
+- Keep critical items (`AWS_ADMIN`, `PRIV_BREAK`) hidden or strongly controlled—not casual self-service
+- Submit an access request (self or on-behalf) for a CRM-aligned user and observe the IdentityRequest
+- Verify catalog display names match the entitlement dictionary
+- Explain why birthright items should not clutter the request catalog
+- Confirm LCM prerequisites when Manage Access / Access Request UI is unavailable
 
 ---
 
 ## Why this matters
 
-**Business:** If Relationship Managers cannot request CRM safely, they share passwords or open shadow SaaS. A clean catalog makes IAM the path of least resistance.
+**Business.** If Relationship Managers cannot request CRM safely, they share passwords or open shadow SaaS. When `sofia.torres` returns from leave (Lesson 33), CRM should come back through a governed request—not a shared mailbox. A clean catalog makes IAM the path of least resistance.
 
-**Control / audit:** Requestable ≠ approved. The catalog is the front door; approvals (Lesson 36) and SoD (Lessons 39–40) are the locks. Control owner: IAM Governance with app owners. Examiner question: *Which privileged entitlements are excluded from self-service, and how is that enforced?*
+**Control / audit.** Requestable ≠ approved. The catalog is the front door; approvals (Lesson 36) and SoD (Lessons 39–40) are the locks. Control owner: IAM Governance with app owners. Examiner question: *Which privileged entitlements are excluded from self-service, and how is that enforced?* Casual tiles for `AWS_ADMIN` or `PRIV_BREAK` next to CRM fail that answer.
 
 ---
 
@@ -42,13 +42,25 @@ You will be able to:
 | `CRM` | medium | Requestable | RM / CML staff |
 | `DWRP` | medium | Requestable | Developers / SRE |
 | `ELDAP` | medium | Usually birthright—not catalog noise | — |
-| `AWS_ADMIN` | critical | Not casual; hidden or break-glass/privileged path | Technology only |
+| `AWS_ADMIN` | critical | Not casual; privileged path / Lesson 28 role | Technology only |
 | `PRIV_BREAK` | critical | Emergency path only (Lesson 37) | On-call + Security |
-| `WIRE_INIT` / `WIRE_APPR` | critical | Optional requestable with Treasury owner—not birthright | Payments |
+| `WIRE_INIT` / `WIRE_APPR` | critical | Optional requestable with Treasury owner—not birthright | Payments (`priya.wire` / `marcus.approve` dual control) |
 
-### LCM request flow
+### Birthright stays out of the shopping list
 
-```text
+`amelia.brooks` already gets ELDAP via `MNB-Birthright-Employee`. Putting birthright in the catalog creates duplicate requests, confused certifiers, and “I requested baseline” tickets. Automatic packs are not requestable.
+
+### Privileged roles are not friendly neighbors
+
+Lesson 28 created `MNB-Role-CloudAdmin` and `MNB-Role-BreakGlass` as requestable objects—but **not casually**. Meridian training standard: exclude from the standard self-service catalog (or segregate behind a Privileged QuickLink). Break-glass uses Lesson 37 with ticket comment—not a one-click tile beside CRM.
+
+---
+
+## How it works
+
+LCM exposes requestable ManagedAttributes and Bundles. Submitting a cart creates an **IdentityRequest**—the audit spine for Lessons 36–38.
+
+```
 User/Manager opens Access Request (LCM)
         │
         ▼
@@ -64,13 +76,20 @@ Approval work items (Lesson 36)
 Provisioning plan / ticket (lab may be stubbed)
 ```
 
-**IIQ terms:** *Requestable* managed attribute / role flag controls catalog visibility. *IdentityRequest* is the audit object for the ask. *LCM* (Lifecycle Manager) supplies the Manage Access UI—without `init-lcm.xml` / feature activation, menus may be empty.
+| Flag / object | Effect |
+| --- | --- |
+| Requestable = true | Appears in standard catalog (subject to QuickLink populations) |
+| Requestable = false | Hidden from casual self-service |
+| IdentityRequest | Audit object: who asked, for whom, what, when, state |
+| `init-lcm.xml` | Lab prerequisite for Manage Access menus |
+
+**IIQ terms:** *Requestable* managed attribute / role flag controls catalog visibility. *LCM* (Lifecycle Manager) supplies the Manage Access UI—without `init-lcm.xml` / feature activation, menus may be empty.
 
 ---
 
 ## Before you start
 
-- [ ] IIQ at `http://localhost:8080/identityiq`.
+- [ ] IIQ at `http://localhost:8080/identityiq`
 - [ ] Confirm LCM: **Manage Access** / Access Request (or equivalent) visible. If not:
 
 ```bash
@@ -82,15 +101,17 @@ import init-lcm.xml
 quit
 ```
 
-- [ ] Entitlements aggregated; dictionary descriptions from Lesson 10 applied where possible.
-- [ ] Pick a target identity who needs CRM but may lack it (e.g. an RM without CRM, or use on-behalf for training user)—do not break `sofia.torres` freeze state unnecessarily; prefer `nina.cruz` / `amelia.brooks` / a test identity as appropriate.
-- [ ] Notebook for catalog decisions.
+- [ ] Entitlements aggregated; dictionary descriptions from Lesson 10 applied where possible
+- [ ] Pick a target identity who needs CRM but may lack it—do not break `sofia.torres` freeze state unnecessarily; prefer `nina.cruz` / `amelia.brooks` / a test identity as appropriate
+- [ ] Notebook for catalog decisions
 
 ---
 
 ## Lab procedure
 
 ### Task 1 — Align catalog with the entitlement dictionary
+
+Managers request what they recognize. Raw codes without dictionary names fail UX and exams.
 
 1. Open `~/iiq-lab-data/reference/entitlement-dictionary.csv`.
 2. Note display names for `CRM` (Salesforce CRM) and `DWRP` (Dev Workstation / Repo).
@@ -101,19 +122,17 @@ quit
 
 **If it fails:** Edit managed attribute XML via Debug only if UI lacks the flag; keep `MNB-` naming discipline.
 
----
-
 ### Task 2 — Guard AWS_ADMIN and PRIV_BREAK
 
-1. Locate managed attributes / roles for `AWS_ADMIN` and `PRIV_BREAK` (and roles `MNB-Role-CloudAdmin` / `MNB-Role-BreakGlass` if created in Lesson 28).
+This is the examiner question. Document the decision even if UI options are limited.
+
+1. Locate managed attributes / roles for `AWS_ADMIN` and `PRIV_BREAK` (and roles `MNB-Role-CloudAdmin` / `MNB-Role-BreakGlass` from Lesson 28).
 2. Set **Requestable** = false for casual catalog, **or** requestable only with warning + restricted population (document which approach you chose).
-3. Meridian training standard: **not casually requestable**. Break-glass uses Lesson 37 path with ticket comment—not a friendly tile next to CRM.
+3. Meridian training standard: **not casually requestable**. Break-glass uses Lesson 37 path with ticket comment.
 
 **Expected result:** Written decision: “AWS_ADMIN / PRIV_BREAK excluded from standard self-service catalog.”
 
 **If it fails:** If you cannot unset requestable, document compensating control (approval always Security + hide via QuickLink population).
-
----
 
 ### Task 3 — Mark relationship / developer request packs
 
@@ -125,9 +144,9 @@ quit
 
 **If it fails:** Entitlement-level requestable CRM/DWRP alone is enough for this lesson.
 
----
-
 ### Task 4 — Submit a CRM access request
+
+The catalog only matters if someone can complete an ask. Produce an IdentityRequest for Lessons 36–38.
 
 1. Open LCM **Manage Access** / **Access Request** (or equivalent).
 2. Choose identity: prefer an RM-aligned user missing CRM, or request on-behalf as `spadmin` for training.
@@ -139,8 +158,6 @@ quit
 
 **If it fails:** Verify LCM import; check QuickLink populations include your user; try `spadmin` on-behalf request.
 
----
-
 ### Task 5 — Track the IdentityRequest
 
 1. Navigate to Access Requests / Identity Requests search (or Debug → IdentityRequest).
@@ -151,8 +168,6 @@ quit
 
 **If it fails:** Lesson 38 deep-dives tracking; for now capture any request id / work item id.
 
----
-
 ### Task 6 — UX note for Risk
 
 1. Browse the catalog as an end user would.
@@ -162,15 +177,24 @@ quit
 
 **Expected result:** Screenshot of catalog showing CRM/DWRP present and privileged items absent or clearly segregated.
 
+### Task 7 — Dual-control catalog note
+
+Wire access may be requestable with Treasury owner approval—but initiator and approver must remain separate items. Never one catalog tile for “full wire access.”
+
+1. Record: if `WIRE_INIT` / `WIRE_APPR` are requestable, they are separate entries owned by Payments (`rachel.evans`).
+2. Cross-link Lessons 25 and 40 for dual-control enforcement.
+
+**Expected result:** Catalog note forbidding a combined wire pack tile.
+
 ---
 
 ## Acceptance criteria
 
-- [ ] `CRM` and `DWRP` marked requestable with dictionary-aligned names.
-- [ ] `AWS_ADMIN` / `PRIV_BREAK` not casually requestable (documented control).
-- [ ] At least one access request submitted.
-- [ ] IdentityRequest (or work item) id recorded.
-- [ ] LCM prerequisite verified or remediated (`init-lcm.xml`).
+- [ ] `CRM` and `DWRP` marked requestable with dictionary-aligned names
+- [ ] `AWS_ADMIN` / `PRIV_BREAK` not casually requestable (documented control)
+- [ ] At least one access request submitted
+- [ ] IdentityRequest (or work item) id recorded
+- [ ] LCM prerequisite verified or remediated (`init-lcm.xml`)
 
 ---
 
@@ -188,11 +212,14 @@ quit
 
 ## Training binder evidence
 
-1. Dictionary excerpt for CRM/DWRP.
-2. Managed attribute screenshots (requestable flags).
-3. Written AWS/PRIV_BREAK exclusion decision.
-4. Access request confirmation / IdentityRequest id.
-5. Catalog UX screenshot.
+1. Dictionary excerpt for CRM/DWRP
+2. Managed attribute screenshots (requestable flags)
+3. Written AWS/PRIV_BREAK exclusion decision
+4. Access request confirmation / IdentityRequest id
+5. Catalog UX screenshot
+
+**Control owner:** IAM Governance with app owners  
+**Examiner question:** “Which privileged entitlements are excluded from self-service, and how is that enforced?”
 
 ---
 
@@ -203,6 +230,7 @@ quit
 3. Where do you track the submitted ask?
 4. Does requestable mean the access is already approved?
 5. What import enables LCM starter objects in the lab?
+6. Why keep birthright out of the catalog?
 
 ### Answers
 
@@ -211,6 +239,17 @@ quit
 3. IdentityRequest / Access Request search (and related work items).
 4. No—requestable only means visible to request; approvals and SoD still apply.
 5. `init-lcm.xml` via `iiq console`.
+6. It is automatic; catalog noise creates duplicate requests and confuses certifiers.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Lifecycle Manager” and “requestable” for catalog flags and IdentityRequest objects.
+- [SailPoint Community](https://community.sailpoint.com/) — search “access request catalog” / “QuickLink population” for hiding privileged items.
+- [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management; requests as the authorized path to new access.
+- [NIST SP 800-53 AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — least privilege; why critical items stay off casual catalogs.
+- [CIS Controls v8 — Control 6](https://www.cisecurity.org/controls/access-control-management) — access control management practices for self-service vs privileged paths.
 
 ---
 

@@ -1,0 +1,78 @@
+name: CI quality
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate workflows, scripts, Helm, and academy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint GitHub Actions
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --volume "${GITHUB_WORKSPACE}:/repo" \
+            --workdir /repo \
+            rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
+            .github/workflows/*.yml
+
+      - name: Validate shell syntax
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' script; do
+            bash -n "$script"
+          done < <(git ls-files -z '*.sh')
+
+      - name: Validate plain YAML
+        run: |
+          set -euo pipefail
+          ruby -ryaml -e '
+            files = Dir[".github/workflows/*.{yml,yaml}"] +
+                    Dir["deploy/helm/{values,charts/*}/*.{yml,yaml}"]
+            files.each { |file| YAML.load_file(file); puts "OK #{file}" }
+          '
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.16.4
+
+      - name: Lint and render Helm
+        working-directory: deploy/helm
+        run: |
+          set -euo pipefail
+          ./scripts/update-deps.sh
+          helm lint charts/sailpoint --values values/local-homelab.yaml
+          helm template sailpoint charts/sailpoint \
+            --namespace sailpoint \
+            --values values/local-homelab.yaml \
+            >/tmp/sailpoint-rendered.yaml
+          test -s /tmp/sailpoint-rendered.yaml
+
+      - name: Build academy
+        run: |
+          set -euo pipefail
+          python3 -m py_compile learn/build.py tools/generate-mnb-curriculum.py
+          python3 learn/build.py
+          test -f learn/dist/index.html
+          lesson_count=$(find docs/lessons -maxdepth 1 -name '[0-9]*.md' -print | wc -l | tr -d ' ')
+          html_count=$(find learn/dist -maxdepth 1 -name '*.html' -print | wc -l | tr -d ' ')
+          expected_count=$((lesson_count + 1))
+          if [ "$html_count" -ne "$expected_count" ]; then
+            echo "::error::Expected ${expected_count} academy HTML files; found ${html_count}"
+            exit 1
+          fi
+          grep -qiE 'Meridian|IAM Academy|Curriculum' learn/dist/index.html

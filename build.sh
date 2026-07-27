@@ -1,3 +1,4 @@
 #!/bin/sh
+set -eu
 
-./lib/ant/bin/ant $@
+exec ./lib/ant/bin/ant "$@"

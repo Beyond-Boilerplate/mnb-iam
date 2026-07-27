@@ -2,13 +2,14 @@
 
 **Level:** Intermediate  
 **Track:** Connectors — ERP / HR / Banking  
-**Time:** 75–90 min  
-**Prereq:** Lesson 79 — SAP Direct Security; Lesson 77 Workday patterns  
+**Time:** 90–120 min  
+**Prereq:** Lesson 79 — SAP Direct Security; Lesson 77 — Workday HCM (authoritative-candidate pattern)  
 
 **Lab data:**
 - Repo: `lab-data/connectors/connector-selection-matrix.csv` (PeopleSoft row)
 - Repo: `lab-data/connectors/features-string-glossary.md`
 - Repo: `lab-data/connectors/jdbc/` (DB alternate patterns)
+- Contrast: DelimitedFile `MNB-HR` from foundations
 
 ---
 
@@ -16,131 +17,247 @@
 
 You will be able to:
 
-- Select **PeopleSoft HCM Database** vs **PeopleSoft Direct** per Meridian matrix notes
-- Create **MNB-PeopleSoft-HCM** application shell for worker/person data
-- Map EmplID, job, status, and department fields into IIQ identity attributes
-- Complete lab-without-live-target PS mock extract and aggregation checklist
-- Document authoritative coexistence with Workday/SAP HR/CSV and handoff to Lesson 81 Oracle EBS
+- Select **PeopleSoft HCM Database** vs **PeopleSoft Direct** using Meridian's connector matrix and defend the choice
+- Explain PeopleSoft HCM building blocks — EMPLID, job data, effective dating — and how Component Interfaces / Integration Broker fit connectivity
+- Create **MNB-PeopleSoft-HCM** as an authoritative **candidate** (same discipline as Workday: do not flip both authoritative)
+- Map EMPLID, job, status, and department into IIQ identity attributes with a bridge to Meridian `employeeId`
+- Complete the lesson with mock/JDBC fallback when no PeopleSoft environment is available, and hand off cleanly to Lesson 81 (Oracle EBS)
 
 ---
 
 ## Why this matters
 
-**Business.** Legacy Meridian entities may still run PeopleSoft HCM for HR and payroll. IAM must ingest EmplID-based workers without treating PS security the same as HCM person data.
+**Business.** Legacy Meridian entities may still run PeopleSoft HCM for HR and payroll long after corporate moves toward Workday. Those workers have **EMPLIDs**, job effective dates, and department IDs that never touch the Workday tenant. If IAM ignores PeopleSoft, joiners in that entity never enter the birthright pipeline — or someone dumps a spreadsheet into `MNB-HR` and hopes the formats match.
 
-**Control / audit.** Examiners ask which HCM system is authoritative per legal entity. Matrix-driven connector choice plus dual-run evidence prevent silent identity splits.
+**Control / audit.** Examiners ask *which HCM system is authoritative per legal entity*. "We have Workday" is not an answer if a thrift subsidiary still runs PeopleSoft. Matrix-driven connector choice plus dual-run evidence (Lesson 77 pattern) prevent silent identity splits when two HCM feeds overlap.
 
 ---
 
 ## Concepts
 
-**PeopleSoft options (matrix):** preferred **PeopleSoft HCM Database**; alternate **PeopleSoft - Direct**.
+### EMPLID is the person key — not Meridian employeeId
 
-| Option | Typical use |
-| --- | --- |
-| PeopleSoft HCM Database | Read HR tables / views via DB connectivity |
-| PeopleSoft Direct | Application-level PS connector path |
+PeopleSoft identifies a person with **EMPLID**. Meridian cubes key on `employeeId` (`MNB#####`). Same bridge problem as SAP PERNR (Lesson 78): without `employeeId` ↔ `psEmplId`, correlation fails. Keep the native EMPLID on the identity forever; do not overwrite Meridian IDs with raw EMPLIDs.
+
+| PeopleSoft concept | What it is | IAM use |
+| --- | --- | --- |
+| **EMPLID** | Person identifier | Native key → `psEmplId` + bridge |
+| **JOB / Job Data** | Employment rows: dept, job code, supervisor, status | Department, title, manager, active/inactive |
+| **EFFDT** | Effective date of a job row | Must select *current* effective-dated row |
+| **HR_STATUS / EMPL_STATUS** | Active, leave, terminated, etc. | Map carefully — leave ≠ terminate (Sofia pattern) |
+| **OPRID / User Profile** | PeopleSoft *application* login | Often a **target** account — not the HCM worker feed |
+
+### Effective dating — the bug factories love
+
+PeopleSoft job data is **effective-dated**: multiple rows per EMPLID across time. Aggregate "all JOB rows" and you invent duplicate accounts or thrash department attributes every night. Production designs use a **current effective-dated view** (as-of today, highest EFFDT / EFFSEQ rules per your PS version). Document that view name in the binder.
+
+### Component Interfaces and Integration Broker
+
+Two common enterprise integration surfaces:
+
+- **Component Interface (CI):** a PeopleTools API over a component (e.g. PERSON / JOB). Connectors or custom integrations invoke CIs to read/write structured HCM data with PeopleSoft's business rules.
+- **Integration Broker:** PeopleSoft's messaging framework (async/sync services) for publishing HR events or exposing services to external systems.
+
+The SailPoint **PeopleSoft Direct** path typically leans on application-level integration (CI / related APIs depending on version). The **PeopleSoft HCM Database** path reads HR tables/views via **JDBC** — faster to stand up for read-only identity feed if DB access is allowed, with the trade-off that you bypass some Component Interface validations and must own SQL/view correctness.
+
+| Option (matrix) | Typical use | Trade-off |
+| --- | --- | --- |
+| **PeopleSoft HCM Database** (preferred at Meridian) | Read current HR views via JDBC | You own the view; no PS UI license needed for read |
+| **PeopleSoft - Direct** (alternate) | Application connector / CI-style path | Closer to PS security model; licensing/version sensitive |
 
 ```
 PeopleSoft HCM
-        │
-        ▼
- MNB-PeopleSoft-HCM
-        │
-        ▼
- Identity attributes (non-auth in lab unless directed)
+   ├── Database views (current JOB + PERSONAL) ──► MNB-PeopleSoft-HCM (preferred lab path)
+   └── Direct / CI / Broker path                 ──► same app name if chosen; document why
+            │
+            ▼
+   Identity attributes (NON-authoritative in lab unless directed)
 ```
 
-**EmplID** is the PeopleSoft person key—bridge to `employeeId` like SAP PERNR.
+### Authoritative-candidate pattern (copy Workday discipline)
 
-**Lab-without-live-target.** Mock PS extract + maps + coexistence card; Next lesson moves to Oracle EBS.
+`MNB-HR` remains lab authoritative. `MNB-Workday-HCM` is a corporate candidate (Lesson 77). `MNB-PeopleSoft-HCM` is a **legal-entity candidate**. Never enable authoritative create on PeopleSoft *and* HR/Workday for the same humans. Segment by company/`SETID`/population rule, or dual-run then flip one.
+
+### HCM is not PeopleSoft security
+
+PeopleSoft also has roles, permission lists, and user profiles for the PS application itself. Those are **out of scope** for `MNB-PeopleSoft-HCM`. If Meridian later governs PS application security, that is a separate application object — same split as SAP HR vs SAP Direct.
+
+---
+
+## How it works
+
+```
+IdentityIQ (MNB-PeopleSoft-HCM)
+        │
+        ├── Path A (preferred): JDBC to PS HR views
+        │         SELECT current EMPLID, JOB, status, dept, manager…
+        │
+        └── Path B (alternate): PeopleSoft Direct / CI / Integration Broker
+                  read PERSON / JOB via connector configuration
+        ▼
+Account or identity aggregation rows
+        │  correlate via employeeId bridge
+        ▼
+Existing cubes (MNB-HR / future Workday) — create-identities OFF in lab
+```
+
+| Operation | PeopleSoft behavior | IIQ behavior |
+| --- | --- | --- |
+| Aggregation | Current effective-dated worker query or CI read | One row per EMPLID in scope |
+| Correlation | Bridge EMPLID ↔ `employeeId` | Match corporate cubes |
+| Status map | HR_STATUS / EMPL_STATUS (+ leave) | Active/inactive; leave as attribute |
+| Manager | Supervisor ID on JOB | Resolve via EMPLID → identity after bridge |
+
+**Matrix reminder:** preferred **PeopleSoft HCM Database**; alternate **PeopleSoft - Direct**. Lab uses Database-style mapping via mock/JDBC patterns; choose Direct only if licensed and architecture prefers CI/Broker.
+
+---
+
+## Real-world setup (outside IIQ)
+
+### Step 1 — Choose the path and get access
+
+1. Architecture decision recorded: HCM Database vs Direct (Task 1 will formalize).
+2. **Database path:** DBA creates read-only DB user `iiq_ps_hr_ro` on the HR reporting database; grant SELECT only on agreed views (not write to PSPROD casually).
+3. **Direct / CI path:** PeopleSoft admin exposes required Component Interfaces / service operations; Integration Broker nodes and authentication configured; network allow-list from IIQ.
+
+### Step 2 — Current-effective view contract
+
+1. HRIS + DBA publish view `MNB_IIQ_PS_WORKERS_CUR` (name example) selecting current JOB + personal fields: EMPLID, names, email, HR status, leave indicators, DEPTID, JOBCODE, SUPERVISOR_ID, company/SETID.
+2. Document EFFDT logic in one paragraph — this is what auditors ask when department thrash appears.
+
+### Step 3 — EMPLID bridge
+
+1. Agree bridge source: HRIS crosswalk table or attribute sync from corporate directory.
+2. Owner: `sofia.torres` (HRIS proxy); IAM owner: `helen.ross`.
+
+### Step 4 — Governance records
+
+Document: path choice, connect string location in vault (no secrets in binder), view name, bridge owner, authoritative stance (**candidate**), population (which company/SETID), residual risks.
 
 ---
 
 ## Before you start
 
-- [ ] IIQ up; Workday/SAP HR coexistence ideas fresh
-- [ ] Matrix PeopleSoft row open
-- [ ] JDBC fixtures available if DB-style PS HCM path used
+- [ ] IIQ up; Workday dual-run / single-auth ideas from Lesson 77 fresh
+- [ ] Matrix PeopleSoft row open; JDBC fixtures under `lab-data/connectors/jdbc/` available if using DB-style path
+- [ ] Decide path: live PeopleSoft / JDBC lab DB, or mock CSV fallback
+- [ ] Personas: `sofia.torres`, `kai.nguyen`, `nina.joiner`; owner `helen.ross`
 
 ---
 
 ## Lab procedure
 
-### Task 1 — Matrix choice
+### Task 1 — Matrix choice and naming
 
-1. Record preferred: PeopleSoft HCM Database; alternate PeopleSoft Direct.
-2. Write Meridian decision: *Lab uses HCM Database-style mapping via mock/JDBC patterns; Direct only if app connector licensed and preferred by architecture.*
+Every connector choice becomes tribal knowledge unless written down.
 
-**Expected result:** Decision sentence.
+1. Record preferred: **PeopleSoft HCM Database**; alternate: **PeopleSoft Direct**.
+2. Write Meridian decision: *Lab uses HCM Database-style mapping via mock/JDBC patterns; Direct only if the application connector is licensed and architecture prefers Component Interface / Integration Broker.*
+3. Application name locked: `MNB-PeopleSoft-HCM`. Owner `helen.ross`; HR contact `sofia.torres`.
+
+**Expected result:** Decision sentence + naming card in the binder.
 
 ### Task 2 — Create MNB-PeopleSoft-HCM
 
-1. Applications → Add New → **PeopleSoft HCM Database** or **PeopleSoft** Direct per available template.
-2. Name: `MNB-PeopleSoft-HCM`. Owner: `helen.ross`; HR contact `sofia.torres`.
-3. Connection placeholders (JDBC URL or PS conn)—vault only.
-4. Save shell.
+1. Applications → Add New → **PeopleSoft HCM Database** or **PeopleSoft** Direct per available template and Task 1 decision.
+2. Connection placeholders:
+   - Database path: JDBC URL, user `iiq_ps_hr_ro`, password `"in vault"`, schema/view hints
+   - Direct path: PS connection / CI / Broker endpoints `"in vault"`
+3. Save shell. Live path: **Test Connection**.
 
-**Expected result:** Application object named correctly.
+**Expected result:** Application object named `MNB-PeopleSoft-HCM`; live path shows Test Connection success.
 
-**If it fails:** Build DelimitedFile/JDBC shadow labeled clearly for training.
+**If it fails:** Wrong template (Direct vs DB) → revisit matrix and recreate from correct type. JDBC timeout → off-peak + filtered view. Build DelimitedFile/JDBC shadow labeled clearly for training if no PS environment.
 
-### Task 3 — Schema map
+### Task 3 — Schema map and bridge
 
-1. `emplId` → `psEmplId` + bridge to `employeeId`.
-2. `userName` / opid → account or identity name strategy (document one).
-3. `hrStatus` / `effStatus` → active/inactive.
-4. `deptId`, `jobCode`, `managerId` → identity attrs.
+1. `emplId` → `psEmplId` (always retain).
+2. Bridge design: `employeeId,psEmplId` — same discipline as Workday Worker ID and SAP PERNR.
+3. `userName` / OPRID strategy: document whether OPRID is correlated as an HCM attribute or deferred to a future PS **security** application (recommended: do not overload this HCM app with PS roles).
+4. `hrStatus` / `emplStatus` → active/inactive; separate leave indicator if present.
+5. `deptId`, `jobCode`, `managerId` (supervisor EMPLID) → identity attrs + manager resolution plan.
+6. **Create identities: OFF** — authoritative candidate only.
 
-**Expected result:** Schema map table.
+**Expected result:** Schema/bridge map table; create-identities off; security scope boundary noted.
 
-### Task 4 — Mock extract (lab-without-live-target)
+### Task 4 — Mock extract (fallback: no live PeopleSoft)
 
-1. Create `~/iiq-lab-data/connectors/peoplesoft/MNB-PeopleSoft-HCM-mock.csv` with `emplId,employeeId,userName,email,hrStatus,deptId,jobCode,managerId`.
-2. Include `sofia.torres`, `kai.nguyen`, `nina.joiner`.
-3. Aggregate via Shadow DelimitedFile or JDBC staging loaded from mock.
+1. Create `~/iiq-lab-data/connectors/peoplesoft/MNB-PeopleSoft-HCM-mock.csv`:
 
-**Expected result:** ≥3 workers in Task Result.
+```csv
+emplId,employeeId,userName,email,hrStatus,onLeave,deptId,jobCode,managerId
+PS10095,MNB00095,sofia.torres,sofia.torres@meridiannb.com,A,true,CML,RM01,PS10006
+PS10096,MNB00096,kai.nguyen,kai.nguyen@meridiannb.com,A,false,IT,ENG01,PS10003
+PS10120,MNB00120,nina.joiner,nina.joiner@meridiannb.com,A,false,RET,TEL01,PS10007
+PS10999,MNB00999,ex.psworker,ex.psworker@meridiannb.com,I,false,RET,TEL01,PS10007
+```
 
-### Task 5 — Aggregation task
+2. Optional: stage the same rows into a JDBC table using patterns under `lab-data/connectors/jdbc/` if your lab DB is up — still non-authoritative.
+3. Read stories: Sofia active + on leave; Nina joiner; Kai IT; inactive row for leaver mapping tests.
 
-1. `MNB-PeopleSoft-HCM-Account-Aggregation`
-2. Keep non-authoritative unless sandbox dedicated to PS-auth experiment.
-3. Spot-check bridge fields on cubes after correlation refresh design.
+**Expected result:** ≥3 active workers (+ inactive) ready to aggregate; leave vs terminate understood.
 
-**Expected result:** Task Result + non-auth note.
+### Task 5 — Aggregation task (non-authoritative)
 
-### Task 6 — Coexistence & cutover stub
+1. Create `MNB-PeopleSoft-HCM-Account-Aggregation`.
+2. Run against live DB/Direct, JDBC staging, or DelimitedFile shadow.
+3. Binder banner: **non-authoritative lab run — do not flip with MNB-HR / Workday both auth.**
+4. Spot-check bridge fields on design: after correlation refresh, `psEmplId` should sit on cubes without creating duplicates.
 
-1. Extend coexistence matrix from Lesson 78: add PeopleSoft legal entity column.
-2. Dual-run sample vs `MNB-HR` for 5 EmplIDs.
-3. Rollback: disable PS auth flag; revert to CSV/Workday.
+**Expected result:** Task Result + non-auth note; Nina/Sofia/Kai spot-checks planned.
 
-**Expected result:** Updated coexistence matrix.
+**If it fails:** Duplicate identities → authoritative flag mistake. EFFDT duplicates → view not current-only. EmplID collisions across entities → namespace by company/SETID in correlation.
 
-### Task 7 — Security vs HCM note
+### Task 6 — Coexistence and dual-run stub (Workday pattern)
 
-1. Clarify PS application security roles are out of scope for this HCM lesson (similar to SAP split).
-2. If PS security needed later, separate application object—do not overload `MNB-PeopleSoft-HCM`.
+Extend the Lesson 78 coexistence matrix:
 
-**Expected result:** Scope boundary paragraph.
+| Source | Population | Authoritative? |
+| --- | --- | --- |
+| `MNB-HR` | Corporate lab | Yes (lab today) |
+| `MNB-Workday-HCM` | Future corporate HCM | Candidate |
+| `MNB-SAP-HR` | SAP HCM entities | Segmented / candidate |
+| `MNB-PeopleSoft-HCM` | PeopleSoft legal entity | **Candidate — this lesson** |
 
-### Task 8 — Examiner Q&A + handoff
+1. Dual-run sample: reconcile 5 EMPLID/`employeeId` pairs vs `MNB-HR` (include `nina.joiner`, `sofia.torres`).
+2. Cutover stub: Phase 1 parallel → Phase 2 fix deltas → Phase 3 flip **only** the PeopleSoft population's authoritative flag with rollback (disable PS auth; revert to CSV/HR).
+3. Explicit warning: **do not flip PeopleSoft and Workday authoritative for overlapping people.**
 
-1. Answer: *Which connector inventories PeopleSoft workers?* → `MNB-PeopleSoft-HCM` per matrix.
-2. Note Next: Oracle E-Business Suite connector (Lesson 81) for EBS responsibilities.
+**Expected result:** Updated coexistence matrix + dual-run stub with rollback.
 
-**Expected result:** Q&A + handoff sentence in binder.
+### Task 7 — Security vs HCM scope boundary
+
+1. Write: *PeopleSoft application security (roles, permission lists, OPRID entitlements) is out of scope for `MNB-PeopleSoft-HCM`. A future `MNB-PeopleSoft-Security` (name TBD) would own that — same pattern as Lessons 78–79.*
+2. If mock data tempted you to add a `roles` column on this app, remove it — wrong object model.
+
+**Expected result:** Scope boundary paragraph in the binder.
+
+### Task 8 — Examiner Q&A and Lesson 81 handoff
+
+1. Answer: *Which connector inventories PeopleSoft workers?* → `MNB-PeopleSoft-HCM`, preferred path PeopleSoft HCM Database per matrix.
+2. Answer: *How do you avoid duplicate cubes during HCM modernization?* → single authoritative per population; dual-run; create-identities off on candidates.
+3. Handoff: Next lesson moves to **Oracle E-Business Suite** responsibilities/security (`Lesson 81`) — another ERP target, not another HR authoritative feed unless explicitly designed.
+
+**Expected result:** Q&A + handoff sentence in the binder.
+
+### Task 9 — Residual risk
+
+Record `RR-PS-EFFDT-01`: *Incorrect effective-date filtering duplicates workers or oscillates department/manager attributes. Compensating control: certified current-effective view owned by HRIS/DBA; aggregation tests on EFFDT boundaries.* Owner: `sofia.torres`.
+
+Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Workday still authoritative for the same EMPLID/`employeeId` creates duplicate cubes. Compensating control: population segmentation + dual-run gate.* Owner: `helen.ross`.
+
+**Expected result:** Both RRs logged with owners.
 
 ---
 
 ## Acceptance criteria
 
 - [ ] Matrix HCM Database vs Direct decision recorded
-- [ ] `MNB-PeopleSoft-HCM` shell + schema/bridge map
-- [ ] Mock extract aggregated (shadow/live/JDBC staging)
-- [ ] Coexistence matrix updated; security scope boundary written
-- [ ] Examiner Q&A and Lesson 81 handoff noted
+- [ ] Real-world CI/Broker or JDBC setup understood; current-effective view contract noted
+- [ ] `MNB-PeopleSoft-HCM` shell + schema/bridge map; create-identities off
+- [ ] Mock (or live/JDBC) aggregation evidence with Sofia/Kai/Nina stories
+- [ ] Coexistence matrix + dual-run stub; security scope boundary written
+- [ ] Examiner Q&A, Lesson 81 handoff, `RR-PS-EFFDT-01` + `RR-PS-AUTH-01`
 
 ---
 
@@ -148,56 +265,67 @@ PeopleSoft HCM
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| EmplID collisions | Shared ids across entities | Namespace by company / setid in correlation |
-| Effdt confusion | Multiple effective-dated rows | Use current effective-dated view |
-| JDBC timeout | Heavy PS queries | Filter active employees; schedule off-peak |
-| Authoritative duplicates | PS + HR both auth | Segment populations immediately |
-| Wrong template chosen | Direct vs DB mismatch | Revisit matrix; recreate app from correct template |
-| Security roles mixed in | Overloaded app | Split to future PS security app |
+| EMPLID collisions | Shared IDs across companies/SETIDs | Namespace correlation by company; segment populations |
+| Department / manager thrash nightly | Multiple effective-dated JOB rows aggregated | Use current-effective view only (`RR-PS-EFFDT-01`) |
+| JDBC timeout | Heavy PS queries / full history | Filter active employees; schedule off-peak; index views |
+| Authoritative duplicates | PS + HR/Workday both auth | Segment or disable one auth flag immediately (`RR-PS-AUTH-01`) |
+| Wrong template chosen | Direct vs Database mismatch | Revisit matrix; recreate app from correct connector type |
+| Security roles mixed into HCM app | Overloaded object model | Split to future PS security application; remove role entitlements here |
 
 ---
 
 ## Training binder evidence
 
-- Matrix decision
-- App config redacted + schema map
-- Mock/Task Result
-- Coexistence matrix update
-- Examiner Q&A + Lesson 81 handoff
+- Matrix decision + naming card
+- Connection worksheet (path, view/CI — no secrets)
+- Schema/bridge map + mock/live Task Result
+- Coexistence matrix + dual-run stub with rollback
+- Security scope boundary, examiner Q&A, Lesson 81 handoff, both RRs
 
 ---
 
 ## Knowledge check
 
-1. What preferred PeopleSoft connector does the matrix list?
+1. What preferred PeopleSoft connector does the Meridian matrix list?
 2. What is the Meridian PeopleSoft HCM application name?
-3. Why bridge EmplID to employeeId?
-4. Should PS security roles live on the HCM app?
-5. What lesson follows for Oracle E-Business?
-6. Name one persona in the PS mock.
+3. Why bridge EMPLID to `employeeId`?
+4. Should PeopleSoft security roles live on the HCM application?
+5. Why must you not flip PeopleSoft and Workday authoritative together for the same people?
+6. What lesson follows for Oracle E-Business Suite?
 
 ### Answers
 
 1. PeopleSoft HCM Database (alternate PeopleSoft Direct).
 2. `MNB-PeopleSoft-HCM`.
-3. IIQ cubes and Meridian HR keys use `MNB#####` / employeeId, not raw EmplID alone.
-4. No—keep security in a separate application object.
-5. Lesson 81 — Oracle EBS Connector.
-6. `sofia.torres`, `kai.nguyen`, or `nina.joiner`.
+3. IIQ cubes and Meridian HR keys use `MNB#####` / `employeeId`; EMPLID is the PeopleSoft native key and must be bridged.
+4. No — keep HCM worker data separate from PS application security (future separate app).
+5. Two authoritative sources for one population create duplicate cubes and unexplained churn — use dual-run and population segmentation (Workday pattern).
+6. Lesson 81 — Oracle EBS Connector.
+
+---
+
+## Further reading
+
+- [Oracle PeopleSoft documentation](https://docs.oracle.com/en/applications/peoplesoft/) — landing page; search your Tools/HCM version for "Component Interface" and "Integration Broker" administration guides.
+- [Oracle PeopleSoft HCM documentation](https://docs.oracle.com/en/applications/peoplesoft/) — search "job data" and "effective date" for the EFFDT behavior behind `RR-PS-EFFDT-01`.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search "PeopleSoft" for HCM Database vs Direct application guides and featuresString notes.
+- [SailPoint Developer Community](https://developer.sailpoint.com/discuss/) — JDBC view and PeopleSoft connector troubleshooting threads.
+- [NIST SP 800-53 — AC-2 / IA-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management and identification controls that multi-HCM coexistence must still satisfy.
+- [FFIEC IT Examination Handbook](https://ithandbook.ffiec.gov/) — search access control / information security for examiner expectations on authoritative identity sources.
 
 ---
 
 ## Stretch lab
 
-Design JDBC view SQL sketch selecting current effective-dated JOB and PERSONAL_DATA fields for Meridian lab schema naming. Do not run against production PS.
+Design a JDBC view SQL sketch (do **not** run against production PS) selecting current effective-dated JOB and PERSONAL_DATA-style fields aligned to Meridian lab schema naming (`employeeId`, `psEmplId`, `hrStatus`, `onLeave`, `deptId`, `jobCode`, `managerId`). Then add a SETID/company column to the coexistence matrix and propose the population rule that would allow PeopleSoft to become authoritative *only* for that entity while Workday owns corporate.
 
 ---
 
 ## Summary
 
-- PeopleSoft HCM Database is Meridian’s preferred PS worker inventory path.
-- Lab-without-live-target mocks and bridges keep authoritative cutovers safe.
-- HCM scope stays separate from PS security; next stop is Oracle EBS.
+- PeopleSoft HCM Database is Meridian's preferred worker inventory path; Direct/CI/Broker is the documented alternate — EMPLID, job data, and effective dating drive the schema.
+- `MNB-PeopleSoft-HCM` is an authoritative candidate under the same dual-run discipline as Workday; never flip overlapping HCM feeds together.
+- Keep PS application security out of this app; next stop is Oracle EBS (Lesson 81).
 
 ---
 

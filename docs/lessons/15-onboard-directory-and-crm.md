@@ -56,6 +56,17 @@ kai.nguyen (MNB00096)
 
 **Batch mindset.** You will create four apps. Use a checklist; do not invent custom schemas per file—the columns match the other platform extracts.
 
+> **Production reality.** Each of these four systems has a real connector, and CSV would be a finding in production:
+>
+> | Lab app (this lesson) | Production connector | Lesson |
+> | --- | --- | --- |
+> | `MNB-ActiveDirectory` | Active Directory - Direct (LDAP + IQService) | 56–57 |
+> | `MNB-Salesforce-CRM` | Salesforce native (profiles + permission sets) | 71 |
+> | `MNB-InternetBanking` | Web Services / SCIM against the platform API | 68–69 |
+> | `MNB-Ecommerce-Ops` | Web Services / JDBC depending on the stack | 68, 63 |
+>
+> The CSVs here teach the batch-onboarding discipline; Part II replaces each with the native path and a retirement plan for the file app.
+
 ---
 
 ## Before you start
@@ -230,6 +241,12 @@ Examiner question: *“Is Active Directory your authoritative identity source?�
 5. Teams wrongly mark directory authoritative and break HR-led joiner/mover/leaver.
 
 ---
+
+## Further reading
+
+- Lessons 56–57 (AD Direct), 71 (Salesforce), 68–69 (Web Services/SCIM) — production connectors for each CSV app in this lesson.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search each connector by name.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — application portfolio and SoD scope.
 
 ## Stretch lab
 

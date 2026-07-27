@@ -27,9 +27,9 @@ You will be able to:
 
 ## Why this matters
 
-**Business:** Involuntary terminations, insider-risk tips, and compromised credentials do not wait for the nightly HR file. Payments users (`WIRE_APPR` / `WIRE_INIT`) can move money in minutes.
+**Business.** Involuntary terminations, insider-risk tips, and compromised credentials do not wait for the nightly HR file. Payments users (`WIRE_APPR` / `WIRE_INIT`) can move money in minutes. Marcus Chen (`marcus.approve`) is a live wire approver — locking him out late is a money-movement incident, not an IAM backlog item.
 
-**Control / audit:** A wiki page written during the incident fails exams. You need a drilled runbook with identity verification of the requester, ordered disable steps, and HR reconciliation. Control owner: Security Operations with IAM Ops; HR and Legal informed. Examiner question: *Show the last drill evidence and time-to-disable for a wire user.*
+**Control / audit.** A wiki page written during the incident fails exams. You need a drilled runbook with identity verification of the requester, ordered disable steps, and HR reconciliation. Control owner: Security Operations with IAM Ops; HR and Legal informed. Examiner question: *Show the last drill evidence and time-to-disable for a wire user.*
 
 ---
 
@@ -37,12 +37,15 @@ You will be able to:
 
 ### Planned leaver vs rapid offboard
 
+Lesson 31 starts from HR. This drill **disables first**, then aligns HR — opposite order for a reason.
+
 | Aspect | Planned leaver (L31) | Rapid offboard (this lesson) |
 | --- | --- | --- |
 | Trigger | HR `status=0` | Security/HR/Legal urgent call |
 | Order | HR → Aggregate → Refresh → residuals | **Disable first**, HR reconcile after |
 | SLA | Same day / 1 hour directory | Minutes for directory + payments |
 | Evidence | Lifecycle pack | Incident timeline + INC ticket |
+| Example persona | `jordan.reed` | `marcus.approve` (wire) |
 
 ### Disable priority (Meridian payments user)
 
@@ -68,7 +71,45 @@ You will be able to:
 | Random manager Slack DM | No | Verify out-of-band |
 | App owner alone | No | Escalate to Security/IAM |
 
-**IIQ terms:** Emergency disable may use Manage Accounts, RapidSetup/LCM terminate workflows (if configured), or file disable + aggregation. *IdentityRequest* is not required for emergency lockout—do not wait on approvals to stop bleeding.
+**IIQ terms:** Emergency disable may use Manage Accounts, RapidSetup/LCM terminate workflows (if configured), or file disable + aggregation. *IdentityRequest* is not required for emergency lockout — do not wait on approvals to stop bleeding.
+
+The wrong way: open an access-request catalog item and wait for manager approval while `WIRE_APPR` stays live.
+
+---
+
+## How it works
+
+```text
+SOC / Legal / HR urgent call
+        │
+        ▼
+Verify requester (callback) + open INC
+        │
+        ▼
+Snapshot entitlements (before)
+        │
+        ▼
+Disable ELDAP ──► Disable WIRE_APPR / WIRE_INIT
+        │
+        ▼
+Notify manager (rachel.evans) + Legal + HR
+        │
+        ▼
+HR reconcile ticket (status=0 when confirmed)
+        │
+        ▼
+Next-day residual hunt + restore if drill-only
+```
+
+| Artifact | Purpose |
+| --- | --- |
+| `RUNBOOK-MNB-rapid-offboard.md` | Pre-written order of operations |
+| `timeline.txt` | T+ timestamps for incident record |
+| `snapshot-before.txt` | What access existed at lockout |
+| INC + HR tickets | Audit trail linking emergency to authoritative HR |
+| Retro gap list | Continuous improvement for next drill |
+
+SLA sketch: directory + wire within minutes of verified request; HR reconcile within ~4 business hours; residual review next business day.
 
 ---
 
@@ -86,6 +127,8 @@ You will be able to:
 
 ### Task 1 — Tabletop: write the runbook before clicking
 
+Runbooks written mid-incident are fiction. Write first, then execute.
+
 1. In your evidence folder, create `RUNBOOK-MNB-rapid-offboard.md` (or `.txt`) with sections:
    - Purpose / Sev definition
    - Authorized requesters + verification steps
@@ -94,28 +137,28 @@ You will be able to:
    - Notification matrix (Security, IAM, manager, HR, Legal)
    - HR reconcile window (e.g. 4 business hours)
    - Post-incident residual certification
-2. Hold a 10-minute tabletop: “SOC calls—Marcus may be insider risk. Lock wire approve now.”
+2. Hold a 10-minute tabletop: “SOC calls — Marcus may be insider risk. Lock wire approve now.”
 3. Assign drill roles: Requester (Security), Executor (you/IAM), Scribe (timeline).
 
 **Expected result:** Written runbook exists **before** lab execution. Tabletop notes list who verifies the call.
 
 **If it fails:** Use the priority list in Concepts; fill Meridian names.
 
----
-
 ### Task 2 — Verify requester and open the incident
+
+Attackers and confused deputies can request lockouts. Out-of-band verification is the first control, not bureaucracy.
 
 1. Simulate inbound request: `SOC on-call` requests lockout of `marcus.approve` citing insider-risk tip.
 2. Perform verification step (lab): record callback phrase / ticket `MNB-INC-34XX` and requester name in the timeline.
-3. Refuse to proceed if requester is unverified—document that refusal path.
+3. Refuse to proceed if requester is unverified — document that refusal path.
 
 **Expected result:** Timeline line 0 = verified requester + INC id **before** first disable.
 
 **If it fails:** Invent lab INC `MNB-INC-3401` and a named SOC analyst; still write verification.
 
----
-
 ### Task 3 — Execute emergency disable in lab
+
+Directory before or with wire — never “wire only” while login still works.
 
 1. Open identity `marcus.approve` (`MNB00091`). Confirm entitlements include `WIRE_APPR` and `ELDAP`.
 2. Snapshot entitlements to `snapshot-before.txt` (copy from UI or IT access CSV lines).
@@ -128,11 +171,11 @@ You will be able to:
 
 **Expected result:** Marcus cannot be treated as an active wire approver in IIQ after disable; timeline shows directory before or with wire, not “wire only.”
 
-**If it fails:** File-based disable on `MNB-ActiveDirectory.csv` and `MNB-WirePortal-Approvers.csv` (or combined wire file) + aggregation is valid drill evidence—restore files after.
-
----
+**If it fails:** File-based disable on `MNB-ActiveDirectory.csv` and `MNB-WirePortal-Approvers.csv` (or combined wire file) + aggregation is valid drill evidence — restore files after.
 
 ### Task 4 — Capture timeline and notifications
+
+Timestamps are the drill’s primary learning artifact.
 
 1. Complete `timeline.txt` example structure:
 
@@ -150,23 +193,23 @@ T+0:20  HR reconcile ticket filed
 
 **Expected result:** Evidence folder contains snapshot, timeline, notifications, and UI proof.
 
-**If it fails:** Text timeline from memory immediately—drills without timestamps teach little.
-
----
+**If it fails:** Write timeline from memory immediately — drills without timestamps teach little.
 
 ### Task 5 — HR reconcile and residual follow-up
 
+Emergency disable without HR reconcile is “shadow HR” — overnight aggregates can resurrect access or leave two truths.
+
 1. Create fictional HR ticket: “Set `marcus.approve` status=0 / terminationDate when involuntary exit confirmed; until then keep emergency disable.”
-2. Schedule residual review next business day: orphan hunt, AWS/SAP check (Marcus may not have them—still run the checklist).
+2. Schedule residual review next business day: orphan hunt, AWS/SAP check (Marcus may not have them — still run the checklist).
 3. If this was a pure drill, **restore** Marcus’s lab access and note restore time in timeline (avoid leaving shared lab broken).
 
 **Expected result:** Documented reconcile path so emergency disable is not “shadow HR.” Restore note if drill-only.
 
 **If it fails:** At minimum write the HR ticket text and restore steps even if you did not flip HR yet.
 
----
-
 ### Task 6 — Retro: list gaps
+
+Honest drills end with gaps, not victory slides.
 
 1. Facilitate 5-minute retro. Capture gaps such as:
    - No PAM / no session kill API
@@ -221,14 +264,26 @@ T+0:20  HR reconcile ticket filed
 3. Why must HR reconcile after emergency disable?
 4. Why is requester verification mandatory?
 5. How does this differ from Lesson 31’s planned leaver flow?
+6. Why is Marcus a better drill target than a teller-only identity?
 
 ### Answers
 
-1. Examples: SOC/Security on-call, Head of IAM (`helen.ross`), HR+manager for involuntary exit—not an unverified Slack DM.
+1. Examples: SOC/Security on-call, Head of IAM (`helen.ross`), HR+manager for involuntary exit — not an unverified Slack DM.
 2. Directory/ELDAP, then Wire Portal entitlements; then core/ACH/cloud as held.
 3. Authoritative HR must match reality so overnight aggregates do not resurrect access and audit has a single truth.
 4. Attackers and confused deputies can request lockouts or avoid them; out-of-band verify prevents abuse.
 5. Planned leaver starts from HR status; rapid offboard disables first, then aligns HR.
+6. He holds `WIRE_APPR` — payments blast radius makes minute-level SLA meaningful.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “emergency termination” and “manage accounts disable.”
+- [NIST SP 800-61 Rev. 2 — Computer Security Incident Handling Guide](https://csrc.nist.gov/pubs/sp/800/61/r2/final) — incident timeline, containment, and evidence discipline that map to this drill.
+- [NIST SP 800-53 IR / AC families](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — incident response and account disablement controls.
+- [FFIEC Information Technology Examination Handbook](https://ithandbook.ffiec.gov/) — search incident response and access revocation expectations.
+- [ISACA — Incident Management primers](https://www.isaca.org/) — search “incident response” for runbook and evidence expectations useful in exams.
 
 ---
 

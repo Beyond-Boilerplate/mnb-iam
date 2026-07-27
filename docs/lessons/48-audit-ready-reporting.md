@@ -182,6 +182,12 @@ Advanced Analytics / Reports / Populations
 
 ---
 
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “advanced analytics” / “report” / “certification campaign reports.”
+- [NIST SP 800-53 AU-6 / AU-7](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — audit review and report generation.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — evidence packs examiners expect.
+
 ## Stretch lab
 
 Draft a monthly IAM metrics email outline: SoD open trend, cert on-time %, AWS holder count, terminated-with-access count, top risk identities (Lesson 42).

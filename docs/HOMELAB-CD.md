@@ -38,15 +38,16 @@ Nodes keep the large **base** layers cached; app deploys pull thin overlay layer
 |----------|---------|
 | `publish-ga-oci.yml` | One-time / rare: GA zip → OCI artifact |
 | `publish-base.yml` | Rare: GA expand + JDBC → `identityiq-base:8.5` |
-| `publish-ghcr.yml` | Frequent: thin app image FROM base |
-| `deploy-homelab.yml` | Helm upgrade + public smoke |
+| `publish-ghcr.yml` | Frequent: thin app image FROM base; calls deploy with the exact SHA tag |
+| `deploy-homelab.yml` | Helm upgrade + in-cluster and public smoke |
+| `ci-quality.yml` | Workflow, shell, Helm, Python, and academy validation |
 
 ### When Deploy runs (automatic)
 
 | Trigger | `IMAGE_TAG` |
 |---------|-------------|
 | Push to `main` touching `deploy/**` or this workflow | Live tag on cluster (else `VERSION`) |
-| Successful **Publish GHCR images** on `main` (`workflow_run`) | Short SHA of that publish commit |
+| Successful **Publish GHCR images** on `main` (reusable workflow call) | Exact short SHA emitted by the publisher |
 | Manual **Run workflow** | Optional input; empty → live / `VERSION` |
 
 Helm-only fixes (probes, values, install scripts) no longer require a manual dispatch.
@@ -83,7 +84,11 @@ Helm-only fixes (probes, values, install scripts) no longer require a manual dis
    - Environment **`homelab`**
    - `TS_OAUTH_CLIENT_ID`, `TS_OAUTH_SECRET`, `HOMELAB_KUBECONFIG`
    - `GHCR_READ_TOKEN`, `GHCR_USERNAME`
-   - Optional: `GHCR_PULL_TOKEN` for cluster pulls if images stay private
+   - Recommended: `GHCR_PULL_TOKEN` for cluster pulls if images stay private
+
+   Cluster pulls must use a long-lived `read:packages` token. CI never stores its
+   short-lived `GITHUB_TOKEN` in Kubernetes. If no token is supplied, deployment
+   preserves an existing `ghcr-pull` secret and fails clearly when none exists.
 
    Then first deploy: **Actions → Deploy homelab → Run workflow** (or push any change under `deploy/`).
 
@@ -122,7 +127,7 @@ Helm-only fixes (probes, values, install scripts) no longer require a manual dis
 - **Phased Helm install**: data (CNPG + schema) then app
 - **Public edge**: `sailpoint-edge` path-routes academy (`/`) and IIQ (`/identityiq`)
 - **CNPG**: 1 instance in lab values (no hard anti-affinity); storage stays at provisioned size (cannot shrink)
-- **1 IdentityIQ replica** (lab speed; set `replicaCount: 2` for HA demos), Service `sessionAffinity: ClientIP`; readiness **TCP:8080** (smoke still hits login.jsf)
+- **1 IdentityIQ replica** (lab speed; set `replicaCount: 2` for HA demos), Service `sessionAffinity: ClientIP`; startup/readiness check the real `/identityiq/login.jsf` route
 - Schema Job applies SailPoint Postgres DDL once (skip if `spt_identity` exists)
 - DB credentials: Secret `sailpoint-iiq-db`
 
@@ -131,4 +136,8 @@ Helm-only fixes (probes, values, install scripts) no longer require a manual dis
 - IIQ 8.5 supports PostgreSQL; JDBC jar is baked into `identityiq-base` (`web/WEB-INF/lib/postgresql-42.7.4.jar`).
 - Shared IIQ filesystem is not PVC-shared on typical k3s RWO.
 - Default login after first successful schema + boot: `spadmin` / `admin` (change immediately in any shared lab).
-- Routine Publish uses `cancel-in-progress: true`; provenance/SBOM only on SemVer bumps via workflow_dispatch.
+- Image publishing cancels superseded builds. Cluster-mutating workflows share one
+  non-cancelling concurrency lock, so Helm and academy rollouts cannot race.
+- Public smoke is bounded to roughly 90 seconds per route and reports tunnel
+  misrouting separately from an unavailable IdentityIQ upstream.
+- Release tags are immutable; the pipeline refuses to force-update an existing tag.

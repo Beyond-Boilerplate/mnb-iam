@@ -183,6 +183,12 @@ Fill:
 
 ---
 
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “email template” and “notification.”
+- [NIST SP 800-53 SI-5](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — security alerts and notifications.
+- [OWASP](https://owasp.org/) — search “HTML email injection” when customizing templates with identity data.
+
 ## Stretch lab
 
 Draft a **leaver notification to manager** template: identity, termination date, residual high-risk ents count, link to rapid offboard runbook (Lesson 34). Save as `MNB-EmailTemplate-Leaver-Manager-Proposed.txt`.

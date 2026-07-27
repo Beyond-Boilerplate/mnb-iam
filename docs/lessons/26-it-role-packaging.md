@@ -4,7 +4,11 @@
 **Track:** Roles  
 **Time:** 45–60 minutes  
 **Prereq:** Lesson 25 job roles created  
-**Lab data:** Role catalog from Lessons 23–25; entitlement dictionary; SoD matrix
+
+**Lab data:**
+- Role catalog from Lessons 23–25
+- `~/iiq-lab-data/reference/entitlement-dictionary.csv`
+- `~/iiq-lab-data/reference/sod-matrix.csv`
 
 ---
 
@@ -17,18 +21,21 @@ You will be able to:
 - Keep **CloudAdmin** as a standalone requestable privileged role (built fully in Lesson 28)
 - Write business-readable role descriptions managers can certify
 - Obtain a fictional Risk sign-off line for composition changes
+- Reject “add AWS to Developer so SREs stop filing tickets” with a documented counter-proposal
 
 ---
 
 ## Why this matters
 
-Packaging reduces request friction but can smuggle privilege. “Developers also need cloud admin sometimes” is how SoD and least privilege die. Every entitlement in a role needs a reason tied to the job—not convenience.
+**Business.** Packaging reduces request friction but can smuggle privilege. “Developers also need cloud admin sometimes” is how SoD and least privilege die—and how `diego.hayes` quietly inherits production keys he only needs twice a year. Every entitlement in a role needs a reason tied to the job—not convenience.
 
-**Control / audit:** Role composition changes are change-controlled. Examiners sample roles for toxic combinations (see `sod-matrix.csv`). Evidence = composition table + justification + Risk approval.
+**Control / audit.** Role composition changes are change-controlled. Examiners sample roles for toxic combinations (see `sod-matrix.csv`): WIRE_INIT+WIRE_APPR, Developer+AWS_ADMIN, birthright with SAP_FI. Evidence = composition table + justification + Risk approval. Silent XML edits fail exams.
 
 ---
 
 ## Concepts
+
+### Least privilege as a packaging rule
 
 **Least privilege:** Grant the minimum entitlements required for the role’s stated job function.
 
@@ -48,6 +55,46 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 | WireInitiator | WIRE_INIT | WIRE_APPR |
 | CloudAdmin | AWS_ADMIN | DWRP “for convenience”, SAP_FI |
 
+### The wrong way under exam
+
+The naive approach: Technology opens a ticket—“add AWS_ADMIN to Developer, SREs are drowning.” IAM “helps” overnight. Next quarter, Risk certifies Developer as a business pack while half the engineers hold standing cloud admin. Dual control on **composition** exists so that path cannot happen quietly.
+
+### Descriptions are part of the control
+
+Managers certify what they understand. “Bundle for DWRP/ODS managed attrs” fails UAT. “Tools for building and supporting internal applications—not cloud account admin, not wire money movement” succeeds. Role descriptions are examiner-facing prose, not developer comments.
+
+---
+
+## How it works
+
+Composition review is a governance loop outside the refresh engine: inventory → SoD scan → remediate → describe → sign off → change-control.
+
+```
+Role Bundles in IIQ
+        │
+        ▼
+Composition inventory (Role | Ents | Justification)
+        │
+        ▼
+SoD / privilege scan (sod-matrix.csv + dictionary risk)
+        │
+   ┌────┴────┐
+   Clean     Findings ──► remove toxic ents / split roles
+   │
+   ▼
+Business descriptions + requestable flags
+        │
+        ▼
+Risk sign-off + change-control note
+```
+
+| Artifact | Owner | Cadence |
+| --- | --- | --- |
+| Composition table | IAM Engineering | Every catalog change |
+| SoD scan results | IAM + Risk | Before go-live; quarterly review |
+| Decision log (reject/accept packs) | Risk | Per proposal |
+| Change ticket | IAM implementer | Per composition edit |
+
 ---
 
 ## Before you start
@@ -62,6 +109,8 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 ## Lab procedure
 
 ### Task 1 — Inventory role compositions
+
+You cannot defend what you have not listed. Start with a complete table.
 
 1. Open each `MNB-Birthright-*` and `MNB-Role-*` object.
 2. Build table: Role | Entitlements | Job rule | Justification (one line each entitlement).
@@ -83,6 +132,8 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 **If it fails:** Remediations become Task 3—do not leave findings untracked.
 
 ### Task 3 — Split CloudAdmin from developer convenience
+
+Standing cloud admin is privileged access, not a developer amenity—even for CLD01/SRE01.
 
 1. If any role contains AWS_ADMIN beside DWRP/ODS, **remove** AWS_ADMIN now.
 2. Record future object: `MNB-Role-CloudAdmin` (Lesson 28) as the only AWS_ADMIN pack.
@@ -125,7 +176,9 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 
 ### Task 8 — Packaging decision log (worked example)
 
-1. Walk the following proposal as if Technology asked for it: “Add AWS_ADMIN to `MNB-Role-Developer` so SREs stop filing tickets.”
+Walk a real pressure scenario so the reject path is muscle memory.
+
+1. Proposal: “Add AWS_ADMIN to `MNB-Role-Developer` so SREs stop filing tickets.”
 2. Record decision: **Reject** — violates least privilege and Lesson 28 privileged model.
 3. Counter-proposal: CLD01/SRE01 users may **request** `MNB-Role-CloudAdmin` with manager + tech owner approval; standing membership still monthly-certified.
 4. Log the decision with date, requester (fictional), and Risk outcome.
@@ -138,7 +191,7 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 
 1. Pick `MNB-Role-WireInitiator` and write a three-line justification:
    - Why WIRE_INIT belongs (job WIR01 initiates payments)
-   - Why WIRE_APPR must stay out (dual control)
+   - Why WIRE_APPR must stay out (dual control with `marcus.approve`)
    - Why ELDAP is not duplicated here (belongs in birthright)
 2. Repeat in shorter form for Developer (DWRP vs AWS_ADMIN).
 
@@ -187,6 +240,7 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 3. Who signs role composition for Meridian?
 4. Name one toxic packaging example from Meridian’s SoD thinking.
 5. Should birthright be requestable?
+6. What is the approved path when SREs need AWS_ADMIN?
 
 ### Answers
 
@@ -195,6 +249,17 @@ GOOD: MNB-Role-Developer = {DWRP, ODS}
 3. Risk (approve) with IAM Engineering (draft/implement)—dual control on composition changes.
 4. Examples: WIRE_INIT+WIRE_APPR in one role; SAP_FI+AWS_ADMIN; Developer+AWS_ADMIN.
 5. No—automatic only.
+6. Request `MNB-Role-CloudAdmin` with manager + tech owner approval; certify monthly—do not auto-pack into Developer.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “role profiles” and “required entitlements” for composition mechanics.
+- [SailPoint Community](https://community.sailpoint.com/) — search “least privilege roles” for packaging debates and toxic bundle war stories.
+- [NIST SP 800-53 AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — least privilege; the control behind splitting CloudAdmin.
+- [NIST SP 800-53 AC-5](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — separation of duties applied to role composition.
+- [OWASP Access Control Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html) — practical least-privilege framing useful when writing role justifications.
 
 ---
 

@@ -47,6 +47,31 @@ Banks run IAM as a factory. Task order and schedules are operational controls, n
 
 **SLA sketch:** Aggregation failures visible before start of banking day; on-call acknowledges within agreed minutes (define for your org—lab: “notice on next login”).
 
+## How it works
+
+IIQ **TaskDefinitions** encapsulate what to run (aggregation, refresh, …); **schedules** attach cron-like timing; **TaskResults** are the auditable proof. Meridian’s control narrative depends on ordered execution: HR → apps → refresh → policy/certs.
+
+```text
+Schedule / Run Now
+        │
+        ▼
+TaskDefinition (Aggregate MNB-HR, Refresh MNB Identities, …)
+        │
+        ▼
+TaskResult (counters, errors, host, duration)
+        │
+        └── Evidence binder + on-call triage
+```
+
+| Ops rule | Why |
+| --- | --- |
+| HR before targets | People must exist before correlation |
+| Refresh after aggregates | Compile new truth |
+| No overlapping refreshes | Avoid contention / partial state |
+| Read TaskResult before re-run | Don’t mask root cause |
+
+**Real-life Meridian example.** If `Aggregate MNB-IT-Access` runs before HR on a night when `nina.joiner` is added, her IT row may land uncorrelated. Ordering is a control, not a preference.
+
 ## Before you start
 
 - [ ] `Aggregate MNB-HR` and `Refresh MNB Identities` exist
@@ -56,6 +81,8 @@ Banks run IAM as a factory. Task order and schedules are operational controls, n
 ## Lab procedure
 
 ### Task 1 — Task inventory
+
+Before scheduling anything, inventory what already exists—orphan or misnamed tasks are how labs and production both accumulate silent failures.
 
 1. Open **Tasks** in IIQ.
 2. List every `MNB-*` task (and note stock tasks you must not schedule casually).
@@ -180,6 +207,14 @@ Write a five-line checklist titled “Aggregation failed”:
 3. Lock contention, long runtimes, inconsistent intermediate identity state, noisy failures.
 4. Stop the chain; fix HR path/data; do not refresh as if the load succeeded.
 5. Avoid unexpected overnight load/failures on a personal laptop lab.
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “task schedule” and “Account Aggregation task” for scheduling and result interpretation.
+- [SailPoint Community](https://community.sailpoint.com/) — search “nightly aggregation refresh order” for production sequencing war stories.
+- [NIST SP 800-53 AU-6 / SI-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — reviewing automated processing logs and maintaining reliable batch controls.
+- [FFIEC IT Examination Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/it-booklets/architecture-infrastructure-and-operations.aspx) — job monitoring, failure handling, and operational resilience.
+- [CIS Controls v8 — Control 8 (Audit Log Management)](https://www.cisecurity.org/controls/audit-log-management) — retaining and reviewing evidence of control activities like aggregations.
 
 ## Stretch lab
 

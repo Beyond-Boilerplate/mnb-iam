@@ -28,9 +28,9 @@ You will be able to:
 
 ## Why this matters
 
-**Business:** Payments SoD failures are existential—one identity with initiate and approve can complete fraudulent wires.
+**Business.** Payments SoD failures are existential — one identity with initiate and approve can complete fraudulent wires. Priya and Marcus exist as a staffing model: she creates instructions; he approves them. Collapse that split and Meridian’s dual-control story collapses with it.
 
-**Control / audit:** Treasury owns the dual-control business rule; IAM owns detection. Exceptions without expiry are fake compliance. Control owner: Payments (`rachel.evans`) + Risk; IAM executes tooling. Examiner question: *Show a clean baseline, a detected violation, and how exceptions expire.*
+**Control / audit.** Treasury owns the dual-control business rule; IAM owns detection. Exceptions without expiry are fake compliance. Control owner: Payments (`rachel.evans`) + Risk; IAM executes tooling. Examiner question: *Show a clean baseline, a detected violation, and how exceptions expire.*
 
 ---
 
@@ -50,18 +50,34 @@ marcus.approve ── WIRE_APPR ──► approve instructions
 | `priya.wire` | `MNB00090` | `WIRE_INIT` | Clean |
 | `marcus.approve` | `MNB00091` | `WIRE_APPR` | Clean |
 
-Note: Priya also holds `ACH_OPS` in IT inventory—related matrix pair for stretch, not this policy’s left/right set.
+Note: Priya also holds `ACH_OPS` in IT inventory — related matrix pair for stretch, not this policy’s left/right set.
+
+### Revoke vs mitigate for payments
+
+| Path | When | Meridian rule |
+| --- | --- | --- |
+| **Revoke** | Default for any wire SoD hit | Remove one side immediately |
+| **Mitigate** | Rare, temporary only | ≤ 30 days + compensating control + `rachel.evans` signoff + Risk informed |
+| Standing exception | Never | Prohibited |
+
+The wrong way: mitigate with blank expiry “until staffing recovers.” That is permanent dual-control bypass under a different name.
 
 ### Induce → detect → decide → clear
 
+Lab learning requires inducing a bad state — then restoring. Shared labs that leave induced violations poison the next learner and the exam evidence story.
+
+---
+
+## How it works
+
 ```text
-Baseline clean
+Baseline clean (Priya INIT / Marcus APPR)
     │
     ▼
 Temporarily grant both WIRE_INIT + WIRE_APPR to test identity
     │
     ▼
-Refresh MNB Identities (policy check)
+Account Aggregation (if file-based) + Refresh MNB Identities (policy check)
     │
     ▼
 PolicyViolation on MNB-SOD-Wire-DualControl
@@ -71,9 +87,20 @@ PolicyViolation on MNB-SOD-Wire-DualControl
     │
     ▼
 Restore lab files / entitlements to clean split
+    │
+    ▼
+Re-baseline: no open induced violations
 ```
 
-**IIQ terms:** *PolicyViolation* work items may offer revoke/mitigate. *Mitigation* must include expiration and compensating control text. Never leave induced violations in shared labs.
+| Artifact | Purpose |
+| --- | --- |
+| Baseline screenshots | Prove clean split before induction |
+| `exception-rules.txt` | Treasury-owned exception standard |
+| Induced violation screenshot | Detection works |
+| Revoke clearance | Preferred remediation path |
+| Restore confirmation | Shared lab hygiene |
+
+**IIQ terms:** *PolicyViolation* work items may offer revoke/mitigate. *Mitigation* must include expiration and compensating control text.
 
 ---
 
@@ -81,7 +108,7 @@ Restore lab files / entitlements to clean split
 
 - [ ] `MNB-SOD-Wire-DualControl` exists and is enabled (Lesson 39).
 - [ ] Wire entitlements aggregated for Priya and Marcus.
-- [ ] Choose induction method: (A) temporary entitlement on a **test** user, or (B) briefly add second wire entitlement to a copy of Marcus/Priya—prefer disposable test identity.
+- [ ] Choose induction method: (A) temporary entitlement on a **test** user, or (B) briefly add second wire entitlement to a copy of Marcus/Priya — prefer disposable test identity.
 - [ ] Evidence folder `~/iiq-lab-data/evidence/wire-sod-L40/`.
 - [ ] Plan restore steps **before** inducing.
 
@@ -91,6 +118,8 @@ Restore lab files / entitlements to clean split
 
 ### Task 1 — Validate clean baseline (Priya / Marcus)
 
+You cannot prove detection without proving the staffing model was clean first.
+
 1. Open identity `priya.wire`; confirm `WIRE_INIT` present and `WIRE_APPR` absent.
 2. Open identity `marcus.approve`; confirm `WIRE_APPR` present and `WIRE_INIT` absent.
 3. Open Policy Violations filtered to `MNB-SOD-Wire-DualControl`.
@@ -98,11 +127,11 @@ Restore lab files / entitlements to clean split
 
 **Expected result:** Written baseline: “Priya/Marcus clean under wire dual-control at `<timestamp>`.”
 
-**If it fails:** Fix data—remove accidental dual entitlements; re-aggregate wire apps; refresh.
-
----
+**If it fails:** Fix data — remove accidental dual entitlements; re-aggregate wire apps; refresh.
 
 ### Task 2 — Write exception rules before you induce
+
+Exception policy written after the violation is rationalization. Write rules first.
 
 1. Draft Meridian exception standard:
 
@@ -121,9 +150,9 @@ Wire SoD exception (MNB-SOD-Wire-DualControl)
 
 **Expected result:** Exception rules exist before any lab violation is created.
 
----
-
 ### Task 3 — Induce a violation safely
+
+Prefer a disposable test identity so shared Priya/Marcus stay clean for other learners.
 
 1. Pick target: create/use lab test user `wire.sodtest` **or** temporarily add `WIRE_APPR` to `priya.wire` in a **private copy** of the wire CSV (restore later).
 2. Ensure both `WIRE_INIT` and `WIRE_APPR` appear on that single identity after Account Aggregation.
@@ -132,11 +161,11 @@ Wire SoD exception (MNB-SOD-Wire-DualControl)
 
 **Expected result:** One identity intentionally holds both wire entitlements; log explains how to reverse.
 
-**If it fails:** Use Debug to add entitlement link only if you know how—CSV + Aggregate is the supported training path.
-
----
+**If it fails:** Use Debug to add entitlement link only if you know how — CSV + Aggregate is the supported training path.
 
 ### Task 4 — Detect the violation
+
+Detection without screenshots is hearsay. Capture the PolicyViolation object.
 
 1. Run **Refresh MNB Identities** with policy checking enabled.
 2. Open Policy Violations → filter `MNB-SOD-Wire-DualControl`.
@@ -147,9 +176,9 @@ Wire SoD exception (MNB-SOD-Wire-DualControl)
 
 **If it fails:** Confirm both entitlements on cube; policy enabled; correct entitlement names.
 
----
-
 ### Task 5 — Decide: revoke (preferred) then optional mitigate demo
+
+Payments default is revoke. Mitigate is a documented exception path — not the happy path.
 
 1. **Revoke path (required):** Remove one conflicting entitlement (prefer removing `WIRE_APPR` from an initiator-shaped user). Re-aggregate if file-based. Refresh. Confirm violation clears.
 2. **Mitigate path (optional demo on a second induction):** Open violation → Mitigate → set **≤ 30 days** expiry → comment compensating control → note `rachel.evans` approval ticket `MNB-PMT-EXC-40xx`.
@@ -159,9 +188,9 @@ Wire SoD exception (MNB-SOD-Wire-DualControl)
 
 **If it fails:** Manual entitlement remove + refresh is acceptable revoke evidence.
 
----
-
 ### Task 6 — Clear lab and Treasury signoff note
+
+Leave the lab as clean as you found it — induced violations are training artifacts, not production state.
 
 1. Restore wire CSV / entitlements to original Priya INIT / Marcus APPR split.
 2. Re-aggregate wire applications; Refresh; confirm no open induced violations.
@@ -218,6 +247,7 @@ Required fields: identity, entitlements, compensating control, expiry, ticket
 3. Who signs wire SoD exceptions?
 4. Why must induced violations be cleared before you leave the lab?
 5. Are Priya and Marcus supposed to violate `MNB-SOD-Wire-DualControl` in the baseline?
+6. What compensating-control elements must a mitigation comment include?
 
 ### Answers
 
@@ -225,7 +255,18 @@ Required fields: identity, entitlements, compensating control, expiry, ticket
 2. 30 days (renewal needs new signoff).
 3. `rachel.evans` (Payments Operations Manager), with Risk informed.
 4. Shared labs and exam evidence must not show fake ongoing fraud risk; restore protects the next learner.
-5. No—they are the clean dual-control split.
+5. No — they are the clean dual-control split.
+6. Compensating control description, expiry, approver/ticket, and Risk awareness.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “policy violation mitigate” and “SOD policy.”
+- [SailPoint Community](https://community.sailpoint.com/) — search “wire dual control SOD” / payment SoD patterns.
+- [FFIEC Information Technology Examination Handbook](https://ithandbook.ffiec.gov/) — search dual control and funds transfer security expectations.
+- [NIST SP 800-53 AC-5 — Separation of Duties](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — control language for initiate/approve separation.
+- [ISACA — Segregation of Duties primers](https://www.isaca.org/) — search “segregation of duties” for exception-governance language Risk committees use.
 
 ---
 
@@ -233,7 +274,7 @@ Required fields: identity, entitlements, compensating control, expiry, ticket
 
 1. Extend policy coverage or add `MNB-SOD-ACH-Wire` for `ACH_OPS`+`WIRE_INIT` and discuss Priya’s residual concentration risk.
 2. Wire a violation work item email template to Treasury.
-3. Pre-stage Lesson 41 by leaving **one** mitigated (expiring) non-wire violation only if the lab is private—never on shared wire users.
+3. Pre-stage Lesson 41 by leaving **one** mitigated (expiring) non-wire violation only if the lab is private — never on shared wire users.
 
 ---
 

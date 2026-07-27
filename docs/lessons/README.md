@@ -38,7 +38,11 @@ docker compose -f docker-compose.connectors.yml up -d
 
 ## How each lesson is structured
 
-See [_STYLE.md](_STYLE.md). Connector lessons (51+) always include a **lab-without-live-target** path so training completes without production AD/SAP/etc.
+See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and real-life context first, then guided setup, then verification — never a bare task list.
+
+- Connector lessons (51+) teach the **native connector as the primary path**, including the real-world setup (service accounts, app registrations, API scopes) you would perform against a live tenant. A clearly labeled **lab-without-live-target** fallback keeps training runnable on a laptop.
+- Early application lessons (09–16) use Delimited File on purpose to teach governance mechanics; each carries a **Production reality** box pointing to the Part II lesson that covers the real connector.
+- Intermediate+ lessons end with a **Further reading** list (SailPoint docs, vendor admin guides, standards/whitepapers).
 
 ---
 

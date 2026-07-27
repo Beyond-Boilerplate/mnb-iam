@@ -55,6 +55,35 @@ An **authoritative** application is allowed to create and update IdentityIQ iden
 
 **Why `employeeId` over email as account id:** Emails change, contractors use vendor domains (`raj.external`), and rehires need a stable key. Meridian employee IDs are durable.
 
+## How it works
+
+An **authoritative** Delimited File application maps each HR row to an account whose **native identity** is `employeeId`. With create-identities enabled, Account Aggregation upserts Identity cubes; non-authoritative apps later only attach Links.
+
+```text
+HRApplications.txt (row per worker)
+        │
+        ▼
+MNB-HR schema (native identity = employeeId)
+        │
+        ▼
+Account Aggregation task: Aggregate MNB-HR
+        │
+        ├── create Identity if missing
+        ├── update attributes if present
+        └── Link account on cube
+```
+
+| Setting | Meridian value | Why |
+| --- | --- | --- |
+| Connector | Delimited File | Lab stand-in for HRIS feed |
+| Native identity | `employeeId` | Stable across email/vendor domains |
+| Create identities | ON (HR only) | Workforce source of truth |
+| Task name | `Aggregate MNB-HR` | Auditable control activity |
+
+> **Production reality:** Banks usually feed HR from Workday, SAP SuccessFactors, or similar via the native connector or a governed flat-file drop—not a hand-edited CSV. Lesson 04 teaches the authoritative pattern; Part II connector lessons cover live HRIS paths.
+
+**Real-life Meridian example.** `amelia.brooks` appears in HR on hire day; after `Aggregate MNB-HR`, her cube exists so birthright and joiner workflows have a person to attach—not an orphan IT account.
+
 ## Before you start
 
 - [ ] `realpath ~/iiq-lab-data/HRApplications.txt` works
@@ -182,6 +211,14 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR`. A
 3. File path, OS permissions, delimiter/header parse—before blaming IIQ logic.
 4. `samir.hassan` (MNB00094), `status=0` with terminationDate set.
 5. `Aggregate MNB-HR`.
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “authoritative application” and “Delimited File” for create-identities and schema identity attribute settings.
+- [SailPoint Community](https://community.sailpoint.com/) — search “HR authoritative source” for patterns that keep AD/IT apps non-authoritative.
+- [NIST SP 800-53 AC-2 — Account Management](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — workforce account lifecycle expectations tied to an authoritative source.
+- [NIST SP 800-63A — Enrollment and Identity Proofing](https://pages.nist.gov/800-63-3/sp800-63a.html) — why stable identifiers matter when binding a person to accounts.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — examiner questions on authoritative identity sources and joiner/leaver evidence.
 
 ## Stretch lab
 

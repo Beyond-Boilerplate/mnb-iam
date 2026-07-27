@@ -60,6 +60,8 @@ Finance extract ──► MNB-SAP-Finance ──► entitlement SAP_FI
 
 Do **not** filter out disabled rows at aggregation time. Disabled-but-present accounts are governance signal (leavers, suspended staff).
 
+> **Production reality.** Real SAP governance does not run on a CSV of one `SAP_FI` code. Production uses the **SAP Direct security connector** (Lesson 79), which aggregates actual SAP roles and profiles (`SAP_ALL`, `Z*` composite roles) over RFC/BAPI, and SAP HR/HCM (Lesson 78) if SAP feeds workforce data. The CSV here stands in so you can learn the toxic-pair story first; the SoD policy you'll build in Lessons 39–41 works identically against real SAP role entitlements.
+
 ---
 
 ## Before you start
@@ -225,6 +227,13 @@ Examiner question: *“How do you detect finance users who also hold cloud admin
 5. **No** — target apps must not create identities; unknowns become uncorrelated for remediation.
 
 ---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “SAP Direct connector.”
+- Lesson 79 — native SAP role aggregation that replaces this CSV in production.
+- [ISACA](https://www.isaca.org/) — search “SAP segregation of duties” for SOX framing of finance access.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — financial application controls.
 
 ## Stretch lab
 

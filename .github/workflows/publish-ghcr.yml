@@ -24,12 +24,18 @@ on:
       - docker/setenv.sh
       - build.xml
       - build.sh
+      - build.bat
       - build.properties
+      - lib/**
+      - scripts/**
       - homelab.*
       - sandbox.*
       - servers.properties
       - VERSION
       - .github/workflows/publish-ghcr.yml
+  workflow_run:
+    workflows: ["Publish IIQ base image"]
+    types: [completed]
 
 concurrency:
   group: publish-ghcr-${{ github.ref }}
@@ -40,7 +46,11 @@ permissions: {}
 jobs:
   prepare:
     name: Resolve version
-    if: ${{ !contains(github.event.head_commit.message || '', '[skip ci]') }}
+    if: >
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'main' ||
+        github.event.workflow_run.head_branch == 'master'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -52,8 +62,9 @@ jobs:
       commit_sha: ${{ steps.meta.outputs.commit_sha }}
       attest: ${{ steps.meta.outputs.attest }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
@@ -74,6 +85,10 @@ jobs:
             exit 0
           fi
           CUR=$(tr -d '[:space:]' < VERSION)
+          if [[ ! "$CUR" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::VERSION must be strict MAJOR.MINOR.PATCH; got '${CUR}'"
+            exit 1
+          fi
           IFS=. read -r MAJOR MINOR PATCH <<<"$CUR"
           case "$TYPE" in
             major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
@@ -81,6 +96,10 @@ jobs:
             patch) PATCH=$((PATCH+1)) ;;
           esac
           NEW="${MAJOR}.${MINOR}.${PATCH}"
+          if git rev-parse --verify --quiet "refs/tags/v${NEW}" >/dev/null; then
+            echo "::error::Release tag v${NEW} already exists; release tags are immutable."
+            exit 1
+          fi
           echo "$NEW" > VERSION
           echo "bumped ${CUR} → ${NEW}"
 
@@ -119,8 +138,6 @@ jobs:
           TAG=$(tr -d '[:space:]' < VERSION)
           git commit -m "chore: bump version to ${TAG} [skip ci]"
           git push
-          git tag -f "v${TAG}"
-          git push -f origin "v${TAG}"
 
       - name: Emit metadata
         id: meta
@@ -128,6 +145,7 @@ jobs:
           set -euo pipefail
           TAG=$(tr -d '[:space:]' < VERSION)
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          COMMIT_SHA=$(git rev-parse HEAD)
           ATTEST=false
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.increment_type || 'none' }}" != "none" ]; then
             ATTEST=true
@@ -135,8 +153,8 @@ jobs:
           {
             echo "image_tag=${TAG}"
             echo "owner=${OWNER}"
-            echo "sha_short=${GITHUB_SHA::7}"
-            echo "commit_sha=$(git rev-parse HEAD)"
+            echo "sha_short=${COMMIT_SHA::7}"
+            echo "commit_sha=${COMMIT_SHA}"
             echo "attest=${ATTEST}"
           } >> "$GITHUB_OUTPUT"
 
@@ -151,30 +169,30 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.commit_sha }}
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USERNAME || github.actor }}
           password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Log in to GHCR (push)
-        uses: docker/login-action@v3
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       - name: Build and push identityiq (thin, no attest)
         if: needs.prepare.outputs.attest != 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: docker/Dockerfile
@@ -193,11 +211,13 @@ jobs:
           cache-from: |
             type=gha,scope=ghcr-identityiq
             type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache
-          cache-to: type=gha,mode=max,scope=ghcr-identityiq
+          cache-to: |
+            type=gha,mode=max,scope=ghcr-identityiq
+            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache,mode=max
 
       - name: Build and push identityiq (thin, attest)
         if: needs.prepare.outputs.attest == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: docker/Dockerfile
@@ -216,11 +236,55 @@ jobs:
           cache-from: |
             type=gha,scope=ghcr-identityiq
             type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache
-          cache-to: type=gha,mode=max,scope=ghcr-identityiq
+          cache-to: |
+            type=gha,mode=max,scope=ghcr-identityiq
+            type=registry,ref=ghcr.io/${{ needs.prepare.outputs.owner }}/identityiq:buildcache,mode=max
+
+  tag-release:
+    name: Tag release
+    needs: [prepare, build]
+    if: needs.prepare.outputs.attest == 'true' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+          fetch-depth: 0
+      - name: Create immutable release tag
+        env:
+          TAG: ${{ needs.prepare.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/v${TAG}" >/dev/null 2>&1; then
+            echo "::error::Release tag v${TAG} already exists; refusing to rewrite it."
+            exit 1
+          fi
+          git tag "v${TAG}"
+          git push origin "v${TAG}"
+
+  deploy:
+    name: Deploy homelab
+    needs: [prepare, build]
+    if: >
+      needs.build.result == 'success' &&
+      (github.event_name == 'workflow_run' ||
+       github.ref_name == 'main' ||
+       github.ref_name == 'master')
+    uses: ./.github/workflows/deploy-homelab.yml
+    permissions:
+      contents: read
+      packages: read
+    with:
+      image_tag: ${{ needs.prepare.outputs.sha_short }}
+      skip_smoke: false
+    secrets: inherit
 
   summarize:
     name: Publish summary
-    needs: [prepare, build]
+    needs: [prepare, build, deploy]
     if: always() && needs.prepare.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -232,6 +296,7 @@ jobs:
           OWNER: ${{ needs.prepare.outputs.owner }}
           SHA: ${{ needs.prepare.outputs.sha_short }}
           ATTEST: ${{ needs.prepare.outputs.attest }}
+          DEPLOY: ${{ needs.deploy.result }}
         run: |
           set -euo pipefail
           {
@@ -243,10 +308,15 @@ jobs:
             echo "- Base: \`ghcr.io/${OWNER}/identityiq-base:8.5\`"
             echo "- Attest/SBOM: \`${ATTEST}\`"
             echo "- Build: \`${BUILD}\`"
+            echo "- Homelab deploy: \`${DEPLOY}\`"
             echo ""
             echo "\`ghcr.io/${OWNER}/identityiq:${TAG}\`"
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$BUILD" != "success" ]; then
             echo "::error::identityiq image build failed (is identityiq-base:8.5 published?)"
+            exit 1
+          fi
+          if [ "$DEPLOY" != "success" ] && [ "$DEPLOY" != "skipped" ]; then
+            echo "::error::identityiq image published but homelab deploy failed"
             exit 1
           fi

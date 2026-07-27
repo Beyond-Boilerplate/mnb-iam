@@ -60,6 +60,31 @@ Promote fields that drive governance:
 | `status=0` | Employment ended | Disable / remove access (leaver) |
 | `onLeave=true` | Still employed, temporarily away | Freeze / reduce access; retain identity |
 
+## How it works
+
+Account Aggregation stores raw connector attributes on the **Link**. Identity attribute maps (or rules) **promote** selected fields onto the Identity so roles, populations, and certifications can filter on person-level truth—not buried account XML.
+
+```text
+MNB-HR Link attributes (employeeId, managerId, departmentCode, …)
+        │
+        ▼
+Identity attribute assignment / maps
+        │
+        ├── email, departmentCode, jobCode, workerType, onLeave → Identity
+        └── managerId resolved to manager Identity (often completed on Refresh)
+        │
+        ▼
+Selectors / roles / JML / cert display consume Identity attrs
+```
+
+| Field pattern | Promote to Identity? | Meridian reason |
+| --- | --- | --- |
+| `departmentCode`, `jobCode` | Yes | Role & population filters |
+| `workerType`, `onLeave`, `status` | Yes | Lifecycle & contractor SLAs |
+| Transient connector noise | No | Keep Link-only |
+
+**Real-life Meridian example.** `sofia.torres` has `onLeave=true` on HR. Until that flag is promoted to the identity, leave-freeze workflows and the `MNB-On-Leave` population cannot see her—schema design is a control dependency, not cosmetics.
+
 ## Before you start
 
 - [ ] `MNB-HR` exists and `Aggregate MNB-HR` has succeeded
@@ -69,6 +94,8 @@ Promote fields that drive governance:
 ## Lab procedure
 
 ### Task 1 — Attribute inventory
+
+Before mapping anything in IIQ, inventory which HR columns are governance signals versus connector noise—promotion is a deliberate control decision.
 
 1. List every HR header column in your notebook.
 2. Mark each **Identity** (promote) or **Link-only** (keep on account).
@@ -191,6 +218,14 @@ Add these “do not” rules to the dictionary footer:
 3. Examples: display name, department, job title, manager, email.
 4. HR is authoritative; IT dumps can be stale or wrong (vendor domains, typos).
 5. `rachel.evans` / MNB00005 (Payments Operations Manager).
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “identity attribute assignment” and “application schema” for map vs rule promotion patterns.
+- [SailPoint Community](https://community.sailpoint.com/) — search “manager correlation” / “managerId” for hierarchy resolution tips after HR aggregation.
+- [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management attributes that must be accurate for lifecycle controls.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — expectations that identity attributes supporting access decisions are complete and current.
+- [OWASP Identity Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Identity_and_Access_Management_Cheat_Sheet.html) — attribute hygiene and lifecycle signals (active vs leave vs terminated).
 
 ## Stretch lab
 

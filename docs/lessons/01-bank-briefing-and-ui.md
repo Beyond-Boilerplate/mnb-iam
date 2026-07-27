@@ -49,6 +49,32 @@ IdentityIQ separates four surfaces you will use every day:
 
 **Corporate context:** Domain `@meridiannb.com`. Lab URL `http://localhost:8080/identityiq` (homelab URL only if your site documents an alternate). Default admin: `spadmin` / `admin`.
 
+## How it works
+
+IdentityIQ is a configuration-driven governance platform: operators configure applications and policies, scheduled **tasks** pull accounts and compile **identity cubes**, and **work items** capture human decisions for approvals and certifications.
+
+```text
+Browser (spadmin)
+      │
+      ▼
+IIQ UI / REST  ──►  Object model (Application, Identity, TaskDefinition, Bundle, …)
+      │                      │
+      │                      ▼
+      │              Hibernate / DB persistence (XML-backed objects)
+      │
+      ├── Tasks run aggregations & refreshes
+      └── Work Item Inbox holds approvals / cert decisions
+```
+
+| Surface | IIQ objects you touch | Meridian lab habit |
+| --- | --- | --- |
+| Config | Application, Bundle, Policy | Always `MNB-` prefix |
+| People | Identity (+ Links) | Search by `userName` / `employeeId` |
+| Jobs | TaskDefinition / TaskResult | Prefer named tasks (`Aggregate MNB-HR`) |
+| Human control | WorkItem, Certification | Bookmark Inbox day one |
+
+**Real-life Meridian example.** When `rachel.evans` later certifies wire access for `priya.wire`, that decision lands as a work item on a cube that already exists because HR aggregation and refresh ran—orientation today is how you find those objects under exam pressure.
+
 ## Before you start
 
 - [ ] Tomcat is running and IIQ responds at `http://localhost:8080/identityiq`
@@ -198,6 +224,14 @@ Copy this starter table into your notebook and keep it for Lessons 04–40:
 3. `HRApplications.txt` (HR delimited file)—not the IT entitlement dump.
 4. `priya.wire` (`WIRE_INIT`) and `marcus.approve` (`WIRE_APPR`).
 5. Later lessons fill it with approvals and certification decisions; it is the human-control surface.
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “IdentityIQ getting started” and “identity warehouse” for your version’s UI map and cube concepts.
+- [SailPoint Community (Compass)](https://community.sailpoint.com/) — search “IdentityIQ navigation” / “Debug page” for practitioner tips on finding objects and task results.
+- [NIST SP 800-53 Rev. 5 — AC family](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management and access enforcement controls examiners map to “who operates the IAM console.”
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — how banking exams expect attributable, repeatable access governance processes.
+- [OWASP Identity Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Identity_and_Access_Management_Cheat_Sheet.html) — industry primer on identity lifecycle hygiene that IIQ operationalizes.
 
 ## Stretch lab
 

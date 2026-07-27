@@ -4,7 +4,11 @@
 **Track:** Roles  
 **Time:** 45–60 minutes  
 **Prereq:** Lesson 26; birthright and job roles assigned; some identities hold entitlements without matching assigned privileged roles  
-**Lab data:** Developer / cloud personas (e.g. identities with AWS_ADMIN on account); `amelia.brooks` birthright assignee
+
+**Lab data:**
+- Developer / cloud personas (e.g. identities with AWS_ADMIN on account)
+- `amelia.brooks` birthright assignee
+- Dual-control reference: `priya.wire` / `marcus.approve` assigned job packs
 
 ---
 
@@ -17,18 +21,21 @@ You will be able to:
 - Use detection to find outliers (entitlements present without approved assigned roles)
 - Confirm which identity refresh options affect assignment vs detection
 - Decide what managers should certify (roles, entitlements, or hybrid by risk)
+- Write a manager-ready narrative that prevents wrong keep/revoke decisions
 
 ---
 
 ## Why this matters
 
-Detection explains what you **already have**; assignment decides what you **should have**. Confusing them breaks certifications: revoking a “detected only” signal is not the same as removing an assigned birthright. Managers who treat all role chips as identical will make wrong keep/revoke decisions.
+**Business.** Detection explains what you **already have**; assignment decides what you **should have**. Confusing them breaks certifications: revoking a “detected only” signal is not the same as removing an assigned birthright. Managers who treat all role chips as identical will make wrong keep/revoke decisions—and tellers like `amelia.brooks` can lose baseline directory access because someone “cleaned up detected noise.”
 
-**Control / audit:** Procedures must define whether campaigns certify assigned roles, detected roles, raw entitlements, or a mix. Meridian’s emerging standard: **assigned roles for baseline/job packs; entitlements (or privileged roles) for critical access.**
+**Control / audit.** Procedures must define whether campaigns certify assigned roles, detected roles, raw entitlements, or a mix. Meridian’s emerging standard: **assigned roles for baseline/job packs; entitlements (or privileged roles) for critical access.** Examiners ask: *“How do you distinguish approved access from merely observed access?”*
 
 ---
 
 ## Concepts
+
+### Normative vs analytical
 
 | Concept | Nature | Question it answers | Actionability |
 | --- | --- | --- | --- |
@@ -40,9 +47,40 @@ Entitlements on accounts ──► Detection engine ──► “Detected: looks
 Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role-Developer”
 ```
 
-**Outlier pattern:** Identity has AWS_ADMIN entitlement on MNB-AWS-Cloud but **no** assigned `MNB-Role-CloudAdmin` (expected if CloudAdmin is request-only and not yet granted—or a standing privilege defect).
+### Outlier pattern — privilege without approved role
 
-**Birthright pattern:** `amelia.brooks` should show **assigned** `MNB-Birthright-Employee`; detection may also light up if ELDAP matches the birthright profile.
+Identity has AWS_ADMIN entitlement on MNB-AWS-Cloud but **no** assigned `MNB-Role-CloudAdmin`. That is expected if CloudAdmin is request-only and not yet granted—or a standing privilege defect (e.g. `raj.external` residual, or a cloud engineer granted outside LCM). Detection may light up a cloud-admin-like profile; detection is **not** approval.
+
+### Birthright pattern
+
+`amelia.brooks` should show **assigned** `MNB-Birthright-Employee`; detection may also light up if ELDAP matches the birthright profile. Do not revoke birthright because it “also shows as detected.”
+
+### Dual-control check
+
+`priya.wire` should show **assigned** WireInitiator; `marcus.approve` should not. If detection claims both “look like” wire operators because of shared department groups, trust assignment for normative decisions—and hunt residuals as entitlements.
+
+---
+
+## How it works
+
+Refresh can assign, detect, both, or neither—depending on task options. Certification policy must name which signal managers act on.
+
+```
+Identity Refresh
+   ├── Assign roles ON  → evaluate rules/requests → Assigned roles on cube
+   └── Detect roles ON  → match profiles to ents → Detected roles on cube
+
+Certification campaign
+   ├── Birthright / job packs     → certify Assigned roles
+   ├── Critical ents (WIRE_*, AWS_ADMIN, SAP_FI) → certify ents / privileged assigned roles
+   └── Unknown direct ents        → entitlement line items
+```
+
+| Refresh mistake | Symptom | Fix |
+| --- | --- | --- |
+| Assign OFF | Birthright/job packs never appear | Enable assign roles |
+| Detect OFF | No analytical matches | Enable detect if you use outlier hunting |
+| Certify “all role chips” | Managers revoke detection noise | Train with Task 4 sentences |
 
 ---
 
@@ -58,6 +96,8 @@ Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role
 ## Lab procedure
 
 ### Task 1 — Inspect a job-role identity
+
+Learn the UI labels on a clean, expected assignee before hunting outliers.
 
 1. Open a developer identity expected to hold DWRP (e.g. `diego.hayes`).
 2. Go to the Roles area of the cube.
@@ -80,7 +120,9 @@ Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role
 
 ### Task 3 — Privileged outlier hunt
 
-1. Find an identity with **AWS_ADMIN** on an account (search entitlement or open known cloud engineers / `jordan.reed` lab pattern).
+This is the finding that feeds Lesson 28 and monthly privileged certs.
+
+1. Find an identity with **AWS_ADMIN** on an account (search entitlement or open known cloud engineers / `jordan.reed` / `raj.external` lab pattern).
 2. Check whether `MNB-Role-CloudAdmin` is assigned (likely **no** if not created/requested yet).
 3. Classify:
    - **Expected gap:** request-only role not granted; entitlement may still be residual/standalone → remediation candidate
@@ -91,6 +133,8 @@ Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role
 **If it fails:** Aggregate MNB-AWS-Cloud; correlate accounts; then re-check.
 
 ### Task 4 — Meridian narrative (manager-ready)
+
+Certifier training fails without plain language.
 
 1. Write exactly two sentences managers can read in training:
    - Sentence A: Assigned roles = access Meridian formally decided you should have.
@@ -132,6 +176,14 @@ Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role
    - Ignore AWS_ADMIN simply because no CloudAdmin role is assigned
 
 **Expected result:** Checklist initialed.
+
+### Task 8 — Dual-control spot-check
+
+1. Open `priya.wire` and `marcus.approve`.
+2. Confirm initiator assignment only on Priya (baseline).
+3. Note any detection that might confuse a certifier who sees both as “Treasury.”
+
+**Expected result:** Written note: assignment enforces dual control; detection alone does not.
 
 ---
 
@@ -176,6 +228,7 @@ Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role
 3. What should managers certify for birthright?
 4. What refresh mistake blocks birthright enforcement?
 5. Is detection alone proof of approval?
+6. How should dual-control wire access be certified—by detection of “Treasury-like” access?
 
 ### Answers
 
@@ -184,6 +237,17 @@ Assignment rules / requests ──► Assignment ──► “Assigned: MNB-Role
 3. The assigned birthright role (and/or underlying ELDAP if certifying ents)—not “detected noise” as the sole signal.
 4. Running refresh without role assignment options enabled.
 5. No—detection is not approval.
+6. No—certify assigned WireInitiator/WireApprover roles and/or WIRE_* entitlements; do not trust a vague detected “Treasury” profile.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “role detection” and “assigned roles” for refresh options and cube semantics.
+- [SailPoint Community](https://community.sailpoint.com/) — search “detected vs assigned” for certifier confusion patterns and training tips.
+- [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management; assigned access as the authorized inventory.
+- [NIST SP 800-53 AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — least privilege reviews should act on authorized grants, not mere observation.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/) — access review expectations that require clear “approved vs observed” language.
 
 ---
 

@@ -21,20 +21,23 @@ You will be able to:
 - Execute safe remediation: fix correlation keys, manual correlate when justified, or mark for disable
 - Apply severity SLAs for privileged uncorrelated access
 - Produce examiner-ready remediation evidence without creating rogue identities
+- Draft disable handoffs and time-bounded exception records for non-human accounts
 
 ---
 
 ## Why this matters
 
-**Business.** Uncorrelated accounts are operational debt. Left alone, they become the pathway for ex-vendors and forgotten service IDs. Meridian’s cloud and wire platforms make that debt urgent.
+**Business.** Uncorrelated accounts are operational debt. Left alone, they become the pathway for ex-vendors and forgotten service IDs. After Lessons 17–18, most Meridian staff link cleanly — but residuals on AWS, Wire, and SAP are exactly where “we’ll look someday” turns into an incident.
 
-**Control / audit.** Auditors sample uncorrelated privileged accounts and ask for age, severity, and disposition. “We’ll look someday” fails. A classify → act → evidence loop is the control.
+**Control / audit.** Auditors sample uncorrelated privileged accounts and ask for age, severity, and disposition. A classify → act → evidence loop is the control. Creating a new identity from an uncorrelated `AWS_ADMIN` “so certs look clean” is not remediation — it is manufacturing a ghost.
 
 ---
 
 ## Concepts
 
-**Remediation dispositions:**
+### Three dispositions — and only three
+
+Every residual must land in one bucket. “TBD” is not allowed for Sev-1.
 
 | Disposition | When | Action |
 | --- | --- | --- |
@@ -42,22 +45,66 @@ You will be able to:
 | **Disable** | No valid owner; terminated vendor; stale ID | Disable account in source / flag for app owner; track ticket |
 | **Exception** | Break-glass or service account pending vaulting | Document owner, review date, compensating control |
 
+**Real-life Meridian example.** An uncorrelated `AWS_ADMIN` whose `employeeId` matches `raj.external` after a typo fix is **Correlate**. An `AWS_ADMIN` with no HR cube and a leftover vendor userid is **Disable**, owned by `christopher.hayes`. A batch ID `svc-wire-batch` with sponsor `rachel.evans` and a 30-day review is **Exception** — never a forever orphan with paperwork theater.
+
+### Privileged residuals are Sev-1
+
+Not all uncorrelated accounts are equal. Meridian treats uncorrelated `AWS_ADMIN`, `WIRE_*`, `SAP_FI`, and `CORE` as **Sev-1**: triage within 24 hours, close within 5 business days. Standard ELDAP/CRM residuals are Sev-2/3. Severity drives who gets paged and what evidence you keep.
+
+### Manual correlation is dual-control territory
+
+IIQ UIs often allow linking an account to an identity when attribute correlation cannot. In production that is a high-risk action — wrong manual correlate *is* a false merge (Lesson 18). Lab rule: document why the link is correct (`employeeId` proof or dual review note) before clicking. Never use create-identities as a shortcut to empty the uncorrelated list.
+
+### Wrong way vs bank-ready way
+
+| Temptation | Why it fails exam |
+| --- | --- |
+| Create identity from privileged orphan | Ghost cube; no HR leaver; certs attest fiction |
+| Leave Sev-1 “for next sprint” | No age/disposition evidence when sampled |
+| Disable without owner ticket | No accountability trail; account returns on next extract |
+| Exception with no review date | Permanent unowned access with a form attached |
+
+---
+
+## How it works
+
+Remediation is a control loop around the uncorrelated inventory — configuration (Lessons 17–18) shrinks the list; this lesson closes what remains.
+
 ```
-Uncorrelated account discovered
+Uncorrelated account discovered (post-aggregation)
         │
         ▼
-Privileged? ──yes──► Sev-1 SLA (e.g. 24h triage)
-        │
+Privileged? (AWS_ADMIN / WIRE_* / SAP_FI / CORE)
+        │ yes → Sev-1 SLA (24h triage / 5d close)
         ▼
-HR person match via employeeId/email/manual proof?
+HR person match via employeeId / email / manual proof?
    │ yes                         │ no
    ▼                             ▼
-Correlate + evidence          Disable / exception ticket
+Correlate + evidence          Disable OR Exception ticket
+   │                             │
+   └── re-aggregate / refresh ───┴── update inventory counts
 ```
 
-**Never:** create a new identity from an uncorrelated privileged account “so certs look clean.”
+| Artifact | Owner | Purpose |
+| --- | --- | --- |
+| Cross-app inventory table | IAM ops | Single view of residuals |
+| Ticket `MNB-LAB-UNC-###` | IAM + app owner | Disposition + evidence |
+| Exception record | Sponsor + IAM | Time-bounded accept |
+| SLA dashboard counts | IAM Engineering | Examiner metric |
 
-**Manual correlation.** IIQ UIs often allow linking an account to an identity when attribute correlation cannot. Use only with dual control / peer review in prod; in lab, document why the link is correct (`employeeId` proof).
+---
+
+## Real-world setup (data steward process)
+
+Outside IIQ, production remediation depends on people and tickets — not only correlation maps. Meridian’s operating pattern:
+
+1. **IAM ops** owns the daily/weekly uncorrelated extract after the aggregation pipeline (Lesson 16).
+2. **App owners** (`christopher.hayes` for AWS, platform owners for Wire/SAP/Core) own disable confirmation in the target system.
+3. **HR / contractor desk** owns employeeId corrections when the person exists but keys drifted.
+4. **Security / Helen Ross** reviews Sev-1 aging and exception renewals.
+5. Tickets use a shared prefix (`MNB-UNC-####` in prod; `MNB-LAB-UNC-###` in lab) so examiners can sample by ID.
+
+You will practice that handoff language even when the lab cannot change a live AWS console.
 
 ---
 
@@ -67,13 +114,15 @@ Correlate + evidence          Disable / exception ticket
 - [ ] Ability to list uncorrelated accounts per application
 - [ ] Ticket template ready (`MNB-LAB-UNC-###`)
 - [ ] Privileged entitlement list from dictionary handy
-- [ ] `spadmin` session; binder “Uncorrelated remediation log”
+- [ ] `spadmin` session at `http://localhost:8080/identityiq`; binder “Uncorrelated remediation log”
 
 ---
 
 ## Lab procedure
 
 ### Task 1 — Build the uncorrelated inventory
+
+You cannot remediate what you have not listed. Build one sheet across apps so privileged rows cannot hide in a single application’s UI.
 
 1. For each major target app, open Accounts and filter/view **Uncorrelated** (or equivalent):
    - `MNB-IT-Access`
@@ -93,9 +142,9 @@ Correlate + evidence          Disable / exception ticket
 
 **If it fails:** If everything is correlated, still pick 2–3 accounts and walk the classification exercise using hypothetical “typo employeeId” reasoning—or temporarily review AD disabled orphans.
 
----
-
 ### Task 2 — Classify each privileged row
+
+Classification before action prevents the classic mistake: disabling someone who simply had a bad key, or correlating someone who should never have access.
 
 1. For each highlighted row, assign disposition: Correlate / Disable / Exception.
 2. Apply rules:
@@ -106,9 +155,9 @@ Correlate + evidence          Disable / exception ticket
 
 **Expected result:** Every privileged uncorrelated account has a disposition—no blank “TBD” for Sev-1.
 
----
-
 ### Task 3 — Remediate by correlation (happy path)
+
+Prefer fixing data or configuration and re-aggregating. Manual correlate is the exception path when attributes already match but the Link never formed.
 
 1. Pick one uncorrelated account that clearly matches an HR identity (same employeeId).
 2. Prefer fixing configuration/data and re-aggregating (Lessons 17–18).
@@ -119,9 +168,9 @@ Correlate + evidence          Disable / exception ticket
 
 **If it fails:** Stop if you are unsure of the person—wrong manual correlate is a false merge.
 
----
-
 ### Task 4 — Remediate by disable / owner handoff (no owner path)
+
+When no valid person exists, the account must leave the “enabled and unowned” state. In a delimited lab you may not disable a real cloud console — the written handoff is still the control evidence.
 
 1. Select a scenario account that should not remain enabled unowned (lab may require role-play if all privileged accounts are linked).
 2. Document the disable request to the application owner:
@@ -139,9 +188,9 @@ Ticket: MNB-LAB-UNC-002
 
 **Expected result:** Disable/handoff path practiced with written owner request.
 
----
-
 ### Task 5 — Exception path (controlled accept)
+
+Some non-human accounts must exist. Exceptions are temporary controls with sponsors and review dates — not silent forever orphans.
 
 1. Draft one exception record:
 
@@ -158,9 +207,9 @@ Compensating: vault password, no interactive login, cert in app-owner campaign
 
 **Expected result:** Exception template exists for non-human accounts.
 
----
-
 ### Task 6 — SLA dashboard (lightweight)
+
+Examiners ask for aging, not vibes. Write numbers you can re-count after the next pipeline.
 
 1. Define Meridian lab SLAs:
 
@@ -173,9 +222,9 @@ Compensating: vault password, no interactive login, cert in app-owner campaign
 
 **Expected result:** Measurable SLA commitments in binder.
 
----
-
 ### Task 7 — Re-run pipeline spot check
+
+Remediation that creates identities or leaves stale Links is incomplete. Confirm metrics moved and identity count stayed stable.
 
 1. Run Aggregate for any app you changed + Refresh.
 2. Re-open uncorrelated inventory; update counts.
@@ -237,6 +286,16 @@ Examiner question: *“Show your oldest uncorrelated privileged account and its 
 3. Sev-1 (24h triage class).
 4. Technology / AWS application owner (`christopher.hayes` intent).
 5. Otherwise exceptions become permanent unowned access with paperwork theater.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “uncorrelated accounts” and “manual correlation” for version-specific remediation UI paths.
+- [SailPoint Community (Compass)](https://community.sailpoint.com/) — search “orphaned accounts remediation” for ops playbooks and reporting patterns.
+- [NIST SP 800-53 Rev. 5 — AC-2 Account Management](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — control language examiners map to owned, reviewed, and disabled accounts.
+- [FFIEC Information Security Booklet](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — sampling expectations for privileged access without clear ownership.
+- [CIS Controls v8 — Control 5 Account Management](https://www.cisecurity.org/controls/account-management) — inventory, disable dormant/unowned accounts, and process discipline.
 
 ---
 

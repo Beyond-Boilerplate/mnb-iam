@@ -4,7 +4,11 @@
 **Track:** Roles  
 **Time:** 45–60 minutes  
 **Prereq:** Lesson 22; applications and entitlements from Lessons 09–16 available  
-**Lab data:** `~/iiq-lab-data/reference/job-codes.csv`, `entitlement-dictionary.csv`, `sod-matrix.csv`
+
+**Lab data:**
+- Repo / home: `~/iiq-lab-data/reference/job-codes.csv`
+- Repo / home: `~/iiq-lab-data/reference/entitlement-dictionary.csv`
+- Repo / home: `~/iiq-lab-data/reference/sod-matrix.csv`
 
 ---
 
@@ -17,18 +21,21 @@ You will be able to:
 - Map department/job codes to candidate roles without exploding the catalog
 - Mark which roles are birthright, assignment-rule driven, or request-only
 - List stakeholders who must approve the catalog before go-live
+- Explain why dual-control payment roles (`WIR01` / `WIR02`) must never share a single bundle
 
 ---
 
 ## Why this matters
 
-Without roles, every access request is a snowflake entitlement pick—slow for joiners, opaque for certifiers. Roles translate bank jobs into governed bundles managers understand: “Relationship Manager pack,” not fifteen raw codes.
+**Business.** Without roles, every access request is a snowflake entitlement pick—slow for joiners, opaque for certifiers. When `amelia.brooks` joined as a teller, her manager should have seen “baseline employee pack,” not fifteen raw group codes. Roles translate bank jobs into governed bundles managers understand: “Relationship Manager pack,” not `CRM|ODS|ELDAP` soup.
 
-**Control / audit:** Role composition is a change-controlled artifact. Examiners ask how birthright is bounded and how privileged access is excluded. Your catalog sketch is the design control; later lessons implement bundles in IIQ.
+**Control / audit.** Role composition is a change-controlled artifact. When the OCC examiner asks *"how is birthright bounded, and how is privileged access excluded?"* your answer is the catalog sketch plus the anti-goals (no birthright CloudAdmin, no initiate+approve wire pack). Later lessons implement the bundles in IIQ; this lesson freezes the design control.
 
 ---
 
 ## Concepts
+
+### Bundles speak two languages
 
 In IdentityIQ, roles are often **Bundles**. Two common modeling styles:
 
@@ -37,18 +44,9 @@ In IdentityIQ, roles are often **Bundles**. Two common modeling styles:
 | **IT role** | Technical packaging | Entitlements / accounts | Building blocks (e.g. directory + ODS) |
 | **Business role** | Job / function | IT roles and/or entitlements | What HR and managers recognize |
 
-```
-Business role: MNB-Role-Developer
-        │
-        ├── IT entitlements: DWRP, ODS
-        └── Assigned when jobCode in {DEV01, SRE01}
+The naive alternative is to skip roles and certify every entitlement forever. That fails at a bank under exam: managers cannot attest technical codes they do not understand, and joiner SLAs collapse under ticket volume.
 
-Birthright: MNB-Birthright-Employee
-        │
-        └── ELDAP only — active Employee workerType
-```
-
-**Starter catalog (sketch — implement in Lessons 24–28):**
+### Starter catalog (sketch — implement in Lessons 24–28)
 
 | Role name | Type | Entitlements (intent) | Assignment posture |
 | --- | --- | --- | --- |
@@ -60,15 +58,48 @@ Birthright: MNB-Birthright-Employee
 | `MNB-Role-CloudAdmin` | Privileged | AWS_ADMIN | Request-only |
 | `MNB-Role-BreakGlass` | Privileged | PRIV_BREAK | Request-only |
 
-**Anti-goals:** Never birthright CloudAdmin, WireApprover, BreakGlass, or SAP_FI.
+**Anti-goals:** Never birthright CloudAdmin, WireApprover, BreakGlass, or SAP_FI. Never merge `WIRE_INIT` and `WIRE_APPR` into one role—that destroys payment dual control.
+
+### Why dual control shows up in the catalog, not later
+
+`priya.wire` (`WIR01`) initiates; `marcus.approve` (`WIR02`) approves. If the catalog treats “Treasury wire access” as one pack, SoD policy later is theater—the conflict is already baked into the role. Catalog design is the first SoD control.
+
+---
+
+## How it works
+
+Roles sit between HR attributes and entitlements. Refresh evaluates assignment rules; LCM later lets humans request privileged packs. Detection (Lesson 27) is analytical—do not confuse it with assignment.
+
+```
+HR identity attributes (jobCode, workerType, status)
+        │
+        ▼
+Assignment rules / selectors
+        │
+        ├──► MNB-Birthright-Employee  → ELDAP
+        ├──► MNB-Role-* (job packs)   → app entitlements
+        └──► (no rule) privileged     → request-only path (Lessons 28, 35–37)
+        │
+        ▼
+Identity cube: Assigned roles ──► provisioning plan (when connectors live)
+```
+
+| Layer | Object | What it answers |
+| --- | --- | --- |
+| HR | `jobCode`, `workerType`, `status` | Who is this person at Meridian? |
+| Role (Bundle) | `MNB-Birthright-*` / `MNB-Role-*` | What pack should they have? |
+| Entitlement | ELDAP, WIRE_INIT, AWS_ADMIN… | What access does the pack grant? |
+| Request path | LCM catalog | What can they ask for that rules do not auto-grant? |
+
+One consequence: **catalog size is a control.** Fifteen thoughtful job packs beat two hundred entitlement-named “roles.” Rare access stays requestable, not auto-assigned.
 
 ---
 
 ## Before you start
 
-- [ ] IIQ up; you can browse Applications and Entitlements
+- [ ] IIQ up at `http://localhost:8080/identityiq`; you can browse Applications and Entitlements
 - [ ] Reference CSVs copied to `~/iiq-lab-data/reference/`
-- [ ] Attribute hygiene understood (roles will key off HR codes)
+- [ ] Attribute hygiene from Lesson 22 understood (roles will key off HR codes)
 - [ ] Notebook section titled `MNB-Role-Catalog-v0`
 
 ---
@@ -77,15 +108,19 @@ Birthright: MNB-Birthright-Employee
 
 ### Task 1 — Refresh Meridian job language
 
+Before naming roles, speak Meridian’s desk language. Wrong job codes in the sketch become wrong assignment rules later.
+
 1. Open `~/iiq-lab-data/reference/job-codes.csv`.
 2. Highlight: `TEL01`, `WIR01`, `WIR02`, `RM01`, `DEV01`, `SRE01`, `CLD01`.
-3. Open `entitlement-dictionary.csv` and mark risk=critical codes.
+3. Open `entitlement-dictionary.csv` and mark risk=critical codes (`WIRE_*`, `AWS_ADMIN`, `SAP_FI`, `PRIV_BREAK`, `CORE`).
 
 **Expected result:** You can say aloud which jobs are retail baseline vs payments dual-control vs cloud privilege.
 
 **If it fails:** Re-read Lesson 02 org model; do not invent job codes.
 
 ### Task 2 — Sketch IT vs business roles
+
+Enterprises argue endlessly about nested IT roles vs flat business roles. Decide now for the academy so Lessons 24–28 stay consistent.
 
 1. Write two paragraphs:
    - IT roles = reusable entitlement packs for engineers
@@ -96,15 +131,19 @@ Birthright: MNB-Birthright-Employee
 
 ### Task 3 — Build catalog v0 table
 
+The table is the design control. Renaming after certifications reference a role is painful—treat names as permanent.
+
 1. Copy the starter catalog table into your binder.
 2. Add columns: Owner, Risk tier, Requestable Y/N, Birthright Y/N.
-3. Assign draft owners: e.g. Directory/IAM for birthright; Treasury (`rachel.evans`) for wire roles; Technology for CloudAdmin; Security for BreakGlass; Commercial manager for RM.
+3. Assign draft owners: Directory/IAM for birthright; Treasury (`rachel.evans`) for wire roles; Technology for CloudAdmin; Security for BreakGlass; Commercial for RM.
 
 **Expected result:** Complete table with no privileged role marked birthright.
 
 **If it fails:** If unsure of owner, mark “TBD — Risk approval required” rather than inventing.
 
 ### Task 4 — Map jobs → roles
+
+Assignment rules will copy this matrix. Dual control lives in the mapping rows.
 
 1. Create mapping:
 
@@ -117,9 +156,9 @@ Birthright: MNB-Birthright-Employee
 | DEV01 | Birthright + Developer |
 | CLD01 | Birthright + (CloudAdmin **request**, not auto) |
 
-2. Confirm WIR01 ≠ WIR02 in the mapping (dual control).
+2. Confirm WIR01 ≠ WIR02 in the mapping (dual control). Tellers (`amelia.brooks` / TEL01) get no wire or cloud packs.
 
-**Expected result:** Mapping shows tellers do not get wire or cloud packs.
+**Expected result:** Mapping shows tellers do not get wire or cloud packs; CLD01 does not auto-get AWS_ADMIN.
 
 ### Task 5 — Naming standard lock-in
 
@@ -131,7 +170,9 @@ Birthright: MNB-Birthright-Employee
 
 ### Task 6 — Stakeholder approval list
 
-1. List required approvers for catalog go-live: HR, Risk/Compliance, IT/IAM, Treasury (payments), Commercial (CRM).
+Catalog go-live is dual-controlled design, not an IAM-only publish.
+
+1. List required approvers: HR, Risk/Compliance, IT/IAM, Treasury (payments), Commercial (CRM).
 2. Write the exam sentence: “Role catalog changes require Risk + IAM dual control.”
 
 **Expected result:** Named stakeholder list in binder (roles/titles, not only personal names).
@@ -155,6 +196,7 @@ Birthright: MNB-Birthright-Employee
 - [ ] Job→role mapping includes WIR01-only initiator rule
 - [ ] Privileged roles marked request-only
 - [ ] Stakeholder approval list completed
+- [ ] Dual-control anti-pattern (initiate+approve) parked for enforcement
 
 ---
 
@@ -189,6 +231,7 @@ Birthright: MNB-Birthright-Employee
 3. Which roles in the starter catalog are request-only?
 4. Why must Wire Approver never be birthright for all of Treasury?
 5. Which jobCode should receive `MNB-Role-WireInitiator`?
+6. Why is catalog size itself a control?
 
 ### Answers
 
@@ -197,6 +240,17 @@ Birthright: MNB-Birthright-Employee
 3. `MNB-Role-CloudAdmin` and `MNB-Role-BreakGlass` (at minimum).
 4. Approval is dual-control privilege; automatic broad assignment destroys payment segregation.
 5. `WIR01` only—not `WIR02`.
+6. Too many roles recreate entitlement soup; too few smuggle privilege—thoughtful job packs plus requestable rares keep certs and joiners workable.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Business Roles” and “IT Roles” for Bundle modeling and assignment vs detection.
+- [SailPoint Community / Compass](https://community.sailpoint.com/) — search “role model design” for real-world birthright vs requestable patterns.
+- [NIST SP 800-53 AC-2 / AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management and least privilege; the control language behind birthright boundaries.
+- [FFIEC Information Security booklet](https://www.ffiec.gov/press/pr110723.htm) — banking examiner expectations for access administration (use current FFIEC IT Handbook portal if the press link redirects).
+- [CIS Controls v8 — Control 6](https://www.cisecurity.org/controls/access-control-management) — access control management practices that map cleanly to role catalogs.
 
 ---
 

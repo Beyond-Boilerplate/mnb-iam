@@ -7,20 +7,53 @@ name: SSB CI
 on:
   push:
     branches: [main, master, develop]
+    paths:
+      - config/**
+      - src/**
+      - web/**
+      - lib/**
+      - scripts/**
+      - build.xml
+      - build.sh
+      - build.bat
+      - build.properties
+      - homelab.*
+      - sandbox.*
+      - servers.properties
+      - .github/workflows/ssb-ci.yml
   pull_request:
+    paths:
+      - config/**
+      - src/**
+      - web/**
+      - lib/**
+      - scripts/**
+      - build.xml
+      - build.sh
+      - build.bat
+      - build.properties
+      - homelab.*
+      - sandbox.*
+      - servers.properties
+      - .github/workflows/ssb-ci.yml
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: read
+permissions: {}
+
+concurrency:
+  group: ssb-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ssb-war:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -43,7 +76,7 @@ jobs:
           fi
           echo "Changed files:"
           echo "$CHANGED"
-          if echo "$CHANGED" | grep -qE '^(config/|src/|web/|docker/Dockerfile$|docker/entrypoint\.sh|docker/setenv\.sh|build\.xml|build\.sh|build\.properties|homelab\.|sandbox\.|servers\.properties|VERSION|\.github/workflows/publish-ghcr\.yml)'; then
+          if grep -qE '^(config/|src/|web/|lib/|scripts/|docker/Dockerfile$|docker/entrypoint\.sh|docker/setenv\.sh|build\.xml|build\.sh|build\.bat|build\.properties|homelab\.|sandbox\.|servers\.properties|VERSION|\.github/workflows/publish-ghcr\.yml)' <<<"$CHANGED"; then
             echo "run=false" >> "$GITHUB_OUTPUT"
             echo "Publish GHCR covers these paths — skipping duplicate SSB war on main"
             exit 0
@@ -52,15 +85,22 @@ jobs:
 
       - name: Install oras
         if: steps.gate.outputs.run == 'true'
-        uses: oras-project/setup-oras@v1
+        uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
 
       - name: Log in to GHCR
         if: steps.gate.outputs.run == 'true'
-        uses: docker/login-action@v3
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USERNAME || github.actor }}
           password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Cache GA zip
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: base/ga/identityiq-8.5.zip
+          key: identityiq-ga-8.5-v1
 
       - name: Ensure GA zip
         if: steps.gate.outputs.run == 'true'
@@ -76,7 +116,9 @@ jobs:
           echo "Pulling ${REF}"
           oras pull "$REF" -o base/ga
           if [ ! -f base/ga/identityiq-8.5.zip ]; then
-            found=$(find base/ga -name 'identityiq-8.5.zip' -o -name '*.zip' | head -1)
+            shopt -s nullglob
+            zips=(base/ga/*.zip)
+            found="${zips[0]:-}"
             test -n "$found"
             mv "$found" base/ga/identityiq-8.5.zip
           fi
@@ -84,7 +126,7 @@ jobs:
 
       - name: Set up JDK 11
         if: steps.gate.outputs.run == 'true'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           distribution: temurin
           java-version: "11"
@@ -94,12 +136,13 @@ jobs:
         env:
           SPTARGET: sandbox
         run: |
+          set -euo pipefail
           chmod +x build.sh lib/ant/bin/ant lib/ant/bin/antRun
           ./build.sh -Dtarget=sandbox clean war
 
       - name: Upload WAR artifact
         if: steps.gate.outputs.run == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: identityiq-war-sandbox
           path: |

@@ -37,23 +37,31 @@ waitForDb:
   image: postgres:16-alpine
   timeoutSeconds: 300
 
-# TCP probes: Tomcat listens long before login.jsf is fully warm (IIQ cold start is slow).
-# Public smoke still hits /identityiq/login.jsf after rollout.
+# Startup waits for the real IIQ login route. This prevents a TCP-open Tomcat
+# from completing the rollout while the application still returns 404/504.
 probes:
-  readiness:
-    type: tcp
+  startup:
+    enabled: true
     path: /identityiq/login.jsf
-    initialDelaySeconds: 45
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 72
+  readiness:
+    type: http
+    path: /identityiq/login.jsf
+    initialDelaySeconds: 0
     periodSeconds: 10
     timeoutSeconds: 3
-    failureThreshold: 30
+    failureThreshold: 6
   liveness:
+    # Liveness only verifies that Tomcat is alive. DB/application health belongs
+    # in readiness so a dependency outage does not restart a healthy JVM.
     type: tcp
     path: /identityiq/login.jsf
-    initialDelaySeconds: 180
+    initialDelaySeconds: 30
     periodSeconds: 30
     timeoutSeconds: 5
-    failureThreshold: 6
+    failureThreshold: 5
 
 podAnnotations: {}
 nodeSelector: {}

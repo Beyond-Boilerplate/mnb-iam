@@ -44,6 +44,29 @@ A **population** (identity selector / group filter—wording varies) is a saved 
 
 **Design rule:** Name populations as durable control objects, not “tmp search 3”.
 
+## How it works
+
+A **population** (identity selector) is a saved filter over Identity attributes and/or Links. Tasks, certifications, and reports reference the population by name so scope stays consistent instead of retyping filters under pressure.
+
+```text
+Identity attrs (status, workerType, departmentCode, onLeave)
+        │
+        ▼
+Population / selector definition (MNB-*)
+        │
+        ├── Refresh MNB Identities (scoped)
+        ├── Certification campaigns
+        └── Reports / Advanced Analytics
+```
+
+| Population | Typical filter | Control use |
+| --- | --- | --- |
+| `MNB-Active-Employees` | Active / status=1 | Default refresh & broad certs |
+| `MNB-Contractors` | workerType=Contractor | Short-cycle reviews |
+| `MNB-Treasury` | departmentCode=TRS | Wire/payments campaigns |
+
+**Real-life Meridian example.** Targeting a contractor-only cert at `raj.external`’s peers without a population means someone retypes `workerType=Contractor` and misses people. `MNB-Contractors` makes the exam answer reproducible.
+
 ## Before you start
 
 - [ ] Identities exist from `MNB-HR`
@@ -53,6 +76,8 @@ A **population** (identity selector / group filter—wording varies) is a saved 
 ## Lab procedure
 
 ### Task 1 — Verify filterable attributes
+
+Populations only work if the attributes you filter on are present and promoted on cubes—spot-check personas before building selectors.
 
 1. Open `amelia.brooks` — confirm active status and `departmentCode=RET`.
 2. Open `raj.external` — confirm `workerType=Contractor`.
@@ -179,6 +204,14 @@ In the binder, for each population write:
 3. Shorter tenure and higher offboarding risk → tighter certification cadence and JML SLAs.
 4. `departmentCode=TRS`.
 5. IT accounts/entitlements are not onboarded yet; residual access needs `MNB-IT-Access` (and correlation).
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “population” and “identity selector” for filter syntax and task scoping.
+- [SailPoint Community](https://community.sailpoint.com/) — search “certification population” for campaign-scoping patterns used in banks.
+- [NIST SP 800-53 AC-6 — Least Privilege](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — scoping reviews and admin work to the right populations.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — expectations for risk-based review populations (contractors, privileged, payments).
+- [CIS Controls v8 — Control 5](https://www.cisecurity.org/controls/account-management) — inventorying and grouping accounts for governance.
 
 ## Stretch lab
 

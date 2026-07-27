@@ -2,13 +2,13 @@
 
 **Level:** Advanced  
 **Track:** Connectors — Infra, Logical, PAM  
-**Time:** 75–90 min  
-**Prereq:** Lesson 85 — Logical Applications; Lesson 28 — Privileged Access Roles recommended  
+**Time:** 90–120 min  
+**Prereq:** Lesson 85 — Logical Applications; Lesson 28 — Privileged Access Roles; Lesson 37 — Break-Glass strongly recommended  
 
 **Lab data:**
-- Repo: `lab-data/connectors/connector-selection-matrix.csv` (Privileged vault)
+- Repo: `lab-data/connectors/connector-selection-matrix.csv` (Privileged vault row)
 - Repo: `lab-data/connectors/features-string-glossary.md`
-- Runtime: `~/iiq-lab-data/connectors/`
+- Runtime: `~/iiq-lab-data/connectors/pam/`
 
 ---
 
@@ -16,158 +16,262 @@
 
 You will be able to:
 
-- Position **CyberArk / PAM module** connectors as privileged account governance, not birthright IAM
-- Create Application shell `MNB-PAM-CyberArk` with safe/account entitlement model (offline)
-- Align IIQ privileged roles (`CloudAdmin`, BreakGlass) with vault dual-control
-- Document joiner/leaver and certification flows that include vault evidence
-- Complete lab-without-live-target connection and RACI worksheets
+- Position **CyberArk / PAM module** connectors as privileged account governance — not birthright IAM or a password spreadsheet replacement alone
+- Explain the vault object model (safes, platforms, accounts, checkout, session recording, rotation) and how IIQ maps onto it
+- Create Application shell **`MNB-PAM-CyberArk`** with a safe/account entitlement model suitable for lab-without-live-target work
+- Align IIQ privileged roles (`CloudAdmin`, BreakGlass from Lessons 28 and 37) with vault dual-control: request → approval → safe membership
+- Produce examiner-ready evidence for **password rotation** and **checkout** without requiring a live CyberArk tenant
 
 ---
 
 ## Why this matters
 
-**Business.** Shared root, Domain Admin, and payment switch passwords must live in a vault with session recording—not in tickets or spreadsheets.
+**Business.** Shared root, Domain Admin, cloud break-glass, and payment-switch passwords must live in a vault with checkout controls and session recording — not in tickets, password managers shared by a team chat, or a spreadsheet on a jump host. When `jordan.reed` needed emergency cloud admin access during an outage, the correct path was a time-bound BreakGlass role that provisioned membership into a CyberArk safe — not a Slack DM with a static password. The wrong path is how privileged credentials become immortal.
 
-**Control / audit.** Examiners ask whether privileged passwords rotate, who can check out break-glass credentials, and how IAM requests relate to vault membership. IIQ without PAM leaves the highest-risk accounts half-governed.
+**Control / audit.** Examiners ask whether privileged passwords **rotate**, who can **check out** break-glass credentials, whether sessions are recorded, and how IAM requests relate to vault membership. IIQ without PAM leaves the highest-risk accounts half-governed: you may certify a role named CloudAdmin while the actual password still sits unmanaged. This lesson builds the joined story: IIQ owns request/approval/evidence; CyberArk owns vault mechanics.
 
 ---
 
 ## Concepts
 
-Matrix: Privileged vault → **CyberArk** / PAM module.
+### Privileged access is not birthright
+
+Birthright (joiner defaults) must never include vault safes that hold Domain Admin, cloud root-equivalent, or payment-switch credentials. Privileged access is **request-only**, dual-approved, time-aware where BreakGlass applies, and continuously inventoriable. Lesson 28’s `CloudAdmin` and Lesson 37’s BreakGlass patterns are the IIQ-side language; CyberArk is where those entitlements become real credential custody.
+
+### The CyberArk object model (governance view)
+
+| CyberArk object | What it is | Meridian example |
+| --- | --- | --- |
+| **Safe** | Access-controlled container of privileged accounts | `MNB-Safe-CloudAdmin`, `MNB-Safe-BreakGlass-AD`, `MNB-Safe-Payments-Switch` |
+| **Platform** | Policy template (rotation interval, complexity, reconciliation) | Windows Domain, AWS console/API, network device |
+| **Account** | A privileged credential managed in a safe | `mnb-da-breakglass`, cloud emergency user |
+| **Checkout** | Temporary retrieval / use of a password (often exclusive) | Engineer checks out DA for a change window |
+| **Session recording / PSM** | Proxied interactive session with audit video/log | Jump to domain controller via PSM |
+| **Rotation** | Automatic or forced password change after use / on schedule | Post-checkout rotate; 30/60/90-day platform policy |
+
+IIQ typically treats **safe membership** (and sometimes links to specific privileged accounts) as entitlements. Checkout, recording, and rotation remain PAM-platform operations — but your governance story must *prove they exist*, not pretend IIQ performs them.
+
+### IIQ request → approval → vault membership
 
 ```
-IIQ request / role (privileged)
+Identity Request (role or PAM entitlement)
         │
         ▼
- Approval (Tech Director + Security)
+ Approvals (e.g. Tech Director + Security)     ← IIQ evidence
         │
         ▼
- Provision vault safe membership / account link  ──► CyberArk
+ Provision: add user to CyberArk safe          ← connector / PAM module
         │
         ▼
- Checkout / session / rotate (PAM platform)
+ Checkout / PSM session / rotate               ← CyberArk platform
+        │
+        ▼
+ Account Aggregation → safe membership on cube ← continuous inventory
 ```
 
 | Layer | Owner | Meridian object |
 | --- | --- | --- |
-| Governance | IAM | `MNB-PAM-CyberArk`, privileged roles |
-| Vault | PAM team | Safes, platforms, accounts |
-| Platform | Ops | Jump hosts, connectors |
+| Governance / request | IAM | `MNB-PAM-CyberArk`, privileged roles |
+| Vault operations | PAM team | Safes, platforms, accounts, rotation |
+| Platform / jump | Ops | PSM, connectors, jump hosts |
+| Security policy | Security (`amelia.brooks`) | Who may request; BreakGlass rules |
 
-**Lab-without-live-target:** Application shell, safe catalog stub, provisioning policy forms, RACI, and network worksheet. No live CyberArk API calls required.
+### Aligning CloudAdmin and BreakGlass
+
+| IIQ construct (Lessons 28 / 37) | Vault target | Standing vs temporary |
+| --- | --- | --- |
+| Role `MNB-Role-CloudAdmin` (or equivalent CloudAdmin) | Safe `MNB-Safe-CloudAdmin` | Standing privileged — monthly cert |
+| BreakGlass assignment (Lesson 37) | Safe `MNB-Safe-BreakGlass-AD` | Time-bound (lab: 8 hours) + mandatory remove |
+| Payments privileged operators | Safe `MNB-Safe-Payments-Switch` | Request-only; dual control with payments SoD |
+
+The naive failure: granting CloudAdmin in IIQ with no vault membership — theater governance. The opposite failure: vault membership with no IIQ request trail — invisible privilege.
+
+---
+
+## How it works
+
+The SailPoint CyberArk / PAM module (exact connector name varies by IdentityIQ version and licensed pack) integrates with CyberArk’s API / PVWA so IdentityIQ can aggregate vault users and safe memberships and, when enabled, provision add/remove.
+
+```
+IdentityIQ (MNB-PAM-CyberArk)
+        │  AppID / certificate (vault-owned secrets)
+        ▼
+CyberArk PVWA / API
+        ├── List users / safes / memberships     → aggregation
+        ├── Add / remove safe member             → provisioning
+        └── (PAM native) checkout, PSM, rotate   → evidence via PAM reports
+```
+
+| Operation | Where it runs | IIQ artifact |
+| --- | --- | --- |
+| Request privileged access | IIQ LCM / roles | IdentityRequest |
+| Approve | IIQ workflows | Approval history |
+| Grant safe membership | CyberArk via connector | Provisioning plan / Task Result |
+| Checkout + session | CyberArk | PAM checkout / recording reports |
+| Rotate password | CyberArk platform policy | Rotation logs / reconcile reports |
+| Inventory | Account Aggregation | Cube entitlements + Task Result |
+
+**Lab-without-live-target:** You will not call a live CyberArk API. You will create the Application shell, a safe catalog stub, policy forms, RACI, connection worksheet, and examiner answers that reference which artifact proves rotation and checkout.
+
+---
+
+## Real-world setup (outside IIQ)
+
+This is what a production engineer coordinates with the PAM team before the connector works:
+
+### Step 1 — Vault integration identity
+
+1. PAM team creates an application identity (AppID / certificate auth — prefer cert over static password).
+2. Scope that identity to the safes IIQ is allowed to manage — least privilege, not “all safes.”
+3. Vault the credential material in the bank’s secret store; never commit to git or leave in Application XML exports.
+
+### Step 2 — Network and TLS
+
+1. IIQ (or its connector gateway — Lesson 88) reaches PVWA / API over TLS only.
+2. Allowlist source IPs; no inbound from internet to the vault.
+3. Document the URL (e.g. internal `https://pam.meridiannb.local`) and cert trust chain owner.
+
+### Step 3 — Safe and platform readiness
+
+1. Create/confirm safes: `MNB-Safe-CloudAdmin`, `MNB-Safe-BreakGlass-AD`, `MNB-Safe-Payments-Switch`.
+2. Attach platforms with rotation and (where required) exclusive checkout + PSM recording.
+3. Confirm break-glass accounts exist *inside* the BreakGlass safe — not as static passwords in a runbook wiki.
+
+### Step 4 — Governance records
+
+Document: RACI, SLAs, which IIQ roles map to which safes, certification cadence (monthly privileged), and the examiner evidence map (Task 6).
 
 ---
 
 ## Before you start
 
-- [ ] IIQ up; Debug access
-- [ ] Matrix row for Privileged vault reviewed
-- [ ] Privileged role names known (Lesson 28): CloudAdmin / BreakGlass patterns
-- [ ] Personas: `kai.nguyen` (engineer), `amelia.brooks` (security), `jordan.reed` (ops)
-- [ ] Binder: `connectors/pam/`
+- [ ] IIQ up at `http://localhost:8080/identityiq`; Debug access available
+- [ ] Matrix row for Privileged vault reviewed; glossary skimmed
+- [ ] Privileged role names known from Lesson 28; BreakGlass pattern from Lesson 37
+- [ ] Personas: `kai.nguyen` (engineer), `amelia.brooks` (security), `jordan.reed` (ops/cloud)
+- [ ] Binder: `~/iiq-lab-data/connectors/pam/`
+- [ ] No CyberArk secrets on disk in cleartext; lab uses placeholders only
 
 ---
 
 ## Lab procedure
 
-### Task 1 — RACI for privileged access
+### Task 1 — RACI and SLAs for privileged access
 
-1. Create RACI table:
+Privileged failures are ownership failures first. Write who does what before you name an Application.
+
+1. Create this RACI (adjust only with justification):
 
 | Activity | IAM | PAM | Security | Manager |
 | --- | --- | --- | --- | --- |
 | Approve standing privileged role | C | C | A | C |
 | Add user to CyberArk safe | C | A/R | C | I |
 | Rotate break-glass password | I | A/R | C | I |
-| Monthly privileged cert | A/R | C | C | C |
+| Review session recording on demand | I | A/R | C | I |
+| Monthly privileged certification | A/R | C | C | C |
 
-2. Define SLA: break-glass vault add within 1 hour after approvals; standing privileged within 2 business days.
+2. Define SLAs: break-glass vault add within **1 hour** after approvals; standing privileged within **2 business days**; leaver vault remove within rapid-offboarding window (align Lesson 34 — privileged vault remove with sensitive access revoke).
 
-**Expected result:** RACI + SLA page in binder.
+**Expected result:** RACI + SLA page in `~/iiq-lab-data/connectors/pam/`.
 
-**If it fails:** Minimum: PAM team owns vault; IAM owns IIQ request evidence.
-
----
+**If it fails:** Minimum viable ownership: PAM owns vault operations; IAM owns IIQ request evidence; Security is Accountable for policy.
 
 ### Task 2 — Create `MNB-PAM-CyberArk` shell
 
-1. Applications → Add New → CyberArk / PAM connector template if available.
-2. Name: `MNB-PAM-CyberArk`.
-3. Owner: Security (`amelia.brooks` if identity exists) + PAM technical owner note.
-4. Not authoritative.
-5. Description: “Lab shell — privileged vault governance.”
-6. Save.
+1. Applications → Add New → **CyberArk** / **PAM** connector template if your build’s registry shows one — or equivalent menu path.
+2. Name: `MNB-PAM-CyberArk`. Owner: Security (`amelia.brooks` if the identity exists) with PAM technical owner noted in Description.
+3. Not authoritative. Create identities: **OFF**. Description: “Privileged vault governance — lab shell; secrets in vault only.”
+4. Save. If the connector type is missing (module not installed), create a named Application placeholder and document intended type in Description — continue offline tasks.
 
-**Expected result:** Named Application exists.
+**Expected result:** Named Application exists; no secrets stored in the object for lab.
 
-**If it fails:** Placeholder Application with connector type documented in Description.
+**If it fails:** Placeholder Application with exact name `MNB-PAM-CyberArk` is acceptable for lab-without-live-target.
 
----
+### Task 3 — Safe / account catalog stub (offline)
 
-### Task 3 — Safe / account catalog (offline)
+Build the entitlement dictionary the connector would populate.
 
-1. Document Meridian safes:
-   - `MNB-Safe-CloudAdmin`
-   - `MNB-Safe-BreakGlass-AD`
-   - `MNB-Safe-Payments-Switch`
-2. Entitlements = safe membership and/or privileged account links (version-dependent)—capture both in worksheet.
+1. Create `~/iiq-lab-data/connectors/pam/pam-safes-stub.csv`:
+
+```csv
+safeName,platformHint,privileged,requestable,standingOrTemp,linkedRole
+MNB-Safe-CloudAdmin,AWS-or-Cloud,true,true,standing,MNB-Role-CloudAdmin
+MNB-Safe-BreakGlass-AD,Windows-Domain,true,true,temporary-8h,BreakGlass
+MNB-Safe-Payments-Switch,Network-or-App,true,true,standing,(payments-privileged)
+```
+
+2. In binder notes: entitlements = **safe membership** and/or privileged account links (version-dependent) — capture both concepts even if your build only surfaces one.
 3. Mark all as **privileged / non-birthright**.
-4. Correlation: vault user ↔ `userName` / email `@meridiannb.com`.
+4. Correlation key: vault user ↔ IdentityIQ `userName` / email `@meridiannb.com` (e.g. `kai.nguyen@meridiannb.com`).
 
-**Expected result:** Safe catalog with privilege flags and correlation key.
+**Expected result:** Safe catalog stub on disk with privilege flags, role linkage, and correlation key.
 
-**If it fails:** CSV stub `~/iiq-lab-data/connectors/pam-safes-stub.csv`.
+### Task 4 — Provisioning policy stubs and role-to-safe map
 
----
+1. Document policy stubs (forms / plan operations — names vary): Add user to safe; Remove from safe; Disable vault user (if applicable).
+2. Link design table:
 
-### Task 4 — Provisioning policies and IIQ role linkage
+| IIQ role / pattern | PAM entitlement / safe | Notes |
+| --- | --- | --- |
+| `MNB-Role-CloudAdmin` (Lesson 28) | `MNB-Safe-CloudAdmin` | Standing; monthly cert; never birthright |
+| BreakGlass (Lesson 37) | `MNB-Safe-BreakGlass-AD` | Max **8 hours**; auto-remove on expiry; Security + Tech approval |
+| Payments privileged | `MNB-Safe-Payments-Switch` | Coordinate with Wire dual-control SoD (Lesson 85) |
 
-1. Policy stubs: Add user to safe, Remove from safe, Disable vault user (if applicable).
-2. Link design: IIQ role `MNB-Role-CloudAdmin` → entitlement on `MNB-PAM-CyberArk` for `MNB-Safe-CloudAdmin` (document; implement later if connector live).
-3. Break-glass: time-bound assignment note (8 hours) + mandatory remove on expiry.
-4. Never put vault API keys in git—use encrypted IIQ config / K8s secrets.
+3. Write the anti-pattern: IIQ role assigned with no safe membership provisioning plan — or safe membership granted in CyberArk UI with no IdentityRequest.
 
-**Expected result:** Policy stubs + role-to-safe mapping table.
-
----
+**Expected result:** Policy stubs + role-to-safe mapping table in the binder.
 
 ### Task 5 — Lab-without-live-target connection worksheet
 
+Complete without live API calls:
+
 | Item | Lab value |
 | --- | --- |
-| PVWA / API URL | `https://pam-lab.meridiannb.local` (example) |
+| PVWA / API URL | `https://pam-lab.meridiannb.local` (example — not live) |
 | Auth | AppID / certificate — vault owned |
-| TLS | Required |
-| Aggregate | Nightly Account Aggregation |
-| Test plan | aggregate → correlate → add safe → remove safe |
+| TLS | Required; trust store owner: Platform |
+| Aggregate | Nightly Account Aggregation task name stub: `MNB-PAM-CyberArk-Account-Aggregation` |
+| Test plan | aggregate → correlate → add safe → remove safe → re-aggregate |
+| Secrets | Placeholder only — “credential in bank secret store” |
 
-Complete without live calls; checkbox “blocked pending PAM lab” if needed.
+Checkbox if needed: “blocked pending PAM lab — worksheets complete.”
 
-**Expected result:** Worksheet signed; secrets absent.
+**Expected result:** Worksheet signed; **no secrets** in git or binder screenshots.
 
----
+### Task 6 — Examiner evidence pack (rotation + checkout)
 
-### Task 6 — Evidence pack for examiners
+Write concrete answers — this is the advanced bar for the lesson:
 
-Write answers:
+1. **How do you prove checkout of break-glass was approved?**  
+   IdentityRequest + approval history in IIQ **and** CyberArk checkout / PSM report showing who checked out which account and when. Neither alone is enough.
 
-1. How do you prove checkout of break-glass was approved?
-2. What IIQ artifact shows safe membership?
-3. What happens on leaver for vault users?
+2. **How do you prove password rotation?**  
+   CyberArk platform rotation / reconcile report for the account (e.g. post-checkout rotate or scheduled rotate) **plus** IIQ aggregation showing continued safe membership only for still-authorized users — rotation is PAM evidence; membership is IAM evidence.
 
-**Expected result:** Evidence pack page with pointers (IdentityRequest, aggregation, PAM reports).
+3. **What IIQ artifact shows safe membership?**  
+   Account Aggregation Task Result for `MNB-PAM-CyberArk` and the identity cube entitlement/safe listing for `kai.nguyen` / `jordan.reed`.
+
+4. **What happens on leaver for vault users?**  
+   Rapid offboarding (Lesson 34): remove safe memberships → disable/delete vault user per runbook → confirm next aggregation shows absence → retain PAM session/checkout history for the investigation window.
+
+**Expected result:** Evidence pack page with pointers to IdentityRequest, aggregation, and PAM reports.
+
+### Task 7 — Residual risk
+
+Record `RR-PAM-01`: *Checkout, session recording, and rotation occur in CyberArk; IIQ aggregation proves membership, not that a session was recorded.* Compensating control: monthly sample of BreakGlass IdentityRequests joined to PAM checkout reports, owned by Security (`amelia.brooks`) with PAM executing the pull.
+
+**Expected result:** Residual risk logged with compensating control and owner.
 
 ---
 
 ## Acceptance criteria
 
-- [ ] RACI + SLA complete
-- [ ] `MNB-PAM-CyberArk` shell exists
-- [ ] Three safes catalogued as privileged
-- [ ] Role-to-safe mapping documented
-- [ ] Connection worksheet complete (no secrets in git)
-- [ ] Examiner evidence pack written
+- [ ] RACI + SLAs complete
+- [ ] `MNB-PAM-CyberArk` shell (or exact-name placeholder) exists
+- [ ] Three safes catalogued as privileged in `pam-safes-stub.csv`
+- [ ] Role-to-safe mapping aligns CloudAdmin and BreakGlass (Lessons 28 / 37)
+- [ ] Connection worksheet complete with no secrets in git
+- [ ] Examiner pack covers approval, checkout, rotation, leaver, and `RR-PAM-01`
 
 ---
 
@@ -175,54 +279,67 @@ Write answers:
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Connector missing | Module not installed | Shell + escalate license/pack |
-| API 401 | AppID/cert | PAM team rotates; update encrypted config |
-| Birthright privileged | Role mistake | Remove assignment rule; request-only |
-| Dual systems drift | No aggregation | Schedule Account Aggregation; cert monthly |
-| Secrets in XML | Bad export | Scrub; re-encrypt |
+| Connector type missing | PAM module / license not installed | Shell + escalate pack; complete offline worksheets |
+| API 401 / cert errors | AppID/cert expired or wrong safe rights | PAM rotates credential; update encrypted config only |
+| Birthright privileged safe | Assignment rule mistake | Remove birthright; request-only |
+| IIQ role without vault access | Provisioning plan never linked | Map role → safe entitlement; test add/remove |
+| Dual-system drift | No aggregation | Schedule Account Aggregation; certify monthly |
+| Secrets in exported XML | Bad export hygiene | Scrub; re-encrypt; treat as incident |
 
 ---
 
 ## Training binder evidence
 
-- RACI/SLA
-- Application screenshot
-- Safe catalog
-- Role-to-safe map
-- Connection worksheet
-- Examiner evidence answers
+- RACI / SLA page
+- Application screenshot (or placeholder note)
+- `pam-safes-stub.csv` + privilege flags
+- Role-to-safe map (CloudAdmin / BreakGlass / payments)
+- Connection worksheet (no secrets)
+- Examiner evidence answers (checkout + rotation) and `RR-PAM-01`
 
 ---
 
 ## Knowledge check
 
-1. Matrix preferred connector for privileged vault?
-2. Name the Meridian PAM application.
-3. Are PAM safes birthright?
-4. Who is Accountable for adding users to CyberArk safes in the lab RACI?
-5. What is the lab-without-live-target requirement?
+1. What is the matrix-preferred connector family for a privileged vault at Meridian?
+2. Name the Meridian PAM application object.
+3. Are PAM safes birthright? Why?
+4. Who is Accountable/Responsible for adding users to CyberArk safes in the lab RACI?
+5. What two artifacts together prove an approved break-glass **checkout**?
+6. What does `RR-PAM-01` say IIQ aggregation cannot prove by itself?
 
 ### Answers
 
-1. CyberArk / PAM module.  
-2. `MNB-PAM-CyberArk`.  
-3. No—privileged / request-only.  
-4. PAM team (A/R) with IAM/Security consulted.  
-5. App shell, safe catalog, policies, RACI, and connection worksheet without live API calls.
+1. CyberArk / PAM module.
+2. `MNB-PAM-CyberArk`.
+3. No — privileged / request-only; birthright would put Domain Admin–class access on every joiner path.
+4. PAM team (A/R) with IAM and Security consulted; Security Accountable for standing privileged policy.
+5. IIQ IdentityRequest/approval history **and** CyberArk checkout (or PSM) report.
+6. That a session was recorded or that a password actually rotated — those are PAM-platform evidence.
+
+---
+
+## Further reading
+
+- [CyberArk technical documentation](https://docs.cyberark.com/) — start at the docs landing page; search PVWA, safes, platforms, CPM rotation, and PSM session management for the object model in this lesson.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “CyberArk” or “PAM connector” for your version’s application guide and aggregation attributes.
+- [SailPoint Developer Community](https://developer.sailpoint.com/discuss/) — integration troubleshooting threads (auth, safe rights, aggregation gaps).
+- [NIST SP 800-63B — Digital Identity Guidelines](https://pages.nist.gov/800-63-3/sp800-63b.html) — authenticator lifecycle and session considerations that parallel privileged credential handling.
+- [FFIEC Information Security booklet](https://www.ffiec.gov/) — search the IT Handbook for privileged access and logging expectations examiners reuse in vault reviews.
 
 ---
 
 ## Stretch lab
 
-Draft IdentityRequest acceptance criteria: approval screenshots + CyberArk safe membership proof attached before closing privileged ticket.
+Draft IdentityRequest acceptance criteria for closing a privileged ticket: (1) approval screenshots, (2) CyberArk safe membership proof (aggregation or PAM admin export), (3) for BreakGlass — checkout report sample and confirmation of remove-on-expiry. Optionally sketch a monthly join query narrative: BreakGlass requests in IIQ vs checkout events in CyberArk for the same window.
 
 ---
 
 ## Summary
 
-- PAM/CyberArk is Meridian’s privileged credential control plane, governed via `MNB-PAM-CyberArk`.
-- IIQ roles request vault access; PAM operates checkout and rotation.
-- Advanced lab completes offline with RACI, catalog, and worksheets.
+- PAM/CyberArk is Meridian’s privileged credential control plane; `MNB-PAM-CyberArk` is how IIQ inventories and requests safe membership.
+- CloudAdmin and BreakGlass roles only become real when mapped to safes with approval evidence, rotation, and checkout audit.
+- Advanced lab completes offline with RACI, safe catalog stub, worksheets, and examiner answers for rotation and checkout.
 
 ---
 

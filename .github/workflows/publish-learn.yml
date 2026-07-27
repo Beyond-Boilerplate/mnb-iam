@@ -9,8 +9,9 @@ on:
     paths:
       - "docs/lessons/**"
       - "learn/**"
-      - "lab-data/**"
-      - "tools/generate-mnb-curriculum.py"
+      - ".github/scripts/ensure-ghcr-pull-secret.sh"
+      - ".github/scripts/smoke-in-cluster-surface.sh"
+      - ".github/scripts/smoke-public-surface.sh"
       - ".github/workflows/publish-learn.yml"
   workflow_dispatch:
     inputs:
@@ -19,13 +20,12 @@ on:
         type: boolean
         default: false
 
-permissions:
-  contents: read
-  packages: write
+permissions: {}
 
 concurrency:
-  group: publish-learn-sailpoint
-  cancel-in-progress: true
+  # Every workflow that mutates the sailpoint namespace shares this lock.
+  group: homelab-sailpoint-deploy
+  cancel-in-progress: false
 
 env:
   LEARN_SMOKE_URL: https://sailpoint.lmsapp.us/
@@ -34,33 +34,45 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
     outputs:
       image_tag: ${{ steps.meta.outputs.tag }}
+      owner: ${{ steps.meta.outputs.owner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Image tag
         id: meta
         run: |
-          echo "tag=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
-          echo "Using tag ${GITHUB_SHA:0:7}"
+          set -euo pipefail
+          OWNER=$(tr '[:upper:]' '[:lower:]' <<<"${{ github.repository_owner }}")
+          {
+            echo "tag=${GITHUB_SHA:0:7}"
+            echo "owner=${OWNER}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Using ghcr.io/${OWNER}/mnb-iam-learn:${GITHUB_SHA:0:7}"
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           file: learn/Dockerfile
           push: true
           tags: |
-            ghcr.io/beyond-boilerplate/mnb-iam-learn:latest
-            ghcr.io/beyond-boilerplate/mnb-iam-learn:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ steps.meta.outputs.owner }}/mnb-iam-learn:latest
+            ghcr.io/${{ steps.meta.outputs.owner }}/mnb-iam-learn:${{ steps.meta.outputs.tag }}
+          cache-from: type=gha,scope=mnb-iam-learn
+          cache-to: type=gha,mode=max,scope=mnb-iam-learn
 
   deploy:
     name: Deploy public surface
@@ -69,26 +81,32 @@ jobs:
       github.event_name != 'workflow_dispatch' ||
       inputs.skip_deploy != true
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment: homelab
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Connect Tailscale
-        uses: tailscale/github-action@v4
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8 # v4.1.3
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-          ping: 192.168.50.11
+          ping: ${{ vars.HOMELAB_TS_PING_IP || '192.168.50.11' }}
 
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
 
       - name: Write kubeconfig
         env:
           HOMELAB_KUBECONFIG: ${{ secrets.HOMELAB_KUBECONFIG }}
         run: |
           set -euo pipefail
+          if [ -z "$HOMELAB_KUBECONFIG" ]; then
+            echo "::error::Missing secret HOMELAB_KUBECONFIG"
+            exit 1
+          fi
           mkdir -p "$HOME/.kube"
           printf '%s\n' "$HOMELAB_KUBECONFIG" > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
@@ -97,23 +115,16 @@ jobs:
         env:
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME || github.actor }}
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
-          kubectl get ns sailpoint >/dev/null 2>&1 || kubectl create namespace sailpoint
-          TOKEN="${GHCR_PULL_TOKEN:-${GHCR_READ_TOKEN:-$GITHUB_TOKEN}}"
-          USER="${GHCR_USERNAME:-${{ github.actor }}}"
-          kubectl -n sailpoint delete secret ghcr-pull --ignore-not-found
-          kubectl -n sailpoint create secret docker-registry ghcr-pull \
-            --docker-server=ghcr.io \
-            --docker-username="${USER}" \
-            --docker-password="${TOKEN}"
+          bash .github/scripts/ensure-ghcr-pull-secret.sh
 
       - name: Install academy + edge
         env:
           LEARN_IMAGE_TAG: ${{ needs.build-push.outputs.image_tag }}
+          GHCR_OWNER: ${{ needs.build-push.outputs.owner }}
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
@@ -121,80 +132,28 @@ jobs:
           ./learn/k8s/install-public-surface.sh
 
       - name: In-cluster smoke (edge path split)
+        timeout-minutes: 12
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
-          kubectl -n sailpoint delete pod curl-edge-smoke --ignore-not-found --wait=true
-          kubectl -n sailpoint run curl-edge-smoke --restart=Never --image=curlimages/curl:8.5.0 --command -- \
-            sleep 120
-          kubectl -n sailpoint wait --for=condition=Ready pod/curl-edge-smoke --timeout=60s
-          # Academy at /
-          BODY=$(kubectl -n sailpoint exec curl-edge-smoke -- curl -fsS http://sailpoint-edge:8080/)
-          echo "$BODY" | grep -qiE 'Meridian|IAM Academy|Curriculum'
-          # IIQ login through edge
-          CODE=$(kubectl -n sailpoint exec curl-edge-smoke -- curl -sS -o /dev/null -w '%{http_code}' \
-            http://sailpoint-edge:8080/identityiq/login.jsf)
-          echo "iiq via edge: HTTP ${CODE}"
-          case "$CODE" in 200|302) ;; *) echo "unexpected IIQ code"; exit 1 ;; esac
-          kubectl -n sailpoint delete pod curl-edge-smoke --ignore-not-found --wait=false
-          echo "In-cluster path split OK"
+          bash .github/scripts/smoke-in-cluster-surface.sh
 
   smoke:
     name: Smoke academy + IIQ
     needs: deploy
     if: always() && needs.deploy.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # IIQ Tomcat can take several minutes after image roll; public smoke retries up to ~6m.
+    timeout-minutes: 12
+    permissions:
+      contents: read
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Probe public URLs
-        id: public
-        continue-on-error: true
         run: |
           set -euo pipefail
-          probe() {
-            local url="$1" label="$2"
-            local ok=0 code
-            for i in $(seq 1 18); do
-              code=$(curl -sS -o /tmp/smoke.body -w '%{http_code}' --connect-timeout 10 "$url" || echo "000")
-              echo "${label} attempt ${i}: HTTP ${code}"
-              if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
-                ok=1
-                break
-              fi
-              sleep 5
-            done
-            [ "$ok" = "1" ]
-          }
-          probe "$LEARN_SMOKE_URL" "academy"
-          if ! grep -qiE 'Meridian|IAM Academy|Curriculum' /tmp/smoke.body; then
-            echo "::error::https://sailpoint.lmsapp.us/ is not serving the academy yet."
-            echo "Update Cloudflare Tunnel Public Hostname URL to:"
-            echo "  sailpoint-edge.sailpoint.svc.cluster.local:8080"
-            echo "(was identityiq.sailpoint.svc.cluster.local:8080)"
-            head -c 200 /tmp/smoke.body || true
-            exit 1
-          fi
-          probe "$IIQ_SMOKE_URL" "iiq"
-          echo "Public surface OK: / and /identityiq"
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-
-      - name: Public tunnel checklist
-        if: steps.public.outcome != 'success'
-        run: |
-          {
-            echo "## Action required — Cloudflare Tunnel"
-            echo ""
-            echo "Cluster deploy succeeded. Public home route will work after this one change:"
-            echo ""
-            echo "1. Open Cloudflare Zero Trust → Networks → Tunnels → your tunnel → **Public Hostname**"
-            echo "2. Edit **sailpoint.lmsapp.us**"
-            echo "3. Set URL to \`sailpoint-edge.sailpoint.svc.cluster.local:8080\`"
-            echo "4. Save, then re-run **Publish learn site** smoke (or wait ~1 min and curl)"
-            echo ""
-            echo "- Academy: https://sailpoint.lmsapp.us/"
-            echo "- IIQ: https://sailpoint.lmsapp.us/identityiq/login.jsf"
-          } >> "$GITHUB_STEP_SUMMARY"
-          exit 1
+          bash .github/scripts/smoke-public-surface.sh
 
 
   gate:
@@ -202,6 +161,8 @@ jobs:
     needs: [build-push, deploy, smoke]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
     steps:
       - name: Aggregate
         env:

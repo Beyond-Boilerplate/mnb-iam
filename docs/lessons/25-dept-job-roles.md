@@ -4,7 +4,11 @@
 **Track:** Roles  
 **Time:** 60–90 minutes  
 **Prereq:** Lesson 24 (`MNB-Birthright-Employee`); entitlements DWRP, ODS, CRM, WIRE_INIT available  
-**Lab data:** `~/iiq-lab-data/reference/job-codes.csv`; personas with DEV/RM/WIR01 jobs; mover preview file `scenarios/mover/hr-delta-priya-to-commercial.csv`
+
+**Lab data:**
+- `~/iiq-lab-data/reference/job-codes.csv`
+- Personas with DEV/RM/WIR01 jobs; dual-control pair `priya.wire` (WIR01) / `marcus.approve` (WIR02)
+- Mover preview: `~/iiq-lab-data/scenarios/mover/hr-delta-priya-to-commercial.csv`
 
 ---
 
@@ -17,18 +21,23 @@ You will be able to:
 - Create **`MNB-Role-WireInitiator`** with WIRE_INIT for **`WIR01` only** (never `WIR02`)
 - Assign via HR `jobCode` (and optionally `departmentCode`) and verify after refresh
 - Preview why Priya’s mover delta will swap wire → RM packs in Lesson 30
+- Prove `marcus.approve` never receives the initiator role (dual control)
 
 ---
 
 ## Why this matters
 
-Most access follows the desk you sit in. Job-coded roles beat one-off entitlement requests for movers: when HR changes `jobCode`, refresh re-evaluates packs. That is how Meridian prevents “Treasury forever” access after a commercial transfer.
+**Business.** Most access follows the desk you sit in. When `priya.wire` later moves to commercial banking, HR changes `jobCode` from `WIR01` to `RM01`—and refresh should re-evaluate packs. Job-coded roles beat one-off entitlement requests for movers: that is how Meridian prevents “Treasury forever” access after a commercial transfer.
 
-**Control / audit:** Job→role mapping is an approved matrix. Dual-control jobs (`WIR01` vs `WIR02`) must never share a single initiate+approve role. Evidence = role definitions + mapping matrix + sample assignee cubes.
+**Control / audit.** Job→role mapping is an approved matrix. Dual-control jobs (`WIR01` vs `WIR02`) must never share a single initiate+approve role. Evidence = role definitions + mapping matrix + sample assignee cubes (`priya.wire`, `marcus.approve`, a developer, an RM such as `sofia.torres`).
 
 ---
 
 ## Concepts
+
+### Job codes are the assignment key
+
+HR `jobCode` (and sometimes `departmentCode`) drives who gets which business role. Birthright still applies underneath for employees; job packs layer on top.
 
 ```
 HR jobCode ──► Assignment rule ──► Business role ──► Entitlements
@@ -44,7 +53,43 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 | `MNB-Role-RelationshipManager` | CRM (+ ODS optional) | jobCode in {RM01, LO01} |
 | `MNB-Role-WireInitiator` | WIRE_INIT | jobCode = WIR01 **only** |
 
-**Mover preview:** `hr-delta-priya-to-commercial.csv` sets Priya to `CML` / `RM01` / manager `MNB00006`. Wire initiator assignment should stop; RM path should start—entitlement cleanup still required if WIRE_INIT residual remains on the account.
+### Dual control is a catalog fact
+
+`priya.wire` initiates; `marcus.approve` approves. A rule keyed only on department `TRS` would give both people initiator access—destroying segregation. Key off `WIR01` explicitly. SoD Lessons 39–40 enforce conflicts; this lesson refuses to encode the conflict in a role.
+
+### Mover preview (Lesson 30)
+
+`hr-delta-priya-to-commercial.csv` sets Priya to `CML` / `RM01` / manager `MNB00006`. Wire initiator assignment should stop; RM path should start—**WIRE_INIT entitlement may residual** on the account until remediations. Roles fix intent; residual entitlement hygiene still matters.
+
+### LoA nuance
+
+`sofia.torres` may be `RM01` with `onLeave=true` (Lesson 33). Job roles may still assign while freeze disables interactive access. Do not “fix” leave by removing job packs blindly—freeze is lifecycle, not catalog redesign.
+
+---
+
+## How it works
+
+Refresh re-evaluates every identity against every assignment rule. When HR attributes change, packs should follow—without a ticket for every entitlement.
+
+```
+Aggregate MNB-HR (jobCode, departmentCode, status)
+        │
+        ▼
+Refresh MNB Identities (assign roles)
+        │
+        ├── TEL01  → birthright only
+        ├── WIR01  → birthright + WireInitiator
+        ├── WIR02  → birthright + WireApprover (not Initiator)
+        ├── RM01   → birthright + RelationshipManager
+        └── DEV01  → birthright + Developer
+```
+
+| Failure mode | What goes wrong | Fix |
+| --- | --- | --- |
+| Department-only wire rule | Marcus gets WIRE_INIT | Key `jobCode == WIR01` |
+| AWS inside Developer | Privilege smuggled | Lesson 26 packaging; Lesson 28 CloudAdmin |
+| Mover HR not aggregated | Old packs stick | Aggregate HR then refresh |
+| File lab no provisioning | Ents missing on account | Still verify **role assignment** on cube |
 
 ---
 
@@ -62,6 +107,8 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 
 ### Task 1 — Confirm target personas
 
+Named personas make dual-control proof examiner-ready. Guessing job codes fails the lab.
+
 1. From HR, identify at least one DEV01 or SRE01 identity (e.g. `diego.hayes` DEV01).
 2. Identify an RM persona (e.g. `sofia.torres` RM01—note onLeave flag if present).
 3. Confirm `priya.wire` is WIR01 in **baseline** HR (before mover).
@@ -69,7 +116,7 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 
 **Expected result:** Four named test identities with known jobCodes.
 
-**If it fails:** Use `HRApplications.txt` search; do not guess job codes.
+**If it fails:** Use `HRApplications.txt` / HR CSV search; do not guess job codes.
 
 ### Task 2 — Create `MNB-Role-Developer`
 
@@ -94,6 +141,8 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 **Expected result:** CRM present; no WIRE_INIT in this role.
 
 ### Task 4 — Create `MNB-Role-WireInitiator`
+
+This is the dual-control hinge. Description and rule must say “initiate only.”
 
 1. Create role `MNB-Role-WireInitiator`.
 2. Description: “Wire Portal initiate only. Dual control: approvers use a separate role.”
@@ -125,6 +174,8 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 **If it fails:** Check jobCode on cube; fix HR map; re-aggregate HR; refresh again.
 
 ### Task 7 — Mover preview (read-only)
+
+Do not apply the delta yet—predict the outcome so Lesson 30 has a baseline.
 
 1. Open `~/iiq-lab-data/scenarios/mover/hr-delta-priya-to-commercial.csv`.
 2. Note changes: dept `CML`, job `RM01`, manager `MNB00006`, title Relationship Manager.
@@ -183,6 +234,7 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 3. What makes movers work with these roles?
 4. Why must WIR02 not match the initiator rule?
 5. After Priya’s commercial mover, which new job role should assign?
+6. Why might `sofia.torres` still show RelationshipManager while on leave?
 
 ### Answers
 
@@ -191,6 +243,17 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 3. Assignment keys off HR job/dept codes that change on transfer; refresh re-evaluates roles.
 4. WIR02 is the approve side of dual control; combining initiate assignment would break segregation.
 5. `MNB-Role-RelationshipManager` (job `RM01`).
+6. Job assignment may remain while LoA freeze disables interactive access—leave is not the same as job change (Lesson 33).
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “role assignment rules” and “identity refresh” for job-attribute-driven packs.
+- [SailPoint Community](https://community.sailpoint.com/) — search “mover access” / “role reassignment” for residual entitlement patterns after HR transfers.
+- [NIST SP 800-53 AC-5](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — separation of duties; the control language behind WIR01/WIR02 split roles.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/) — access administration and dual control expectations for payment systems.
+- [CIS Controls v8 — Control 6](https://www.cisecurity.org/controls/access-control-management) — least privilege and access review practices tied to job function.
 
 ---
 
@@ -205,7 +268,7 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 ## Summary
 
 - Job-coded roles encode Meridian desks: Developer, RM, Wire Initiator.
-- WIR01-only initiator packaging preserves payment dual control.
+- WIR01-only initiator packaging preserves payment dual control (`priya.wire` vs `marcus.approve`).
 - Mover success depends on HR codes + refresh—and still needs residual entitlement hygiene.
 
 ---

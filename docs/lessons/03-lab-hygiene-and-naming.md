@@ -44,6 +44,28 @@ Messy labs teach bad production habits. Banks survive exams with reproducible bu
 
 **Control owner (lab):** You (trainee). In prod, IAM Ops owns task schedules; Application owners own entitlement dictionaries.
 
+## How it works
+
+Delimited File connectors resolve paths on the **application server OS**, not in your laptop shell’s current directory. Naming prefixes and evidence folders are process controls that make objects and screenshots attributable later.
+
+```text
+repo lab-data/
+      │  cp
+      ▼
+~/iiq-lab-data/*.txt   ──absolute path──►  MNB-* DelimitedFile Application
+      │
+      └── screenshots / task results ──► ~/iiq-lab-evidence/YYYY-MM-DD/
+```
+
+| Habit | Failure mode if skipped | Exam impact |
+| --- | --- | --- |
+| Absolute file path | Aggregation reads wrong/empty file | “Control failed last night” |
+| `MNB-` prefix | Object collisions in shared lab | Cannot prove ownership |
+| Dated evidence | “It worked once” folklore | No reproducible binder |
+| CHANGELOG line | Forgotten why object exists | Change-control finding |
+
+**Real-life Meridian example.** Ops restarts Tomcat after a patch; if `MNB-HR` still points at `./HRApplications.txt`, aggregation silently fails and joiner cubes for `nina.joiner` never appear—hygiene prevents that outage story.
+
 ## Before you start
 
 - [ ] Lesson 02 complete
@@ -192,6 +214,14 @@ EOF
 3. Screenshots of task results, object configs, dates, INTENT notes—reproducible proof of work.
 4. `Aggregate MNB-HR`.
 5. Collision risk, audit confusion, accidental changes to “real” named controls.
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Delimited File connector” for file path, delimiter, and header configuration details.
+- [SailPoint Community](https://community.sailpoint.com/) — search “aggregation zero accounts” for path/permission failure write-ups.
+- [NIST SP 800-53 CM / AU families](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — configuration management and audit evidence habits mirrored by naming + evidence folders.
+- [FFIEC IT Examination Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/it-booklets/architecture-infrastructure-and-operations.aspx) — change-control and operational resilience expectations for bank platforms.
+- [CIS Controls v8 — Control 4 (Secure Configuration)](https://www.cisecurity.org/controls/secure-configuration-of-enterprise-assets-and-software) — baseline for consistent, documented configuration of systems that process identities.
 
 ## Stretch lab
 

@@ -1,198 +1,383 @@
 # Lesson 58 — LDAP / OpenLDAP Connector
 
-| Field | Value |
-| --- | --- |
-| **Level** | Intermediate |
-| **Track** | Connectors — Directory |
-| **Time** | 75–90 minutes |
-| **Prereq** | Lesson 57; connector matrix OpenLDAP row |
-| **Lab data** | `~/iiq-lab-data/connectors/ldap/mnb-openldap.ldif`; optional `docker-compose.connectors.yml` |
+**Level:** Intermediate  
+**Track:** Connectors — Directory  
+**Time:** 90–120 min  
+**Prereq:** Lesson 57 — AD Groups, OUs & Exchange; connector matrix OpenLDAP row  
+
+**Lab data:**
+- Repo: `lab-data/connectors/ldap/mnb-openldap.ldif` (copy to `~/iiq-lab-data/connectors/ldap/`)
+- Repo: `docker-compose.connectors.yml` — **live OpenLDAP backend, required for this lesson**
+
+---
 
 ## Learning objectives
 
 You will be able to:
 
-- Inspect Meridian OpenLDAP LDIF (`inetOrgPerson` + `groupOfNames`)
-- Create Application `MNB-OpenLDAP` as OpenLDAP Direct or LDAP type per lab build
-- Map `uid` / `employeeNumber` / `mail` for correlation
-- Complete lab-without-live-LDAP using LDIF as schema truth
-- Define aggregate task and group membership expectations for `priya.wire`
+- Explain LDAP as a protocol (versus Active Directory as a product) and read a Directory Information Tree, DN, and objectClass without guessing
+- Start Meridian's live OpenLDAP container, verify it with `ldapsearch`, and predict aggregation results from the bootstrap LDIF before IIQ ever connects
+- Create and configure **MNB-OpenLDAP** against the live directory: bind DN, base DN, account objectClass `inetOrgPerson`, and group entitlements from `groupOfNames`
+- Run a real Test Connection and a real Account Aggregation, and reconcile the counts against the LDIF line by line
+- Correlate LDAP accounts to HR identity cubes using `employeeNumber` with create-identities off
+- Diagnose the four classic LDAP failures: `err=49`, `err=32`, connection refused, and size limit exceeded
+
+---
 
 ## Why this matters
 
-Not every Meridian directory is Active Directory. Lab and midrange systems often use OpenLDAP/FreeIPA. Engineers who only know AD Direct mis-map `sAMAccountName` onto `uid` and break correlation.
+**Business.** Not every directory at Meridian is Active Directory. The wire-operations platform the bank bought in 2014 ships with an embedded OpenLDAP instance for its own authentication; the network team's switches and VPN concentrators authenticate against another one. When `priya.wire` was moved off wire duties last quarter, her AD group was removed on day one — but her entry in the wire platform's LDAP group `wire-initiators` sat untouched for five weeks, because nobody governs directories they cannot see. That is exactly the access an examiner will find, because embedded directories are where revocations go to die.
 
-**Control / audit:** LDAP apps remain non-authoritative unless Architecture explicitly designates otherwise. Evidence is LDIF + Application schema maps.
+**Control / audit.** The control story is simple to state and easy to fail: *every directory that grants access is aggregated into IdentityIQ, correlated to an HR-owned identity, and its groups appear as certifiable entitlements.* An engineer who only knows AD Direct will mis-map `sAMAccountName` onto a directory that uses `uid`, break correlation, and quietly produce a fleet of uncorrelated accounts that no certification ever reaches. This lesson teaches the generic LDAP mental model so you can govern any RFC-compliant directory, not just Microsoft's.
+
+---
 
 ## Concepts
 
-| LDIF / LDAP | IIQ role |
-| --- | --- |
-| `uid` | Native account id candidate |
-| `employeeNumber` | Correlate to `employeeId` |
-| `mail` | Secondary correlate / quality |
-| `groupOfNames` / `member` | Entitlements |
-| Base DN | `dc=meridiannb,dc=com` |
+### LDAP is a protocol; Active Directory is a product
 
-```text
-  mnb-openldap.ldif
-        |
-        v
-  Optional Docker OpenLDAP
-        |
-        v
-  MNB-OpenLDAP Application
-        |
-        v
-  Aggregate MNB-OpenLDAP → correlate to HR cubes
+LDAP (Lightweight Directory Access Protocol) is a wire protocol — a standardized way to search, read, and modify a tree-shaped database of entries. Active Directory is one *product* that speaks LDAP, alongside a pile of Microsoft-specific extensions (Kerberos, SIDs, `sAMAccountName`, `userAccountControl` bit flags). OpenLDAP is another product that speaks the same protocol but stays close to the standard schemas.
+
+| | Active Directory | OpenLDAP |
+| --- | --- | --- |
+| Vendor | Microsoft, part of Windows Server | Open source, runs anywhere |
+| Account objectClass | `user` (Microsoft schema) | `inetOrgPerson` (RFC 2798 standard) |
+| Login attribute | `sAMAccountName` / `userPrincipalName` | `uid` |
+| Enable/disable | `userAccountControl` bit flags | No standard flag — often `pwdAccountLockedTime` or app-specific |
+| Group objectClass | `group` | `groupOfNames` or `groupOfUniqueNames` |
+| Typical role at Meridian | Corporate workstation/app directory | Embedded app directories, network gear auth |
+
+The practical consequence: when you sit down in front of an unfamiliar directory, your first questions are always *what objectClass are the accounts?* and *what attribute is the login name?* — never assumptions carried over from AD.
+
+### The DIT, DNs, and RDNs
+
+An LDAP directory is a tree called the **Directory Information Tree (DIT)**. Every entry has a **Distinguished Name (DN)** — its full address in the tree, written leaf-first. The leftmost component is the **Relative Distinguished Name (RDN)**, the entry's name within its parent container.
+
+Meridian's lab DIT:
+
+```
+dc=meridiannb,dc=com                      ← suffix (the tree root)
+├── ou=people,dc=meridiannb,dc=com        ← container for user entries
+│   ├── uid=helen.ross,ou=people,dc=meridiannb,dc=com
+│   └── uid=priya.wire,ou=people,dc=meridiannb,dc=com
+└── ou=groups,dc=meridiannb,dc=com        ← container for group entries
+    └── cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
 ```
 
-Fixture personas in LDIF include `helen.ross`, `priya.wire`, and group `wire-initiators`.
+Read `uid=priya.wire,ou=people,dc=meridiannb,dc=com` right to left: in the `meridiannb.com` tree, inside the `people` organizational unit, the entry whose RDN is `uid=priya.wire`. Unlike AD, where OUs mostly organize policy, in a plain LDAP directory the OUs are just containers — but you still need to know them, because they become your search bases.
+
+### Bind DN and objectClass
+
+A **bind DN** is the account IIQ authenticates *as* when it connects — LDAP's version of a service account. The lab uses the directory administrator, `cn=admin,dc=meridiannb,dc=com`, because osixia's image creates it automatically. Production never does this; see the hardening notes below.
+
+An **objectClass** declares what kind of entry something is and which attributes it may carry. Three matter here:
+
+- **`inetOrgPerson`** — the standard "person" class. Carries `uid`, `cn`, `sn`, `mail`, `employeeNumber`. This is Meridian's account objectClass.
+- **`groupOfNames`** — a group whose members are listed as full DNs in the `member` attribute. This is what the lab LDIF uses for `wire-initiators`.
+- **`groupOfUniqueNames`** — a near-identical sibling that uses `uniqueMember` instead of `member`. Directories vary; if your group aggregation returns groups with zero members, the wrong member attribute name is the first suspect.
+
+### Search base, scope, and filter
+
+Every LDAP query has three coordinates, and the connector configuration is really just these three plus credentials:
+
+- **Search base** — where in the tree to start, e.g. `ou=people,dc=meridiannb,dc=com`. Too narrow and you miss accounts; a typo and you get `err=32 No such object`.
+- **Scope** — how deep to go: `base` (that one entry), `one` (immediate children), `sub` (entire subtree — the aggregation default).
+- **Filter** — which entries qualify, e.g. `(objectClass=inetOrgPerson)`. This is why the objectClass decision matters: filter on `(objectClass=user)` out of AD habit and you aggregate zero accounts from OpenLDAP, with no error to tip you off.
+
+Real-life check: when Priya's wire platform directory returns 0 accounts to a new engineer, the cause is almost never connectivity — it is one of these three coordinates being wrong, silently.
+
+### Why banks still run OpenLDAP
+
+It is tempting to treat OpenLDAP as legacy trivia. It is not, for two reasons that show up in every bank:
+
+1. **App-embedded directories.** Vendor platforms (wire systems, trading tools, mainframe front-ends) frequently ship their own LDAP instance for local authentication and roles. The vendor will not migrate it to AD for you. If it grants access, you govern it.
+2. **Network infrastructure auth.** Switches, routers, VPN concentrators, and out-of-band consoles commonly authenticate admins against a RADIUS/LDAP stack that is deliberately kept separate from the corporate domain — a blast-radius decision. Those admin groups are among the most sensitive entitlements in the bank.
+
+---
+
+## How it works
+
+The SailPoint OpenLDAP / LDAP connector is one of the simplest in the catalog because there is no API gateway, token exchange, or agent: IIQ opens a TCP connection to the directory, binds, and issues standard LDAP search operations. Everything you configured in the concepts above maps one-to-one onto connector fields.
+
+```
+IdentityIQ (MNB-OpenLDAP application)
+        │  bind: cn=admin,dc=meridiannb,dc=com  (lab)
+        │        cn=svc-iiq-read,...            (production, read-only)
+        ▼
+LDAP simple bind over TCP 389 (lab) / LDAPS 636 (production)
+        │
+        ▼
+OpenLDAP (osixia container, suffix dc=meridiannb,dc=com)
+        ├── search base ou=people,  filter (objectClass=inetOrgPerson)
+        │        → account aggregation (2 entries in the lab)
+        ├── search base ou=groups,  filter (objectClass=groupOfNames)
+        │        → group / entitlement aggregation (1 group)
+        └── member DNs on groups → membership resolution back to accounts
+```
+
+| Operation | LDAP behavior | IIQ behavior |
+| --- | --- | --- |
+| Test Connection | Anonymous or simple bind as the bind DN | Proves host, port, credentials, and base DN in one click |
+| Account aggregation | Subtree search under the people base, filtered by account objectClass | One Link per entry; `uid` as native identity |
+| Group aggregation | Subtree search under the groups base, filtered by group objectClass | One ManagedAttribute per group |
+| Membership resolution | Reads `member` (or `uniqueMember`) DNs on each group | Multi-valued entitlement attribute on each account |
+| Provisioning (if enabled) | LDAP add/modify/delete operations | Create, attribute sync, group add/remove |
+
+Note what is *absent* compared to AD Direct: no IQService, no Exchange, no forest topology. The trade is that OpenLDAP also has no standard "disabled" flag, so leaver evidence usually means *removed from groups and/or entry deleted*, and your runbook must say which.
+
+---
+
+## Real-world setup (outside IIQ)
+
+Per the style contract, this lesson's live path is mandatory — the repo ships a real OpenLDAP backend, so you will configure against a directory that actually answers.
+
+### Step 1 — Start the container
+
+From the repo root:
+
+```bash
+docker compose -f docker-compose.connectors.yml up -d openldap
+docker compose -f docker-compose.connectors.yml ps
+```
+
+The `osixia/openldap:1.5.0` image reads its environment (`LDAP_DOMAIN: meridiannb.com`, `LDAP_ADMIN_PASSWORD: admin`) and builds the suffix `dc=meridiannb,dc=com` with admin `cn=admin,dc=meridiannb,dc=com` on first start. It then loads the mounted bootstrap file `lab-data/connectors/ldap/mnb-openldap.ldif`. Port 389 is mapped to localhost.
+
+One osixia quirk worth knowing now: **bootstrap LDIF is applied only on first container creation.** If you edit the LDIF later, `docker compose -f docker-compose.connectors.yml down && docker compose -f docker-compose.connectors.yml up -d openldap` to recreate.
+
+### Step 2 — Verify with ldapsearch before touching IIQ
+
+A production engineer never lets the connector be the first client to test a directory — a command-line bind isolates network and credential problems from connector configuration problems.
+
+```bash
+ldapsearch -x -H ldap://localhost:389 \
+  -b dc=meridiannb,dc=com \
+  -D cn=admin,dc=meridiannb,dc=com -w admin
+```
+
+Flag by flag: `-x` simple bind (no SASL), `-H` the directory URL, `-b` search base, `-D` bind DN, `-w` bind password. Expect six entries back: the suffix, `ou=people`, `ou=groups`, two `inetOrgPerson` entries, and one `groupOfNames`.
+
+### Step 3 — Read the LDIF and predict the aggregation
+
+Open `lab-data/connectors/ldap/mnb-openldap.ldif` and account for every entry. This is the discipline that makes aggregation results *verifiable* rather than merely *plausible*:
+
+- `helen.ross` — `inetOrgPerson`, `employeeNumber: MNB00001`, `mail: helen.ross@meridiannb.com`
+- `priya.wire` — `inetOrgPerson`, `employeeNumber: MNB00090`, and she is the sole `member` of `cn=wire-initiators`
+- `wire-initiators` — `groupOfNames` with exactly one member DN
+
+So before running anything, write the prediction: **account aggregation scans 2 accounts; group aggregation finds 1 group; `priya.wire` carries 1 entitlement; `helen.ross` carries 0.** Any other numbers mean the configuration is wrong, no matter how green the task result looks.
+
+### Production notes (what changes outside the lab)
+
+- **Dedicated read-only bind account.** Never bind as the directory admin. Create `cn=svc-iiq-read,ou=service,dc=meridiannb,dc=com` with read-only ACLs scoped to the people and groups subtrees, password in the vault, rotation on schedule. The lab's `cn=admin` / `admin` is a lab-only convenience — label it that way in your binder.
+- **LDAPS everywhere.** Simple binds send the password in cleartext. Production uses `ldaps://` on 636 (or StartTLS), which means the directory's certificate chain must live in the IIQ trust store — document who owns that trust store, because expired directory certs are a classic 2 a.m. outage.
+- **Paged results.** Directories enforce a server-side size limit (OpenLDAP defaults to 500). A 40,000-entry directory will throw *size limit exceeded* mid-aggregation unless the connector requests the paged-results control. Two entries won't trigger it in the lab; forty thousand in production will, on your first full run.
+
+---
 
 ## Before you start
 
-- [ ] Copy LDIF: confirm `~/iiq-lab-data/connectors/ldap/mnb-openldap.ldif`
-- [ ] Optional: review `docker-compose.connectors.yml` for OpenLDAP service
-- [ ] IIQ up; Lesson 52 preferred connector OpenLDAP - Direct
+- [ ] IIQ up at `http://localhost:8080/identityiq` as `spadmin`; `MNB-HR` identities exist (Lesson 06+) so correlation has targets
+- [ ] Docker running; `docker compose -f docker-compose.connectors.yml up -d openldap` succeeds
+- [ ] `ldapsearch` available (macOS ships it; Linux: `openldap-clients` / `ldap-utils` package)
+- [ ] LDIF copied to `~/iiq-lab-data/connectors/ldap/mnb-openldap.ldif` for reference
+- [ ] Lesson 52 connector selection record names **OpenLDAP - Direct** as preferred type
+
+---
 
 ## Lab procedure
 
-### Task 1 — Inspect the LDIF fixture
+### Task 1 — Start and verify the live directory
 
-1. Read structure:
+Everything downstream depends on a directory that actually answers, so prove that first — exactly the order a production engineer follows when a new LDAP endpoint lands on their desk.
 
-```bash
-grep -E '^dn:|^uid:|^employeeNumber:|^cn:|^member:' ~/iiq-lab-data/connectors/ldap/mnb-openldap.ldif
-```
+1. From the repo root, run `docker compose -f docker-compose.connectors.yml up -d openldap`.
+2. Run the Step 2 `ldapsearch` and count the entries returned.
+3. Confirm you can name each entry: suffix, two OUs, `helen.ross`, `priya.wire`, `wire-initiators`.
 
-2. Confirm base `dc=meridiannb,dc=com`, `ou=people`, `ou=groups`.
-3. Note `priya.wire` membership in `cn=wire-initiators`.
+**Expected result:** `ldapsearch` returns 6 entries with `result: 0 Success` at the bottom; `priya.wire`'s DN appears as the `member` of `wire-initiators`.
 
-**Expected result:** Notebook lists people DNs + wire-initiators member DN.
+**If it fails:** `Can't contact LDAP server` → container not running or port 389 not mapped (`docker compose ps`); `err=49` → bind DN/password typo (lab password is exactly `admin`).
 
-**If it fails:** Re-copy from `lab-data/connectors/ldap/`.
+### Task 2 — Predict the aggregation from the LDIF
 
-### Task 2 — Lab without live target — schema worksheet from LDIF
+Auditable aggregation starts with a written prediction — if you cannot say in advance what the task will return, you cannot detect when it returns the wrong thing.
 
-1. Create `~/iiq-lab-data/connectors/ldap/MNB-OpenLDAP-schema-58.md`:
+1. Create `~/iiq-lab-data/connectors/ldap/MNB-OpenLDAP-schema-58.md` and record the prediction card: 2 accounts (`helen.ross`, `priya.wire`), 1 group (`wire-initiators`), 1 membership (Priya).
+2. Add the schema map:
 
 | LDAP attribute | Schema use |
 | --- | --- |
-| `uid` | Account identity attribute |
-| `cn`, `sn` | Identity sync optional |
-| `mail` | email |
-| `employeeNumber` | Correlation to `employeeId` |
-| `member` on groups | Entitlement |
+| `uid` | Account native identity |
+| `cn`, `sn` | Display name / identity sync candidates |
+| `mail` | Email; secondary correlation quality check |
+| `employeeNumber` | Correlation to identity `employeeId` |
+| `member` on `groupOfNames` | Group membership → entitlement |
 
-2. Correlation: `employeeNumber`↔`employeeId`; fallback `uid`↔`userName`.
-3. Create-identities: **No**.
-4. Search DN people: `ou=people,dc=meridiannb,dc=com`; groups: `ou=groups,dc=meridiannb,dc=com`.
+3. Record the correlation decision: primary `employeeNumber` ↔ `employeeId`; documented fallback `uid` ↔ `userName`. Create-identities: **No** — `MNB-HR` remains the only authoritative source.
 
-**Expected result:** Schema file complete without needing LDAP bind.
+**Expected result:** Prediction card and schema map saved before the application exists.
 
-### Task 3 — Create Application MNB-OpenLDAP
+### Task 3 — Create the MNB-OpenLDAP application against the live container
 
-1. Applications → Add New → **OpenLDAP - Direct** (or **LDAP** if Direct unavailable—document which).
-2. Name: `MNB-OpenLDAP`. Owner lab `spadmin`.
-3. Host/port/bind DN: use Docker values if running; else placeholders `ldap://mnb-openldap:389` and bind `cn=admin,dc=meridiannb,dc=com` (fictional password in secrets store—not in git).
-4. Base DN: `dc=meridiannb,dc=com`.
-5. Save.
+Now consume the coordinates from concepts: host, port, bind DN, base DN. In production these come from the directory owner's handover sheet; here they come from the compose file.
 
-**Expected result:** Application object exists (Test Connection optional).
+1. Applications → Add New → **OpenLDAP - Direct** (or the generic **LDAP** type if Direct is absent from your build — document which you used, or equivalent menu path).
+2. Name: `MNB-OpenLDAP`. Owner: `helen.ross` (lab session as `spadmin`).
+3. Connection section:
+   - **Host:** `localhost` — **Port:** `389`
+   - **Bind DN (user):** `cn=admin,dc=meridiannb,dc=com` — **Password:** `admin` (annotate: *lab-only; production uses a vaulted read-only service bind*)
+   - **Base / search DN:** `dc=meridiannb,dc=com`; if the form takes separate bases, people `ou=people,dc=meridiannb,dc=com` and groups `ou=groups,dc=meridiannb,dc=com`
+   - **SSL/LDAPS:** off — label *lab only* in your notes
+4. Save.
 
-**If it fails:** Notes-only shell file acceptable when type missing from image.
+**Expected result:** Application saved with live connection values, not placeholders.
 
-### Task 4 — Optional live Docker path
+**If it fails:** If IIQ runs inside its own Docker network, `localhost` may need to be `host.docker.internal` (or the compose service name `openldap`) — the classic container-to-container networking trap.
 
-1. If compose profile available, start OpenLDAP per `docker-compose.connectors.yml` comments.
-2. Load LDIF into the container (follow compose README / learn track).
-3. Test Connection from IIQ; run Account Aggregation `Aggregate MNB-OpenLDAP`.
-4. Spot-check `helen.ross` and `priya.wire` links + `wire-initiators`.
+### Task 4 — Test Connection
 
-**Expected result:** Live path: accounts > 0 and group visible. Offline path: skip with deferred note.
+Test Connection is a real bind against a real directory here — it proves host, port, credentials, and base DN in a single click, which is why an examiner treats it as the first artifact of connector health.
 
-**If it fails:** Capture bind error; continue offline worksheets as primary.
+1. Click **Test Connection** on `MNB-OpenLDAP`.
+2. If it fails, reproduce with the Task 1 `ldapsearch` to split connector-config problems from directory problems.
 
-### Task 5 — Entitlement expectation
+**Expected result:** Success message. A failure here with a passing `ldapsearch` means the application fields differ from the working command — compare field by field.
 
-1. Write Expected result: After aggregate+correlate, `priya.wire` shows entitlement/group `wire-initiators` (or CN equivalent).
-2. If it fails: check group search DN, `member` attribute mapping, and correlation on `priya.wire`.
+**If it fails:** `err=49` → credential typo in the app; `err=32` → base DN typo (compare character-by-character with the LDIF suffix).
 
-**Expected result:** Expectation block in schema file.
+### Task 5 — Schema: account objectClass and group entitlements
 
-### Task 6 — TLS / LDAPS design note
+The schema decides what governance can see; the objectClass filter decides what the schema even receives. This is where AD reflexes break non-AD directories.
 
-1. Prefer `ldaps://` for Meridian non-lab; document cert trust store ownership.
-2. Lab may use plain LDAP on Docker—label clearly **lab only**.
-3. Expected result: TLS note in schema file. If it fails (prod on plain LDAP): finding—require LDAPS ADR exception.
+1. Open the account schema. Confirm the account objectClass is `inetOrgPerson` (not `user`); native identity `uid`; attributes `cn`, `sn`, `mail`, `employeeNumber` present.
+2. Open the group schema. Group objectClass `groupOfNames`, native identity `cn` (or DN per build), membership read from `member`. Mark group membership as the **entitlement attribute** so each group becomes a certifiable ManagedAttribute.
+3. Correlation config: `employeeNumber` ↔ `employeeId` primary; `uid` ↔ `userName` fallback, both recorded in the schema file.
+4. Confirm **create identities is OFF** — LDAP accounts that fail correlation must surface as uncorrelated accounts (Lesson 19 remediation), not spawn phantom cubes.
 
-**Expected result:** TLS/lab-only label written.
+**Expected result:** Schema shows `inetOrgPerson` accounts keyed by `uid`, `groupOfNames` entitlements, create-identities disabled.
 
-### Task 7 — Runbook + CHANGELOG
+### Task 6 — Account Aggregation with predicted counts
 
-1. Add `Aggregate MNB-OpenLDAP` after HR in conceptual order (before Refresh).
-2. CHANGELOG: “Lesson 58 MNB-OpenLDAP shell + LDIF schema maps.”
+Now run the inventory and hold it against your Task 2 prediction. A green task result with the wrong counts is a *worse* outcome than a red one, because nobody investigates green.
 
-**Expected result:** Runbook row + CHANGELOG.
+1. Tasks → New → Account Aggregation: `MNB-OpenLDAP-Account-Aggregation` (curriculum alias `Aggregate MNB-OpenLDAP`), application `MNB-OpenLDAP`.
+2. Run it. Open the Task Result and record accounts scanned, created, updated.
+3. Run group/entitlement aggregation per your build (separate Account Group Aggregation task or the connector's group scan).
+4. Reconcile: **2 accounts scanned, 1 group discovered.** Open `priya.wire`'s identity cube — the `MNB-OpenLDAP` link shows entitlement `wire-initiators`. Open `helen.ross` — link present, zero group entitlements.
+5. Confirm both links correlated to their HR cubes via `employeeNumber` (MNB00090, MNB00001) — no new identities created.
+6. Schedule design note: nightly, after `MNB-HR` aggregation so correlation targets exist first.
+
+**Expected result:** Task Result success with exactly 2 accounts; Priya's cube shows `wire-initiators`; zero identities created.
+
+**If it fails:** 0 accounts → base DN or objectClass filter wrong (Task 5); group empty → `member` vs `uniqueMember` mapping; accounts uncorrelated → `employeeNumber` map or HR cubes missing.
+
+### Task 7 — The governance payoff: wire-initiators as evidence
+
+Connect the plumbing to the control story — this paragraph of narrative is what the examiner actually buys.
+
+1. In the Entitlement Catalog, find `wire-initiators` on `MNB-OpenLDAP`. Set/describe it: *authorizes wire transfer initiation on the vendor wire platform*; flag as high-risk per Lesson 22 patterns.
+2. Write the leaver expectation in the schema file: when Priya leaves wire operations, the provisioning plan (or the vendor admin, with an IIQ-verified deadline) removes her `member` value; the next `Aggregate MNB-OpenLDAP` shows the entitlement gone — the before/after Task Results are the revocation evidence.
+3. Note the OpenLDAP gap honestly: no standard disable flag, so "account disabled" is not an available control here — group removal and entry deletion are.
+
+**Expected result:** Entitlement described and risk-flagged; leaver evidence chain written down, including the no-disable-flag caveat.
+
+### Task 8 — Production hardening notes
+
+The lab deliberately violates three production rules; writing them down is what separates a lab exercise from training evidence.
+
+1. In the schema file, record the three deltas from the Real-world setup section: (1) read-only service bind DN instead of `cn=admin`, vaulted and rotated; (2) LDAPS/StartTLS with named trust-store owner — plain LDAP requires an ADR exception; (3) paged results enabled before pointing at any directory larger than the server size limit.
+2. Add the examiner line: *"Lab used admin bind over plain LDAP on localhost only; production design is documented at right."*
+
+**Expected result:** Hardening section with all three deltas and the lab-only disclaimer.
+
+### Task 9 — Fallback path (only if you cannot run Docker)
+
+This path exists for locked-down machines; it is explicitly secondary and your binder must say the live path was unavailable, not skipped.
+
+1. Complete Tasks 2, 3 (placeholder host `mnb-openldap:389`), 5, 7, and 8 using the LDIF as schema truth; skip Test Connection and mark Task 6 as *deferred — no live target*, keeping the prediction card as the expected-results record.
+
+**Expected result:** All design artifacts complete; a dated deferred-aggregation note in the binder.
+
+---
 
 ## Acceptance criteria
 
-- [ ] LDIF inspected; wire group membership noted
-- [ ] Lab-without-live-target schema/correlation file saved
-- [ ] `MNB-OpenLDAP` created or notes shell equivalent
-- [ ] Create-identities disabled documented
-- [ ] Live aggregate optional; deferred note OK
-- [ ] TLS / lab-only LDAP note written
-- [ ] Runbook + CHANGELOG updated
+- [ ] OpenLDAP container running; `ldapsearch` returns 6 entries with `result: 0 Success`
+- [ ] Prediction card written *before* aggregation (2 accounts / 1 group / 1 membership)
+- [ ] `MNB-OpenLDAP` created with live values; Test Connection passed
+- [ ] Schema: `inetOrgPerson` accounts on `uid`, `groupOfNames` entitlements, create-identities off
+- [ ] Aggregation Task Result matches the prediction exactly; Priya and Helen correlated by `employeeNumber`
+- [ ] `wire-initiators` described and risk-flagged; leaver evidence chain written
+- [ ] Hardening notes: read-only bind, LDAPS, paged results (fallback path: deferred note instead of live results)
+
+---
 
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Bind failed | Bad DN/password/TLS | Fix secrets; try ldap vs ldaps |
-| 0 accounts | Wrong people OU | Use `ou=people,dc=meridiannb,dc=com` |
-| No groups | Group objectClass filter | Include `groupOfNames` |
-| Orphans | Create-identities on | Disable |
-| AD attrs on LDAP | Wrong mental model | Use `uid` not `sAMAccountName` |
+| `ldap_bind: Invalid credentials (49)` | Wrong bind DN or password | Lab bind is exactly `cn=admin,dc=meridiannb,dc=com` / `admin`; check for trailing spaces |
+| `No such object (32)` | Base DN typo — e.g. `dc=meridianb,dc=com` | Compare the base DN character-by-character with the LDIF suffix |
+| `Can't contact LDAP server` / connection refused | Container down, or port 389 not mapped to the host | `docker compose -f docker-compose.connectors.yml ps`; re-run `up -d openldap` |
+| `Size limit exceeded (4)` mid-aggregation | Result set exceeds the server limit (OpenLDAP default 500) | Enable the paged-results control in the connector; never raise the server limit as the "fix" |
+| Aggregation returns 0 accounts, task green | objectClass filter or people base wrong (AD habits) | Filter on `inetOrgPerson`, base `ou=people,dc=meridiannb,dc=com` |
+| Group found but has no members | Directory uses `uniqueMember` (`groupOfUniqueNames`), schema maps `member` | Match the member attribute to the group objectClass actually in the directory |
+
+---
 
 ## Training binder evidence
 
-- LDIF grep output or screenshot
-- `MNB-OpenLDAP-schema-58.md`
-- Application definition screenshot or shell notes
-- Aggregate result **or** deferred-no-target note
+- `ldapsearch` output showing all 6 entries and `result: 0 Success`
+- Prediction card + `MNB-OpenLDAP-schema-58.md` with schema map and correlation decision
+- Application screenshot (bind/base values visible, password masked) and Test Connection success
+- Aggregation Task Result with counts reconciled against the prediction; Priya's cube showing `wire-initiators`
+- Hardening notes with the lab-only disclaimer
 
-**Examiner question:** “Show the non-AD directory application and how employeeNumber correlates to HR.”
+**Examiner question:** *"This vendor wire platform doesn't use Active Directory. Show me how its accounts and the wire-initiation group get into your governance system, and how you'd prove a revocation."*
+
+---
 
 ## Knowledge check
 
-1. What file bootstraps Meridian OpenLDAP lab data?
-2. Which attribute is the preferred account id in the LDIF?
-3. How does `priya.wire` relate to `wire-initiators`?
-4. Is `MNB-OpenLDAP` authoritative?
-5. Must Docker be running to finish acceptance criteria?
-6. Why prefer LDAPS for non-lab Meridian LDAP?
+1. LDAP versus Active Directory — which is the protocol and which is the product, and why does the distinction change how you configure a connector?
+2. Read `uid=priya.wire,ou=people,dc=meridiannb,dc=com` — what is the RDN, and what does the rest of the DN tell you?
+3. Why does filtering on `(objectClass=user)` return zero accounts from this directory, with no error?
+4. Why is binding as `cn=admin,dc=meridiannb,dc=com` acceptable in the lab but a finding in production?
+5. What exact counts should `Aggregate MNB-OpenLDAP` report against the bootstrap LDIF, and why do you write them down *before* running?
+6. OpenLDAP has no standard disable flag — what does that mean for your leaver evidence on this application?
 
 ### Answers
 
-1. `ldap/mnb-openldap.ldif`.
-2. `uid`.
-3. She is a `member` of the `groupOfNames` `cn=wire-initiators`.
-4. No—unless Architecture explicitly changes that (curriculum default: non-authoritative).
-5. No—LDIF-based lab-without-live-target worksheets suffice.
-6. Encrypt directory binds in transit; plain LDAP is lab-only unless exceptioned.
+1. LDAP is the protocol; AD is one product speaking it (with Microsoft extensions). The connector must match the *product's* schema: `uid`/`inetOrgPerson` here, not `sAMAccountName`/`user`.
+2. RDN is `uid=priya.wire` — her name within her container; the rest is the path: the `people` OU inside the `dc=meridiannb,dc=com` suffix.
+3. The filter is a search predicate, not a validation — no entries carry `objectClass=user` in this directory, so the search legitimately matches nothing and succeeds with zero results.
+4. Lab convenience on a disposable container. Production requires a dedicated read-only bind account with scoped ACLs, vaulted credentials, and rotation — admin binds violate least privilege and put a directory-admin password in connector config.
+5. 2 accounts scanned, 1 group, 1 membership (Priya). Writing the prediction first turns the Task Result into verifiable evidence — a green task with wrong counts is otherwise invisible.
+6. "Disabled" is not an available control; leaver evidence must be group removal (`member` gone on re-aggregation) and/or entry deletion, and the runbook must state which.
+
+---
+
+## Further reading
+
+- [OpenLDAP Software documentation](https://www.openldap.org/doc/) — the official admin guide; read the "Access Control" and "Limits" sections, which map directly to the read-only-bind and paged-results hardening notes.
+- [ldap.com — Understanding LDAP DNs and RDNs](https://ldap.com/ldap-dns-and-rdns/) — the clearest standalone explanation of DN syntax; ten minutes here prevents a career of `err=32`.
+- [ldap.com — LDAP filters](https://ldap.com/ldap-filters/) — filter syntax reference for the search-base/scope/filter triad, including the objectClass filters used in this lesson.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search "OpenLDAP connector" or "LDAP connector" for the version-specific application guide, including paged-results and SSL settings.
+- [SailPoint Developer Community](https://developer.sailpoint.com/discuss/) — search "OpenLDAP aggregation" for field-reported issues, especially `member` vs `uniqueMember` mapping threads.
+
+---
 
 ## Stretch lab
 
-- Extend LDIF with `marcus.approve` and an approvers group; re-import.
-- Compare OpenLDAP Direct vs generic LDAP feature strings in registry.
-- Add TLS LDAPS design notes mirroring IQService TLS discipline.
+Extend the LDIF: add `samir.hassan` (MNB00094) and `raj.external` (MNB00093, contractor) as `inetOrgPerson` entries and a `cn=wire-approvers` group containing Samir. Recreate the container (`down` then `up -d` — remember bootstrap LDIF only loads on first creation), re-run the aggregation, and verify your new prediction: 4 accounts, 2 groups. Then write the finding Raj represents if he ever appears in `wire-initiators`: a contractor holding wire initiation is an SoD/risk event for Lesson 40's policies. Finally, convert the container to LDAPS with a self-signed cert and document the trust-store import on the IIQ side.
+
+---
 
 ## Summary
 
-- OpenLDAP labs use Meridian LDIF as schema truth.
-- `MNB-OpenLDAP` maps `uid`/`employeeNumber`, not AD attributes.
-- Live Docker is optional; offline maps complete the lesson.
+- LDAP is a protocol with a portable mental model — DIT, DN, bind DN, objectClass, and the base/scope/filter triad — that governs any directory, and AD habits (`sAMAccountName`, `user`) actively break non-AD directories.
+- The live path is the lesson: a real container, a real `ldapsearch`, and an aggregation whose counts (2 accounts, 1 group, Priya in `wire-initiators`) were predicted from the LDIF before the task ran.
+- Production hardening is three deltas from the lab: dedicated read-only bind, LDAPS with an owned trust store, and paged results — plus the honesty note that OpenLDAP has no standard disable flag.
 
 ---
 

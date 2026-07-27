@@ -299,6 +299,13 @@ Store as `MNB-Capstone-Exam-Binder-YYYY-MM-DD`.
 
 ---
 
+## Further reading
+
+- Full curriculum index: [docs/lessons/README.md](README.md) and Part II catalog [_CATALOG_51_110.md](_CATALOG_51_110.md).
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — version-specific release notes for go-live checklists.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — exam readiness framing.
+- [NIST SP 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — control families mapped throughout this academy.
+
 ## Stretch lab
 
 Onboard a new application `MNB-MobileDeposit` with two entitlements; aggregate; correlate; add one SoD pair; run a 5-identity owner micro-cert. Treat it as a timeboxed simulation of production app onboarding using Lessons 09–14 patterns.

@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/component: app
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 1200
+  minReadySeconds: 10
   selector:
     matchLabels:
       app.kubernetes.io/name: identityiq
@@ -75,6 +78,15 @@ spec:
                 name: {{ .Values.dbSecretName | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.probes.startup.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.probes.startup.path }}
+              port: http
+            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.startup.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+          {{- end }}
           # Null the unused handler so Helm 3-way merge can switch httpGet↔tcpSocket
           # (K8s rejects probes with more than one handler type).
           readinessProbe:

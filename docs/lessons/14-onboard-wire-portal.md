@@ -56,6 +56,8 @@ Also in extract: managers/ops staff such as `rachel.evans` (WIRE_APPR) — usefu
 
 Extract size: **10** accounts.
 
+> **Production reality.** An in-house wire portal typically exposes a REST API or SCIM endpoint rather than dropping CSVs. Production Meridian would govern it with the **Web Services connector** (Lesson 68) against the portal's user/role API — the repo even carries a stub OpenAPI spec for it (`lab-data/connectors/webservices/wire-portal-openapi.yaml`) — or **SCIM 2.0** (Lesson 69) if the portal team implements the standard. The dual-control design, ownership, and SoD line you write here carry over verbatim.
+
 ---
 
 ## Before you start
@@ -227,6 +229,13 @@ Examiner question: *“Prove initiate and approve are separable entitlements wit
 5. No — non-authoritative target only.
 
 ---
+
+## Further reading
+
+- Lesson 68 — Web Services connector against the Wire Portal OpenAPI (production path).
+- Lesson 40 — Payment dual-control SoD policy deep dive.
+- [OWASP API Security Top 10](https://owasp.org/www-project-api-security/) — when the portal moves from CSV to API.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — payment dual-control expectations.
 
 ## Stretch lab
 

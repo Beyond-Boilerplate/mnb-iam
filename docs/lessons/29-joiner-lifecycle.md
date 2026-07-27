@@ -17,57 +17,83 @@ You will be able to:
 - Confirm birthright `MNB-Birthright-Employee` / ELDAP assignment intent for the new hire
 - Distinguish automatic birthright from job-specific access still requiring requests
 - Document Meridian joiner SLA and evidence for training/exam records
+- Explain why HR file insert is the lab stand-in for a full LCM Joiner lifecycle event
 
 ---
 
 ## Why this matters
 
-Joiners stuck without access create shadow IT and bad first impressions. Automated birthright triggered from HR is Meridian’s first IAM promise: identity exists, directory baseline lands, tickets cover only non-birthright needs.
+**Business.** Nina Foster starts Monday as a Retail teller. If IdentityIQ has no cube and no directory baseline by opening, she cannot log in — and her branch invents workarounds (shared passwords, borrowed CRM sessions). Automated birthright triggered from HR is Meridian’s first IAM promise: identity exists, directory baseline lands, tickets cover only non-birthright needs.
 
-**Control / audit:** Joiner control = HR active row → aggregate → refresh → birthright within SLA. Evidence = HR delta file + task results + identity screenshots. Examiners ask how quickly a new teller gets baseline access and what is excluded from automation.
+**Control / audit.** Joiner control = HR active row → Account Aggregation → Refresh → birthright within SLA. Evidence = HR delta file + Task Results + identity screenshots. Examiners ask how quickly a new teller gets baseline access and what is excluded from automation. Control owners: HR Operations (trigger) + IAM Operations (pipeline).
 
 ---
 
 ## Concepts
 
-In full LCM, joiner **lifecycle events** fire workflows. In this file-based lab, **inserting an HR row** is the business event.
+### The joiner business event
+
+In full LCM, a **joiner lifecycle event** fires when IIQ detects a new authoritative account (or attribute pattern) and launches a workflow. In this file-based lab, **inserting an HR row** is the business event — same control story, without Rapid Setup ceremony.
+
+A **birthright role** (`MNB-Birthright-Employee`) is the automatic package every active Employee should receive: typically ELDAP login baseline and nothing privileged. Job packs (Wire, RM, CloudAdmin) stay request-driven.
+
+### Nina’s story — what “day one” must look like
+
+| Field (Nina) | Value | Why it matters |
+| --- | --- | --- |
+| employeeId | `MNB00120` | Correlation / native key into HR |
+| userName | `nina.joiner` | Cube name; email local-part |
+| email | `nina.joiner@meridiannb.com` | Target correlation for SaaS later |
+| managerId | `MNB00007` (`emily.bennett`) | Approvals and manager certs route here |
+| status | `1` (active) | Joiner signal — inactive would skip birthright |
+| departmentCode | `RET` | Retail branch context |
+| jobCode | `TEL01` | Teller — not wire, not cloud |
+| workerType | `Employee` | Birthright rule includes Employees; contractors differ (Lesson 32) |
+| hireDate | `2026-07-26` | SLA clock starts when HR marks active |
+
+**Automatic:** birthright ELDAP via `MNB-Birthright-Employee`. **Not automatic:** CRM, wire (`WIRE_INIT`/`WIRE_APPR`), cloud, privileged roles. Compare `amelia.brooks` (also TEL01) — same birthright composition is the convergence test.
+
+### The wrong way
+
+Hand-create a cube and manually assign ELDAP without an HR row. That works until the next HR aggregation “finds” Nina as uncorrelated or overwrites attributes. Banks fail exams when joiners exist only in AD, not in the authoritative HR feed.
+
+---
+
+## How it works
 
 ```
 hr-delta-new-hire.csv
-        │
+        │  append/merge (no duplicate header)
         ▼
-Append/merge into HRApplications.txt
+HRApplications.txt  (authoritative MNB-HR feed)
         │
         ▼
 Account Aggregation task (MNB-HR)
-        │
+        │  creates/links HR account; create-identities ON for HR only
         ▼
-Refresh MNB Identities (assign roles)
-        │
+Refresh MNB Identities
+        │  attribute sync + role assignment
         ▼
-Identity nina.joiner + MNB-Birthright-Employee
+Identity cube nina.joiner
+        └── MNB-Birthright-Employee (ELDAP intent)
+        └── NO WireInitiator / CloudAdmin / BreakGlass
 ```
 
-| Field (Nina) | Value |
-| --- | --- |
-| employeeId | MNB00120 |
-| userName | nina.joiner |
-| email | nina.joiner@meridiannb.com |
-| managerId | MNB00007 (`emily.bennett`) |
-| status | 1 (active) |
-| departmentCode | RET |
-| jobCode | TEL01 |
-| jobTitle | Teller |
-| workerType | Employee |
-| hireDate | 2026-07-26 |
+| Stage | IIQ object / action | What you verify |
+| --- | --- | --- |
+| HR delta applied | File row `MNB00120` | One line; field counts match header |
+| Aggregation | Account Aggregation task | Task Result success; no parse errors |
+| Materialization | Refresh MNB Identities | Cube exists; manager resolves |
+| Birthright | Role assignment | `MNB-Birthright-Employee` present |
+| Gap check | Manual analysis | CRM/Wire/Cloud still request-only |
 
-**Automatic:** birthright ELDAP. **Not automatic:** CRM, wire, cloud, privileged roles.
+**Production reality:** Live Meridian HR would be Workday or similar (Part II connectors). The delimited HR file here teaches the governance mechanics — aggregate → refresh → birthright — without a live HCM tenant.
 
 ---
 
 ## Before you start
 
-- [ ] IIQ at `http://localhost:8080/identityiq`
+- [ ] IIQ at `http://localhost:8080/identityiq` as `spadmin`
 - [ ] Backup `~/iiq-lab-data/HRApplications.txt`
 - [ ] Scenario file present: `~/iiq-lab-data/scenarios/joiner/hr-delta-new-hire.csv`
 - [ ] `MNB-Birthright-Employee` assignment rule includes active Employees
@@ -79,18 +105,22 @@ Identity nina.joiner + MNB-Birthright-Employee
 
 ### Task 1 — Read the joiner delta
 
+Before you merge anything into production HR (or the lab feed that stands in for it), read the delta like a change ticket. Column shifts corrupt `managerId` and `status` silently — examiners will not accept “we thought she was active.”
+
 1. Open `~/iiq-lab-data/scenarios/joiner/hr-delta-new-hire.csv`.
 2. Verify header columns match `HRApplications.txt`.
 3. Record Nina’s manager, job, dept, and hire date in your binder.
 
 **Expected result:** Column counts match; you understand Nina is an active Retail teller under `MNB00007`.
 
-**If it fails:** Fix header mismatch before merging—shifted columns corrupt managerId/status.
+**If it fails:** Fix header mismatch before merging — shifted columns corrupt managerId/status.
 
 ### Task 2 — Apply delta to HR file
 
+This is the lab equivalent of HR marking Nina “Active” in the HCM. Treat the file as authoritative: one row per employeeId, never a second header mid-file.
+
 1. Backup HR file: copy to `HRApplications.txt.bak-joiner`.
-2. Append Nina’s data row to `~/iiq-lab-data/HRApplications.txt` (data only—do not duplicate header).
+2. Append Nina’s data row to `~/iiq-lab-data/HRApplications.txt` (data only — do not duplicate header).
 3. Confirm one new line for `MNB00120` / `nina.joiner`.
 4. Confirm no accidental truncation of prior rows.
 
@@ -100,15 +130,19 @@ Identity nina.joiner + MNB-Birthright-Employee
 
 ### Task 3 — Aggregate MNB-HR
 
+Aggregation is continuous inventory. The Task Result timestamp is your joiner control’s start evidence.
+
 1. Tasks → run **Account Aggregation** for application **MNB-HR**.
-2. Wait for success in task results.
-3. Check for errors/warnings referencing MNB00120.
+2. Wait for success in Task Results.
+3. Check for errors/warnings referencing `MNB00120`.
 
 **Expected result:** Aggregation succeeds; new account link for Nina creatable on next identity view.
 
 **If it fails:** Validate file path on the application; fix malformed row; re-run aggregation.
 
 ### Task 4 — Refresh identities (joiner materialization)
+
+Refresh is where attributes and birthright roles land on the cube. Aggregation alone does not assign `MNB-Birthright-Employee`.
 
 1. Run **Refresh MNB Identities** with identity attribute refresh + **role assignment** enabled.
 2. Optionally filter to new identity / recent hires if supported.
@@ -120,6 +154,8 @@ Identity nina.joiner + MNB-Birthright-Employee
 
 ### Task 5 — Verify cube & birthright
 
+Examiners sample whether birthright is *only* birthright. Privileged roles on day one are a finding.
+
 1. Identity Warehouse → search `nina.joiner`.
 2. Confirm attributes: email `@meridiannb.com`, TEL01, RET, Employee, active.
 3. Confirm Manager resolves (Emily Bennett).
@@ -128,17 +164,21 @@ Identity nina.joiner + MNB-Birthright-Employee
 
 **Expected result:** Birthright only among business packs; privileged roles absent.
 
-**If it fails:** Re-check birthright rule; ensure refresh assigned roles; verify workerType=Employee on cube.
+**If it fails:** Re-check birthright rule; ensure refresh assigned roles; verify `workerType=Employee` on cube.
 
 ### Task 6 — Gap analysis (non-birthright)
 
-1. List access Nina might still need for teller operations beyond ELDAP (core banking frontline, branch apps)—mark as **request / separate birthright** decisions.
+Honest programs do not oversell automation. Nina still needs branch apps that are not birthright — those become catalog requests (Lesson 35), not silent grants.
+
+1. List access Nina might still need for teller operations beyond ELDAP (core banking frontline, branch apps) — mark as **request / separate birthright** decisions.
 2. Explicitly note CRM/Wire/Cloud are out of scope for TEL01 automation.
 3. Open a training “ticket” note: optional follow-up request catalog items (Lesson 35).
 
 **Expected result:** Gap list with “auto vs request” column; birthright alone not oversold.
 
 ### Task 7 — Joiner SLA statement
+
+Controls without SLAs are aspirations. Write the numbers you will defend.
 
 1. Write Meridian lab/prod target:
    - Identity visible ≤ 1 hour after HR marks active
@@ -199,21 +239,33 @@ Identity nina.joiner + MNB-Birthright-Employee
 3. What is the joiner identity/birthright SLA target?
 4. Who is Nina’s managerId?
 5. Should Nina receive `MNB-Role-CloudAdmin` as a joiner?
+6. Why is inserting an HR row preferred over hand-creating a cube?
 
 ### Answers
 
 1. Inserting/merging the HR delta row for the new hire, then aggregating MNB-HR and refreshing identities.
-2. Identity cube + `MNB-Birthright-Employee` (ELDAP baseline)—not privileged or wire packs.
+2. Identity cube + `MNB-Birthright-Employee` (ELDAP baseline) — not privileged or wire packs.
 3. Identity within ~1 hour of HR active; birthright same refresh cycle.
 4. `MNB00007` (Emily Bennett).
-5. No—privileged roles are request-only and never joiner birthright.
+5. No — privileged roles are request-only and never joiner birthright.
+6. Hand-created cubes drift from authoritative HR and fail the aggregate/refresh control story examiners sample.
+
+---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Lifecycle Manager joiner” and “identity refresh role assignment” for your IIQ version.
+- [SailPoint Community](https://community.sailpoint.com/) — search “joiner lifecycle event” for Rapid Setup and file-based HR patterns.
+- [NIST SP 800-53 AC-2 — Account Management](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — baseline expectation that accounts are authorized and provisioned from approved processes.
+- [FFIEC Information Security booklet](https://www.ffiec.gov/press/pr060566.htm) — landing context for examiner expectations on access provisioning; search current FFIEC IT Handbook “Information Security.”
+- [ISACA — Identity and Access Management guidance](https://www.isaca.org/) — search “identity and access management” for joiner control framing useful in SOX/ITGC discussions.
 
 ---
 
 ## Stretch lab
 
 - If LCM Rapid Setup / Lifecycle Events are imported, configure a Joiner event on HR account create to create a work item “Verify birthright for nina.joiner.”
-- Compare `amelia.brooks` and `nina.joiner`—both TEL01 tellers should converge on the same birthright composition.
+- Compare `amelia.brooks` and `nina.joiner` — both TEL01 tellers should converge on the same birthright composition.
 - Measure wall-clock time from file save → birthright visible; record as lab KPI.
 
 ---

@@ -55,6 +55,8 @@ You will be able to:
 
 **RPO (recovery point) narrative for Meridian lab/prod intent:** HR daily before start of business; targets daily after extract drops; privileged apps (AWS, Wire, SAP, Core) monitored for same-day re-run on feed repair.
 
+> **Production reality.** In production this pipeline aggregates native connectors, not files — which changes the failure modes: instead of "file missing / stale extract," you plan for API rate limits (Okta/Graph 429s), expired client secrets, and connector-account lockouts. The staging discipline (authoritative first, stop-vs-continue decisions, refresh last) is identical; only the troubleshooting table grows. Lessons 56–76 teach each connector's specific failure signatures.
+
 ---
 
 ## Before you start
@@ -243,6 +245,13 @@ Examiner question: *“What do you do if Wire aggregation fails at 06:40?”* �
 5. Builds the evidence habit and estimates for prod capacity/SLA discussions.
 
 ---
+
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “task schedule” and “Account Aggregation.”
+- Lessons 54 and 105 — advanced aggregation patterns and partitioning at scale.
+- [NIST SP 800-53 SI-4 / AU-6](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — monitoring and audit review of control activities.
+- [FFIEC IT Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/) — batch job and recovery expectations.
 
 ## Stretch lab
 

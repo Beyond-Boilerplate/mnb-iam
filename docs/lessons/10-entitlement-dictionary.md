@@ -186,6 +186,12 @@ For each of `WIRE_INIT`, `WIRE_APPR`, `SAP_FI`, `AWS_ADMIN`, `ELDAP`:
 4. medium.
 5. `reference/entitlement-dictionary.csv`.
 
+## Further reading
+
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “managed attribute” and “entitlement catalog.”
+- [NIST SP 800-53 AC-2 / AC-6](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — account management and least privilege.
+- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — entitlement ownership and certification prerequisites.
+
 ## Stretch lab
 
 - Enrich `PRIV_BREAK` with a strongly worded description and non-requestable flag.
