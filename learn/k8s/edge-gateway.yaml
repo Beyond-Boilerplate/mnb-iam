@@ -87,6 +87,9 @@ metadata:
     app.kubernetes.io/name: sailpoint-edge
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 180
+  minReadySeconds: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: sailpoint-edge
@@ -94,8 +97,6 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: sailpoint-edge
-      annotations:
-        checksum/nginx: "v1-root-academy"
     spec:
       containers:
         - name: nginx
