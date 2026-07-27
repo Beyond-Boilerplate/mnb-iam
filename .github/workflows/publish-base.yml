@@ -55,21 +55,32 @@ jobs:
           mkdir -p base/ga
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           ZIP="base/ga/identityiq-${IIQ_VERSION}.zip"
-          if [ -f "$ZIP" ]; then
-            ls -lh "$ZIP"
-            exit 0
-          fi
-          REF="ghcr.io/${OWNER}/mnb-iam-ga:${IIQ_VERSION}"
-          echo "oras pull ${REF}"
-          oras pull "$REF" -o base/ga
           if [ ! -f "$ZIP" ]; then
-            shopt -s nullglob
-            zips=(base/ga/*.zip)
-            found="${zips[0]:-}"
-            test -n "$found"
-            mv "$found" "$ZIP"
+            REF="ghcr.io/${OWNER}/mnb-iam-ga:${IIQ_VERSION}"
+            echo "oras pull ${REF}"
+            oras pull "$REF" -o base/ga
+            if [ ! -f "$ZIP" ]; then
+              # OCI layer annotations sometimes nest paths (base/ga/base/ga/...).
+              shopt -s nullglob globstar
+              candidates=(base/ga/**/*.zip base/ga/*.zip)
+              found=""
+              for candidate in "${candidates[@]}"; do
+                if [[ "$(basename "$candidate")" == "identityiq-${IIQ_VERSION}.zip" ]] || [[ -z "$found" ]]; then
+                  found="$candidate"
+                  [[ "$(basename "$candidate")" == "identityiq-${IIQ_VERSION}.zip" ]] && break
+                fi
+              done
+              if [ -z "$found" ]; then
+                echo "::error::oras pull succeeded but no zip was written under base/ga"
+                find base/ga -maxdepth 4 -type f -print || true
+                exit 1
+              fi
+              echo "Normalizing ${found} → ${ZIP}"
+              mv "$found" "$ZIP"
+            fi
           fi
           ls -lh "$ZIP"
+
           shopt -s nullglob
           jdbc_jars=(web/WEB-INF/lib/postgresql-*.jar)
           if (( ${#jdbc_jars[@]} == 0 )); then
@@ -82,7 +93,7 @@ jobs:
           fi
           if (( ${#jdbc_jars[@]} != 1 )); then
             echo "::error::Expected exactly one PostgreSQL JDBC jar; found ${#jdbc_jars[@]}"
-            ls -la web/WEB-INF/lib/postgresql-*.jar 2>/dev/null || true
+            ls -la web/WEB-INF/lib 2>/dev/null || true
             exit 1
           fi
           echo "Using JDBC driver ${jdbc_jars[0]}"
