@@ -73,10 +73,16 @@ jobs:
         id: gate
         run: |
           set -euo pipefail
-          # Reusable call / manual dispatch always deploy.
-          if [ "${{ github.event_name }}" != "push" ]; then
+          # Publisher / manual pin always deploys. Note: reusable workflow_call inherits
+          # the caller's event_name (often "push"), so do NOT key only on event_name.
+          if [ -n "${{ inputs.image_tag }}" ]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
-            echo "reason=explicit (${{ github.event_name }})" >> "$GITHUB_OUTPUT"
+            echo "reason=image_tag provided (${{ inputs.image_tag }})" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "reason=explicit workflow_dispatch" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -89,11 +95,11 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED"
 
-          # Same commit rebuilds the IIQ *image* → Publish GHCR owns deploy (avoid double Helm).
-          # Workflow-only / helm-only changes still need this Deploy job.
+          # Ops push that also changes IIQ sources: Publish GHCR owns Helm (this job
+          # has no image_tag). Pure deploy/** changes still deploy here.
           if grep -qE '^(config/|src/|web/|lib/|scripts/|docker/Dockerfile$|docker/entrypoint\.sh|docker/setenv\.sh|build\.xml|build\.sh|build\.bat|build\.properties|homelab\.|sandbox\.|servers\.properties|VERSION)' <<<"$CHANGED"; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "reason=Publish GHCR owns this commit (IIQ sources changed)" >> "$GITHUB_OUTPUT"
+            echo "reason=Publish GHCR owns this commit (IIQ sources changed; no image_tag on ops path)" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -226,6 +232,14 @@ jobs:
           export KUBECONFIG="$HOME/.kube/config"
           kubectl -n sailpoint rollout status deploy/identityiq --timeout=12m
           kubectl -n sailpoint get pods -l app.kubernetes.io/name=identityiq -o wide
+
+      - name: Import custom SSB objects into IIQ DB
+        # Image bake puts XML under WEB-INF/config/custom; objects appear in Debug only after import.
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          chmod +x deploy/helm/scripts/import-custom-objects.sh
+          ./deploy/helm/scripts/import-custom-objects.sh
 
       - name: In-cluster smoke (opt-in)
         if: inputs.run_smoke == true
