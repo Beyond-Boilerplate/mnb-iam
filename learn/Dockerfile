@@ -5,7 +5,7 @@ COPY docs/lessons /src/docs/lessons
 COPY learn /src/learn
 RUN python3 /src/learn/build.py
 
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 COPY learn/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /src/learn/dist/ /usr/share/nginx/html/
 EXPOSE 8080
