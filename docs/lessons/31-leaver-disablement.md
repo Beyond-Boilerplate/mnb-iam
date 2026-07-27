@@ -1,0 +1,257 @@
+# Lesson 31 — Leaver & Access Disablement
+
+**Level:** Intermediate  
+**Track:** Lifecycle  
+**Time:** 60–90 minutes  
+**Prereq:** Lesson 30 (mover / transfer events); `MNB-HR` and target apps aggregated; identity refresh working  
+
+**Lab data:**
+- `lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv` → `~/iiq-lab-data/scenarios/leaver/`
+- Residual access context: `lab-data/apps/MNB-SAP-Finance.csv`, `lab-data/apps/MNB-AWS-Cloud.csv`, `lab-data/apps/MNB-IT-Access.csv`
+- HR baseline: `lab-data/hr/MNB-HR-Employees.csv` (or your mapped `HRApplications.txt` / employee feed)
+
+---
+
+## Learning objectives
+
+You will be able to:
+
+1. Apply an HR leaver delta for `jordan.reed` (`MNB00092`) and propagate it through Account Aggregation and identity refresh.
+2. Distinguish **leaver** (`status=0` + `terminationDate`) from **leave of absence** (`onLeave=true`) on Meridian HR rows.
+3. Inventory residual high-risk access (`SAP_FI`, `AWS_ADMIN`, `GL_POST`) still present after HR marks the person inactive.
+4. Execute or document disable/revoke steps for directory and privileged links in the lab.
+5. Write a Meridian **leaver control standard** covering timing, scope, notifications, and evidence retention.
+6. Answer examiner questions about same-day privileged disablement for finance/cloud leavers.
+
+---
+
+## Why this matters
+
+**Business:** A terminated staff accountant with live SAP Finance and AWS Admin keys can move money, alter journals, or destroy cloud evidence. Same-day disablement is a board-level expectation—not a “nice to have” backlog item.
+
+**Control / audit:** Examiners ask: *When HR marked the employee terminated, what systems were disabled, by whom, and within what SLA?* Your Aggregate → Refresh → residual inventory → disable → evidence pack is the answer. Control owner: IAM Ops with Finance and Technology app owners for privileged residuals.
+
+---
+
+## Concepts
+
+### Leaver signal vs leave signal
+
+| Attribute | Leaver (this lesson) | Leave of absence (Lesson 33) |
+| --- | --- | --- |
+| `status` | `0` (inactive) | Usually still `1` |
+| `terminationDate` | Populated (e.g. `2026-07-26`) | Empty |
+| `onLeave` | `false` | `true` |
+| Intent | End employment; destroy/disable access path | Temporary freeze; expected return |
+
+### Lab persona — why Jordan is a Sev-1 leaver
+
+| Field | Value |
+| --- | --- |
+| Identity | `jordan.reed` / `MNB00092` |
+| Email | `jordan.reed@meridiannb.com` |
+| Manager | `deepa.nair` (`MNB00003`) |
+| Job | Staff Accountant (`FIN` / `GL01`) |
+| Known entitlements | `ELDAP`, `SAP_FI`, `AWS_ADMIN`, `GL_POST` |
+
+### Standard leaver pipeline (file lab)
+
+```text
+HR delta (status=0, terminationDate)
+        │
+        ▼
+Account Aggregation task (MNB-HR)
+        │
+        ▼
+Refresh MNB Identities (roles + optional leaver workflow)
+        │
+        ▼
+Identity inactive / inactive flags visible
+        │
+        ▼
+Residual entitlement inventory (SAP / AWS / GL)
+        │
+        ▼
+Disable links / revoke roles / ticket residuals
+        │
+        ▼
+Notify manager + evidence pack
+```
+
+**IIQ terms:** *Account Aggregation task* pulls HR file changes. *Identity Refresh* re-evaluates attributes, roles, and (if configured) lifecycle events. *Disable* marks an account link inactive/disabled; *revoke* removes entitlements/roles. Do not conflate with LCM access-request objects (Lessons 35–38).
+
+---
+
+## Before you start
+
+- [ ] IIQ reachable at `http://localhost:8080/identityiq` (homelab URL only as alternate).
+- [ ] Logged in as `spadmin` (or equivalent lab admin).
+- [ ] Lab files under `~/iiq-lab-data/` including `scenarios/leaver/hr-delta-terminate-jordan.csv`.
+- [ ] `MNB-HR` (or your authoritative HR app) aggregates successfully.
+- [ ] Prior apps from Applications track present: at least IT inventory / SAP / AWS links for Jordan.
+- [ ] Optional: `init-lcm.xml` imported if you want automated leaver lifecycle events—**not required** for file-driven status change in this lesson.
+- [ ] Notebook ready for residual inventory and control-standard draft.
+
+---
+
+## Lab procedure
+
+### Task 1 — Inspect the leaver delta before you touch production HR
+
+1. Open `~/iiq-lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv` (or repo `lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv`).
+2. Confirm the row: `employeeId=MNB00092`, `userName=jordan.reed`, `status=0`, `onLeave=false`, `terminationDate=2026-07-26`, manager `MNB00003`.
+3. Open the live HR feed your connector reads (often `~/iiq-lab-data/HRApplications.txt` or mapped CSV). Locate Jordan’s current row and note `status=1` before change.
+
+**Expected result:** Delta clearly shows inactive employee with termination date; current HR still shows Jordan active. You know exactly which columns will flip.
+
+**If it fails:** Re-copy `lab-data/scenarios` into `~/iiq-lab-data/` per [README](README.md).
+
+---
+
+### Task 2 — Apply the terminate delta into the authoritative HR file
+
+1. Update Jordan’s HR row to match the leaver CSV (do not invent columns). Preferred approach: replace the `MNB00092` line with the delta line, preserving header column order.
+2. Validate column count matches the header (comma count / CSV lint).
+3. Leave other employees unchanged—especially `sofia.torres` (`onLeave=true`) and `samir.hassan` (already `status=0`).
+
+**Expected result:** Only Jordan’s authoritative row shows `status=0` and `terminationDate=2026-07-26`. `onLeave` remains `false`.
+
+**If it fails:** Restore from `lab-data/hr/MNB-HR-Employees.csv` and re-apply a single-line edit.
+
+---
+
+### Task 3 — Aggregate HR and refresh identities
+
+1. In IIQ, open **Setup → Tasks** (or equivalent Tasks menu).
+2. Run the **Account Aggregation** task for `MNB-HR` (or your HR application name). Wait for success.
+3. Run **Refresh MNB Identities** (or your named identity refresh task). Enable options you normally use for attribute sync / role refresh if configured.
+4. Open **Identities → Identity Warehouse** (or equivalent). Search `jordan.reed`.
+
+**Expected result:** Identity cube reflects inactive HR signals (`status` / inactive flag / termination date as mapped). Manager still resolves toward `deepa.nair` unless you remapped hierarchy.
+
+**If it fails:** Check aggregation task result for parse errors; confirm file path on the application; re-run aggregation only, then refresh.
+
+---
+
+### Task 4 — Inventory residual SAP / AWS / GL access
+
+1. On Jordan’s cube, open **Accounts** / **Entitlements** / **Detected Roles** (or equivalent tabs).
+2. Build a residual table in your notebook:
+
+| System / entitlement | Still present? | Risk | Action |
+| --- | --- | --- | --- |
+| `ELDAP` | | medium | Disable directory login |
+| `SAP_FI` | | critical | Disable / revoke same day |
+| `AWS_ADMIN` | | critical | Disable / revoke same day |
+| `GL_POST` | | high | Revoke / ticket Finance |
+
+3. Cross-check source files if links are missing in IIQ: `MNB-SAP-Finance.csv`, `MNB-AWS-Cloud.csv`, `MNB-IT-Access.csv` still list Jordan as `active` until you remediate or re-aggregate after disable.
+
+**Expected result:** You can prove Jordan still holds (or recently held) finance + cloud privilege after HR termination—the classic residual-access finding.
+
+**If it fails:** Re-run Account Aggregation on SAP/AWS/IT apps; confirm correlation from earlier lessons still maps Jordan’s accounts.
+
+---
+
+### Task 5 — Practice disable / revoke for critical access
+
+1. Using lab-available actions (Manage Accounts, certification remediation, manual entitlement remove, or CSV “disabled” status + re-aggregate—whichever your lab supports), disable or mark inactive:
+   - Directory / `ELDAP` link first (blocks interactive login).
+   - `AWS_ADMIN` next (cloud Sev-1).
+   - `SAP_FI` and `GL_POST` for Finance.
+2. Re-run relevant **Account Aggregation** tasks if you remediated via file.
+3. Refresh the identity and confirm links show disabled / entitlements removed or pending.
+4. Create a work item or ticket note for anything you could not disable in-lab: owner, system, SLA (same business day for privileged).
+
+**Expected result:** Written residual list with each critical item either disabled, revoked, or ticketed with owner and timestamp. No silent “assume it went away.”
+
+**If it fails:** Document the gap explicitly—examiners prefer known gaps over fake green checks. Stretch later with provisioning connectors.
+
+---
+
+### Task 6 — Notify manager and draft Meridian leaver standard
+
+1. Note manager `deepa.nair@meridiannb.com` as notification target for finance leavers.
+2. Draft a one-page **MNB Leaver Control Standard** with these four parts:
+   - **Timing:** HR terminate → directory disable ≤ 1 hour; privileged (`SAP_FI`, `AWS_ADMIN`, wire, core) ≤ same business day / Sev-1.
+   - **Scope:** All correlated accounts + orphan hunt for uncorrelated keys (Lesson 19 pattern).
+   - **Notifications:** Manager, app owners for critical residuals, Security for privileged leavers.
+   - **Evidence retention:** Aggregation/refresh task results, identity screenshots, residual inventory, ticket IDs—retain per bank records policy (lab: keep in training binder).
+3. Add one examiner Q&A line: *“How do you know Jordan’s AWS key is dead?”* → point to disable evidence + re-aggregation showing inactive.
+
+**Expected result:** Control standard text you could hand to Internal Audit without rewriting. Jordan case used as the worked example.
+
+**If it fails:** Use the four-part outline above; fill Meridian object names only.
+
+---
+
+## Acceptance criteria
+
+- [ ] Leaver CSV applied; Jordan `status=0` with `terminationDate` in authoritative HR.
+- [ ] Account Aggregation (MNB-HR) and Refresh MNB Identities completed successfully.
+- [ ] Identity cube shows inactive/terminated signals for `jordan.reed`.
+- [ ] Residual inventory lists `SAP_FI`, `AWS_ADMIN`, `GL_POST` (and `ELDAP`) with disposition.
+- [ ] At least one critical disable/revoke path practiced or ticketed with timestamp.
+- [ ] Written leaver standard covers timing, scope, notifications, evidence.
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Jordan still active after refresh | HR file not updated or wrong path | Confirm connector file path; re-aggregate HR |
+| CSV parse / column shift | Extra comma or truncated field | Match header exactly to leaver delta |
+| No SAP/AWS on cube | Apps not aggregated or uncorrelated | Aggregate target apps; fix correlation |
+| Confused with Sofia | Mixing `onLeave` and `status` | Sofia stays leave; Jordan is terminate |
+| LCM event never fired | `init-lcm.xml` / event not configured | File status change is enough for this lesson |
+
+---
+
+## Training binder evidence
+
+1. Screenshot of leaver CSV row for `MNB00092`.
+2. Task result success for Aggregate MNB-HR and Refresh MNB Identities.
+3. Identity cube screenshot showing inactive/terminated attributes.
+4. Residual entitlement table (SAP / AWS / GL) with actions.
+5. Disable/revoke or ticket evidence with timestamps.
+6. Final **MNB Leaver Control Standard** paragraph set.
+
+---
+
+## Knowledge check
+
+1. Which HR attributes define a Meridian **leaver** in this lab versus leave of absence?
+2. Why is `jordan.reed` treated as a Sev-1 leaver compared to a teller with only `ELDAP`?
+3. Name the four required parts of the Meridian leaver control standard.
+4. What runs first after editing HR: Account Aggregation or identity Refresh?
+5. Who is Jordan’s manager for notification purposes?
+
+### Answers
+
+1. Leaver: `status=0` and populated `terminationDate` with `onLeave=false`. Leave: `onLeave=true`, typically still active employment status.
+2. Holds critical finance (`SAP_FI`, `GL_POST`) plus cloud admin (`AWS_ADMIN`)—material residual risk after exit.
+3. Timing, scope, notifications, evidence retention.
+4. Account Aggregation task for HR, then Refresh MNB Identities.
+5. `deepa.nair` (`MNB00003`) / `deepa.nair@meridiannb.com`.
+
+---
+
+## Stretch lab
+
+1. Re-check `samir.hassan` (`status=0`) for residual `DWRP` / `SAP_FI` / `ODS` as a backlog defect—compare disabled flags in `MNB-IT-Access.csv`.
+2. If LCM is active, configure or inspect a leaver lifecycle event on `status` change and capture the workflow name in the binder.
+3. Draft a Sev-1 communications template (Security + Finance + Technology) for privileged leavers.
+
+---
+
+## Summary
+
+- You terminated `jordan.reed` via the official leaver HR delta and refreshed identity state.
+- You inventoried residual SAP/AWS/GL privilege that HR status alone does not remove.
+- You practiced disable/revoke discipline and wrote Meridian’s leaver control standard for audit.
+
+---
+
+**Previous:** [Lesson 30 — Mover / Transfer Events](30-mover-transfers.md)  
+**Next:** [Lesson 32 — Contractor & Contingent Worker Lifecycle](32-contractor-lifecycle.md)

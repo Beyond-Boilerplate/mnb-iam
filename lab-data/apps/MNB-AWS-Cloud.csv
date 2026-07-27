@@ -1,0 +1,10 @@
+userName,email,employeeId,entitlement,accountStatus
+anita.ross,anita.ross@meridiannb.com,MNB00010,AWS_ADMIN,disabled
+kai.khatri,kai.khatri@meridiannb.com,MNB00018,AWS_ADMIN,active
+benjamin.mehta,benjamin.mehta@meridiannb.com,MNB00034,AWS_ADMIN,disabled
+samir.hughes,samir.hughes@meridiannb.com,MNB00037,AWS_ADMIN,active
+aisha.hughes,aisha.hughes@meridiannb.com,MNB00044,AWS_ADMIN,active
+anita.rao,anita.rao@meridiannb.com,MNB00068,AWS_ADMIN,active
+owen.morris,owen.morris@meridiannb.com,MNB00071,AWS_ADMIN,active
+jordan.reed,jordan.reed@meridiannb.com,MNB00092,AWS_ADMIN,active
+raj.external,raj.contractor@vendor-mail.invalid,MNB00093,AWS_ADMIN,active

@@ -1,0 +1,9 @@
+userName,email,employeeId,entitlement,accountStatus
+anita.ross,anita.ross@meridiannb.com,MNB00010,SAP_FI,disabled
+kai.howard,kai.howard@meridiannb.com,MNB00024,SAP_FI,disabled
+theo.foster,theo.foster@meridiannb.com,MNB00030,SAP_FI,disabled
+amelia.foster,amelia.foster@meridiannb.com,MNB00041,SAP_FI,active
+priya.fernandez,priya.fernandez@meridiannb.com,MNB00046,SAP_FI,active
+meera.nair,meera.nair@meridiannb.com,MNB00061,SAP_FI,active
+jordan.reed,jordan.reed@meridiannb.com,MNB00092,SAP_FI,active
+samir.hassan,samir.hassan@meridiannb.com,MNB00094,SAP_FI,disabled

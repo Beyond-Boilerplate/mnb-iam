@@ -1,0 +1,26 @@
+jobCode,jobTitle,departmentCode,description
+TEL01,Teller,RET,Branch frontline
+CSR01,Customer Service Rep,RET,Contact center
+RM01,Relationship Manager,CML,Commercial portfolio
+LO01,Loan Officer,CML,Credit underwriting
+WIR01,Wire Specialist,TRS,Wire initiation
+WIR02,Wire Approver,TRS,Wire dual control
+ACH01,ACH Operator,TRS,ACH processing
+GL01,Staff Accountant,FIN,General ledger
+SOX01,SOX Controls Analyst,FIN,Financial controls
+AML01,AML Investigator,RSK,SAR / KYC casework
+CMP01,Compliance Officer,RSK,Policy & exams
+OPS01,Operations Analyst,OPS,Item processing
+DIG01,Digital Product Analyst,DIG,Channel change mgmt
+SRE01,Site Reliability Engineer,ITP,Platform reliability
+DEV01,Application Developer,ITP,Internal apps
+CLD01,Cloud Platform Engineer,ITP,AWS landing zone
+AD01,Directory Administrator,ITP,Active Directory
+DBA01,Database Administrator,ITP,Core ODS / DB
+IAM01,IAM Engineer,SEC,Identity governance
+SOC01,SOC Analyst,SEC,Security operations
+HR01,HR Business Partner,HRP,Workforce support
+MGR01,People Manager,RET,Line management
+CTO01,Technology Director,ITP,IT leadership
+CFO01,Finance Director,FIN,Finance leadership
+CRO01,Chief Risk Officer,RSK,Risk leadership

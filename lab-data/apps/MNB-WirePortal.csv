@@ -1,0 +1,11 @@
+userName,email,employeeId,entitlement,accountStatus
+rachel.evans,rachel.evans@meridiannb.com,MNB00005,WIRE_APPR,active
+michael.ross,michael.ross@meridiannb.com,MNB00015,WIRE_INIT,active
+noah.ibrahim,noah.ibrahim@meridiannb.com,MNB00021,WIRE_INIT,active
+james.nguyen,james.nguyen@meridiannb.com,MNB00023,WIRE_INIT,active
+rachel.thapa,rachel.thapa@meridiannb.com,MNB00035,WIRE_INIT,active
+grace.howard,grace.howard@meridiannb.com,MNB00056,WIRE_APPR,active
+avery.shah,avery.shah@meridiannb.com,MNB00066,WIRE_APPR,active
+arjun.bailey,arjun.bailey@meridiannb.com,MNB00067,WIRE_APPR,active
+priya.wire,priya.wire@meridiannb.com,MNB00090,WIRE_INIT,active
+marcus.approve,marcus.approve@meridiannb.com,MNB00091,WIRE_APPR,active

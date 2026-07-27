@@ -1,0 +1,147 @@
+# Path-split edge for sailpoint.lmsapp.us
+#   /            → Meridian IAM Academy (mnb-learn)
+#   /identityiq  → IdentityIQ
+#
+# Cloudflare Tunnel must target THIS service (not identityiq directly):
+#   sailpoint.lmsapp.us → http://sailpoint-edge.sailpoint.svc.cluster.local:8080
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sailpoint-edge-nginx
+  namespace: sailpoint
+  labels:
+    app.kubernetes.io/name: sailpoint-edge
+data:
+  default.conf: |
+    upstream iiq_upstream {
+      server identityiq.sailpoint.svc.cluster.local:8080;
+      keepalive 16;
+    }
+    upstream learn_upstream {
+      server mnb-learn.sailpoint.svc.cluster.local:8080;
+      keepalive 8;
+    }
+
+    map $http_upgrade $connection_upgrade {
+      default upgrade;
+      ''      close;
+    }
+
+    server {
+      listen 8080;
+      server_name _;
+      client_max_body_size 64m;
+      absolute_redirect off;
+
+      location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 'ok';
+      }
+
+      # IdentityIQ (context path /identityiq)
+      location /identityiq {
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+        proxy_buffering off;
+        proxy_pass http://iiq_upstream;
+      }
+
+      # Legacy /learn → academy paths at root
+      location = /learn {
+        return 301 /;
+      }
+      location /learn/ {
+        rewrite ^/learn/(.*)$ /$1 permanent;
+      }
+
+      # Meridian IAM Academy (site root)
+      location / {
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        proxy_pass http://learn_upstream;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sailpoint-edge
+  namespace: sailpoint
+  labels:
+    app.kubernetes.io/name: sailpoint-edge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sailpoint-edge
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sailpoint-edge
+      annotations:
+        checksum/nginx: "v1-root-academy"
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: sailpoint-edge-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sailpoint-edge
+  namespace: sailpoint
+  labels:
+    app.kubernetes.io/name: sailpoint-edge
+spec:
+  selector:
+    app.kubernetes.io/name: sailpoint-edge
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

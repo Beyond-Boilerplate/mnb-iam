@@ -1,0 +1,2 @@
+employeeId,userName,firstName,lastName,email,managerId,status,departmentCode,jobCode,jobTitle,locationCode,country,workerType,onLeave,costCenter,hireDate,terminationDate
+MNB00090,priya.wire,Priya,Mehta,priya.wire@meridiannb.com,MNB00006,1,CML,RM01,Relationship Manager,US-NY,USA,Employee,false,CC-CML-220,2022-06-01,

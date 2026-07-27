@@ -1,0 +1,192 @@
+name: Publish learn site
+
+# Build academy image → GHCR → deploy to sailpoint ns (edge + mnb-learn)
+# Public: https://sailpoint.lmsapp.us/   IIQ: https://sailpoint.lmsapp.us/identityiq/
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "docs/lessons/**"
+      - "learn/**"
+      - "lab-data/**"
+      - "tools/generate-mnb-curriculum.py"
+      - ".github/workflows/publish-learn.yml"
+  workflow_dispatch:
+    inputs:
+      skip_deploy:
+        description: Build/push only (skip cluster deploy)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-learn-sailpoint
+  cancel-in-progress: true
+
+env:
+  LEARN_SMOKE_URL: https://sailpoint.lmsapp.us/
+  IIQ_SMOKE_URL: https://sailpoint.lmsapp.us/identityiq/login.jsf
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Image tag
+        id: meta
+        run: |
+          echo "tag=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          echo "Using tag ${GITHUB_SHA:0:7}"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: learn/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/beyond-boilerplate/mnb-iam-learn:latest
+            ghcr.io/beyond-boilerplate/mnb-iam-learn:${{ steps.meta.outputs.tag }}
+
+  deploy:
+    name: Deploy public surface
+    needs: build-push
+    if: >
+      github.event_name != 'workflow_dispatch' ||
+      inputs.skip_deploy != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: homelab
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          ping: 192.168.50.11
+
+      - uses: azure/setup-kubectl@v4
+
+      - name: Write kubeconfig
+        env:
+          HOMELAB_KUBECONFIG: ${{ secrets.HOMELAB_KUBECONFIG }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          printf '%s\n' "$HOMELAB_KUBECONFIG" > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Ensure ghcr-pull secret
+        env:
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          kubectl get ns sailpoint >/dev/null 2>&1 || kubectl create namespace sailpoint
+          TOKEN="${GHCR_PULL_TOKEN:-${GHCR_READ_TOKEN:-$GITHUB_TOKEN}}"
+          USER="${GHCR_USERNAME:-${{ github.actor }}}"
+          kubectl -n sailpoint delete secret ghcr-pull --ignore-not-found
+          kubectl -n sailpoint create secret docker-registry ghcr-pull \
+            --docker-server=ghcr.io \
+            --docker-username="${USER}" \
+            --docker-password="${TOKEN}"
+
+      - name: Install academy + edge
+        env:
+          LEARN_IMAGE_TAG: ${{ needs.build-push.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          chmod +x learn/k8s/install-public-surface.sh
+          ./learn/k8s/install-public-surface.sh
+
+  smoke:
+    name: Smoke academy + IIQ
+    needs: deploy
+    if: always() && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Probe public URLs
+        run: |
+          set -euo pipefail
+          probe() {
+            local url="$1" label="$2"
+            local ok=0 code
+            for i in $(seq 1 24); do
+              code=$(curl -sS -o /tmp/smoke.body -w '%{http_code}' --connect-timeout 10 "$url" || echo "000")
+              echo "${label} attempt ${i}: HTTP ${code}"
+              if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
+                ok=1
+                break
+              fi
+              sleep 5
+            done
+            if [ "$ok" != "1" ]; then
+              echo "::error::Smoke failed for ${url}"
+              echo "Cloudflare Tunnel Public Hostname must be:"
+              echo "  Subdomain: sailpoint  Domain: lmsapp.us"
+              echo "  Type: HTTP  URL: sailpoint-edge.sailpoint.svc.cluster.local:8080"
+              exit 1
+            fi
+          }
+          probe "$LEARN_SMOKE_URL" "academy"
+          # Academy HTML should look like the curriculum (not IIQ login)
+          if ! grep -qiE 'Meridian|IAM Academy|Curriculum' /tmp/smoke.body; then
+            echo "::warning::Academy response did not look like Meridian learn HTML — check tunnel path routing"
+            head -c 400 /tmp/smoke.body || true
+          fi
+          probe "$IIQ_SMOKE_URL" "iiq"
+          echo "Public surface OK: / and /identityiq"
+
+  gate:
+    name: Publish learn gate
+    needs: [build-push, deploy, smoke]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggregate
+        env:
+          BUILD: ${{ needs.build-push.result }}
+          DEPLOY: ${{ needs.deploy.result }}
+          SMOKE: ${{ needs.smoke.result }}
+          TAG: ${{ needs.build-push.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Publish learn"
+            echo ""
+            echo "- Image tag: \`${TAG:-}\`"
+            echo "- Build: \`${BUILD}\`"
+            echo "- Deploy: \`${DEPLOY}\`"
+            echo "- Smoke: \`${SMOKE}\`"
+            echo "- Academy: https://sailpoint.lmsapp.us/"
+            echo "- IIQ: https://sailpoint.lmsapp.us/identityiq/login.jsf"
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$BUILD" = "success" ] || exit 1
+          if [ "$DEPLOY" = "skipped" ]; then
+            echo "Deploy skipped"
+            exit 0
+          fi
+          [ "$DEPLOY" = "success" ] || exit 1
+          [ "$SMOKE" = "success" ] || [ "$SMOKE" = "skipped" ] || exit 1

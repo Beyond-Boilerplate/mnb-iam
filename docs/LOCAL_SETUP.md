@@ -63,8 +63,9 @@ Sailpoint/
 │   ├── doc/                    ← official PDFs
 │   ├── integration/            ← optional connectors / add-ons
 │   └── ConnectorGateway-*.zip  ← optional
-├── HRApplications.txt          ← sample HR (authoritative) data
-├── EmployeeData.txt            ← sample application / entitlement data
+├── lab-data/                   ← Meridian HR, apps, SoD, JML scenario files
+├── docs/lessons/               ← 50-lesson IdentityIQ curriculum (Markdown)
+├── learn/                      ← static site builder for iam.lmsapp.us/learn
 └── email.txt                   ← sample certification email output
 ```
 
@@ -322,8 +323,8 @@ Do these quickly before diving into lessons:
 
 ```bash
 mkdir -p ~/iiq-lab-data
-cp /Users/alishaghatane/Documents/Sailpoint/HRApplications.txt ~/iiq-lab-data/
-cp /Users/alishaghatane/Documents/Sailpoint/EmployeeData.txt ~/iiq-lab-data/
+cp lab-data/HRApplications.txt lab-data/EmployeeData.txt ~/iiq-lab-data/
+cp -R lab-data/apps lab-data/scenarios lab-data/reference lab-data/notifications ~/iiq-lab-data/
 ```
 
 ---
@@ -381,9 +382,10 @@ Increase `-Xmx` in `setenv.sh` and restart Tomcat.
 ## Suggested next reading
 
 1. [INFRASTRUCTURE.md](INFRASTRUCTURE.md) — how the stack fits together  
-2. [lessons/README.md](lessons/README.md) — Meridian National Bank learning path  
-3. `identityiq-8.5/doc/8.5_IdentityIQ_Getting_Started.pdf`  
-4. `identityiq-8.5/doc/8.5_IdentityIQ_Installation_Guide.pdf`
+2. [lessons/README.md](lessons/README.md) — Meridian National Bank 50-lesson path  
+3. [LEARN-SITE.md](LEARN-SITE.md) — publish lessons at iam.lmsapp.us/learn  
+4. `identityiq-8.5/doc/8.5_IdentityIQ_Getting_Started.pdf`  
+5. `identityiq-8.5/doc/8.5_IdentityIQ_Installation_Guide.pdf`
 
 ---
 
@@ -397,4 +399,4 @@ Increase `-Xmx` in `setenv.sh` and restart Tomcat.
 - [ ] Edited `iiq.properties` passwords/URLs
 - [ ] Imported `init.xml` (and optionally `init-lcm.xml`) via `iiq console`
 - [ ] Started Tomcat; logged in as `spadmin` / `admin`
-- [ ] Copied `HRApplications.txt` and `EmployeeData.txt` to `~/iiq-lab-data`
+- [ ] Copied Meridian `lab-data/` files to `~/iiq-lab-data`

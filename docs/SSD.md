@@ -26,7 +26,9 @@ Official Compass docs (login required):
 | `dev.*.properties` / `prod.*.properties` | Higher environments |
 | `servers.properties` | Hostname → `SPTARGET` mapping |
 | `tools/lab/` | Greenfield laptop bootstrap (Tomcat/MySQL) |
-| `lab-data/` | Delimited file samples for lessons |
+| `lab-data/` | Meridian bank lab fixtures (HR, apps, SoD, JML scenarios) |
+| `docs/lessons/` | 50-lesson IdentityIQ curriculum (Markdown) |
+| `learn/` | Static site builder for `iam.lmsapp.us/learn` |
 | `docs/` | Human docs + lessons + vendor PDFs |
 
 ## Everyday commands

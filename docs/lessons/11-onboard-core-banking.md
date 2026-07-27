@@ -1,0 +1,259 @@
+# Lesson 11 — Onboard Core Banking Extract
+
+**Level:** Intermediate  
+**Track:** Applications  
+**Time:** 60–75 min  
+**Prereq:** Lesson 10 (entitlement dictionary); Lessons 04–09 (`MNB-HR`, `MNB-IT-Access` exist)  
+
+**Lab data:**
+- Repo: `lab-data/apps/MNB-CoreBanking.csv`
+- Runtime path: `~/iiq-lab-data/apps/MNB-CoreBanking.csv`
+
+---
+
+## Learning objectives
+
+You will be able to:
+
+- Inspect a platform extract and map columns to an IdentityIQ Delimited File schema
+- Create non-authoritative application **MNB-CoreBanking** that materializes the **CORE** entitlement
+- Run an **Account Aggregation** task and verify account/entitlement counts without creating new identities
+- Assign application ownership and document CORE as **critical** risk for later certifications
+- Spot-check known CORE holders on identity cubes after aggregation
+
+---
+
+## Why this matters
+
+**Business.** Meridian’s midrange core (AS400-style) posts deposits, loans, and GL feeds. A small set of operators holds `CORE`. If that access is buried inside a mega IT dump, Operations cannot certify it cleanly and incident response cannot scope “who can touch the core.”
+
+**Control / audit.** Examiners ask: *Which system of record lists core operators, who owns the application, and how often is the extract aggregated?* A dedicated `MNB-CoreBanking` application answers ownership, aggregation evidence, and certification scope in one object.
+
+---
+
+## Concepts
+
+**Target application (non-authoritative).** Reads accounts and entitlements from a source. It **must not** create identity cubes. Only `MNB-HR` creates people.
+
+**Entitlement attribute.** The CSV column `entitlement` becomes a managed/group-style attribute. For this extract every active row carries `CORE`.
+
+**Why split from `MNB-IT-Access`?** The inventory dump is useful for breadth; platform apps are useful for **control boundaries**—owner, risk tier, cert campaign, and SoD scope.
+
+```
+MNB-HR (authoritative)          → creates/updates identities
+        │
+        ▼
+MNB-CoreBanking (target extract) → accounts + CORE entitlement
+        │
+        ▼
+Correlation (Lessons 17–18)      → link account → identity cube
+```
+
+| Field (CSV) | IIQ use |
+| --- | --- |
+| `userName` | Account native identity (preferred account id) |
+| `email` | Correlation candidate |
+| `employeeId` | Strong correlation key (matches HR) |
+| `entitlement` | Entitlement / group attribute → `CORE` |
+| `accountStatus` | Account state (`active` / `disabled`) |
+
+**Holders in the lab extract (7 accounts):** `daniel.griffin`, `aisha.murphy`, `benjamin.desai`, `rohan.singh`, `ethan.thapa`, `theo.joshi`, `ethan.kim`.
+
+---
+
+## Before you start
+
+- [ ] IIQ reachable at `http://localhost:8080/identityiq` (homelab URL only if that is your lab)
+- [ ] Login as `spadmin` / `admin`
+- [ ] Lab files copied: `~/iiq-lab-data/apps/MNB-CoreBanking.csv` exists
+- [ ] `MNB-HR` aggregated; search finds `daniel.griffin`
+- [ ] Lesson 10 dictionary notes: CORE = Core Banking (AS400), risk **critical**
+- [ ] Notebook open for object names with `MNB-` prefix
+
+---
+
+## Lab procedure
+
+### Task 1 — Inspect the Core Banking extract
+
+1. Open `~/iiq-lab-data/apps/MNB-CoreBanking.csv` (or repo `lab-data/apps/MNB-CoreBanking.csv`).
+2. Confirm header: `userName,email,employeeId,entitlement,accountStatus`.
+3. Count data rows (expect **7**). Confirm every `entitlement` value is `CORE` and every `accountStatus` is `active`.
+4. Note `daniel.griffin` / `MNB00008` — Operations Manager and a sensible business owner later.
+
+**Expected result:** Seven CORE operators, all `@meridiannb.com`, all with Meridian `employeeId` values.
+
+**If it fails:** Re-copy `lab-data/apps` into `~/iiq-lab-data/apps` per [README](README.md).
+
+---
+
+### Task 2 — Create application MNB-CoreBanking
+
+1. Navigate to **Applications** (Setup / Define Applications, or equivalent menu path).
+2. Add New → **DelimitedFile** (or Delimited File connector).
+3. Name: `MNB-CoreBanking`. Owner: `spadmin` for now (you will reassign ownership in Task 5).
+4. File path: absolute path to `~/iiq-lab-data/apps/MNB-CoreBanking.csv`.
+5. Delimiter: comma. Has header: yes.
+6. Save.
+
+**Expected result:** Application object `MNB-CoreBanking` appears in the applications list.
+
+**If it fails:** Path typos and relative paths are the usual cause—use an absolute path the Tomcat user can read.
+
+---
+
+### Task 3 — Schema, account id, entitlement attribute
+
+1. Open `MNB-CoreBanking` → Schema (or Discover Schema).
+2. Ensure attributes include `userName`, `email`, `employeeId`, `entitlement`, `accountStatus`.
+3. Set **account identity attribute** to `userName` (native id on the platform).
+4. Mark `entitlement` as the **entitlement / group** attribute (multi-valued if the UI offers that for delimited files).
+5. Optionally mark `accountStatus` as status-related if your build exposes that mapping.
+6. Save.
+
+**Expected result:** Schema shows `entitlement` as the managed entitlement attribute; account id is `userName`.
+
+**If it fails:** Re-discover schema after confirming the CSV header row is present and readable.
+
+---
+
+### Task 4 — Enforce non-authoritative behavior
+
+1. Open application configuration / aggregation settings for `MNB-CoreBanking`.
+2. Confirm **create identities** (or equivalent “authoritative / create identities from accounts”) is **disabled**.
+3. Document in your notebook: *Only `MNB-HR` creates identities; `MNB-CoreBanking` is a target.*
+4. Save.
+
+**Expected result:** Aggregating this app will not invent new people if correlation fails—accounts may be uncorrelated instead.
+
+**If it fails:** If the checkbox is unclear, compare settings to `MNB-IT-Access` from Lesson 09 and mirror them.
+
+---
+
+### Task 5 — Ownership and risk narrative
+
+1. Set application owner to `daniel.griffin` if that identity exists; otherwise leave `spadmin` and note “proxy owner — assign daniel.griffin when cube is ready.”
+2. In your notebook write:
+   - Risk tier: **critical**
+   - Entitlement display intent: “Core Banking (AS400)”
+   - Approval narrative: *CORE requires manager + Operations owner approval; never birthright.*
+3. Enrich the `CORE` managed attribute if Lesson 10 objects are present (display name / description / critical tag).
+
+**Expected result:** Ownership and criticality are written down; examiner can be told who owns core access governance.
+
+---
+
+### Task 6 — Account Aggregation task
+
+1. Open **Tasks**.
+2. Create (or edit) an **Account Aggregation** task named `Aggregate MNB-CoreBanking`.
+3. Select application `MNB-CoreBanking`. Keep defaults unless your lab standard says otherwise.
+4. Save and **Run Now**.
+5. Open the task result. Note accounts read, accounts created/updated, and errors.
+
+**Expected result:** Task completes successfully with approximately **7** accounts; entitlement `CORE` appears on those accounts. No unexplained identity-creation spike on `MNB-HR`.
+
+**If it fails:** Zero accounts → file path/permissions/header. Partial errors → open the result details and fix schema attribute names to match the CSV exactly.
+
+---
+
+### Task 7 — Verify on identity / account views
+
+1. Search Identities for `daniel.griffin`.
+2. Open the cube → Accounts (or equivalent). Look for an account on `MNB-CoreBanking`.
+3. If the account is linked, confirm entitlement `CORE` (or its display name).
+4. If the account is **uncorrelated**, open Applications → `MNB-CoreBanking` → Accounts and confirm `daniel.griffin` exists there. Correlation is deepened in Lessons 17–18—do not force-create identities.
+5. Spot-check one more holder (e.g. `aisha.murphy`).
+
+**Expected result:** Core accounts exist in IIQ; linked cubes show `CORE` when correlation already works; otherwise accounts are visible as uncorrelated on the application—still valid for this lesson.
+
+**If it fails:** Re-run Aggregate MNB-CoreBanking after schema save; then Refresh Identities only if your lab already uses refresh after target aggregates.
+
+---
+
+### Task 8 — Control evidence note
+
+1. Write a three-line control note in your binder:
+
+```text
+Control: MNB-CoreBanking aggregation
+Frequency: Lab — on demand; Prod intent — daily after core extract drop
+Evidence: Aggregate MNB-CoreBanking task result + CORE holder list
+```
+
+**Expected result:** You can answer “how do you know core operators?” without opening the CSV again.
+
+---
+
+## Acceptance criteria
+
+- [ ] `MNB-CoreBanking` Delimited File application exists with absolute CSV path
+- [ ] Application does **not** create identities
+- [ ] `entitlement` mapped; `CORE` materialized
+- [ ] `Aggregate MNB-CoreBanking` ran successfully (~7 accounts)
+- [ ] Owner / risk tier / approval narrative documented
+- [ ] At least one CORE holder verified on cube or application account list
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| 0 accounts aggregated | Bad path or Tomcat cannot read file | Use absolute `~/…` expanded path; `chmod`/`ls` the file |
+| Entitlements missing | `entitlement` not marked as entitlement attribute | Edit schema; re-aggregate |
+| New mystery identities | Create-identities enabled | Disable; delete erroneous cubes carefully; re-aggregate |
+| Duplicate apps | Typo name `MNB-Corebanking` | Delete/rename; standardize on `MNB-CoreBanking` |
+| Accounts uncorrelated | Normal before Lesson 17 | Proceed; do not flip authoritative |
+| Task “running” forever | Stuck worker / prior hung task | Check Task results; restart Tomcat only if hung |
+
+---
+
+## Training binder evidence
+
+Capture:
+
+1. Screenshot of `MNB-CoreBanking` application summary (name, owner, type)
+2. Screenshot of Account Aggregation task result (counts)
+3. Screenshot of `daniel.griffin` accounts tab **or** application account list showing CORE
+4. Notebook excerpt: risk tier critical + approval narrative
+
+Examiner question to practice aloud: *“Show me the authoritative list of core banking operators and who owns that control.”*
+
+---
+
+## Knowledge check
+
+1. Why must `MNB-CoreBanking` be non-authoritative?
+2. Which CSV column becomes the governable entitlement?
+3. What risk tier should CORE carry, and why split it from the IT inventory dump?
+4. Who is a sensible Meridian business owner for this application?
+5. If aggregation succeeds but the identity cube shows no CORE, what are the two most likely explanations?
+
+### Answers
+
+1. Only HR (`MNB-HR`) should create people; target apps attach accounts/entitlements to existing cubes (or leave them uncorrelated for remediation).
+2. `entitlement` → value `CORE`.
+3. **Critical** — core is crown-jewel; a dedicated app gives clear ownership, cert scope, and SoD boundaries vs a blended dump.
+4. `daniel.griffin` (Operations Manager / CORE holder) or a designated Ops application owner with `spadmin` as temporary proxy.
+5. Correlation not configured/complete yet, **or** you are looking at the wrong tab/app; check application account list and Lessons 17–18.
+
+---
+
+## Stretch lab
+
+- Create population `MNB-CORE-Holders` selecting identities with entitlement CORE on `MNB-CoreBanking` (or filter after correlation).
+- Compare CORE holders in `MNB-CoreBanking` vs rows with `itAccess=CORE` in `MNB-IT-Access` / `EmployeeData.txt`. Note any mismatches as data-quality findings.
+
+---
+
+## Summary
+
+- You onboarded **MNB-CoreBanking** from `apps/MNB-CoreBanking.csv` as a non-authoritative target.
+- Account Aggregation materialized the critical **CORE** entitlement for seven operators.
+- Ownership, risk tier, and evidence habits are in place for certifications and exam questions.
+
+---
+
+**Previous:** [Lesson 10 — Entitlement Dictionary](10-entitlement-dictionary.md)  
+**Next:** [Lesson 12 — Onboard SAP Finance](12-onboard-sap-finance.md)

@@ -1,0 +1,7 @@
+entitlementA,entitlementB,rationale
+WIRE_INIT,WIRE_APPR,Payment dual control — initiate vs approve
+SAP_FI,AWS_ADMIN,Finance system of record + cloud bypass
+IBSI,ECOM,Digital banking support + channel promotion
+GL_POST,SOX_VIEW,Post journals and attest own controls
+CORE,AWS_ADMIN,Core ops + infrastructure escape hatch
+ACH_OPS,WIRE_INIT,Cross-rail payment initiation concentration

@@ -1,49 +1,81 @@
-employeeId,userName,firstName,lastName,gender,email,managerId,status,departmentCode,positionCode,jobCode,country,onLeave
-a1,manish.shrestha,manish,shrestha,m,mshrestha@gmail.com,,1,300,1300,2300,nepal,true
-a2,ravi.shah,ravi,shah,m,rshah@gmail.com,a1,1,300,1300,2301,india,true
-a3,ganesh.upreti,ganesh,upreti,m,gupreti@gmail.com,,1,500,1500,2500,nepal,false
-a4,george.bush,george,bush,m,gbush@gmail.com,a3,0,500,1500,2504,usa,false
-a5,barack.obama,barack,obama,m,bobama@gmail.com,,1,800,1800,2800,usa,false
-a6,prakash.aryal,prakash,aryal,m,paryal@gmail.com,a5,0,800,1800,2805,bangladesh,false
-a7,sabin.sharma,sabin,sharma,m,ssharma@gmail.com,a5,1,800,1801,2816,england,false
-a8,maria.white,maria,white,f,mwhite@gmail.com,a3,0,500,1500,2505,norway,false
-a9,sarah.smith,sarah,smith,f,ssmith@gmail.com,a1,1,500,1500,2506,usa,true
-a10,madhu.gyawali,madhu,gyawali,m,mgyawali@gmail.com,a11,1,300,1300,2303,india,false
-a11,sai.krishna,sai,krishna,m,skrishna@gmail.com,a2,1,300,1300,2304,india,false
-a12,pra.bina,pra,bina,f,pbina@gmail.com,a4,0,500,1500,2506,india,false
-a13,yash.tiwari,yash,tiwari,m,ytiwari@gmail.com,a4,1,500,150870,2507,nepal,false
-a14,sudhir.shrestha,sudhir,shrestha,m,sshrestha@gmail.com,a5,1,800,1800,2810,nepal,false
-a15,indra.shah,indra,shah,m,ishaha@gmail.com,a2,1,300,1300,2303,india,false
-a16,rajesh.khadka,rajesh,khadka,m,rkhadka@gmail.com,a6,1,700,1700,2700,nepal,false
-a17,anita.malla,anita,malla,f,amalla@gmail.com,a8,0,500,1500,2508,india,true
-a18,sanjay.giri,sanjay,giri,m,sgiri@gmail.com,a7,1,900,1900,2900,usa,false
-a19,bhavani.devi,bhavani,devi,f,bdevi@gmail.com,a9,0,300,1300,2302,norway,true
-a20,vijay.kumar,vijay,kumar,m,vkumar@gmail.com,a6,1,800,1800,2808,bangladesh,false
-a21,sushma.basnet,sushma,basnet,f,sbasnet@gmail.com,a13,0,500,1500,2509,england,false
-a22,arun.poudel,arun,poudel,m,apoudel@gmail.com,a14,1,700,1700,2702,nepal,false
-a23,rekha.rana,rekha,rana,f,rrana@gmail.com,a1,1,600,1600,2600,india,false
-a24,pawan.mishra,pawan,mishra,m,pmishra@gmail.com,a8,0,500,1500,2510,nepal,true
-a25,meena.karki,meena,karki,f,mkarki@gmail.com,a5,1,900,1900,2901,usa,false
-a26,raju.shah,raju,shah,m,rshah@gmail.com,a15,1,300,1300,2305,india,false
-a27,krishna.dev,krishna,dev,m,kdev@gmail.com,a12,0,700,1700,2703,nepal,false
-a28,maya.das,maya,das,f,mdas@gmail.com,a3,1,500,1500,2511,india,false
-a29,ram.chhetri,ram,chhetri,m,rchhetri@gmail.com,a9,1,600,1600,2601,nepal,true
-a30,sheetal.thapa,sheetal,thapa,f,sthapa@gmail.com,a4,0,500,1500,2512,norway,false
-a31,amit.singh,amit,singh,m,asingh@gmail.com,a5,1,800,1800,2811,usa,false
-a32,rekha.shah,rekha,shah,f,rshah@gmail.com,a7,0,900,1900,2902,england,true
-a33,sanjiv.magar,sanjiv,magar,m,smagar@gmail.com,a11,1,300,1300,2306,nepal,false
-a34,pooja.bhattarai,pooja,bhattarai,f,pbhattarai@gmail.com,a12,0,500,1500,2513,india,false
-a35,manoj.sharma,manoj,sharma,m,msharma@gmail.com,a14,1,700,1700,2704,bangladesh,false
-a36,manish.sharma,manish,sharma,m,manishsharma@gmail.com,a4,1,700,1700,2709,bangladesh,false
-a37,manisha.sharma,manisha,sharma,f,manishasharma@gmail.com,a4,1,700,1700,2609,bangladesh,false
-a38,sita.kumari,sita,kumari,f,sitakumari@gmail.com,a13,0,500,1500,2514,india,true
-a39,rajesh.pandey,rajesh,pandey,m,rajeshpandey@gmail.com,a11,1,600,1600,2605,nepal,false
-a40,ram.prasad,ram,prasad,m,ramprasad@gmail.com,a15,1,800,1800,2812,bangladesh,false
-a41,surendra.sharma,surendra,sharma,m,ssharma@gmail.com,a4,1,900,1900,2903,nepal,false
-a42,anil.khatri,anil,khatri,m,akhatri@gmail.com,a4,1,700,1700,2705,india,true
-a43,ramesh.bhusal,ramesh,bhusal,m,rbhusal@gmail.com,a4,0,500,1500,2515,norway,false
-a44,kamala.shrestha,kamala,shrestha,f,kshrestha@gmail.com,a4,1,600,1600,2607,usa,false
-a45,priya.tamang,priya,tamang,f,ptamang@gmail.com,a4,0,500,1500,2516,england,true
-
-
-
+employeeId,userName,firstName,lastName,email,managerId,status,departmentCode,jobCode,jobTitle,locationCode,country,workerType,onLeave,costCenter,hireDate,terminationDate
+MNB00001,helen.ross,Helen,Ross,helen.ross@meridiannb.com,,1,SEC,IAM01,Head of Identity & Access,US-NY,USA,Employee,false,CC-SEC-100,2018-03-12,
+MNB00002,christopher.hayes,Christopher,Hayes,christopher.hayes@meridiannb.com,,1,ITP,CTO01,Director of Technology,US-CLT,USA,Employee,false,CC-ITP-100,2018-03-12,
+MNB00003,deepa.nair,Deepa,Nair,deepa.nair@meridiannb.com,,1,FIN,CFO01,Director of Finance,US-CHI,USA,Employee,false,CC-FIN-100,2018-03-12,
+MNB00004,anthony.powell,Anthony,Powell,anthony.powell@meridiannb.com,,1,RSK,CRO01,Chief Risk Officer,NP-KTM,NPL,Employee,false,CC-RSK-100,2018-03-12,
+MNB00005,rachel.evans,Rachel,Evans,rachel.evans@meridiannb.com,,1,TRS,WIR02,Payments Operations Manager,IN-BLR,IND,Employee,false,CC-TRS-100,2018-03-12,
+MNB00006,sanjay.kapoor,Sanjay,Kapoor,sanjay.kapoor@meridiannb.com,,1,CML,RM01,Commercial Banking Manager,GB-LON,GBR,Employee,false,CC-CML-100,2018-03-12,
+MNB00007,emily.bennett,Emily,Bennett,emily.bennett@meridiannb.com,,1,RET,MGR01,Retail Branch Manager,US-NY,USA,Employee,false,CC-RET-100,2018-03-12,
+MNB00008,daniel.griffin,Daniel,Griffin,daniel.griffin@meridiannb.com,,1,OPS,OPS01,Operations Manager,US-CLT,USA,Employee,false,CC-OPS-100,2018-03-12,
+MNB00009,chloe.adhikari,Chloe,Adhikari,chloe.adhikari@meridiannb.com,MNB00001,1,SEC,SOC01,SOC Analyst,US-CHI,USA,Employee,false,CC-SEC-109,2020-10-08,
+MNB00010,anita.ross,Anita,Ross,anita.ross@meridiannb.com,MNB00004,0,FIN,GL01,Staff Accountant,IN-BLR,IND,Employee,false,CC-FIN-110,2023-02-14,2026-04-20
+MNB00011,anthony.rao,Anthony,Rao,anthony.rao@meridiannb.com,MNB00004,1,RSK,CRO01,Chief Risk Officer,GB-LON,GBR,Employee,false,CC-RSK-111,2016-06-06,
+MNB00012,meera.torres,Meera,Torres,meera.torres@meridiannb.com,MNB00002,1,ITP,AD01,Directory Administrator,US-NY,USA,Employee,false,CC-ITP-112,2017-01-09,
+MNB00013,aisha.murphy,Aisha,Murphy,aisha.murphy@meridiannb.com,MNB00004,1,OPS,OPS01,Operations Analyst,IN-BLR,IND,Employee,false,CC-OPS-113,2017-05-05,
+MNB00014,sofia.andersson,Sofia,Andersson,sofia.andersson@meridiannb.com,MNB00003,1,RET,CSR01,Customer Service Rep,US-CHI,USA,Employee,false,CC-RET-114,2015-06-13,
+MNB00015,michael.ross,Michael,Ross,michael.ross@meridiannb.com,MNB00002,1,TRS,WIR01,Wire Specialist,US-CLT,USA,Employee,false,CC-TRS-115,2019-03-18,
+MNB00016,isaac.lambert,Isaac,Lambert,isaac.lambert@meridiannb.com,MNB00001,1,RET,MGR01,People Manager,IN-BLR,IND,Employee,false,CC-RET-116,2024-05-08,
+MNB00017,anthony.bennett,Anthony,Bennett,anthony.bennett@meridiannb.com,MNB00004,1,FIN,CFO01,Finance Director,US-CHI,USA,Employee,false,CC-FIN-117,2021-10-22,
+MNB00018,kai.khatri,Kai,Khatri,kai.khatri@meridiannb.com,MNB00003,1,ITP,CLD01,Cloud Platform Engineer,IN-BLR,IND,Employee,false,CC-ITP-118,2018-03-07,
+MNB00019,chloe.joshi,Chloe,Joshi,chloe.joshi@meridiannb.com,MNB00002,1,CML,RM01,Relationship Manager,IN-BLR,IND,Employee,true,CC-CML-119,2015-11-05,
+MNB00020,zoe.okoro,Zoe,Okoro,zoe.okoro@meridiannb.com,MNB00001,1,RET,CSR01,Customer Service Rep,US-CLT,USA,Employee,false,CC-RET-120,2015-01-06,
+MNB00021,noah.ibrahim,Noah,Ibrahim,noah.ibrahim@meridiannb.com,MNB00001,1,TRS,WIR01,Wire Specialist,US-NY,USA,Employee,false,CC-TRS-121,2020-03-10,
+MNB00022,rachel.khatri,Rachel,Khatri,rachel.khatri@meridiannb.com,MNB00003,1,CML,RM01,Relationship Manager,US-CLT,USA,Contractor,false,CC-CML-122,2020-03-04,
+MNB00023,james.nguyen,James,Nguyen,james.nguyen@meridiannb.com,MNB00004,1,TRS,WIR01,Wire Specialist,US-CHI,USA,Contractor,false,CC-TRS-123,2018-02-26,
+MNB00024,kai.howard,Kai,Howard,kai.howard@meridiannb.com,MNB00004,0,FIN,SOX01,SOX Controls Analyst,GB-LON,GBR,Employee,false,CC-FIN-124,2022-06-07,2026-06-01
+MNB00025,meera.brooks,Meera,Brooks,meera.brooks@meridiannb.com,MNB00005,1,SEC,SOC01,SOC Analyst,IN-BLR,IND,Employee,false,CC-SEC-125,2021-10-16,
+MNB00026,raj.ross,Raj,Ross,raj.ross@meridiannb.com,MNB00002,1,ITP,CTO01,Technology Director,GB-LON,GBR,Employee,false,CC-ITP-126,2018-06-07,
+MNB00027,leo.powell,Leo,Powell,leo.powell@meridiannb.com,MNB00004,1,DIG,DIG01,Digital Product Analyst,US-CHI,USA,Employee,false,CC-DIG-127,2017-05-19,
+MNB00028,benjamin.desai,Benjamin,Desai,benjamin.desai@meridiannb.com,MNB00003,1,ITP,DBA01,Database Administrator,US-NY,USA,Employee,false,CC-ITP-128,2017-08-03,
+MNB00029,sofia.murphy,Sofia,Murphy,sofia.murphy@meridiannb.com,MNB00002,1,SEC,SOC01,SOC Analyst,US-CLT,USA,Employee,false,CC-SEC-129,2018-01-02,
+MNB00030,theo.foster,Theo,Foster,theo.foster@meridiannb.com,MNB00006,0,HRP,HR01,HR Business Partner,US-NY,USA,Employee,false,CC-HRP-130,2022-11-19,2026-02-24
+MNB00031,rohan.singh,Rohan,Singh,rohan.singh@meridiannb.com,MNB00004,1,OPS,OPS01,Operations Analyst,US-CLT,USA,Employee,false,CC-OPS-131,2022-05-13,
+MNB00032,maya.desai,Maya,Desai,maya.desai@meridiannb.com,MNB00002,1,CML,RM01,Relationship Manager,IN-BLR,IND,Employee,false,CC-CML-132,2020-01-23,
+MNB00033,raj.morris,Raj,Morris,raj.morris@meridiannb.com,MNB00003,1,SEC,SOC01,SOC Analyst,US-CLT,USA,Employee,false,CC-SEC-133,2015-09-25,
+MNB00034,benjamin.mehta,Benjamin,Mehta,benjamin.mehta@meridiannb.com,MNB00006,0,ITP,SRE01,Site Reliability Engineer,NP-KTM,NPL,Employee,false,CC-ITP-134,2022-09-25,2026-02-23
+MNB00035,rachel.thapa,Rachel,Thapa,rachel.thapa@meridiannb.com,MNB00002,1,TRS,WIR01,Wire Specialist,NP-KTM,NPL,Employee,false,CC-TRS-135,2023-11-22,
+MNB00036,michael.watson,Michael,Watson,michael.watson@meridiannb.com,MNB00005,1,RET,MGR01,People Manager,GB-LON,GBR,Employee,false,CC-RET-136,2024-03-10,
+MNB00037,samir.hughes,Samir,Hughes,samir.hughes@meridiannb.com,MNB00004,1,ITP,SRE01,Site Reliability Engineer,US-NY,USA,Employee,true,CC-ITP-137,2020-06-07,
+MNB00038,hannah.desai,Hannah,Desai,hannah.desai@meridiannb.com,MNB00006,1,DIG,DIG01,Digital Product Analyst,IN-BLR,IND,Employee,false,CC-DIG-138,2021-02-06,
+MNB00039,diego.hayes,Diego,Hayes,diego.hayes@meridiannb.com,MNB00007,1,ITP,DEV01,Application Developer,GB-LON,GBR,Employee,false,CC-ITP-139,2018-09-14,
+MNB00040,claire.evans,Claire,Evans,claire.evans@meridiannb.com,MNB00008,1,DIG,DIG01,Digital Product Analyst,US-CLT,USA,Employee,false,CC-DIG-100,2015-04-21,
+MNB00041,amelia.foster,Amelia,Foster,amelia.foster@meridiannb.com,MNB00003,1,FIN,SOX01,SOX Controls Analyst,IN-BLR,IND,Employee,true,CC-FIN-101,2021-06-20,
+MNB00042,meera.joshi,Meera,Joshi,meera.joshi@meridiannb.com,MNB00003,1,ITP,CTO01,Technology Director,US-CHI,USA,Employee,false,CC-ITP-102,2021-01-19,
+MNB00043,olivia.park,Olivia,Park,olivia.park@meridiannb.com,MNB00001,1,RET,CSR01,Customer Service Rep,IN-BLR,IND,Employee,false,CC-RET-103,2017-07-17,
+MNB00044,aisha.hughes,Aisha,Hughes,aisha.hughes@meridiannb.com,MNB00006,1,ITP,CLD01,Cloud Platform Engineer,US-CLT,USA,Employee,false,CC-ITP-104,2019-02-27,
+MNB00045,arjun.kim,Arjun,Kim,arjun.kim@meridiannb.com,MNB00001,1,ITP,AD01,Directory Administrator,US-CHI,USA,Employee,false,CC-ITP-105,2015-09-13,
+MNB00046,priya.fernandez,Priya,Fernandez,priya.fernandez@meridiannb.com,MNB00008,1,FIN,GL01,Staff Accountant,US-NY,USA,Employee,false,CC-FIN-106,2024-05-17,
+MNB00047,ethan.thapa,Ethan,Thapa,ethan.thapa@meridiannb.com,MNB00005,1,OPS,OPS01,Operations Analyst,US-NY,USA,Employee,false,CC-OPS-107,2020-03-02,
+MNB00048,maya.lambert,Maya,Lambert,maya.lambert@meridiannb.com,MNB00004,1,RET,MGR01,People Manager,GB-LON,GBR,Contractor,false,CC-RET-108,2016-12-08,
+MNB00049,christopher.diaz,Christopher,Diaz,christopher.diaz@meridiannb.com,MNB00006,1,DIG,DIG01,Digital Product Analyst,GB-LON,GBR,Employee,false,CC-DIG-109,2021-06-24,
+MNB00050,laura.patel,Laura,Patel,laura.patel@meridiannb.com,MNB00008,1,TRS,ACH01,ACH Operator,GB-LON,GBR,Employee,false,CC-TRS-110,2020-02-11,
+MNB00051,zoe.singh,Zoe,Singh,zoe.singh@meridiannb.com,MNB00008,1,RSK,AML01,AML Investigator,GB-LON,GBR,Employee,false,CC-RSK-111,2019-07-19,
+MNB00052,priya.nair,Priya,Nair,priya.nair@meridiannb.com,MNB00008,1,DIG,DIG01,Digital Product Analyst,US-CLT,USA,Employee,false,CC-DIG-112,2019-04-10,
+MNB00053,deepa.khatri,Deepa,Khatri,deepa.khatri@meridiannb.com,MNB00004,1,CML,LO01,Loan Officer,NP-KTM,NPL,Employee,true,CC-CML-113,2016-07-12,
+MNB00054,elena.thapa,Elena,Thapa,elena.thapa@meridiannb.com,MNB00004,1,FIN,CFO01,Finance Director,US-NY,USA,Employee,false,CC-FIN-114,2020-09-16,
+MNB00055,priya.torres,Priya,Torres,priya.torres@meridiannb.com,MNB00002,1,ITP,DEV01,Application Developer,IN-BLR,IND,Contractor,false,CC-ITP-115,2016-10-12,
+MNB00056,grace.howard,Grace,Howard,grace.howard@meridiannb.com,MNB00002,1,TRS,WIR02,Wire Approver,US-CLT,USA,Contractor,false,CC-TRS-116,2019-06-12,
+MNB00057,arjun.joshi,Arjun,Joshi,arjun.joshi@meridiannb.com,MNB00007,1,ITP,AD01,Directory Administrator,US-CHI,USA,Employee,false,CC-ITP-117,2017-11-22,
+MNB00058,amelia.patel,Amelia,Patel,amelia.patel@meridiannb.com,MNB00005,1,SEC,IAM01,IAM Engineer,NP-KTM,NPL,Employee,false,CC-SEC-118,2020-12-24,
+MNB00059,laura.chen,Laura,Chen,laura.chen@meridiannb.com,MNB00005,1,HRP,HR01,HR Business Partner,NP-KTM,NPL,Contractor,true,CC-HRP-119,2020-04-22,
+MNB00060,ethan.ross,Ethan,Ross,ethan.ross@meridiannb.com,MNB00008,1,RSK,CRO01,Chief Risk Officer,IN-BLR,IND,Contractor,false,CC-RSK-120,2020-05-18,
+MNB00061,meera.nair,Meera,Nair,meera.nair@meridiannb.com,MNB00004,1,FIN,SOX01,SOX Controls Analyst,GB-LON,GBR,Employee,false,CC-FIN-121,2016-08-17,
+MNB00062,claire.mehta,Claire,Mehta,claire.mehta@meridiannb.com,MNB00011,1,ITP,AD01,Directory Administrator,NP-KTM,NPL,Employee,false,CC-ITP-122,2015-10-08,
+MNB00063,olivia.hayes,Olivia,Hayes,olivia.hayes@meridiannb.com,MNB00003,1,FIN,CFO01,Finance Director,US-CLT,USA,Employee,false,CC-FIN-123,2020-07-09,
+MNB00064,theo.joshi,Theo,Joshi,theo.joshi@meridiannb.com,MNB00008,1,OPS,OPS01,Operations Analyst,GB-LON,GBR,Employee,false,CC-OPS-124,2018-07-10,
+MNB00065,mateo.chen,Mateo,Chen,mateo.chen@meridiannb.com,MNB00005,1,ITP,AD01,Directory Administrator,US-CHI,USA,Employee,false,CC-ITP-125,2023-12-07,
+MNB00066,avery.shah,Avery,Shah,avery.shah@meridiannb.com,MNB00003,1,TRS,WIR02,Wire Approver,US-CLT,USA,Employee,false,CC-TRS-126,2015-11-19,
+MNB00067,arjun.bailey,Arjun,Bailey,arjun.bailey@meridiannb.com,MNB00005,1,TRS,WIR02,Wire Approver,US-CLT,USA,Employee,false,CC-TRS-127,2015-03-16,
+MNB00068,anita.rao,Anita,Rao,anita.rao@meridiannb.com,MNB00002,1,ITP,SRE01,Site Reliability Engineer,NP-KTM,NPL,Employee,false,CC-ITP-128,2023-01-07,
+MNB00069,nina.cruz,Nina,Cruz,nina.cruz@meridiannb.com,MNB00003,1,CML,RM01,Relationship Manager,US-CLT,USA,Employee,false,CC-CML-129,2018-12-22,
+MNB00070,ethan.kim,Ethan,Kim,ethan.kim@meridiannb.com,MNB00005,1,ITP,DBA01,Database Administrator,NP-KTM,NPL,Employee,false,CC-ITP-130,2015-07-26,
+MNB00071,owen.morris,Owen,Morris,owen.morris@meridiannb.com,MNB00006,1,ITP,CLD01,Cloud Platform Engineer,IN-BLR,IND,Employee,false,CC-ITP-131,2020-08-19,
+MNB00072,rohan.price,Rohan,Price,rohan.price@meridiannb.com,MNB00003,1,FIN,CFO01,Finance Director,US-CHI,USA,Contractor,true,CC-FIN-132,2017-08-16,
+MNB00090,priya.wire,Priya,Mehta,priya.wire@meridiannb.com,MNB00005,1,TRS,WIR01,Wire Specialist,US-NY,USA,Employee,false,CC-TRS-210,2022-06-01,
+MNB00091,marcus.approve,Marcus,Coleman,marcus.approve@meridiannb.com,MNB00005,1,TRS,WIR02,Wire Approver,US-NY,USA,Employee,false,CC-TRS-210,2021-02-14,
+MNB00092,jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,MNB00003,1,FIN,GL01,Staff Accountant,US-CLT,USA,Employee,false,CC-FIN-300,2020-09-09,
+MNB00093,raj.external,Raj,External,raj.contractor@vendor-mail.invalid,MNB00002,1,ITP,CLD01,Cloud Platform Engineer,IN-BLR,IND,Contractor,false,CC-ITP-400,2023-01-10,
+MNB00094,samir.hassan,Samir,Hassan,samir.hassan@meridiannb.com,MNB00002,0,ITP,DEV01,Application Developer,NP-KTM,NPL,Employee,false,CC-ITP-410,2019-11-01,2026-05-30
+MNB00095,sofia.torres,Sofia,Torres,sofia.torres@meridiannb.com,MNB00006,1,CML,RM01,Relationship Manager,US-CHI,USA,Employee,true,CC-CML-220,2018-08-20,
+MNB00096,kai.nguyen,Kai,Nguyen,kai.nguyen@meridiannb.com,MNB00002,1,DIG,DIG01,Digital Product Analyst,US-NY,USA,Employee,false,CC-DIG-250,2024-01-15,
+MNB00097,amelia.brooks,Amelia,Brooks,amelia.brooks@meridiannb.com,MNB00007,1,RET,TEL01,Teller,US-CLT,USA,Employee,false,CC-RET-110,2026-07-20,

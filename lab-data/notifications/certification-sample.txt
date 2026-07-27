@@ -1,0 +1,16 @@
+From: identity-noreply@meridiannb.com
+To: rachel.evans@meridiannb.com
+Subject: Action required — Q3 Manager Access Review (Treasury)
+
+Rachel,
+
+Meridian National Bank's quarterly access certification for your
+direct reports is ready. Please complete decisions by the due date.
+
+Campaign: MNB-Q3-Manager-Cert-Treasury
+Scope: High-risk entitlements on Wire Portal, SAP Finance, AWS Admin
+Due: 10 business days
+
+Login to IdentityIQ → Work Item Inbox → open the certification.
+
+— Identity Governance Office

@@ -1,81 +1,16 @@
-From admin@example.com Wed Dec 18 14:08:54 2024
-Date: Wed, 18 Dec 2024 14:08:54 -0600 (CST)
-From: admin@example.com
-To: gbush@gmail.com
-Message-ID: <5544d6c4f73547e69ba9779b0e48f58e@example.com>
-Subject: New access certification: Manager Access Review for george bush
-MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_504_275676117.1734552534045"
-X-Mailer: smptsend
+From: identity-noreply@meridiannb.com
+To: rachel.evans@meridiannb.com
+Subject: Action required — Q3 Manager Access Review (Treasury)
 
-------=_Part_504_275676117.1734552534045
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Rachel,
 
-A new access certification report has been assigned to you: Manager Access Review for george bush.
+Meridian National Bank's quarterly access certification for your
+direct reports is ready. Please complete decisions by the due date.
 
-Login and view your work item inbox to complete this access certification report.
-    
-------=_Part_504_275676117.1734552534045--
+Campaign: MNB-Q3-Manager-Cert-Treasury
+Scope: High-risk entitlements on Wire Portal, SAP Finance, AWS Admin
+Due: 10 business days
 
-From admin@example.com Wed Dec 18 14:12:34 2024
-Date: Wed, 18 Dec 2024 14:12:34 -0600 (CST)
-From: admin@example.com
-To: gbush@gmail.com
-Message-ID: <6e478794463d413fa9e6910b31fce4dd@example.com>
-Subject: Delegation Completed by anita malla
-MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_506_1145091640.1734552754501"
-X-Mailer: smptsend
+Login to IdentityIQ → Work Item Inbox → open the certification.
 
-------=_Part_506_1145091640.1734552754501
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-anita malla has finished the delegated item 'Predelegation workItem'.
-Please review the items. 
-    
-------=_Part_506_1145091640.1734552754501--
-
-From admin@example.com Wed Dec 18 14:13:04 2024
-Date: Wed, 18 Dec 2024 14:13:04 -0600 (CST)
-From: admin@example.com
-To: gbush@gmail.com
-Message-ID: <947064ab96624ae990c6d53431b6619e@example.com>
-Subject: Delegation Completed by anita malla
-MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_508_1168790699.1734552784647"
-X-Mailer: smptsend
-
-------=_Part_508_1168790699.1734552784647
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-anita malla has finished the delegated item 'Predelegation workItem'.
-Please review the items. 
-    
-------=_Part_508_1168790699.1734552784647--
-
-From admin@example.com Wed Dec 18 14:13:24 2024
-Date: Wed, 18 Dec 2024 14:13:24 -0600 (CST)
-From: admin@example.com
-To: gbush@gmail.com
-Message-ID: <0495bff31e4c4ca685c7627f38e15f73@example.com>
-Subject: Delegation Completed by anita malla
-MIME-Version: 1.0
-Content-Type: multipart/mixed; 
-	boundary="----=_Part_510_734892151.1734552804769"
-X-Mailer: smptsend
-
-------=_Part_510_734892151.1734552804769
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-anita malla has finished the delegated item 'Predelegation workItem'.
-Please review the items. 
-    
-------=_Part_510_734892151.1734552804769--
-
+— Identity Governance Office

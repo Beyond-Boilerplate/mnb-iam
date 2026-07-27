@@ -1,0 +1,17 @@
+code,name,description,risk
+ELDAP,Enterprise Directory,Login / AD group backbone,medium
+ODS,Operational Data Store,Analytics & reporting DB,medium
+IBSI,Internet Banking Support,Digital banking ops console,high
+ECOM,E-Commerce Channel Ops,Digital change promotion,high
+CRM,Salesforce CRM,Relationship management CRM,medium
+CORE,Core Banking (AS400),Midrange core operations,critical
+SAP_FI,SAP Finance,ERP finance modules,critical
+AWS_ADMIN,AWS Admin,Cloud account administration,critical
+DWRP,Dev Workstation / Repo,Source control & build,medium
+WIRE_INIT,Wire Portal — Initiate,Create wire instructions,critical
+WIRE_APPR,Wire Portal — Approve,Approve wire instructions,critical
+ACH_OPS,ACH Operations,ACH file create/release,critical
+AML_CASE,AML Case System,Investigations workspace,high
+GL_POST,GL Posting,Journal entry posting,high
+SOX_VIEW,SOX Evidence Portal,Control evidence viewer,medium
+PRIV_BREAK,Break-Glass Admin,Emergency privileged access,critical

@@ -1,7 +1,9 @@
 # Homelab (k3s) — Beyond-Boilerplate / mnb-iam
-# Public URL: https://sailpoint.lmsapp.us/identityiq/login.jsf
+# Public:
+#   https://sailpoint.lmsapp.us/                      → Meridian IAM Academy
+#   https://sailpoint.lmsapp.us/identityiq/login.jsf  → IdentityIQ
 # Cloudflare Tunnel (no Access for now):
-#   sailpoint.lmsapp.us → http://identityiq.sailpoint.svc.cluster.local:8080
+#   sailpoint.lmsapp.us → http://sailpoint-edge.sailpoint.svc.cluster.local:8080
 
 identityiq-data:
   enabled: true

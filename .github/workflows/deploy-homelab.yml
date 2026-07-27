@@ -13,6 +13,7 @@ on:
     branches: [main, master]
     paths:
       - deploy/**
+      - learn/k8s/**
       - .github/workflows/deploy-homelab.yml
   workflow_dispatch:
     inputs:
@@ -163,8 +164,22 @@ jobs:
           export KUBECONFIG="$HOME/.kube/config"
           kubectl -n sailpoint rollout status deploy/identityiq --timeout=12m
 
+      - name: Ensure public surface (academy + edge)
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          chmod +x learn/k8s/install-public-surface.sh
+          # Keep currently pinned learn tag if present; else latest
+          LIVE=$(kubectl -n sailpoint get deploy mnb-learn -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
+          if [[ "$LIVE" == *:* ]]; then
+            export LEARN_IMAGE_TAG="${LIVE##*:}"
+          else
+            export LEARN_IMAGE_TAG=latest
+          fi
+          ./learn/k8s/install-public-surface.sh
+
   smoke-iiq:
-    name: Smoke login.jsf
+    name: Smoke public surface
     needs: helm-upgrade
     if: >
       always() &&
@@ -173,29 +188,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Probe sailpoint.lmsapp.us
+      - name: Probe sailpoint.lmsapp.us (/ and /identityiq)
+        env:
+          LEARN_SMOKE_URL: https://sailpoint.lmsapp.us/
         run: |
           set -euo pipefail
-          ok=0
-          for i in $(seq 1 36); do
-            code=$(curl -sS -o /tmp/iiq.html -w '%{http_code}' --connect-timeout 10 \
-              "$IIQ_SMOKE_URL" || echo "000")
-            echo "attempt ${i}: HTTP ${code}"
-            if [ "$code" = "200" ] || [ "$code" = "302" ]; then
-              ok=1
-              break
+          probe() {
+            local url="$1" label="$2"
+            local ok=0 code
+            for i in $(seq 1 36); do
+              code=$(curl -sS -o /tmp/smoke.body -w '%{http_code}' --connect-timeout 10 "$url" || echo "000")
+              echo "${label} attempt ${i}: HTTP ${code}"
+              if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
+                ok=1
+                break
+              fi
+              sleep 10
+            done
+            if [ "$ok" != "1" ]; then
+              echo "::error::Smoke failed for ${url}"
+              echo "Cloudflare Tunnel Public Hostname must be:"
+              echo "  Subdomain: sailpoint  Domain: lmsapp.us"
+              echo "  Type: HTTP  URL: sailpoint-edge.sailpoint.svc.cluster.local:8080"
+              echo "(Previously pointed at identityiq — update the tunnel target.)"
+              exit 1
             fi
-            sleep 10
-          done
-          if [ "$ok" != "1" ]; then
-            echo "::error::Smoke failed for ${IIQ_SMOKE_URL}"
-            echo "Add Cloudflare Tunnel Public Hostname:"
-            echo "  Subdomain: sailpoint  Domain: lmsapp.us"
-            echo "  Type: HTTP  URL: identityiq.sailpoint.svc.cluster.local:8080"
-            echo "(No Cloudflare Access for now.)"
-            exit 1
-          fi
-          echo "Public IdentityIQ login OK"
+          }
+          probe "$LEARN_SMOKE_URL" "academy"
+          probe "$IIQ_SMOKE_URL" "iiq"
+          echo "Public academy + IdentityIQ OK"
 
   deploy-gate:
     name: Deploy gate

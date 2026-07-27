@@ -1,8 +1,16 @@
 # Homelab CD — Meridian IdentityIQ (`mnb-iam`)
 
-Public URL: **https://sailpoint.lmsapp.us/identityiq/login.jsf**  
+Public URLs:
+
+| Surface | URL |
+| --- | --- |
+| **Academy (home)** | **https://sailpoint.lmsapp.us/** |
+| IdentityIQ | **https://sailpoint.lmsapp.us/identityiq/login.jsf** |
+
 Namespace: **`sailpoint`** (isolated from `platform`)  
 Pattern: same Tailscale + Helm + GHCR flow as [nepaledu-platform](https://github.com/Beyond-Boilerplate/nepaledu-platform).
+
+Path split is handled in-cluster by **`sailpoint-edge`** (nginx). Cloudflare Tunnel must target the edge, not IdentityIQ directly.
 
 ## What is CNPG?
 
@@ -90,9 +98,18 @@ Helm-only fixes (probes, values, install scripts) no longer require a manual dis
    | Subdomain | `sailpoint` |
    | Domain | `lmsapp.us` |
    | Type | HTTP |
-   | URL | `identityiq.sailpoint.svc.cluster.local:8080` |
+   | URL | `sailpoint-edge.sailpoint.svc.cluster.local:8080` |
 
-6. **Helm install (manual)**
+   Routes: `/` → academy (`mnb-learn`), `/identityiq` → IdentityIQ. See [LEARN-SITE.md](LEARN-SITE.md).
+
+6. **Public surface (academy + edge)**
+
+   ```bash
+   ./learn/k8s/install-public-surface.sh
+   # or: Actions → Publish learn site
+   ```
+
+7. **Helm install (manual)**
 
    ```bash
    export KUBECONFIG=…
@@ -103,6 +120,7 @@ Helm-only fixes (probes, values, install scripts) no longer require a manual dis
 ## Runtime shape
 
 - **Phased Helm install**: data (CNPG + schema) then app
+- **Public edge**: `sailpoint-edge` path-routes academy (`/`) and IIQ (`/identityiq`)
 - **CNPG**: 1 instance in lab values (no hard anti-affinity); storage stays at provisioned size (cannot shrink)
 - **1 IdentityIQ replica** (lab speed; set `replicaCount: 2` for HA demos), Service `sessionAffinity: ClientIP`; readiness **TCP:8080** (smoke still hits login.jsf)
 - Schema Job applies SailPoint Postgres DDL once (skip if `spt_identity` exists)

@@ -1,0 +1,11 @@
+departmentCode,departmentName,description
+RET,Retail Banking,Branch & consumer deposits
+CML,Commercial Lending,Business credit & RM desks
+TRS,Treasury & Payments,"Wire, ACH, liquidity"
+FIN,Finance & Accounting,"GL, SOX, financial close"
+RSK,Risk & Compliance,"AML, BSA, model risk"
+OPS,Bank Operations,Back-office processing
+DIG,Digital Banking,Online/mobile channels
+ITP,Technology & Platforms,"Apps, cloud, directory"
+HRP,People & Culture,HRIS & workforce
+SEC,Information Security,"Cyber, IAM, SOC"

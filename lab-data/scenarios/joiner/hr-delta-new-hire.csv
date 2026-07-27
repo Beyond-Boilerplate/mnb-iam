@@ -1,0 +1,2 @@
+employeeId,userName,firstName,lastName,email,managerId,status,departmentCode,jobCode,jobTitle,locationCode,country,workerType,onLeave,costCenter,hireDate,terminationDate
+MNB00120,nina.joiner,Nina,Foster,nina.joiner@meridiannb.com,MNB00007,1,RET,TEL01,Teller,US-CLT,USA,Employee,false,CC-RET-110,2026-07-26,

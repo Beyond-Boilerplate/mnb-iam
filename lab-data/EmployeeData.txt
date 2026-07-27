@@ -1,29 +1,177 @@
-userName,firstName,lastName,email,jobTitle,itAccess
-gsmith,george,smith,george.smith@demo.com,Developer,DWRP
-hgold,hary,gold,hary.gold@demo.com,Developer,DWRP
-mjohnson,mary,johnson,mary.johnson@demo.com,Developer,ODS
-maria.gates,maria,gates,maria.gates@demo.com,Developer,ODS
-rhood,robin,hood,robin.hood@demo.com,Developer,ODS
-gsmith,george,smith,george.smith@demo.com,Developer,ODS
-hgold,hary,gold,hary.gold@demo.com,Developer,ODS
-mjohnson,mary,johnson,mary.johnson@demo.com,Developer,ODS
-rbedi,rahul,bedi,rahul.bedi@demo.com,Admin,AWS
-msmith,mary,smith,mary.smith@demo.com,Admin,AWS
-swhite,sara,white,sara.white@demo.com,Admin,AWS
-dforlan,dieago,forlan,dieago.forlan@demo.com,Analyst,IBSI
-rbrown,robert,brown,robert.brown@demo.com,Analyst,IBSI
-rbrown,robert,brown,robert.brown@demo.com,Analyst,ELDAP
-mgomez,max,gomez,max.gomez@demo.com,Operations,Ecom
-mgomez,max,gomez,max.gomez@demo.com,Operations,SalesForce
-dforlan,dieago,forlan,dieago.forlan@demo.com,Analyst,ELDAP
-psmith,paul,smith,paul.smith@demo.com,Operations,Ecom
-psmith,paul,smith,paul.smith@demo.com,Operations,SalesForce
-mgomez,max,gomez,max.gomez@demo.com,Operations,AS500
-manisha.shrestha,manisha,shrestha,mshresthaa@gmail.com,Developer,ODS
-ravindra.shaha,ravindra,shah,rshaha@gmail.com,Developer,ODS
-rohit.shah,rahit,shah,rhshaha@gmail.com,Developer,ODS
-mohit.shrestha,mohit,shrestha,mshresthaa@gmail.com,Developer,ODS
-rgomez,rax,gomez,rax.gomez@demo.com,Operations,AS500
-gsmith,george,smith,george.smith@demo.com,Developer,SAP
-neymar.dex22,neymar,dex22,neymar.dex22@gmail.com,Analyst,IBSI
-neymar.dex22,neymar,dex22,neymar.dex22@gmail.com,Analyst,ELDAP
+userName,firstName,lastName,email,jobTitle,employeeId,itAccess,accountStatus
+helen.ross,Helen,Ross,helen.ross@meridiannb.com,Head of Identity & Access,MNB00001,ELDAP,active
+helen.ross,Helen,Ross,helen.ross@meridiannb.com,Head of Identity & Access,MNB00001,SOX_VIEW,active
+christopher.hayes,Christopher,Hayes,christopher.hayes@meridiannb.com,Director of Technology,MNB00002,ELDAP,active
+deepa.nair,Deepa,Nair,deepa.nair@meridiannb.com,Director of Finance,MNB00003,ELDAP,active
+anthony.powell,Anthony,Powell,anthony.powell@meridiannb.com,Chief Risk Officer,MNB00004,ELDAP,active
+rachel.evans,Rachel,Evans,rachel.evans@meridiannb.com,Payments Operations Manager,MNB00005,ELDAP,active
+rachel.evans,Rachel,Evans,rachel.evans@meridiannb.com,Payments Operations Manager,MNB00005,WIRE_APPR,active
+sanjay.kapoor,Sanjay,Kapoor,sanjay.kapoor@meridiannb.com,Commercial Banking Manager,MNB00006,CRM,active
+sanjay.kapoor,Sanjay,Kapoor,sanjay.kapoor@meridiannb.com,Commercial Banking Manager,MNB00006,ELDAP,active
+sanjay.kapoor,Sanjay,Kapoor,sanjay.kapoor@meridiannb.com,Commercial Banking Manager,MNB00006,ODS,active
+emily.bennett,Emily,Bennett,emily.bennett@meridiannb.com,Retail Branch Manager,MNB00007,ELDAP,active
+daniel.griffin,Daniel,Griffin,daniel.griffin@meridiannb.com,Operations Manager,MNB00008,CORE,active
+daniel.griffin,Daniel,Griffin,daniel.griffin@meridiannb.com,Operations Manager,MNB00008,ECOM,active
+daniel.griffin,Daniel,Griffin,daniel.griffin@meridiannb.com,Operations Manager,MNB00008,ELDAP,active
+chloe.adhikari,Chloe,Adhikari,chloe.adhikari@meridiannb.com,SOC Analyst,MNB00009,AML_CASE,active
+chloe.adhikari,Chloe,Adhikari,chloe.adhikari@meridiannb.com,SOC Analyst,MNB00009,ELDAP,active
+anita.ross,Anita,Ross,anita.ross@meridiannb.com,Staff Accountant,MNB00010,AWS_ADMIN,disabled
+anita.ross,Anita,Ross,anita.ross@meridiannb.com,Staff Accountant,MNB00010,ELDAP,disabled
+anita.ross,Anita,Ross,anita.ross@meridiannb.com,Staff Accountant,MNB00010,GL_POST,disabled
+anita.ross,Anita,Ross,anita.ross@meridiannb.com,Staff Accountant,MNB00010,SAP_FI,disabled
+anthony.rao,Anthony,Rao,anthony.rao@meridiannb.com,Chief Risk Officer,MNB00011,ELDAP,active
+meera.torres,Meera,Torres,meera.torres@meridiannb.com,Directory Administrator,MNB00012,ELDAP,active
+aisha.murphy,Aisha,Murphy,aisha.murphy@meridiannb.com,Operations Analyst,MNB00013,CORE,active
+aisha.murphy,Aisha,Murphy,aisha.murphy@meridiannb.com,Operations Analyst,MNB00013,ECOM,active
+aisha.murphy,Aisha,Murphy,aisha.murphy@meridiannb.com,Operations Analyst,MNB00013,ELDAP,active
+sofia.andersson,Sofia,Andersson,sofia.andersson@meridiannb.com,Customer Service Rep,MNB00014,CRM,active
+sofia.andersson,Sofia,Andersson,sofia.andersson@meridiannb.com,Customer Service Rep,MNB00014,ELDAP,active
+michael.ross,Michael,Ross,michael.ross@meridiannb.com,Wire Specialist,MNB00015,ELDAP,active
+michael.ross,Michael,Ross,michael.ross@meridiannb.com,Wire Specialist,MNB00015,WIRE_INIT,active
+isaac.lambert,Isaac,Lambert,isaac.lambert@meridiannb.com,People Manager,MNB00016,ELDAP,active
+anthony.bennett,Anthony,Bennett,anthony.bennett@meridiannb.com,Finance Director,MNB00017,ELDAP,active
+kai.khatri,Kai,Khatri,kai.khatri@meridiannb.com,Cloud Platform Engineer,MNB00018,AWS_ADMIN,active
+kai.khatri,Kai,Khatri,kai.khatri@meridiannb.com,Cloud Platform Engineer,MNB00018,DWRP,active
+kai.khatri,Kai,Khatri,kai.khatri@meridiannb.com,Cloud Platform Engineer,MNB00018,ELDAP,active
+chloe.joshi,Chloe,Joshi,chloe.joshi@meridiannb.com,Relationship Manager,MNB00019,CRM,active
+chloe.joshi,Chloe,Joshi,chloe.joshi@meridiannb.com,Relationship Manager,MNB00019,ELDAP,active
+chloe.joshi,Chloe,Joshi,chloe.joshi@meridiannb.com,Relationship Manager,MNB00019,ODS,active
+zoe.okoro,Zoe,Okoro,zoe.okoro@meridiannb.com,Customer Service Rep,MNB00020,CRM,active
+zoe.okoro,Zoe,Okoro,zoe.okoro@meridiannb.com,Customer Service Rep,MNB00020,ELDAP,active
+noah.ibrahim,Noah,Ibrahim,noah.ibrahim@meridiannb.com,Wire Specialist,MNB00021,ELDAP,active
+noah.ibrahim,Noah,Ibrahim,noah.ibrahim@meridiannb.com,Wire Specialist,MNB00021,WIRE_INIT,active
+rachel.khatri,Rachel,Khatri,rachel.khatri@meridiannb.com,Relationship Manager,MNB00022,CRM,active
+rachel.khatri,Rachel,Khatri,rachel.khatri@meridiannb.com,Relationship Manager,MNB00022,ELDAP,active
+rachel.khatri,Rachel,Khatri,rachel.khatri@meridiannb.com,Relationship Manager,MNB00022,ODS,active
+james.nguyen,James,Nguyen,james.nguyen@meridiannb.com,Wire Specialist,MNB00023,ELDAP,active
+james.nguyen,James,Nguyen,james.nguyen@meridiannb.com,Wire Specialist,MNB00023,WIRE_INIT,active
+kai.howard,Kai,Howard,kai.howard@meridiannb.com,SOX Controls Analyst,MNB00024,ELDAP,disabled
+kai.howard,Kai,Howard,kai.howard@meridiannb.com,SOX Controls Analyst,MNB00024,SAP_FI,disabled
+kai.howard,Kai,Howard,kai.howard@meridiannb.com,SOX Controls Analyst,MNB00024,SOX_VIEW,disabled
+meera.brooks,Meera,Brooks,meera.brooks@meridiannb.com,SOC Analyst,MNB00025,AML_CASE,active
+meera.brooks,Meera,Brooks,meera.brooks@meridiannb.com,SOC Analyst,MNB00025,ELDAP,active
+raj.ross,Raj,Ross,raj.ross@meridiannb.com,Technology Director,MNB00026,ELDAP,active
+leo.powell,Leo,Powell,leo.powell@meridiannb.com,Digital Product Analyst,MNB00027,ELDAP,active
+leo.powell,Leo,Powell,leo.powell@meridiannb.com,Digital Product Analyst,MNB00027,IBSI,active
+benjamin.desai,Benjamin,Desai,benjamin.desai@meridiannb.com,Database Administrator,MNB00028,CORE,active
+benjamin.desai,Benjamin,Desai,benjamin.desai@meridiannb.com,Database Administrator,MNB00028,ELDAP,active
+benjamin.desai,Benjamin,Desai,benjamin.desai@meridiannb.com,Database Administrator,MNB00028,ODS,active
+sofia.murphy,Sofia,Murphy,sofia.murphy@meridiannb.com,SOC Analyst,MNB00029,AML_CASE,active
+sofia.murphy,Sofia,Murphy,sofia.murphy@meridiannb.com,SOC Analyst,MNB00029,ELDAP,active
+theo.foster,Theo,Foster,theo.foster@meridiannb.com,HR Business Partner,MNB00030,ELDAP,disabled
+theo.foster,Theo,Foster,theo.foster@meridiannb.com,HR Business Partner,MNB00030,SAP_FI,disabled
+rohan.singh,Rohan,Singh,rohan.singh@meridiannb.com,Operations Analyst,MNB00031,CORE,active
+rohan.singh,Rohan,Singh,rohan.singh@meridiannb.com,Operations Analyst,MNB00031,ECOM,active
+rohan.singh,Rohan,Singh,rohan.singh@meridiannb.com,Operations Analyst,MNB00031,ELDAP,active
+maya.desai,Maya,Desai,maya.desai@meridiannb.com,Relationship Manager,MNB00032,CRM,active
+maya.desai,Maya,Desai,maya.desai@meridiannb.com,Relationship Manager,MNB00032,ELDAP,active
+maya.desai,Maya,Desai,maya.desai@meridiannb.com,Relationship Manager,MNB00032,ODS,active
+raj.morris,Raj,Morris,raj.morris@meridiannb.com,SOC Analyst,MNB00033,AML_CASE,active
+raj.morris,Raj,Morris,raj.morris@meridiannb.com,SOC Analyst,MNB00033,ELDAP,active
+benjamin.mehta,Benjamin,Mehta,benjamin.mehta@meridiannb.com,Site Reliability Engineer,MNB00034,AWS_ADMIN,disabled
+benjamin.mehta,Benjamin,Mehta,benjamin.mehta@meridiannb.com,Site Reliability Engineer,MNB00034,DWRP,disabled
+benjamin.mehta,Benjamin,Mehta,benjamin.mehta@meridiannb.com,Site Reliability Engineer,MNB00034,ODS,disabled
+rachel.thapa,Rachel,Thapa,rachel.thapa@meridiannb.com,Wire Specialist,MNB00035,ELDAP,active
+rachel.thapa,Rachel,Thapa,rachel.thapa@meridiannb.com,Wire Specialist,MNB00035,WIRE_INIT,active
+michael.watson,Michael,Watson,michael.watson@meridiannb.com,People Manager,MNB00036,ELDAP,active
+samir.hughes,Samir,Hughes,samir.hughes@meridiannb.com,Site Reliability Engineer,MNB00037,AWS_ADMIN,active
+samir.hughes,Samir,Hughes,samir.hughes@meridiannb.com,Site Reliability Engineer,MNB00037,DWRP,active
+samir.hughes,Samir,Hughes,samir.hughes@meridiannb.com,Site Reliability Engineer,MNB00037,ELDAP,active
+samir.hughes,Samir,Hughes,samir.hughes@meridiannb.com,Site Reliability Engineer,MNB00037,ODS,active
+hannah.desai,Hannah,Desai,hannah.desai@meridiannb.com,Digital Product Analyst,MNB00038,ELDAP,active
+hannah.desai,Hannah,Desai,hannah.desai@meridiannb.com,Digital Product Analyst,MNB00038,IBSI,active
+diego.hayes,Diego,Hayes,diego.hayes@meridiannb.com,Application Developer,MNB00039,DWRP,active
+diego.hayes,Diego,Hayes,diego.hayes@meridiannb.com,Application Developer,MNB00039,ELDAP,active
+diego.hayes,Diego,Hayes,diego.hayes@meridiannb.com,Application Developer,MNB00039,ODS,active
+claire.evans,Claire,Evans,claire.evans@meridiannb.com,Digital Product Analyst,MNB00040,ELDAP,active
+claire.evans,Claire,Evans,claire.evans@meridiannb.com,Digital Product Analyst,MNB00040,IBSI,active
+amelia.foster,Amelia,Foster,amelia.foster@meridiannb.com,SOX Controls Analyst,MNB00041,ELDAP,active
+amelia.foster,Amelia,Foster,amelia.foster@meridiannb.com,SOX Controls Analyst,MNB00041,SAP_FI,active
+amelia.foster,Amelia,Foster,amelia.foster@meridiannb.com,SOX Controls Analyst,MNB00041,SOX_VIEW,active
+meera.joshi,Meera,Joshi,meera.joshi@meridiannb.com,Technology Director,MNB00042,ELDAP,active
+olivia.park,Olivia,Park,olivia.park@meridiannb.com,Customer Service Rep,MNB00043,CRM,active
+olivia.park,Olivia,Park,olivia.park@meridiannb.com,Customer Service Rep,MNB00043,ELDAP,active
+aisha.hughes,Aisha,Hughes,aisha.hughes@meridiannb.com,Cloud Platform Engineer,MNB00044,AWS_ADMIN,active
+aisha.hughes,Aisha,Hughes,aisha.hughes@meridiannb.com,Cloud Platform Engineer,MNB00044,DWRP,active
+aisha.hughes,Aisha,Hughes,aisha.hughes@meridiannb.com,Cloud Platform Engineer,MNB00044,ELDAP,active
+arjun.kim,Arjun,Kim,arjun.kim@meridiannb.com,Directory Administrator,MNB00045,ELDAP,active
+priya.fernandez,Priya,Fernandez,priya.fernandez@meridiannb.com,Staff Accountant,MNB00046,ELDAP,active
+priya.fernandez,Priya,Fernandez,priya.fernandez@meridiannb.com,Staff Accountant,MNB00046,GL_POST,active
+priya.fernandez,Priya,Fernandez,priya.fernandez@meridiannb.com,Staff Accountant,MNB00046,SAP_FI,active
+ethan.thapa,Ethan,Thapa,ethan.thapa@meridiannb.com,Operations Analyst,MNB00047,CORE,active
+ethan.thapa,Ethan,Thapa,ethan.thapa@meridiannb.com,Operations Analyst,MNB00047,ECOM,active
+ethan.thapa,Ethan,Thapa,ethan.thapa@meridiannb.com,Operations Analyst,MNB00047,ELDAP,active
+maya.lambert,Maya,Lambert,maya.lambert@meridiannb.com,People Manager,MNB00048,ELDAP,active
+christopher.diaz,Christopher,Diaz,christopher.diaz@meridiannb.com,Digital Product Analyst,MNB00049,ELDAP,active
+christopher.diaz,Christopher,Diaz,christopher.diaz@meridiannb.com,Digital Product Analyst,MNB00049,IBSI,active
+laura.patel,Laura,Patel,laura.patel@meridiannb.com,ACH Operator,MNB00050,ACH_OPS,active
+laura.patel,Laura,Patel,laura.patel@meridiannb.com,ACH Operator,MNB00050,ELDAP,active
+zoe.singh,Zoe,Singh,zoe.singh@meridiannb.com,AML Investigator,MNB00051,AML_CASE,active
+zoe.singh,Zoe,Singh,zoe.singh@meridiannb.com,AML Investigator,MNB00051,ELDAP,active
+zoe.singh,Zoe,Singh,zoe.singh@meridiannb.com,AML Investigator,MNB00051,ODS,active
+priya.nair,Priya,Nair,priya.nair@meridiannb.com,Digital Product Analyst,MNB00052,ELDAP,active
+priya.nair,Priya,Nair,priya.nair@meridiannb.com,Digital Product Analyst,MNB00052,IBSI,active
+deepa.khatri,Deepa,Khatri,deepa.khatri@meridiannb.com,Loan Officer,MNB00053,CRM,active
+deepa.khatri,Deepa,Khatri,deepa.khatri@meridiannb.com,Loan Officer,MNB00053,ELDAP,active
+deepa.khatri,Deepa,Khatri,deepa.khatri@meridiannb.com,Loan Officer,MNB00053,ODS,active
+elena.thapa,Elena,Thapa,elena.thapa@meridiannb.com,Finance Director,MNB00054,ELDAP,active
+priya.torres,Priya,Torres,priya.torres@meridiannb.com,Application Developer,MNB00055,DWRP,active
+priya.torres,Priya,Torres,priya.torres@meridiannb.com,Application Developer,MNB00055,ELDAP,active
+priya.torres,Priya,Torres,priya.torres@meridiannb.com,Application Developer,MNB00055,ODS,active
+grace.howard,Grace,Howard,grace.howard@meridiannb.com,Wire Approver,MNB00056,ELDAP,active
+grace.howard,Grace,Howard,grace.howard@meridiannb.com,Wire Approver,MNB00056,WIRE_APPR,active
+arjun.joshi,Arjun,Joshi,arjun.joshi@meridiannb.com,Directory Administrator,MNB00057,ELDAP,active
+amelia.patel,Amelia,Patel,amelia.patel@meridiannb.com,IAM Engineer,MNB00058,ELDAP,active
+amelia.patel,Amelia,Patel,amelia.patel@meridiannb.com,IAM Engineer,MNB00058,SOX_VIEW,active
+laura.chen,Laura,Chen,laura.chen@meridiannb.com,HR Business Partner,MNB00059,ELDAP,active
+ethan.ross,Ethan,Ross,ethan.ross@meridiannb.com,Chief Risk Officer,MNB00060,ELDAP,active
+meera.nair,Meera,Nair,meera.nair@meridiannb.com,SOX Controls Analyst,MNB00061,ELDAP,active
+meera.nair,Meera,Nair,meera.nair@meridiannb.com,SOX Controls Analyst,MNB00061,SAP_FI,active
+meera.nair,Meera,Nair,meera.nair@meridiannb.com,SOX Controls Analyst,MNB00061,SOX_VIEW,active
+claire.mehta,Claire,Mehta,claire.mehta@meridiannb.com,Directory Administrator,MNB00062,ELDAP,active
+olivia.hayes,Olivia,Hayes,olivia.hayes@meridiannb.com,Finance Director,MNB00063,ELDAP,active
+theo.joshi,Theo,Joshi,theo.joshi@meridiannb.com,Operations Analyst,MNB00064,CORE,active
+theo.joshi,Theo,Joshi,theo.joshi@meridiannb.com,Operations Analyst,MNB00064,ECOM,active
+theo.joshi,Theo,Joshi,theo.joshi@meridiannb.com,Operations Analyst,MNB00064,ELDAP,active
+mateo.chen,Mateo,Chen,mateo.chen@meridiannb.com,Directory Administrator,MNB00065,ELDAP,active
+avery.shah,Avery,Shah,avery.shah@meridiannb.com,Wire Approver,MNB00066,ELDAP,active
+avery.shah,Avery,Shah,avery.shah@meridiannb.com,Wire Approver,MNB00066,WIRE_APPR,active
+arjun.bailey,Arjun,Bailey,arjun.bailey@meridiannb.com,Wire Approver,MNB00067,ELDAP,active
+arjun.bailey,Arjun,Bailey,arjun.bailey@meridiannb.com,Wire Approver,MNB00067,WIRE_APPR,active
+anita.rao,Anita,Rao,anita.rao@meridiannb.com,Site Reliability Engineer,MNB00068,AWS_ADMIN,active
+anita.rao,Anita,Rao,anita.rao@meridiannb.com,Site Reliability Engineer,MNB00068,DWRP,active
+anita.rao,Anita,Rao,anita.rao@meridiannb.com,Site Reliability Engineer,MNB00068,ELDAP,active
+anita.rao,Anita,Rao,anita.rao@meridiannb.com,Site Reliability Engineer,MNB00068,ODS,active
+nina.cruz,Nina,Cruz,nina.cruz@meridiannb.com,Relationship Manager,MNB00069,CRM,active
+nina.cruz,Nina,Cruz,nina.cruz@meridiannb.com,Relationship Manager,MNB00069,ELDAP,active
+nina.cruz,Nina,Cruz,nina.cruz@meridiannb.com,Relationship Manager,MNB00069,ODS,active
+ethan.kim,Ethan,Kim,ethan.kim@meridiannb.com,Database Administrator,MNB00070,CORE,active
+ethan.kim,Ethan,Kim,ethan.kim@meridiannb.com,Database Administrator,MNB00070,ELDAP,active
+ethan.kim,Ethan,Kim,ethan.kim@meridiannb.com,Database Administrator,MNB00070,ODS,active
+owen.morris,Owen,Morris,owen.morris@meridiannb.com,Cloud Platform Engineer,MNB00071,AWS_ADMIN,active
+owen.morris,Owen,Morris,owen.morris@meridiannb.com,Cloud Platform Engineer,MNB00071,DWRP,active
+owen.morris,Owen,Morris,owen.morris@meridiannb.com,Cloud Platform Engineer,MNB00071,ELDAP,active
+rohan.price,Rohan,Price,rohan.price@meridiannb.com,Finance Director,MNB00072,ELDAP,active
+priya.wire,Priya,Mehta,priya.wire@meridiannb.com,Wire Specialist,MNB00090,ELDAP,active
+priya.wire,Priya,Mehta,priya.wire@meridiannb.com,Wire Specialist,MNB00090,WIRE_INIT,active
+priya.wire,Priya,Mehta,priya.wire@meridiannb.com,Wire Specialist,MNB00090,ACH_OPS,active
+marcus.approve,Marcus,Coleman,marcus.approve@meridiannb.com,Wire Approver,MNB00091,ELDAP,active
+marcus.approve,Marcus,Coleman,marcus.approve@meridiannb.com,Wire Approver,MNB00091,WIRE_APPR,active
+jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,Staff Accountant,MNB00092,ELDAP,active
+jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,Staff Accountant,MNB00092,SAP_FI,active
+jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,Staff Accountant,MNB00092,AWS_ADMIN,active
+jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,Staff Accountant,MNB00092,GL_POST,active
+raj.external,Raj,External,raj.contractor@vendor-mail.invalid,Cloud Platform Engineer,MNB00093,AWS_ADMIN,active
+samir.hassan,Samir,Hassan,samir.hassan@meridiannb.com,Application Developer,MNB00094,ELDAP,disabled
+samir.hassan,Samir,Hassan,samir.hassan@meridiannb.com,Application Developer,MNB00094,DWRP,disabled
+samir.hassan,Samir,Hassan,samir.hassan@meridiannb.com,Application Developer,MNB00094,ODS,disabled
+samir.hassan,Samir,Hassan,samir.hassan@meridiannb.com,Application Developer,MNB00094,SAP_FI,disabled
+sofia.torres,Sofia,Torres,sofia.torres@meridiannb.com,Relationship Manager,MNB00095,ELDAP,active
+sofia.torres,Sofia,Torres,sofia.torres@meridiannb.com,Relationship Manager,MNB00095,CRM,active
+sofia.torres,Sofia,Torres,sofia.torres@meridiannb.com,Relationship Manager,MNB00095,ODS,active
+kai.nguyen,Kai,Nguyen,kai.nguyen@meridiannb.com,Digital Product Analyst,MNB00096,ELDAP,active
+kai.nguyen,Kai,Nguyen,kai.nguyen@meridiannb.com,Digital Product Analyst,MNB00096,IBSI,active
+kai.nguyen,Kai,Nguyen,kai.nguyen@meridiannb.com,Digital Product Analyst,MNB00096,ECOM,active
+amelia.brooks,Amelia,Brooks,amelia.brooks@meridiannb.com,Teller,MNB00097,ELDAP,active
+deepa.nair,Deepa,Nair,deepa.nair@meridiannb.com,Director of Finance,MNB00003,ELDAP,active
+sanjay.kapoor,Sanjay,Kapoor,sanjay.kapoor@meridiannb.com,Commercial Banking Manager,MNB00006,CRM,active

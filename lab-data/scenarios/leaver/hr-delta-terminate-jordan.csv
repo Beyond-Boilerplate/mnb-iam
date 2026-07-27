@@ -1,0 +1,2 @@
+employeeId,userName,firstName,lastName,email,managerId,status,departmentCode,jobCode,jobTitle,locationCode,country,workerType,onLeave,costCenter,hireDate,terminationDate
+MNB00092,jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,MNB00003,0,FIN,GL01,Staff Accountant,US-CLT,USA,Employee,false,CC-FIN-300,2020-09-09,2026-07-26
