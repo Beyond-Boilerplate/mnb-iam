@@ -12,15 +12,16 @@
 
 You will be able to:
 
-- Inspect Meridian’s denormalized IT entitlement dump and count access codes
+- Inspect Meridian’s denormalized IT entitlement dump (CSV) and count access codes
 - Create non-authoritative Delimited File application `MNB-IT-Access`
 - Mark `itAccess` as the entitlement/group attribute
-- Create and run `Aggregate MNB-IT-Access` without creating new identities
+- Create and run `Aggregate MNB-IT-Access` without creating new (orphan) identities
+- Explain why uncorrelated accounts must **not** become orphan identities via create-identities
 - Spot-check toxic entitlements on `jordan.reed` and `kai.nguyen`
 
 ## Why this matters
 
-Most banks start with a messy entitlement dump before perfect connectors. Meridian’s `EmployeeData.txt` is intentionally denormalized and duplicated—like production exports from a CMDB or access warehouse. You must onboard imperfect truth safely without letting IT invent people.
+Most banks start with a messy entitlement dump before perfect connectors. Meridian’s `EmployeeData.txt` is intentionally denormalized and duplicated—like production exports from a CMDB or access warehouse. The content is **CSV** (comma + header) even though the extension is `.txt`. You must onboard imperfect truth safely without letting IT invent people.
 
 > **Production reality.** An inventory dump like this is a legitimate *interim* production pattern (many programs really do start here), but its endgame is decomposition: each system inside the dump graduates to its own application with a native connector — AD (Lessons 56–57), databases via JDBC (Lesson 63), SaaS via API/SCIM (Lessons 68–76). Part II of this curriculum walks that graduation path system by system.
 
@@ -30,10 +31,30 @@ Most banks start with a messy entitlement dump before perfect connectors. Meridi
 
 | App | Authoritative? | Creates identities? | Purpose |
 | --- | --- | --- | --- |
-| `MNB-HR` | Yes | Yes | Workforce truth |
+| `MNB-HR` | Yes (set **on the Delimited File app**) | Yes | Workforce truth |
 | `MNB-IT-Access` | No | **No** | Consolidated entitlement inventory |
 
-**File shape:** One row per (user, entitlement). Same `userName` repeats.
+### Orphan identities — what goes wrong if create-identities is on
+
+An **orphan identity** is a cube that IIQ created from an application account that does **not** represent a real HR person (or is not yet correlated to one). Uncorrelated IT accounts can be aggregated into the system as orphan identities when the target application is marked authoritative / create-identities **on**.
+
+| Outcome | When it happens | Meridian posture |
+| --- | --- | --- |
+| Account stays uncorrelated | Create-identities **off**; no matching Identity | Correct interim state → Lessons 17–19 remediate |
+| Orphan Identity minted | Create-identities **on** for a non-HR app | **Wrong** — ghost people, fake certs, no leaver path |
+| Correlated Link on HR cube | Keys match after correlation | Desired end state |
+
+```text
+  Uncorrelated IT account
+        |
+        +-- create-identities OFF --> uncorrelated account (fixable)
+        |
+        +-- create-identities ON  --> orphan Identity cube (control failure)
+```
+
+Never “empty the uncorrelated list” by turning create-identities on for `MNB-IT-Access`. That manufactures ghosts.
+
+**File shape:** One row per (user, entitlement). Same `userName` repeats. Format = **CSV**.
 
 | Column | Role |
 | --- | --- |
@@ -44,7 +65,7 @@ Most banks start with a messy entitlement dump before perfect connectors. Meridi
 | `accountStatus` | active/disabled on IT side |
 
 ```text
-  EmployeeData.txt (many rows per person)
+  EmployeeData.txt (CSV; many rows per person)
         |
         v
   MNB-IT-Access (non-authoritative)
@@ -54,7 +75,8 @@ Most banks start with a messy entitlement dump before perfect connectors. Meridi
         |
         v
   Links + entitlements on existing HR cubes
-  (correlation may be partial until Lessons 17–18)
+  (correlation may be partial until Lessons 17–18;
+   uncorrelated rows stay accounts—not orphan identities)
 ```
 
 **SoD demo holders:** `jordan.reed` (`SAP_FI`+`AWS_ADMIN`), `kai.nguyen` (`IBSI`+`ECOM`), wire pair `priya.wire` / `marcus.approve`.
@@ -117,10 +139,12 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 
 ### Task 2 — Create MNB-IT-Access
 
+Same Delimited File habit as HR: almost always **CSV** (comma + header), absolute path, `MNB-` name.
+
 1. **Applications** → Add New → **DelimitedFile**.
 2. Name: `MNB-IT-Access`. Owner: `spadmin` (lab); conceptually Technology owns inventory, IAM operates it.
 3. File path: absolute path to `EmployeeData.txt`.
-4. Delimiter: comma; has header: yes.
+4. Delimiter: comma; has header: yes (CSV).
 5. Save.
 
 **Expected result:** Application `MNB-IT-Access` listed beside `MNB-HR`.
@@ -129,19 +153,22 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 
 1. Discover/define schema from header.
 2. Set account identity attribute to `userName` **or** `employeeId` (pick one; document it—`employeeId` often correlates cleaner to HR; `userName` matches many IT exports). Curriculum default recommendation: **`employeeId`** if the connector allows stable account id from that column; otherwise `userName`.
-3. Mark `itAccess` as the **entitlement** / group attribute (managed attribute promotion).
+3. Mark `itAccess` as the **entitlement** / group attribute (managed attribute promotion). Lesson 10 shows how to enrich those objects in the UI and how to **manually pull/create groups via the ManagedAttribute API** when aggregation alone is not enough.
 4. Include `accountStatus`, `email`, `userName` on schema.
 5. Save.
 
 **Expected result:** Schema shows `itAccess` as entitlement-bearing; account id choice documented in CHANGELOG.
 
-### Task 4 — Non-authoritative confirmation
+### Task 4 — Non-authoritative confirmation (prevent orphan identities)
 
-1. Open application settings for identity creation / authoritative flag.
-2. Ensure `MNB-IT-Access` does **NOT** create identities.
-3. Save. Write control statement: “Only `MNB-HR` creates identities.”
+Authoritative / create-identities is an **application** setting—same place you enabled it for `MNB-HR`. Here it must stay off so uncorrelated dump rows do not become orphan identities.
 
-**Expected result:** Config screenshot or note proving create-identities disabled.
+1. Open application settings for identity creation / authoritative flag on `MNB-IT-Access`.
+2. Ensure `MNB-IT-Access` does **NOT** create identities (authoritative=false / create-identities OFF).
+3. Save. Write control statement: “Only `MNB-HR` creates identities. Uncorrelated IT accounts remain accounts until correlation/remediation—never auto-minted orphans.”
+4. CHANGELOG: `MNB-IT-Access authoritative=false`.
+
+**Expected result:** Config screenshot or note proving create-identities disabled; orphan-risk sentence in binder.
 
 **If it fails:** If UI defaults to create, explicitly disable before first aggregation.
 
@@ -151,9 +178,11 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 2. Select application `MNB-IT-Access`.
 3. Run Now.
 4. Read task result counters; screenshot to evidence.
-5. Update runbook inventory row from Lesson 08 to “created”.
+5. Compare identity counts before vs after: you should **not** see a spike of brand-new cubes that lack HR (that would mean orphan creation).
+6. Update runbook inventory row from Lesson 08 to “created.”
+7. Optional but recommended: run `Refresh MNB Attributes` if you mapped any IT fields to identity attrs (rare this early); otherwise note that HR attribute promotion already ran in Lesson 06.
 
-**Expected result:** Success with accounts/entitlements > 0. No unexplained spike in brand-new identities that lack HR (if any appear, stop and fix authoritative flags/correlation).
+**Expected result:** Success with accounts/entitlements > 0. Uncorrelated accounts may exist—that is OK. New orphan identities are **not** OK.
 
 ### Task 6 — Verify entitlements on cubes
 
@@ -161,7 +190,7 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 2. Open `kai.nguyen` → confirm `IBSI`, `ECOM`.
 3. Open `priya.wire` / `marcus.approve` → `WIRE_INIT` / `WIRE_APPR`.
 4. Open `samir.hassan` → residual IT rows with disabled status.
-5. If entitlements missing or uncorrelated, note “correlation deferred to Lessons 17–19” but confirm aggregation created application accounts.
+5. If entitlements missing or uncorrelated, note “correlation deferred to Lessons 17–19” but confirm aggregation created application accounts (as uncorrelated accounts, **not** as orphan identities).
 
 **Expected result:** Written spot-check table for at least three personas. Partial correlation is acceptable this lesson if accounts exist on the app.
 
@@ -174,10 +203,11 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 
 ## Acceptance criteria
 
-- [ ] IT dump inspected; distinct entitlements noted
+- [ ] IT dump inspected as CSV; distinct entitlements noted
 - [ ] `MNB-IT-Access` created with absolute path
 - [ ] `itAccess` configured as entitlement attribute
-- [ ] Create-identities disabled
+- [ ] Create-identities disabled; CHANGELOG `MNB-IT-Access authoritative=false`
+- [ ] Orphan vs uncorrelated distinction written in binder
 - [ ] `Aggregate MNB-IT-Access` succeeded with evidence
 - [ ] jordan.reed / kai.nguyen / wire personas spot-checked
 - [ ] CHANGELOG + runbook updated
@@ -186,9 +216,9 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| 0 accounts | Path/delimiter/header | Same hygiene as HR; verify absolute path |
-| New orphan identities | App marked authoritative | Disable create identities; clean orphans carefully |
-| No entitlements visible | `itAccess` not marked entitlement | Fix schema; re-aggregate |
+| 0 accounts | Path/delimiter/header | Same hygiene as HR; verify absolute path + CSV comma/header |
+| New orphan identities | App marked authoritative | Disable create identities; clean orphans carefully (Lesson 19) |
+| No entitlements visible | `itAccess` not marked entitlement | Fix schema; re-aggregate; Lesson 10 ManagedAttribute API if catalog empty |
 | Duplicates alarms | Multi-row file | Expected—document; do not “dedupe away” entitlements blindly |
 | Nothing on cube | Correlation mismatch | Confirm account id choice; continue to Lesson 17 |
 
@@ -198,8 +228,9 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 - Screenshot: `Aggregate MNB-IT-Access` result
 - Screenshot: `jordan.reed` entitlements (or account link)
 - Distinct entitlement count note vs dictionary
+- Binder note: uncorrelated ≠ orphan identity
 
-**Examiner question:** “Can your IT inventory feed create identities? Show me the setting and last aggregation.”
+**Examiner question:** “Can your IT inventory feed create identities? Show me the setting and last aggregation. What happens to uncorrelated accounts?”
 
 ## Knowledge check
 
@@ -208,6 +239,7 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 3. Name two people useful for SoD demos.
 4. Why does the file have multiple rows per userName?
 5. Where does `Aggregate MNB-IT-Access` sit in the nightly order?
+6. What is an orphan identity, and how do uncorrelated accounts become one?
 
 ### Answers
 
@@ -215,7 +247,8 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 2. `itAccess`.
 3. `jordan.reed` (SAP_FI+AWS_ADMIN) and `kai.nguyen` (IBSI+ECOM).
 4. Denormalized entitlement inventory—one entitlement per row.
-5. After `Aggregate MNB-HR`, before `Refresh MNB Identities`.
+5. After `Aggregate MNB-HR`, before `Refresh MNB Attributes` / managers.
+6. A cube minted from an app account without a real HR person; it happens when create-identities/authoritative is on for a non-HR app—uncorrelated accounts should stay accounts until remediated.
 
 ## Further reading
 
@@ -231,10 +264,12 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 - Point a second app at `apps/MNB-IT-Access.csv` only if paths differ—otherwise treat it as the same dataset.
 - Preview `apps/MNB-SAP-Finance.csv` schema for Lesson 12.
 - Attempt advanced search for identities with `AWS_ADMIN` (may depend on entitlement indexing).
+- On a **throwaway copy** app only, briefly enable create-identities, aggregate a tiny fake CSV with a nonsense user, observe the orphan cube, then delete the app/orphan and document why Meridian forbids this on `MNB-IT-Access`.
 
 ## Summary
 
-- `MNB-IT-Access` onboards Meridian’s messy entitlement dump without creating identities.
+- `MNB-IT-Access` onboards Meridian’s messy CSV entitlement dump without creating identities.
+- Uncorrelated accounts are fixable; orphan identities from create-identities-on are a control failure.
 - `itAccess` is the governable entitlement attribute; aggregation feeds cubes for SoD demos.
 - Platform-specific apps come next; the inventory teaches imperfect-truth discipline.
 

@@ -4,7 +4,7 @@
 | --- | --- |
 | **Level** | Beginner |
 | **Track** | Foundations |
-| **Time** | 60–75 minutes |
+| **Time** | 75–90 minutes |
 | **Prereq** | Lesson 05 (HR schema mapped) |
 | **Lab data** | `~/iiq-lab-data/HRApplications.txt` |
 
@@ -13,64 +13,84 @@
 You will be able to:
 
 - Inspect a full identity cube and inventory its major tabs
-- Create Identity Refresh task `Refresh MNB Identities`
-- Enable intentional refresh options (manager, roles, policy—as available)
-- Run the pipeline Aggregate → Refresh and capture evidence
-- Prove a file change (`onLeave`) appears on the cube after re-aggregate + refresh
+- Explain each major **Identity Refresh** option and when Meridian turns it on
+- Create **separate** purpose-built refresh tasks (attributes, managers, roles, optional policy)
+- Run the pipeline `Aggregate MNB-HR` → `Refresh MNB Attributes` (and managers) to promote HR Link data onto cubes
+- Prove a file change (`onLeave`) appears on the cube after re-aggregate + attribute refresh
 
 ## Why this matters
 
-Aggregation loads accounts; refresh recalculates the person. Without refresh, managers, detected roles, and policy state lag HR reality—Meridian would walk into Monday’s ops meeting with stale cubes.
+Aggregation loads accounts; refresh recalculates the person. Without the right refresh after HR aggregation, identity attributes stay blank, managers stay unresolved, and roles/policies lag—Meridian would walk into Monday’s ops meeting with stale cubes.
 
-**Control / audit:** Task order is itself a control: HR aggregate then identity refresh. Examiners ask whether identity state is recalculated after HR loads and whether results are monitored. Your task results are the evidence.
+**Control / audit:** Task order and *which* refresh options you enable are themselves controls. Examiners ask whether identity state is recalculated after HR loads, and whether you run one overloaded “refresh everything” job or purpose-scoped tasks that ops can schedule and debug. Your task results are the evidence.
 
 ## Concepts
 
 | Process | Does | Does not |
 | --- | --- | --- |
-| **Account Aggregation** | Reads connector data into accounts/links | Fully recalculate role/policy/manager outcomes |
-| **Identity Refresh** | Re-evaluates correlations, manager links, role assignment, optional policy checks | Replace the need to aggregate source apps |
+| **Account Aggregation** | Reads connector data into accounts/links; with authoritative `MNB-HR`, creates/updates identities | Fully promote attrs, resolve managers, assign roles, or check policies |
+| **Identity Refresh** | Re-evaluates selected cube outcomes based on **options you enable** | Replace the need to aggregate source apps |
+
+**Why separate refresh tasks?** One Identity Refresh definition with every checkbox enabled is slow, hard to schedule, and opaque when it fails. Meridian creates **purpose-built** tasks so each nightly (or on-demand) job has one job:
+
+| Task name | Purpose | Typical options ON |
+| --- | --- | --- |
+| `Refresh MNB Attributes` | Promote/update identity attrs from HR Link after aggregation | Refresh identity attributes from accounts |
+| `Refresh MNB Managers` | Resolve `managerId` → manager Identity | Refresh manager / manager correlation |
+| `Refresh MNB Roles` | Recalculate assigned/detected roles (later lessons) | Refresh assigned / detected roles |
+| `Refresh MNB Policies` *(optional early)* | Evaluate policy violations | Check active policies |
+
+Keep a broad lab helper `Refresh MNB Identities` only if you want a “run all for demos” shortcut—**do not** schedule it as the only production-like pattern. Ops prefers the purpose-built set.
+
+### Identity Refresh options (define before you click)
+
+Labels vary slightly by IIQ version; meanings do not. Enable only options you can explain.
+
+| Option (typical label) | What it does | When Meridian uses it | Cost |
+| --- | --- | --- | --- |
+| **Refresh identity attributes** / promote attributes from accounts | Copies mapped Link fields onto the Identity | **Always after `Aggregate MNB-HR`** (and after map changes) | Moderate |
+| **Refresh manager** / manager correlation | Resolves manager references (`managerId` → manager cube) | After HR manager changes; hierarchy certs/approvals | Moderate |
+| **Refresh assigned / detected roles** | Re-evaluates birthright and detection | After role model changes (Lessons 23+) | Higher |
+| **Check active policies** / process policy violations | Evaluates SoD and other policies | After policy edits (Lessons 39+); not needed every early-lab run | Higher |
+| **Refresh entitlements / needs refresh** *(if present)* | Marks or recalculates entitlement-related state | When entitlement catalogs or assignment flags change | Moderate–high |
+| **Provision / synchronize attributes** *(if present)* | Pushes identity changes outbound | Only when attribute sync is designed (Lesson 22+)—leave off until then | High / side-effecting |
+| **Filter / population scope** | Limits which identities the task touches | Prefer `MNB-Active-Employees` once Lesson 07 exists | Lowers cost |
 
 ```text
   Aggregate MNB-HR
         |
         v
-  Accounts on cubes updated
+  Accounts / Links on cubes updated (raw HR truth)
         |
-        v
-  Refresh MNB Identities
-        |
-        v
-  Manager links / attrs / roles / policies recalculated
+        +-----> Refresh MNB Attributes  --> identity attrs current
+        +-----> Refresh MNB Managers    --> manager links resolved
+        +-----> Refresh MNB Roles       --> (when roles exist)
+        +-----> Refresh MNB Policies    --> (when policies exist)
 ```
 
-**Production-like discipline:** Schedule refresh after aggregations. Too many refresh checkboxes on a large tenant = long runtimes—enable only what you need.
+**Production-like discipline:** Schedule attribute (and usually manager) refresh **immediately after** HR aggregation. Do not enable every checkbox on one task “just in case.”
 
 **SLA (lab):** Manual run after config changes. **SLA (prod target):** Nightly pipeline before business day (see Lesson 08).
 
 ## How it works
 
-**Account Aggregation** moves connector data onto Links. **Identity Refresh** recompiles cube-derived state: manager links, attribute-driven role assignment, optional policy checks, and related maintenance. Running refresh without aggregating first recompiles stale inputs.
+**Account Aggregation** moves connector data onto Links. **Identity Refresh** recompiles only the cube-derived outcomes whose options are enabled. Running refresh without aggregating first recompiles stale inputs. Running aggregation without attribute refresh leaves promoted identity attributes stale even when the Link is correct.
 
 ```text
 Aggregate MNB-HR  ──►  Links / raw attrs current
         │
         ▼
-Refresh MNB Identities (checkboxes: manager, roles, policies, …)
+Refresh MNB Attributes (promote attrs from HR Link)
+        │
+        ▼
+Refresh MNB Managers (optional same night / after hierarchy edits)
         │
         ├── Resolve manager references
-        ├── Assign/remove birthright roles (when configured)
-        └── Evaluate policies / mark needs refresh flags
+        ├── (later) Refresh MNB Roles → assign/remove birthright
+        └── (later) Refresh MNB Policies → SoD / policy flags
 ```
 
-| Refresh option | Turn on when | Cost |
-| --- | --- | --- |
-| Refresh manager | After HR managerId changes | Moderate |
-| Refresh assigned roles | After role/birthright edits | Higher |
-| Check policies | After SoD policy changes | Higher |
-| Promote attributes | After map changes | Moderate |
-
-**Real-life Meridian example.** `priya.wire`’s `managerId` points at `rachel.evans`. Aggregation alone may leave the manager display unresolved; after `Refresh MNB Identities`, Rachel appears as manager so wire certifications and approvals route correctly.
+**Real-life Meridian example.** `priya.wire`’s `managerId` points at `rachel.evans`. Aggregation alone may leave department/`onLeave` blank on the Identity and manager display unresolved. After `Refresh MNB Attributes`, org flags appear; after `Refresh MNB Managers`, Rachel appears as manager so wire certifications and approvals route correctly.
 
 ## Before you start
 
@@ -87,45 +107,82 @@ A cube is the examiner-facing unit of a person. Inventory one leadership cube en
 
 1. Open identity `christopher.hayes` (MNB00002, Director of Technology).
 2. Inventory tabs: attributes, accounts, roles/bundles, work items, risk/history (as present).
-3. Note which attributes already show HR-sourced values vs still empty.
+3. Note which attributes already show HR-sourced values vs still empty (expected gaps before attribute refresh).
 4. Optionally open `helen.ross` for a second leadership cube.
 
 **Expected result:** Notebook checklist of cube tabs + which HR fields are visible pre-refresh.
 
-### Task 2 — Create Refresh MNB Identities
+### Task 2 — Option study (write before you click)
 
-1. **Tasks** → New Task → type **Identity Refresh** (or equivalent).
-2. Name: `Refresh MNB Identities`.
-3. Scope: if your UI supports filtering to identities that have an account on `MNB-HR`, use it; else refresh all (lab headcount is small).
-4. Save.
+Before creating tasks, lock the meanings so you never enable mystery toggles.
 
-**Expected result:** Task definition `Refresh MNB Identities` exists and is selectable under Tasks.
+1. Open any Identity Refresh task editor (or the new-task form) and list every option checkbox your version shows.
+2. Map each checkbox to the definition table in Concepts. Mark unknowns as “leave OFF until documented.”
+3. Decide Meridian’s purpose split:
+   - Attributes → `Refresh MNB Attributes`
+   - Managers → `Refresh MNB Managers`
+   - Roles → `Refresh MNB Roles` (options off until roles exist—still create the shell)
+   - Policies → `Refresh MNB Policies` (optional shell; leave schedule disabled)
 
-### Task 3 — Enable useful options
+**Expected result:** Written option dictionary in your notebook. No “I don’t know what this does” left checked.
 
-1. Edit `Refresh MNB Identities`.
-2. Enable options you understand, for example (labels vary by version):
-   - Refresh manager correlation / promote manager
-   - Refresh assigned / detected roles (if present)
-   - Refresh identity attributes from accounts
-   - Check policies (optional in early labs—note cost)
-3. Document every checkbox you enabled in the notebook.
-4. Save.
+### Task 3 — Create purpose-built refresh tasks
 
-**Expected result:** Written option list. No mystery toggles—“I don’t know what this does” stays unchecked.
+Create four task definitions (or three + optional policy). Prefer **separate** tasks over one mega-task.
 
-### Task 4 — Run the pipeline
+#### 3a — Refresh MNB Attributes *(required after every HR aggregate)*
+
+1. **Tasks** → New Task → type **Identity Refresh**.
+2. Name: `Refresh MNB Attributes`.
+3. Scope: all lab identities, or filter to identities with an account on `MNB-HR` if the UI allows.
+4. Enable **only**: refresh / promote identity attributes from accounts (wording varies).
+5. Leave manager, roles, policies, and provisioning options **off**.
+6. Save. CHANGELOG: `Refresh MNB Attributes created (attrs only)`.
+
+#### 3b — Refresh MNB Managers
+
+1. New Identity Refresh task: `Refresh MNB Managers`.
+2. Enable **only** manager correlation / refresh manager options.
+3. Save. CHANGELOG: `Refresh MNB Managers created`.
+
+#### 3c — Refresh MNB Roles *(shell for later)*
+
+1. New Identity Refresh task: `Refresh MNB Roles`.
+2. Enable assigned/detected role refresh **only if** you already have roles; otherwise save with those options noted for Lesson 23+ and leave unscheduled.
+3. Save.
+
+#### 3d — Refresh MNB Policies *(optional shell)*
+
+1. Optional: `Refresh MNB Policies` with policy-check options prepared but **disabled** for early labs (cost).
+2. Save or skip; document the choice.
+
+**Expected result:** At least `Refresh MNB Attributes` and `Refresh MNB Managers` exist as separate TaskDefinitions. Option lists documented per task.
+
+**If it fails:** Some editions nest options under “advanced”—expand panels before assuming a checkbox is missing.
+
+### Task 4 — Optional demo umbrella (do not schedule as primary)
+
+1. Optionally create `Refresh MNB Identities` that enables attributes + managers (still avoid policy/provisioning in early labs).
+2. Label it in CHANGELOG as **lab demo only**—nightly discipline in Lesson 08 uses the purpose-built tasks.
+3. Prefer running the purpose-built pair for the rest of this lesson.
+
+**Expected result:** You can explain why Meridian does not rely on one “refresh everything” job in production-like ops.
+
+### Task 5 — Run the pipeline (HR aggregate → attribute refresh → managers)
+
+This is the control sequence after any HR feed change.
 
 1. Run `Aggregate MNB-HR` → wait for Success.
-2. Run `Refresh MNB Identities` → wait for Success.
-3. Screenshot both task results into `~/iiq-lab-evidence/YYYY-MM-DD/`.
-4. Re-open `priya.wire` and confirm manager/attributes look more complete than Task 1.
+2. Run **`Refresh MNB Attributes`** → wait for Success. This is the task that **promotes/updates identity attributes from the HR Link**.
+3. Run **`Refresh MNB Managers`** → wait for Success.
+4. Screenshot all three task results into `~/iiq-lab-evidence/YYYY-MM-DD/`.
+5. Re-open `priya.wire` and confirm department/job/`onLeave` (as mapped) and manager toward `rachel.evans`.
 
-**Expected result:** Two successful task results; at least one identity shows improved manager or attribute promotion.
+**Expected result:** Three successful task results; at least one identity shows promoted attributes and a resolved manager.
 
-**If it fails:** Read refresh task errors first (rule exceptions, missing manager targets). Fix data/maps; do not blindly re-run in a loop without reading results.
+**If it fails:** Read the failing task’s errors first (rule exceptions, missing manager targets). Fix data/maps; do not blindly re-run in a loop without reading results.
 
-### Task 5 — Change-detect drill
+### Task 6 — Change-detect drill
 
 1. Backup:
 
@@ -133,23 +190,23 @@ A cube is the examiner-facing unit of a person. Inventory one leadership cube en
 cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 ```
 
-2. Pick an active employee currently `onLeave=false` (e.g. `amelia.brooks` MNB00097). Flip `onLeave` to `true` in the HR file (careful CSV edit).
-3. Run `Aggregate MNB-HR`, then `Refresh MNB Identities`.
+2. Pick an active employee currently `onLeave=false` (e.g. `amelia.brooks` MNB00097). Flip `onLeave` to `true` in the HR file (careful **CSV** edit—comma delimiter, preserve header).
+3. Run `Aggregate MNB-HR`, then **`Refresh MNB Attributes`** (managers optional if hierarchy unchanged).
 4. Open the cube; confirm `onLeave` (or mapped identity attribute) reflects `true`.
-5. Restore from `.bak` and re-run aggregate + refresh so the rest of the curriculum stays clean.
+5. Restore from `.bak` and re-run aggregate + `Refresh MNB Attributes` so the rest of the curriculum stays clean.
 
-**Expected result:** Before/after note + screenshots proving refresh propagates HR changes. File restored.
+**Expected result:** Before/after note + screenshots proving attribute refresh propagates HR changes. File restored.
 
-### Task 6 — Scheduling awareness (no overnight requirement)
+### Task 7 — Scheduling awareness (no overnight requirement)
 
-1. Open schedule settings on `Refresh MNB Identities`.
+1. Open schedule settings on `Refresh MNB Attributes`.
 2. Observe how daily/cron-style schedules are configured in your UI.
 3. Optionally set a daily time, save, then **disable** the schedule again if you do not want laptop overnight runs.
-4. Note: full scheduling discipline is Lesson 08.
+4. Note: full scheduling discipline and the nightly order (HR → apps → attrs → managers → roles) is Lesson 08.
 
 **Expected result:** You can explain where schedules live; lab schedule left disabled unless you intentionally keep it.
 
-### Task 7 — Cube comparison after refresh
+### Task 8 — Cube comparison after refresh
 
 1. Compare three cubes side by side in notes:
 
@@ -160,16 +217,16 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 | sofia.torres | onLeave promoted |
 
 2. Confirm leadership cubes (`helen.ross`, `christopher.hayes`) still look healthy (no accidental inactivation).
-3. File a one-line SLA note: “After any HR file edit in lab, always Aggregate MNB-HR then Refresh MNB Identities before trusting cube state.”
+3. File a one-line SLA note: “After any HR file edit in lab, always Aggregate MNB-HR → Refresh MNB Attributes (→ Refresh MNB Managers when hierarchy matters) before trusting cube state.”
 
 **Expected result:** Comparison table complete; no unexpected identity corruption; SLA note in CHANGELOG.
 
 ## Acceptance criteria
 
 - [ ] Cube deep-dive notes for `christopher.hayes` complete
-- [ ] `Refresh MNB Identities` created
-- [ ] Refresh options documented
-- [ ] Aggregate → Refresh pipeline run with evidence screenshots
+- [ ] Identity Refresh options defined in notebook (table mapped to your UI labels)
+- [ ] Separate tasks created: `Refresh MNB Attributes`, `Refresh MNB Managers` (plus roles/policy shells as designed)
+- [ ] Aggregate → Attributes → Managers pipeline run with evidence screenshots
 - [ ] Change-detect drill completed and HR file restored
 - [ ] Three-persona comparison table complete
 - [ ] CHANGELOG updated
@@ -178,35 +235,36 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Refresh success but attrs stale | Options not enabled / wrong filter | Enable attribute refresh; widen scope |
-| Manager still blank | Manager identity missing or id mismatch | Confirm managerId exists as employeeId in HR |
-| Refresh very slow | Too many options / full pop | Disable policy check for early labs |
+| Refresh success but attrs stale | Attribute option off / wrong task | Run `Refresh MNB Attributes` with promote-attrs enabled |
+| Manager still blank | Ran attrs-only; manager task not run | Run `Refresh MNB Managers`; confirm managerId exists as employeeId |
+| Refresh very slow | Too many options on one task | Split tasks; disable policy check for early labs |
 | Change not visible | Edited wrong file copy | Confirm IIQ path matches edited absolute path |
-| Restore forgotten | Skipped bak restore | Restore `.bak` immediately; re-aggregate |
+| Restore forgotten | Skipped bak restore | Restore `.bak` immediately; re-aggregate + attrs refresh |
+| Mystery checkbox enabled | Skipped Task 2 | Disable unknown options; re-document |
 
 ## Training binder evidence
 
-- Screenshots: Aggregate + Refresh task results
+- Screenshots: Aggregate + `Refresh MNB Attributes` + `Refresh MNB Managers` task results
 - Screenshot: `priya.wire` manager/attributes after refresh
 - Before/after `onLeave` screenshots (then restored)
-- Option checklist for `Refresh MNB Identities`
+- Option checklist per purpose-built task (not one mega-list)
 
-**Examiner question:** “Show the job that recalculates identities after HR aggregation and its last success.”
+**Examiner question:** “Show the job that recalculates identity attributes after HR aggregation and its last success—and explain why manager refresh is a separate task.”
 
 ## Knowledge check
 
 1. Aggregation vs refresh in one sentence each?
-2. Why run refresh after HR aggregate?
-3. What is dangerous about refreshing “everything” with all options in prod?
-4. What task name does this curriculum use for refresh?
+2. Which Meridian task must run after HR aggregation to promote identity attributes from the HR Link?
+3. Why create separate Identity Refresh tasks instead of one with all options?
+4. Name two Identity Refresh options and what each does.
 5. Why restore the HR file after the onLeave drill?
 
 ### Answers
 
-1. Aggregation reads accounts from connectors; refresh recalculates identity-level outcomes (manager, roles, policies, promoted attrs).
-2. New/updated HR accounts must be recalculated into person state before roles/certs trust the cube.
-3. Long runtimes, lock contention, overlapping jobs, unexpected policy storms—scope and options must be intentional.
-4. `Refresh MNB Identities`.
+1. Aggregation reads accounts from connectors onto Links; refresh recalculates selected identity-level outcomes (attrs, manager, roles, policies) based on enabled options.
+2. `Refresh MNB Attributes` (Identity Refresh with attribute promotion from accounts).
+3. Faster scoped runs, clearer failures, safer scheduling, and no accidental policy/provisioning side effects on every HR load.
+4. Examples: refresh identity attributes = promote Link fields to Identity; refresh manager = resolve manager references; check policies = evaluate SoD/policy state; refresh roles = re-evaluate assigned/detected roles.
 5. So later lessons see the intended baseline personas (amelia not stuck on leave).
 
 ## Further reading
@@ -219,14 +277,15 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 
 ## Stretch lab
 
-- Schedule `Refresh MNB Identities` daily at 02:00, verify the schedule object, then disable it.
-- Compare task duration with policy checking on vs off.
+- Schedule `Refresh MNB Attributes` daily at 02:00, verify the schedule object, then disable it.
+- Compare task duration: attrs-only vs attrs+managers+policies on one combined run.
 - From Debug, note `lastRefresh` (or equivalent) timestamps on an Identity XML.
+- Point `Refresh MNB Attributes` at population `MNB-Active-Employees` after Lesson 07 and document the scope change.
 
 ## Summary
 
-- Cubes are the operational person record; refresh is the calculation engine.
-- Meridian pipeline pattern: `Aggregate MNB-HR` then `Refresh MNB Identities`.
+- Cubes are the operational person record; Identity Refresh options are the calculation knobs—define them before enabling them.
+- Meridian uses purpose-built tasks: after `Aggregate MNB-HR`, run **`Refresh MNB Attributes`** (promote Link → Identity), then **`Refresh MNB Managers`** when hierarchy matters.
 - Change-detect drills prove evidence that ops and examiners expect.
 
 ---

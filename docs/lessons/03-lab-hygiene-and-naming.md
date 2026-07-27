@@ -30,7 +30,7 @@ Messy labs teach bad production habits. Banks survive exams with reproducible bu
 | --- | --- | --- |
 | Application names | `MNB-` + platform | `MNB-HR`, `MNB-IT-Access`, `MNB-CoreBanking` |
 | Aggregation tasks | `Aggregate` + app name | `Aggregate MNB-HR` |
-| Refresh tasks | Clear scope in name | `Refresh MNB Identities` |
+| Refresh tasks | Clear purpose in name | `Refresh MNB Attributes`, `Refresh MNB Managers` (Lesson 06) |
 | Populations | `MNB-` + audience | `MNB-Active-Employees`, `MNB-Treasury` |
 | Roles / policies | `MNB-Role-*`, `MNB-SOD-*` | Later lessons |
 
@@ -39,6 +39,8 @@ Messy labs teach bad production habits. Banks survive exams with reproducible bu
                                       |
                                       +--> screenshots --> ~/iiq-lab-evidence/YYYY-MM-DD/
 ```
+
+**Delimited File ≈ CSV.** In IdentityIQ, the Delimited File connector almost always means a **CSV** feed: comma delimiter, header row, one record per line. Meridian lab files may end in `.txt` (`HRApplications.txt`, `EmployeeData.txt`)—that is only the extension. Treat the content as CSV and configure the app with comma + header. Do not invent pipe/tab formats unless a real feed requires them.
 
 **Why absolute paths:** Tomcat’s working directory is not your shell cwd. Relative paths like `./HRApplications.txt` silently fail or read the wrong file after restart.
 
@@ -121,7 +123,7 @@ realpath ~/iiq-lab-data/HRApplications.txt
 | IT dump app | `MNB-IT-Access` | Lesson 09 |
 | HR aggregate | `Aggregate MNB-HR` | Lesson 04 |
 | IT aggregate | `Aggregate MNB-IT-Access` | Lesson 09 |
-| Refresh | `Refresh MNB Identities` | Lesson 06 |
+| Refresh (attrs / managers / roles) | `Refresh MNB Attributes`, `Refresh MNB Managers`, … | Lesson 06 |
 | Populations | `MNB-Active-Employees`, … | Lesson 07 |
 
 2. Rule: never create Meridian objects without the `MNB-` prefix in a shared lab.

@@ -13,8 +13,8 @@
 You will be able to:
 
 - Inventory Meridian tasks and state their purpose
-- Define a nightly runbook order with HR first
-- Configure (then safely disable) a schedule on a refresh task
+- Define a nightly runbook order with HR first, then purpose-built refreshes
+- Configure (then safely disable) a schedule on an attribute refresh task
 - Read a task result for start time, duration, counters, and errors
 - Write a five-line on-call checklist for aggregation failure
 
@@ -32,16 +32,21 @@ Banks run IAM as a factory. Task order and schedules are operational controls, n
   1. Aggregate MNB-HR
   2. Aggregate MNB-IT-Access          (Lesson 09+)
   3. Aggregate platform apps          (Lessons 11–16)
-  4. Refresh MNB Identities           (population-scoped when possible)
-  5. Policy scan / cert generation    (later lessons)
+  4. Refresh MNB Attributes           (promote Link → Identity after HR/apps)
+  5. Refresh MNB Managers             (hierarchy; can follow attrs same night)
+  6. Refresh MNB Roles                (when role model exists)
+  7. Refresh MNB Policies / certs     (later lessons; never overlap refreshes)
 ```
 
 | Why this order | Reason |
 | --- | --- |
 | HR first | Creates/updates people before accounts try to correlate |
 | Apps next | Attach entitlements to existing identities |
-| Refresh after | Recalculate managers, roles, policies from new truth |
+| Attributes refresh after | Promote HR (and other) Link fields onto cubes |
+| Managers after attrs | Hierarchy uses current identity attrs |
+| Roles / policies last | Depend on promoted attrs and memberships |
 | Avoid overlap | Two refreshes at once → contention and partial state |
+| Purpose-built refreshes | Failures are diagnosable; costs stay predictable |
 
 **Task result literacy:** Always read start/end time, host, success/fail, account/identity counters, and the first error stack—before re-running.
 
@@ -49,13 +54,13 @@ Banks run IAM as a factory. Task order and schedules are operational controls, n
 
 ## How it works
 
-IIQ **TaskDefinitions** encapsulate what to run (aggregation, refresh, …); **schedules** attach cron-like timing; **TaskResults** are the auditable proof. Meridian’s control narrative depends on ordered execution: HR → apps → refresh → policy/certs.
+IIQ **TaskDefinitions** encapsulate what to run (aggregation, refresh, …); **schedules** attach cron-like timing; **TaskResults** are the auditable proof. Meridian’s control narrative depends on ordered execution: HR → apps → **attribute refresh** → managers → roles → policy/certs—not one mega Identity Refresh with every checkbox.
 
 ```text
 Schedule / Run Now
         │
         ▼
-TaskDefinition (Aggregate MNB-HR, Refresh MNB Identities, …)
+TaskDefinition (Aggregate MNB-HR, Refresh MNB Attributes, Refresh MNB Managers, …)
         │
         ▼
 TaskResult (counters, errors, host, duration)
@@ -66,15 +71,16 @@ TaskResult (counters, errors, host, duration)
 | Ops rule | Why |
 | --- | --- |
 | HR before targets | People must exist before correlation |
-| Refresh after aggregates | Compile new truth |
+| `Refresh MNB Attributes` after aggregates | Promote Link → Identity (required after HR) |
+| Separate manager/role/policy refreshes | Scope cost and blast radius |
 | No overlapping refreshes | Avoid contention / partial state |
 | Read TaskResult before re-run | Don’t mask root cause |
 
-**Real-life Meridian example.** If `Aggregate MNB-IT-Access` runs before HR on a night when `nina.joiner` is added, her IT row may land uncorrelated. Ordering is a control, not a preference.
+**Real-life Meridian example.** If `Aggregate MNB-IT-Access` runs before HR on a night when `nina.joiner` is added, her IT row may land uncorrelated—and if that IT app were wrongly marked authoritative, IIQ could mint an **orphan identity**. Ordering plus create-identities discipline are both controls.
 
 ## Before you start
 
-- [ ] `Aggregate MNB-HR` and `Refresh MNB Identities` exist
+- [ ] `Aggregate MNB-HR`, `Refresh MNB Attributes`, and `Refresh MNB Managers` exist
 - [ ] Populations from Lesson 07 available (optional for scheduling)
 - [ ] Evidence folder for today ready
 
@@ -90,9 +96,12 @@ Before scheduling anything, inventory what already exists—orphan or misnamed t
 
 | Task name | Type | Depends on | Schedule? |
 | --- | --- | --- | --- |
-| Aggregate MNB-HR | Account Aggregation | HR file path | Nightly |
-| Refresh MNB Identities | Identity Refresh | HR aggregate | Nightly after apps |
+| Aggregate MNB-HR | Account Aggregation | HR file path (CSV) | Nightly |
 | Aggregate MNB-IT-Access | Account Aggregation | Lesson 09 | Nightly after HR |
+| Refresh MNB Attributes | Identity Refresh | HR (and app) aggregates | Nightly after aggs |
+| Refresh MNB Managers | Identity Refresh | Attrs refresh / HR managerIds | Nightly after attrs |
+| Refresh MNB Roles | Identity Refresh | Role model (later) | After role changes |
+| Refresh MNB Policies | Identity Refresh | Policies (later) | After policy changes |
 
 **Expected result:** Inventory table started; empty rows reserved for future apps.
 
@@ -106,11 +115,11 @@ Before scheduling anything, inventory what already exists—orphan or misnamed t
 
 ### Task 3 — Schedule UI practice
 
-1. Open `Refresh MNB Identities` → schedule settings.
+1. Open `Refresh MNB Attributes` → schedule settings.
 2. Set a daily time (e.g. 02:00 local).
 3. Save. Screenshot the schedule.
 4. **Disable** the schedule again unless you intentionally want overnight laptop runs.
-5. Log in CHANGELOG: “Practiced schedule enable/disable on Refresh MNB Identities.”
+5. Log in CHANGELOG: “Practiced schedule enable/disable on Refresh MNB Attributes.”
 
 **Expected result:** You can configure a schedule and prove you left it in a safe state for a personal lab.
 
@@ -139,18 +148,18 @@ Write a five-line checklist titled “Aggregation failed”:
 
 ### Task 6 — Overlap risk note
 
-1. Write one paragraph: risk of overlapping two `Refresh MNB Identities` runs.
-2. Write mitigation: schedules with buffer; mutual exclusion; monitor duration trends.
+1. Write one paragraph: risk of overlapping two Identity Refresh runs (e.g. `Refresh MNB Attributes` and `Refresh MNB Managers` started at the same second, or two attrs runs).
+2. Write mitigation: schedules with buffer; mutual exclusion; monitor duration trends; never schedule a mega “all options” refresh on top of purpose-built tasks.
 
 **Expected result:** Overlap risk paragraph in the runbook.
 
 ### Task 7 — Result ID evidence habit
 
 1. From a successful `Aggregate MNB-HR` result, copy the result id / name / timestamp into evidence `TASK-RESULTS.txt`.
-2. From `Refresh MNB Identities`, do the same.
+2. From `Refresh MNB Attributes` (and optionally `Refresh MNB Managers`), do the same.
 3. Add a binder rule: “Every production-like change cites at least one task result id.”
 
-**Expected result:** `TASK-RESULTS.txt` has two entries with timestamps.
+**Expected result:** `TASK-RESULTS.txt` has at least two entries with timestamps.
 
 ### Task 8 — Dry-run failure (optional but recommended)
 
@@ -199,6 +208,7 @@ Write a five-line checklist titled “Aggregation failed”:
 3. Name one risk of overlapping refreshes.
 4. What should you do if HR aggregation fails before refresh?
 5. Why disable lab schedules after practice?
+6. After aggregations, which Meridian refresh task promotes identity attributes from Links?
 
 ### Answers
 
@@ -207,6 +217,7 @@ Write a five-line checklist titled “Aggregation failed”:
 3. Lock contention, long runtimes, inconsistent intermediate identity state, noisy failures.
 4. Stop the chain; fix HR path/data; do not refresh as if the load succeeded.
 5. Avoid unexpected overnight load/failures on a personal laptop lab.
+6. `Refresh MNB Attributes`.
 
 ## Further reading
 
@@ -218,7 +229,7 @@ Write a five-line checklist titled “Aggregation failed”:
 
 ## Stretch lab
 
-- Draft a “sequential composite” mindset doc: even if your edition uses separate schedules, document required gaps (e.g. HR 01:00, apps 01:20, refresh 02:00).
+- Draft a “sequential composite” mindset doc: even if your edition uses separate schedules, document required gaps (e.g. HR 01:00, apps 01:20, attrs 02:00, managers 02:20).
 - Add duration baselines to the runbook after three manual runs.
 - Create a fake failure evidence pack (bad path on a *copy* task named `Aggregate MNB-HR-DRYRUN`) and file it under evidence as training for incident response.
 - Add a RACI line to the runbook: who acknowledges failed tasks (IAM Ops) vs who fixes HR file feeds (HRIS).
@@ -226,7 +237,7 @@ Write a five-line checklist titled “Aggregation failed”:
 ## Summary
 
 - Meridian treats task order and schedules as controls.
-- HR → apps → refresh is the factory sequence; results are monitored artifacts.
+- HR → apps → `Refresh MNB Attributes` → managers → roles/policies is the factory sequence; results are monitored artifacts.
 - On-call checklists turn aggregation failures into repeatable response.
 
 ---

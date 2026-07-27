@@ -13,7 +13,8 @@
 You will be able to:
 
 - Decide which HR fields belong on the Identity vs only on the Link (account)
-- Map HR schema attributes so identity attributes populate after refresh
+- Map HR schema attributes so identity attributes populate after **`Refresh MNB Attributes`**
+- Name the Identity Refresh task that must run after HR aggregation to promote Link → Identity attributes
 - Validate manager linkage for a wire specialist toward Payments leadership
 - Distinguish `status=0` termination from `onLeave=true` temporary freeze
 - Publish a short Meridian identity attribute dictionary for roles/SoD/JML
@@ -45,13 +46,18 @@ Promote fields that drive governance:
 | locationCode | locationCode | Locational scopes |
 
 ```text
-  HR account attributes
+  HR account attributes (on Link after Aggregate MNB-HR)
         |  schema mapping / identity attribute assignment
+        v
+  Refresh MNB Attributes  (Identity Refresh — promote attrs from accounts)
+        |
         v
   Identity attributes  -->  roles / populations / JML / cert display
 ```
 
 **Codes beat display strings:** Rule on `TRS`, not `"Treasury & Payments"`. Display titles change; codes stay stable.
+
+**Pipeline rule:** Mapping alone does not finish the job. After you save maps (and re-aggregate if required), you must run an **Identity Refresh** with attribute promotion—Meridian’s purpose-built task is `Refresh MNB Attributes` (created in Lesson 06). Aggregation writes the HR Link; refresh promotes selected fields onto the Identity.
 
 **Termination vs leave:**
 
@@ -68,10 +74,14 @@ Account Aggregation stores raw connector attributes on the **Link**. Identity at
 MNB-HR Link attributes (employeeId, managerId, departmentCode, …)
         │
         ▼
-Identity attribute assignment / maps
+Identity attribute assignment / maps (saved on application / identity attrs)
         │
-        ├── email, departmentCode, jobCode, workerType, onLeave → Identity
-        └── managerId resolved to manager Identity (often completed on Refresh)
+        ▼
+Aggregate MNB-HR (if schema change requires it)
+        │
+        ▼
+Refresh MNB Attributes  ← promotes Link fields onto Identity
+Refresh MNB Managers    ← resolves managerId → manager Identity (Lesson 06)
         │
         ▼
 Selectors / roles / JML / cert display consume Identity attrs
@@ -83,7 +93,7 @@ Selectors / roles / JML / cert display consume Identity attrs
 | `workerType`, `onLeave`, `status` | Yes | Lifecycle & contractor SLAs |
 | Transient connector noise | No | Keep Link-only |
 
-**Real-life Meridian example.** `sofia.torres` has `onLeave=true` on HR. Until that flag is promoted to the identity, leave-freeze workflows and the `MNB-On-Leave` population cannot see her—schema design is a control dependency, not cosmetics.
+**Real-life Meridian example.** `sofia.torres` has `onLeave=true` on HR. Until that flag is promoted to the identity via `Refresh MNB Attributes`, leave-freeze workflows and the `MNB-On-Leave` population cannot see her—schema design is a control dependency, not cosmetics.
 
 ## Before you start
 
@@ -106,12 +116,15 @@ Before mapping anything in IIQ, inventory which HR columns are governance signal
 
 ### Task 2 — Refine MNB-HR schema maps
 
+Maps tell IIQ *which* Link fields become Identity attributes. Promotion still needs a refresh after aggregation.
+
 1. Open application `MNB-HR` → Schema / Attribute mapping (or Identity attribute mappings—path varies).
 2. Map account attributes onto identity attributes used by IIQ (normalize names if UI expects `firstname` vs `firstName`—match what your install shows for existing identities).
 3. Confirm manager mapping uses `managerId` toward identity correlation (manager name/id as your version requires).
 4. Save. Re-run `Aggregate MNB-HR` if the UI warns that schema changes need aggregation.
+5. Note for Lesson 06: after that aggregate, run **`Refresh MNB Attributes`** to promote/update identity attributes from the HR Link. Manager display may still need **`Refresh MNB Managers`**.
 
-**Expected result:** Mapping saved without errors. Notebook lists each identity attribute → HR column.
+**Expected result:** Mapping saved without errors. Notebook lists each identity attribute → HR column **and** the refresh task that finishes promotion.
 
 **If it fails:** Prefer IIQ’s documented identity attribute names from Debug → Identity example; do not invent conflicting attribute names.
 
@@ -188,11 +201,11 @@ Add these “do not” rules to the dictionary footer:
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Identity attrs blank | Not mapped / no refresh yet | Fix maps; run refresh (Lesson 06) |
-| Manager shows raw id only | Manager correlation not run | Enable manager options on refresh |
+| Identity attrs blank | Not mapped / no refresh yet | Fix maps; run `Refresh MNB Attributes` (Lesson 06) |
+| Manager shows raw id only | Manager correlation not run | Run `Refresh MNB Managers` |
 | Wrong department on cube | Mapped display name instead of code | Map `departmentCode` |
 | Duplicate custom attributes | Invented names | Align to standard identity attrs |
-| Contractor looks like employee | `workerType` not promoted | Promote and re-aggregate/refresh |
+| Contractor looks like employee | `workerType` not promoted | Promote; re-aggregate; run `Refresh MNB Attributes` |
 
 ## Training binder evidence
 
@@ -210,6 +223,7 @@ Add these “do not” rules to the dictionary footer:
 3. Name one attribute certifications commonly display.
 4. Why avoid overwriting email from IT apps?
 5. Who should be manager of `marcus.approve` per HR?
+6. After HR aggregation, which Meridian Identity Refresh task promotes Link attributes onto the cube?
 
 ### Answers
 
@@ -218,6 +232,7 @@ Add these “do not” rules to the dictionary footer:
 3. Examples: display name, department, job title, manager, email.
 4. HR is authoritative; IT dumps can be stale or wrong (vendor domains, typos).
 5. `rachel.evans` / MNB00005 (Payments Operations Manager).
+6. `Refresh MNB Attributes` (Identity Refresh with attribute promotion from accounts).
 
 ## Further reading
 
@@ -229,7 +244,7 @@ Add these “do not” rules to the dictionary footer:
 
 ## Stretch lab
 
-- Promote `costCenter` to the identity and show it on `helen.ross`.
+- Promote `costCenter` to the identity, run `Refresh MNB Attributes`, and show it on `helen.ross`.
 - Build a one-page “forbidden mappings” list (e.g. never map IT `accountStatus` onto HR `status`).
 - Using Debug, compare Identity XML before vs after mapping changes (post-refresh).
 
@@ -237,7 +252,7 @@ Add these “do not” rules to the dictionary footer:
 
 - Governance needs HR fields on the identity, not buried only on the link.
 - Codes (`departmentCode`, `jobCode`) power roles; status and onLeave power lifecycle.
-- The attribute dictionary is Meridian’s design contract for later lessons.
+- After HR aggregation, `Refresh MNB Attributes` (Lesson 06) finishes Link → Identity promotion; the attribute dictionary is Meridian’s design contract for later lessons.
 
 ---
 

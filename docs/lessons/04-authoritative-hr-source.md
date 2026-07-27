@@ -13,9 +13,10 @@
 You will be able to:
 
 - Inspect the Meridian HR header and explain each column’s governance role
-- Create Delimited File application `MNB-HR` with an absolute file path
-- Set account identity attribute to `employeeId` and enable identity creation
+- Create Delimited File (CSV) application `MNB-HR` with an absolute file path
+- Set account identity attribute to `employeeId` and set **authoritative / create identities on the application itself**
 - Create and run Account Aggregation task `Aggregate MNB-HR`
+- Know that after HR aggregation you must run an Identity Refresh (Lesson 06) to promote link attributes onto cubes
 - Verify known identity cubes for leadership and scripted personas
 
 ## Why this matters
@@ -26,7 +27,11 @@ If HR is wrong, every downstream control is wrong. Authoritative aggregation is 
 
 ## Concepts
 
-An **authoritative** application is allowed to create and update IdentityIQ identities from its accounts. Non-authoritative apps (Lesson 09+) only attach accounts/entitlements to existing people.
+An **authoritative** application is allowed to create and update IdentityIQ identities from its accounts. That flag lives **on the application object** (for Meridian: on the Delimited File app `MNB-HR` itself)—not on the aggregation task and not as a global IIQ switch. Non-authoritative apps (Lesson 09+) only attach accounts/entitlements to existing people.
+
+**CSV reality:** Delimited File feeds are almost always CSV (comma + header). Lab `HRApplications.txt` is CSV content with a `.txt` name—configure delimiter = comma and “has header.”
+
+**Orphan trap (preview):** If a *non-HR* app has create-identities / authoritative enabled, uncorrelated accounts can be aggregated in as **orphan identities**—cubes with no real HR person behind them. Meridian turns create-identities **on** only for `MNB-HR`. Lesson 09 and Lessons 19–20 drill the orphan remediation path.
 
 | Column | Role |
 | --- | --- |
@@ -75,12 +80,14 @@ Account Aggregation task: Aggregate MNB-HR
 
 | Setting | Meridian value | Why |
 | --- | --- | --- |
-| Connector | Delimited File | Lab stand-in for HRIS feed |
+| Connector | Delimited File | Lab stand-in for HRIS feed; format ≈ **CSV** |
+| File format | Comma + header | Almost always CSV in real Delimited File work |
 | Native identity | `employeeId` | Stable across email/vendor domains |
-| Create identities | ON (HR only) | Workforce source of truth |
+| Authoritative / create identities | **ON on the `MNB-HR` application** | Workforce source of truth (app-level flag) |
 | Task name | `Aggregate MNB-HR` | Auditable control activity |
+| After aggregate | `Refresh MNB Attributes` (+ managers as needed) | Promotes Link attrs onto Identity (Lesson 06) |
 
-> **Production reality:** Banks usually feed HR from Workday, SAP SuccessFactors, or similar via the native connector or a governed flat-file drop—not a hand-edited CSV. Lesson 04 teaches the authoritative pattern; Part II connector lessons cover live HRIS paths.
+> **Production reality:** Banks usually feed HR from Workday, SAP SuccessFactors, or similar via the native connector or a governed flat-file drop—not a hand-edited CSV. Lesson 04 teaches the authoritative pattern; Part II connector lessons cover live HRIS paths. When the feed *is* a file, treat it as CSV unless the vendor documents otherwise.
 
 **Real-life Meridian example.** `amelia.brooks` appears in HR on hire day; after `Aggregate MNB-HR`, her cube exists so birthright and joiner workflows have a person to attach—not an orphan IT account.
 
@@ -111,16 +118,18 @@ wc -l ~/iiq-lab-data/HRApplications.txt
 
 ### Task 2 — Create application MNB-HR
 
+You are creating a Delimited File application whose feed is CSV in all but name. Production HR drops are almost always comma-separated with a header—match that habit here.
+
 1. In IIQ: **Applications** → **Add New Application** (or equivalent).
 2. Application type: **DelimitedFile** (Delimited File connector).
 3. Name: `MNB-HR`. Owner: `spadmin` (lab).
 4. File settings:
    - File path: absolute path to `HRApplications.txt` (expanded `/Users/...`, not `~`)
-   - Delimiter: comma
-   - Has header row: yes
+   - **File format:** treat as **CSV** — delimiter: comma; has header row: yes
+   - Do not switch to tab/pipe unless you are deliberately testing a non-CSV feed
 5. Save.
 
-**Expected result:** Application `MNB-HR` appears in the application list.
+**Expected result:** Application `MNB-HR` appears in the application list; notebook notes “Delimited File = CSV (comma + header).”
 
 **If it fails:** Check connector type spelling; confirm file path is readable by Tomcat OS user.
 
@@ -134,23 +143,29 @@ wc -l ~/iiq-lab-data/HRApplications.txt
 
 **Expected result:** Schema lists HR columns; account id is `employeeId`.
 
-### Task 4 — Authoritative / create identities
+### Task 4 — Authoritative / create identities (on the application)
 
-1. On `MNB-HR`, locate settings for creating identities from accounts (Authoritative application / Create identities—or equivalent wording for your IIQ version).
-2. Enable identity creation from this application.
-3. Save. Log in CHANGELOG: “MNB-HR authoritative=true”.
+Authoritative is **not** a property of the aggregation task. It is set on the **Delimited File application** `MNB-HR`: when that app is marked to create identities, Account Aggregation will mint Identity cubes from HR accounts.
 
-**Expected result:** Notebook documents that **only** `MNB-HR` creates identities in the Meridian lab (IT apps must remain non-authoritative).
+1. On `MNB-HR`, locate settings for creating identities from accounts (**Authoritative application** / **Create identities**—or equivalent wording for your IIQ version). This lives on the **application configuration**, not on `Aggregate MNB-HR`.
+2. Enable identity creation from this application (`authoritative=true` / create-identities ON).
+3. Save. Log in CHANGELOG: `MNB-HR authoritative=true`.
+4. Confirm no other Meridian app will get this flag in later lessons—IT dumps must stay non-authoritative so uncorrelated rows do not become orphan identities.
+
+**Expected result:** Notebook documents that **only** `MNB-HR` creates identities in the Meridian lab (IT apps must remain non-authoritative). CHANGELOG contains exactly: `MNB-HR authoritative=true`.
 
 ### Task 5 — Create and run Aggregate MNB-HR
+
+Aggregation loads HR accounts onto Links (and creates cubes because the **app** is authoritative). It does **not** finish promoting every identity attribute or resolving managers—that is Identity Refresh (Lesson 06).
 
 1. **Tasks** → New Task → type **Account Aggregation** (or equivalent).
 2. Name: `Aggregate MNB-HR`.
 3. Select application `MNB-HR`.
 4. Save, then **Run Now**.
 5. Open the **Task Result**. Note start time, duration, accounts scanned/created/updated, errors.
+6. Write in your notebook: “Next control step after HR aggregate = run `Refresh MNB Attributes` (and `Refresh MNB Managers` when hierarchy matters)—Lesson 06. Aggregation alone is not enough to trust promoted identity attributes.”
 
-**Expected result:** Task result Success (or Success with warnings you understand). Account count > 0 (lab HR is ~70–80 workers including header). Screenshot saved to evidence folder.
+**Expected result:** Task result Success (or Success with warnings you understand). Account count > 0 (lab HR is ~70–80 workers including header). Screenshot saved to evidence folder. Pipeline note points at the refresh tasks.
 
 **If it fails:** Zero accounts → path, permissions, delimiter, or header parse. Check Tomcat logs; re-test file with `head`.
 
@@ -165,16 +180,17 @@ wc -l ~/iiq-lab-data/HRApplications.txt
 
 ### Task 7 — Binder note — control statement
 
-Write: “Meridian’s authoritative workforce source is application `MNB-HR`. Aggregation task `Aggregate MNB-HR` is the control activity that materializes identities. Control owner (lab): IAM trainee / (prod) HRIS+IAM Ops.”
+Write: “Meridian’s authoritative workforce source is application `MNB-HR` (authoritative / create-identities set **on that Delimited File app**). Aggregation task `Aggregate MNB-HR` materializes accounts and cubes; Identity Refresh tasks from Lesson 06 promote HR Link attributes onto identities. Control owner (lab): IAM trainee / (prod) HRIS+IAM Ops.”
 
 **Expected result:** One control statement ready for training binder.
 
 ## Acceptance criteria
 
-- [ ] `MNB-HR` Delimited File app created with absolute path
+- [ ] `MNB-HR` Delimited File app created with absolute path (CSV: comma + header)
 - [ ] Account identity attribute = `employeeId`
-- [ ] Identity creation enabled (authoritative)
+- [ ] Authoritative / create identities enabled **on the application**; CHANGELOG: `MNB-HR authoritative=true`
 - [ ] `Aggregate MNB-HR` ran with non-zero accounts
+- [ ] Notebook notes the post-aggregate refresh tasks required (Lesson 06)
 - [ ] Cubes verified for helen.ross, priya.wire, samir.hassan
 - [ ] Evidence screenshot of task result filed
 - [ ] CHANGELOG updated
@@ -183,11 +199,13 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR`. A
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| 0 accounts aggregated | Bad path / perms / delimiter | Fix absolute path; confirm comma + header |
+| 0 accounts aggregated | Bad path / perms / delimiter | Fix absolute path; confirm comma + header (CSV) |
 | Duplicate identities | Wrong account id (email) | Rebuild schema with `employeeId` |
 | Missing columns | Schema not rediscovered after file change | Rediscover schema; re-aggregate |
 | Tomcat cannot read file | macOS privacy / ownership | Adjust ACL; move under readable home path |
 | Identities not searchable | Aggregation failed silently | Read full task result errors + syslog |
+| Attrs blank after aggregate | Refresh not run yet | Expected—run `Refresh MNB Attributes` in Lesson 06 |
+| Orphan cubes from IT later | Non-HR app left authoritative | Disable create-identities on IT apps (Lesson 09) |
 
 ## Training binder evidence
 
@@ -205,14 +223,18 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR`. A
 3. Where do you look first when aggregation returns zero accounts?
 4. Which persona demonstrates a terminated worker in HR?
 5. What is the exact task name for HR aggregation in this curriculum?
+6. After `Aggregate MNB-HR`, which kind of task promotes identity attributes from the HR Link?
+7. Where is `authoritative=true` set—on the task or on the application?
 
 ### Answers
 
-1. It is configured to create/update IdentityIQ identities from its accounts—HR is the workforce source of truth.
+1. It is configured on the **application** to create/update IdentityIQ identities from its accounts—HR is the workforce source of truth.
 2. Emails change and vendors use non-corporate domains; employee IDs are stable.
-3. File path, OS permissions, delimiter/header parse—before blaming IIQ logic.
+3. File path, OS permissions, delimiter/header parse (CSV settings)—before blaming IIQ logic.
 4. `samir.hassan` (MNB00094), `status=0` with terminationDate set.
 5. `Aggregate MNB-HR`.
+6. An **Identity Refresh** task with attribute promotion enabled—Meridian uses `Refresh MNB Attributes` (Lesson 06).
+7. On the **Delimited File application** (`MNB-HR`), not on the aggregation task.
 
 ## Further reading
 
@@ -227,12 +249,13 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR`. A
 - Append `~/iiq-lab-data/scenarios/joiner/hr-delta-new-hire.csv` content into a copy of the HR file (keep a backup), re-run `Aggregate MNB-HR`, and find `nina.joiner`.
 - Compare account counts in task results before vs after the joiner append.
 - Document rollback: restore original `HRApplications.txt` from `lab-data/`.
+- Intentionally mis-set delimiter to pipe once on a **copy** app, observe zero accounts, then revert—reinforces “Delimited File ≈ CSV.”
 
 ## Summary
 
-- `MNB-HR` is Meridian’s authoritative Delimited File application keyed on `employeeId`.
-- `Aggregate MNB-HR` materializes identity cubes from `HRApplications.txt`.
-- Persona verification proves active, contractor, and terminated patterns exist in the lab.
+- `MNB-HR` is Meridian’s authoritative Delimited File (CSV) application keyed on `employeeId`; authoritative is set **on the app**.
+- `Aggregate MNB-HR` materializes identity cubes from `HRApplications.txt`; Identity Refresh (Lesson 06) promotes Link attributes onto cubes.
+- Persona verification proves active, contractor, and terminated patterns exist in the lab; only HR may create identities so IT dumps cannot mint orphans.
 
 ---
 

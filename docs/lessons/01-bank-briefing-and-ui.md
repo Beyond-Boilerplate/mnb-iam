@@ -32,7 +32,7 @@ IdentityIQ separates four surfaces you will use every day:
 | --- | --- | --- |
 | **Configuration** | Applications, roles, policies, workflows | `MNB-HR`, SoD policies, birthright roles |
 | **Operational data** | Identities, accounts (links), certifications | Cubes for `helen.ross`, `priya.wire`, … |
-| **Tasks** | Aggregation, refresh, certification jobs | `Aggregate MNB-HR`, `Refresh MNB Identities` |
+| **Tasks** | Aggregation, refresh, certification jobs | `Aggregate MNB-HR`, `Refresh MNB Attributes` |
 | **Work items** | Human decisions (approvals, certs) | Manager certs, access request approvals |
 
 ```text

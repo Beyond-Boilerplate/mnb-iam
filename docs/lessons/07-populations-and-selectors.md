@@ -5,7 +5,7 @@
 | **Level** | Beginner |
 | **Track** | Foundations |
 | **Time** | 60 minutes |
-| **Prereq** | Lesson 06 (`Refresh MNB Identities` works; identity attrs populated) |
+| **Prereq** | Lesson 06 (`Refresh MNB Attributes` works; identity attrs populated) |
 | **Lab data** | HR-backed identity attributes (`status`, `workerType`, `departmentCode`) |
 
 ## Learning objectives
@@ -54,7 +54,7 @@ Identity attrs (status, workerType, departmentCode, onLeave)
         ▼
 Population / selector definition (MNB-*)
         │
-        ├── Refresh MNB Identities (scoped)
+        ├── Refresh MNB Attributes (population-scoped)
         ├── Certification campaigns
         └── Reports / Advanced Analytics
 ```
@@ -124,10 +124,11 @@ Populations only work if the attributes you filter on are present and promoted o
 
 ### Task 6 — Apply population to refresh
 
-1. Clone or edit `Refresh MNB Identities` (prefer a copy: `Refresh MNB Active Employees` if you want to preserve the broad task).
+1. Clone or edit `Refresh MNB Attributes` (prefer a copy: `Refresh MNB Active Employees` if you want to preserve the broad attrs task).
 2. Set filter/population to `MNB-Active-Employees`.
-3. Run once.
-4. Capture task result screenshot.
+3. Keep **attribute promotion** options on (same purpose as `Refresh MNB Attributes`); do not pile on policy checks.
+4. Run once.
+5. Capture task result screenshot.
 
 **Expected result:** Refresh succeeds scoped to the population; evidence shows population name/filter in result or task definition.
 
