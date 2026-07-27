@@ -39,7 +39,8 @@ identityiq:
   image:
     repository: ghcr.io/beyond-boilerplate/identityiq
     tag: "0.1.0"
-    pullPolicy: IfNotPresent
+    # Always: GHCR retags (0.1.0 / latest) must not stick on a stale local digest.
+    pullPolicy: Always
   imagePullSecrets:
     - name: ghcr-pull
   dbSecretName: sailpoint-iiq-db

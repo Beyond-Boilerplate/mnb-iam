@@ -39,6 +39,7 @@ RUN mkdir -p build/extract base/ga base/patch base/efix/8.5 \
   && chmod +x build.sh lib/ant/bin/ant lib/ant/bin/antRun \
   && ./build.sh -Dtarget=${SPTARGET} main \
   && test -d build/extract/WEB-INF \
+  && test -f build/extract/WEB-INF/lib/postgresql-42.7.4.jar \
   && mv build/extract /out-identityiq \
   && rm -rf build
 
@@ -48,6 +49,9 @@ USER root
 # Replace stock tree with customized extract (no full-tree chown of base layers)
 RUN rm -rf "${IIQ_HOME}" && mkdir -p "${IIQ_HOME}"
 COPY --from=ssb /out-identityiq/ "${IIQ_HOME}/"
+# Belt-and-suspenders: base stock always carries JDBC; re-copy in case overlay/cache drifted.
+RUN cp -f /opt/iiq-stock/WEB-INF/lib/postgresql-42.7.4.jar "${IIQ_HOME}/WEB-INF/lib/" \
+  && test -f "${IIQ_HOME}/WEB-INF/lib/postgresql-42.7.4.jar"
 COPY docker/setenv.sh "${CATALINA_HOME}/bin/setenv.sh"
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x "${CATALINA_HOME}/bin/setenv.sh" /entrypoint.sh \

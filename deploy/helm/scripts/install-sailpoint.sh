@@ -60,6 +60,12 @@ IMAGE_SETS=()
 if [[ -n "${IMAGE_TAG:-}" ]]; then
   echo "Pinning identityiq.image.tag=${IMAGE_TAG}"
   IMAGE_SETS+=(--set-string "identityiq.image.tag=${IMAGE_TAG}")
+  # Force pull so mutable tags (0.1.0/latest) and retagged SHAs never reuse a stale node cache.
+  if [[ "${IMAGE_PULL_POLICY:-}" != "" ]]; then
+    IMAGE_SETS+=(--set-string "identityiq.image.pullPolicy=${IMAGE_PULL_POLICY}")
+  elif [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    IMAGE_SETS+=(--set-string "identityiq.image.pullPolicy=Always")
+  fi
   if [[ "${VERIFY_IMAGE_TAGS:-}" == "true" ]]; then
     OWNER="$(tr '[:upper:]' '[:lower:]' <<<"${GHCR_OWNER:-beyond-boilerplate}")"
     MANIFEST="ghcr.io/${OWNER}/identityiq:${IMAGE_TAG}"
