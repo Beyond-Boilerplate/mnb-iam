@@ -6,7 +6,7 @@
 | **Track** | Foundations |
 | **Time** | 60 minutes |
 | **Prereq** | Lesson 06 (`Refresh MNB Attributes` works; identity attrs populated) |
-| **Lab data** | HR-backed identity attributes (`status`, `workerType`, `departmentCode`) |
+| **Lab data** | HR-backed identity attributes (`inactive`, `employeeType`, `departmentName` / `JobCode`) |
 
 ## Learning objectives
 
@@ -22,7 +22,7 @@ You will be able to:
 
 Certifications, reports, and refreshes need scoped populations. “All identities” does not scale, floods managers, and scares auditors who expect risk-based targeting (Treasury first, contractors on short cadence, etc.).
 
-**Control / audit:** Population definitions are reusable controls. Examiners ask how you select who enters a campaign. “We used `MNB-Treasury` where `departmentCode=TRS`” is a defensible answer.
+**Control / audit:** Population definitions are reusable controls. Examiners ask how you select who enters a campaign. “We used `MNB-Treasury` where `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury” is a defensible answer.
 
 ## Concepts
 
@@ -30,10 +30,10 @@ A **population** (identity selector / group filter—wording varies) is a saved 
 
 | Population | Logic (intent) | Later use |
 | --- | --- | --- |
-| `MNB-Active-Employees` | Active workforce (`status` active / `1`) | Default refresh & certs |
-| `MNB-Contractors` | `workerType=Contractor` | Short-cycle certs, tight JML |
-| `MNB-Treasury` | `departmentCode=TRS` | Wire/payments campaigns |
-| `MNB-On-Leave` (stretch) | `onLeave=true` | Temporary freeze controls |
+| `MNB-Active-Employees` | Active workforce (`inactive=false` / `status=Active`) | Default refresh & certs |
+| `MNB-Contractors` | `employeeType=Contractor` | Short-cycle certs, tight JML |
+| `MNB-Treasury` | `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury | Wire/payments campaigns |
+| `MNB-On-Leave` (stretch) | `exceptions=LOA` | Temporary freeze controls |
 
 ```text
   Identity attributes
@@ -62,15 +62,15 @@ Population / selector definition (MNB-*)
 | Population | Typical filter | Control use |
 | --- | --- | --- |
 | `MNB-Active-Employees` | Active / status=1 | Default refresh & broad certs |
-| `MNB-Contractors` | workerType=Contractor | Short-cycle reviews |
-| `MNB-Treasury` | departmentCode=TRS | Wire/payments campaigns |
+| `MNB-Contractors` | employeeType=Contractor | Short-cycle reviews |
+| `MNB-Treasury` | Treasury / Payments dept | Wire/payments campaigns |
 
-**Real-life Meridian example.** Targeting a contractor-only cert at `raj.external`’s peers without a population means someone retypes `workerType=Contractor` and misses people. `MNB-Contractors` makes the exam answer reproducible.
+**Real-life Meridian example.** Targeting a contractor-only cert at `raj.external`’s peers without a population means someone retypes `employeeType=Contractor` and misses people. `MNB-Contractors` makes the exam answer reproducible.
 
 ## Before you start
 
 - [ ] Identities exist from `MNB-HR`
-- [ ] Refresh has promoted `status`, `workerType`, `departmentCode` (verify on a few cubes)
+- [ ] Refresh has promoted `inactive`, `employeeType`, `departmentName` / `JobCode` (verify on a few cubes)
 - [ ] You know UI path for Populations / Identity Selector / Advanced Analytics (version-dependent)
 
 ## Lab procedure
@@ -80,8 +80,8 @@ Population / selector definition (MNB-*)
 Populations only work if the attributes you filter on are present and promoted on cubes—spot-check personas before building selectors.
 
 1. Open `amelia.brooks` — confirm active status and `departmentCode=RET`.
-2. Open `raj.external` — confirm `workerType=Contractor`.
-3. Open `priya.wire` — confirm `departmentCode=TRS`.
+2. Open `raj.external` — confirm `employeeType=Contractor`.
+3. Open `priya.wire` — confirm `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury.
 4. Open `samir.hassan` — confirm inactive/terminated.
 
 **Expected result:** You trust the attributes populations will filter on.
@@ -93,7 +93,7 @@ Populations only work if the attributes you filter on are present and promoted o
 1. Navigate to **Populations** / **Identity Selectors** / Advanced search save-as (or equivalent).
 2. Name: `MNB-Active-Employees`.
 3. Filter: identities whose HR-driven status indicates active (e.g. `status=1` or inactive=false—match how your mapping stored it).
-4. Optionally exclude `workerType=Contractor` if you want employees-only; document your choice.
+4. Optionally exclude `employeeType=Contractor` if you want employees-only; document your choice.
 5. Save and preview membership count.
 
 **Expected result:** Population saved; member count roughly matches active HR rows (lab ~70+ active depending on exclusions).
@@ -101,7 +101,7 @@ Populations only work if the attributes you filter on are present and promoted o
 ### Task 3 — Create MNB-Contractors
 
 1. Create population `MNB-Contractors`.
-2. Filter: `workerType=Contractor`.
+2. Filter: `employeeType=Contractor`.
 3. Preview; confirm `raj.external` appears.
 
 **Expected result:** Non-zero contractor membership including `raj.external`.
@@ -109,7 +109,7 @@ Populations only work if the attributes you filter on are present and promoted o
 ### Task 4 — Create MNB-Treasury
 
 1. Create population `MNB-Treasury`.
-2. Filter: `departmentCode=TRS`.
+2. Filter: `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury.
 3. Confirm `rachel.evans`, `priya.wire`, `marcus.approve` appear (and other TRS workers).
 
 **Expected result:** Treasury-scoped list suitable for future wire-focused certifications.
@@ -138,18 +138,18 @@ In the binder, for each population write:
 
 | Name | Filter logic | Owner | Review cadence |
 | --- | --- | --- | --- |
-| MNB-Active-Employees | status active | IAM Ops (lab: you) | Quarterly |
-| MNB-Contractors | workerType=Contractor | IAM Ops | Monthly |
-| MNB-Treasury | departmentCode=TRS | Payments + IAM | Quarterly |
+| MNB-Active-Employees | inactive false | IAM Ops (lab: you) | Quarterly |
+| MNB-Contractors | employeeType=Contractor | IAM Ops | Monthly |
+| MNB-Treasury | Treasury / Payments dept | Payments + IAM | Quarterly |
 
 **Expected result:** Audit-ready population register page.
 
 ### Task 8 — Population vs ad-hoc search drill
 
-1. Run an ad-hoc Advanced Search for `departmentCode=TRS` without saving.
+1. Run an ad-hoc Advanced Search for `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury without saving.
 2. Compare member count to `MNB-Treasury`.
 3. Write why the saved population wins for certifications: named control, repeatable, reviewable, referenceable from tasks.
-4. Add an examiner-ready sentence: “Campaign X uses population `MNB-Treasury` defined as departmentCode equals TRS as of [review-date].”
+4. Add an examiner-ready sentence: “Campaign X uses population `MNB-Treasury` defined as Treasury/Payments department filter as of [review-date].”
 
 **Expected result:** Counts match (or difference explained); one examiner-ready sentence in the binder.
 
@@ -203,7 +203,7 @@ In the binder, for each population write:
 1. Reusable, named, reviewable controls with stable logic—auditable and consistent across tasks/certs.
 2. Active employees (or a risk-tiered subset)—not all identities including leavers.
 3. Shorter tenure and higher offboarding risk → tighter certification cadence and JML SLAs.
-4. `departmentCode=TRS`.
+4. `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury.
 5. IT accounts/entitlements are not onboarded yet; residual access needs `MNB-IT-Access` (and correlation).
 
 ## Further reading
@@ -216,7 +216,7 @@ In the binder, for each population write:
 
 ## Stretch lab
 
-- Create `MNB-On-Leave` (`onLeave=true`) and write which control freezes access for `sofia.torres`.
+- Create `MNB-On-Leave` (`exceptions=LOA`) and write which control freezes access for `sofia.torres`.
 - Create `MNB-Finance` (`departmentCode=FIN`) for later SoD campaigns targeting `jordan.reed`’s org.
 - Export member lists (if UI allows) into evidence for count reconciliation vs HR file.
 - Create `MNB-Terminated` on inactive status and attach it as a future input to Lesson 20 orphan/dormant hunting notes.

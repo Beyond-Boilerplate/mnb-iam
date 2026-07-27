@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CorrelationConfig PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Meridian P1 — correlate HR accounts on userId (bank associate ID). -->
+<CorrelationConfig name="MNB-HR EmployeeId Correlation">
+  <AttributeAssignments>
+    <Filter operation="EQ" property="name" value="userId"/>
+  </AttributeAssignments>
+</CorrelationConfig>

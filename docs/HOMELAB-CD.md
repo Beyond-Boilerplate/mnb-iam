@@ -57,8 +57,28 @@ Nodes keep the large **base** layers cached; app deploys pull thin overlay layer
 
 ### Deploy success criteria
 
-- **Pass** = Helm upgrade + `rollout status` Ready (startup/readiness use **TCP** so cold start does not flake).
+- **Pass** = Helm upgrade + `rollout status` Ready (startup/readiness use **TCP** so cold start does not flake) **and** custom object import succeeds.
+- After import, [`deploy/helm/scripts/import-custom-objects.sh`](../deploy/helm/scripts/import-custom-objects.sh) runs [`tools/iiq-verify/assert-mnb-objects.sh`](../tools/iiq-verify/assert-mnb-objects.sh) against the Meridian academy allowlist (`MNB-HR`, refresh tasks, roles, LCM stubs, SoD, …). **Green deploy means objects exist in the DB**, not only that a pod has a port.
 - **Smoke** (in-cluster + public URL probes) is **off by default**. Enable with `run_smoke=true` on workflow_dispatch when you need a deep check.
+
+### Bake then import (mental model)
+
+```text
+config/**/*.xml  --SSB WAR bake-->  WEB-INF/config/custom + sp.init-custom.xml  (in image)
+        |
+        v
+homelab rollout Ready
+        |
+        v
+import-custom-objects.sh  -->  iiq console import  -->  DB objects
+        |
+        v
+assert-mnb-objects.sh k8s  -->  allowlist OK / fail deploy narrative
+```
+
+XML on the filesystem is **not** enough. Debug only shows objects after import. Lesson 03 teaches this for learners; CD enforces it for the academy tenant.
+
+Lab CSV mounts (when configured) should align with `homelab.target.properties` tokens under `/opt/iiq-lab-data/…` — see [`config/PACKS.md`](../config/PACKS.md).
 
 ### When Deploy runs (automatic)
 

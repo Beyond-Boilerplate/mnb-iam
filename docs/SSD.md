@@ -10,6 +10,20 @@ Official Compass docs (login required):
 - [Get Started with the SSD](https://community.sailpoint.com/t5/Services-Standard-Deployment/Get-Started-with-the-SSD/ta-p/73449)
 - [Services Standard Build User Guide](https://community.sailpoint.com/t5/Services-Standard-Deployment/Services-Standard-Build-User-Guide-SSB/ta-p/73434)
 
+## Learner setup = scoped bank setup
+
+The Meridian academy and a forward-deployed IAM team use the **same** SSB layout:
+
+| Layer | Path | Role |
+| --- | --- | --- |
+| CSV fixtures | `lab-data/` → `~/iiq-lab-data/` | HR / app extracts |
+| IIQ objects | [`config/`](../config/) | Applications, tasks, rules, roles, workflows, policies |
+| Tokens | `*.target.properties` | `%%MNB_HR_FILE%%`, etc. |
+| Pack inventory | [`config/PACKS.md`](../config/PACKS.md) | What is seeded vs lesson-extended |
+| Verify | [`tools/iiq-verify/assert-mnb-objects.sh`](../tools/iiq-verify/assert-mnb-objects.sh) | Post-import allowlist |
+
+Day-1 for learners (Lesson 03): copy lab-data → set tokens → `./build.sh importdynamic` → confirm `MNB-Rule-Hello-World` / `MNB-HR`. Lessons 04+ teach UI craft against that product layer; durable changes re-export to `config/`. Lesson **101** is promotion/CAB maturity, not first contact with SSB.
+
 ## Layout
 
 | Path | Role |
@@ -52,12 +66,14 @@ Bundled Ant (no system Ant required):
 
 ## Adding a feature (happy path)
 
-1. Implement / configure in the running sandbox UI.  
-2. Export clean XML → `config/<Type>/MNB-…xml`.  
+1. Prefer **extend a seeded pack** from [`config/PACKS.md`](../config/PACKS.md); use UI create only for first-principles lessons.  
+2. Export clean XML → `config/<Type>/MNB-…xml` (or edit the seed in place).  
 3. Replace hard-coded env values with `%%TOKENS%%` from `*.target.properties`.  
 4. `./build.sh -Dtarget=sandbox clean war`  
-5. Commit XML + property token changes (not `build/`).  
-6. CI builds the same way (see `.github/workflows/ssb-ci.yml`).
+5. `./build.sh importdynamic` (or wait for homelab CD import).  
+6. `./tools/iiq-verify/assert-mnb-objects.sh local` (or `k8s`).  
+7. Commit XML + property token changes (not `build/`).  
+8. CI builds the same way (see `.github/workflows/ssb-ci.yml`).
 
 ## CI / CD next step (ready)
 

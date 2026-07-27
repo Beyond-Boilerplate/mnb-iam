@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Meridian P1 — correlation helper stub (employeeId). Lessons 04 / 17. -->
+<Rule language="beanshell" name="MNB-Rule-Correlation-EmployeeId" type="Correlation">
+  <Description>
+    Meridian academy correlation rule stub. Prefer attribute CorrelationConfig for HR;
+    this rule documents the employeeId key for later target-app correlation lessons.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="environment"/>
+      <Argument name="account"/>
+      <Argument name="application"/>
+    </Inputs>
+    <Returns>
+      <Argument name="identityName"/>
+      <Argument name="identity"/>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+      import java.util.HashMap;
+      import java.util.Map;
+
+      Map result = new HashMap();
+      if (account == null) {
+        return result;
+      }
+      Object employeeId = account.getAttribute("userId");
+      if (employeeId == null) {
+        employeeId = account.getAttribute("employeeId");
+      }
+      if (employeeId != null) {
+        // Attribute-based CorrelationConfig is primary for MNB-HR (userId).
+        // Rule kept for academy traceability and Lesson 17–18 extensions.
+        if (log != null && log.isDebugEnabled()) {
+          log.debug("MNB-Rule-Correlation-EmployeeId saw userId=" + employeeId);
+        }
+      }
+      return result;
+    ]]>
+  </Source>
+</Rule>

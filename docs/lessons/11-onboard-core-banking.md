@@ -217,6 +217,8 @@ Evidence: Aggregate MNB-CoreBanking task result + CORE holder list
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** `MNB-CoreBanking` matches seed `config/Application/MNB-Application-CoreBanking.xml` (import-verify or UI+export)
+
 - [ ] `MNB-CoreBanking` Delimited File application exists with absolute CSV path
 - [ ] Application does **not** create identities
 - [ ] `entitlement` mapped; `CORE` materialized

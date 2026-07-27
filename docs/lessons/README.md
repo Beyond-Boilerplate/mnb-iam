@@ -16,23 +16,36 @@ One-stop **SailPoint IdentityIQ 8.5** curriculum for enterprise IAM engineers: g
 
 ## Before you start
 
+Learner setup **is** the scoped bank setup: same SSB repo, same `config/` objects, same tokens—academy-sized Meridian, not HA prod.
+
 1. Complete [LOCAL_SETUP.md](../LOCAL_SETUP.md) until you can log in as `spadmin`.
-2. Skim [INFRASTRUCTURE.md](../INFRASTRUCTURE.md) and [SSD.md](../SSD.md).
-3. Copy lab fixtures:
+2. Skim [INFRASTRUCTURE.md](../INFRASTRUCTURE.md), [SSD.md](../SSD.md), and [config/PACKS.md](../../config/PACKS.md).
+3. Copy lab fixtures (CSV truth) and record absolute paths:
 
 ```bash
 mkdir -p ~/iiq-lab-data ~/iiq-lab-evidence/$(date +%F)
 cp lab-data/HRApplications.txt lab-data/EmployeeData.txt ~/iiq-lab-data/
 cp -R lab-data/apps lab-data/scenarios lab-data/reference lab-data/notifications lab-data/connectors ~/iiq-lab-data/
+realpath ~/iiq-lab-data/HRApplications.txt
+# Skim bank-style HR columns:
+# less lab-data/reference/hr-column-map.md
 ```
 
-4. Optional live connector backends (OpenLDAP + Postgres):
+4. Align SSB file tokens in `sandbox.target.properties` (`%%MNB_HR_FILE%%`, `%%MNB_IT_ACCESS_FILE%%`, …) to those absolute paths (Lesson 03).
+5. Import Meridian seed objects (after WAR/deploy or via console):
+
+```bash
+export SPTARGET=sandbox
+./build.sh importdynamic   # or use homelab CD import after push
+```
+
+6. Optional live connector backends (OpenLDAP + Postgres):
 
 ```bash
 docker compose -f docker-compose.connectors.yml up -d
 ```
 
-5. Keep a CHANGELOG of `MNB-*` objects and evidence screenshots.
+7. Keep a CHANGELOG of `MNB-*` objects, **`config/` paths**, and evidence screenshots.
 
 ---
 
@@ -40,9 +53,11 @@ docker compose -f docker-compose.connectors.yml up -d
 
 See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and real-life context first, then guided setup, then verification — never a bare task list.
 
+- **Hybrid bank craft:** Foundations teach UI first principles; from Applications onward prefer **import → verify → extend** seeded packs in [`config/`](../../config/). Durable controls exit as `MNB-*.xml` (or reviewed diffs to seeds). Capstones grade **git + evidence**.
 - Connector lessons (51+) teach the **native connector as the primary path**, including the real-world setup (service accounts, app registrations, API scopes) you would perform against a live tenant. A clearly labeled **lab-without-live-target** fallback keeps training runnable on a laptop.
 - Early application lessons (09–16) use Delimited File on purpose to teach governance mechanics; each carries a **Production reality** box pointing to the Part II lesson that covers the real connector.
 - Intermediate+ lessons end with a **Further reading** list (SailPoint docs, vendor admin guides, standards/whitepapers).
+- Lesson **101 / 108** deepen promotion and multi-env CAB—not first contact with SSB (that starts in Lesson 03).
 
 ---
 

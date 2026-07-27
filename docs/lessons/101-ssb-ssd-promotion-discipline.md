@@ -3,7 +3,7 @@
 **Level:** Intermediate  
 **Track:** Plugins, APIs & SSD  
 **Time:** 75–90 min  
-**Prereq:** Lesson 100 — IIQ REST & SCIM APIs; [docs/SSD.md](../SSD.md)  
+**Prereq:** Lesson 100 — IIQ REST & SCIM APIs; Lesson 03 SSB import hygiene; [docs/SSD.md](../SSD.md); [config/PACKS.md](../../config/PACKS.md)  
 
 **Lab data:**
 - Repo: `config/`, `sandbox.*.properties`, `build.sh`
@@ -15,10 +15,10 @@
 
 You will be able to:
 
-- Explain **SSD** vs **SSB** and where Meridian customizations live (`config/`, `src/`, `web/`, `pluginsrc/`)
-- Export a UI-built object to clean `config/<Type>/MNB-*.xml` with `%%TOKENS%%`
-- Run `./build.sh -Dtarget=sandbox clean war` (or document the CI equivalent)
-- Describe the promotion pipeline: sandbox → dev → prod property files
+- Explain **SSD** vs **SSB** and where Meridian customizations live (`config/`, `src/`, `web/`, `pluginsrc/`) — building on Lesson 03 import, not first contact
+- Promote a change to an existing academy pack (or export a UI delta) with `%%TOKENS%%`
+- Run `./build.sh -Dtarget=sandbox clean war` and `importdynamic`, then assert with `tools/iiq-verify/assert-mnb-objects.sh`
+- Describe the promotion pipeline: sandbox → dev → prod property files with CAB evidence
 - List secrets that must never be committed and how CI injects them
 - Decide when `importdynamic` is enough vs when a full WAR redeploy is mandatory
 
@@ -251,6 +251,9 @@ Write the three-artifact answer: (1) path to `config/.../MNB-*.xml` + git SHA, (
 ---
 
 ## Acceptance criteria
+
+- [ ] Promotion story uses existing academy packs in `config/` (not first HelloWorld-only contact — that was Lesson 03)
+- [ ] CAB-style note cites git path + TaskResult id for one Meridian object change
 
 - [ ] SPTARGET identified
 - [ ] At least one `MNB-*.xml` in `config/` (or staged lab-data with move note)

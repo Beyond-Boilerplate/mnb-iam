@@ -218,6 +218,8 @@ No identity create changes made.
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** Nightly order documents seeded TaskDefinitions (`Aggregate MNB-*`, `Refresh MNB Attributes` / Managers) under `config/TaskDefinition/`
+
 - [ ] Written runbook with ordered task names and stop/go rules
 - [ ] Full pipeline executed at least once (HR → targets → refresh)
 - [ ] Durations and results recorded

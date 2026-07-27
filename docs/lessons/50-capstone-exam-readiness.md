@@ -263,6 +263,9 @@ Print this section or export to PDF. Check each box only with evidence on file.
 
 ## Acceptance criteria
 
+- [ ] **Capstone grades git + evidence:** core Meridian objects present in `config/` (or binder lists SHAs/paths); screenshots alone are insufficient
+- [ ] `./tools/iiq-verify/assert-mnb-objects.sh` passes locally or on homelab (or failures explained with residual risk)
+
 - [ ] Pipeline tasks run and evidence saved
 - [ ] Clean + handled SoD stories documented
 - [ ] Cert demo with traced revoke

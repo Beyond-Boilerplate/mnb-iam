@@ -44,11 +44,11 @@ A **birthright role** (`MNB-Birthright-Employee`) is the automatic package every
 | employeeId | `MNB00120` | Correlation / native key into HR |
 | userName | `nina.joiner` | Cube name; email local-part |
 | email | `nina.joiner@meridiannb.com` | Target correlation for SaaS later |
-| managerId | `MNB00007` (`emily.bennett`) | Approvals and manager certs route here |
+| managersAssociateID | `MNB00007` (`emily.bennett`) | Approvals and manager certs route here |
 | status | `1` (active) | Joiner signal — inactive would skip birthright |
-| departmentCode | `RET` | Retail branch context |
+| departmentName / division | `RET` | Retail branch context |
 | jobCode | `TEL01` | Teller — not wire, not cloud |
-| workerType | `Employee` | Birthright rule includes Employees; contractors differ (Lesson 32) |
+| employeeType | `Employee` | Birthright rule includes Employees; contractors differ (Lesson 32) |
 | hireDate | `2026-07-26` | SLA clock starts when HR marks active |
 
 **Automatic:** birthright ELDAP via `MNB-Birthright-Employee`. **Not automatic:** CRM, wire (`WIRE_INIT`/`WIRE_APPR`), cloud, privileged roles. Compare `amelia.brooks` (also TEL01) — same birthright composition is the convergence test.
@@ -113,7 +113,7 @@ Before you merge anything into production HR (or the lab feed that stands in for
 
 **Expected result:** Column counts match; you understand Nina is an active Retail teller under `MNB00007`.
 
-**If it fails:** Fix header mismatch before merging — shifted columns corrupt managerId/status.
+**If it fails:** Fix header mismatch before merging — shifted columns corrupt managersAssociateID/inactive.
 
 ### Task 2 — Apply delta to HR file
 
@@ -164,7 +164,7 @@ Examiners sample whether birthright is *only* birthright. Privileged roles on da
 
 **Expected result:** Birthright only among business packs; privileged roles absent.
 
-**If it fails:** Re-check birthright rule; ensure refresh assigned roles; verify `workerType=Employee` on cube.
+**If it fails:** Re-check birthright rule; ensure refresh assigned roles; verify `employeeType=Employee` on cube.
 
 ### Task 6 — Gap analysis (non-birthright)
 
@@ -199,6 +199,8 @@ Controls without SLAs are aspirations. Write the numbers you will defend.
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** Joiner flow extends `config/Workflow/MNB-Workflow-Joiner.xml` (or documents diff to seed)
+
 - [ ] Nina’s HR row applied without corrupting HR file
 - [ ] MNB-HR aggregation and identity refresh succeeded
 - [ ] `nina.joiner` cube exists with correct manager/job
@@ -212,7 +214,7 @@ Controls without SLAs are aspirations. Write the numbers you will defend.
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Nina missing after agg | Row not in file path IIQ reads | Confirm `~/iiq-lab-data` path on app |
-| Identity created, no birthright | Assign roles off / rule exclude | Enable assign; fix workerType/status maps |
+| Identity created, no birthright | Assign roles off / rule exclude | Enable assign; fix employeeType/inactive maps |
 | Manager blank | MNB00007 missing or map fail | Ensure Emily exists; re-aggregate/refresh |
 | Duplicate Nina | Delta applied twice | Dedupe HR file; re-aggregate |
 | CSV column shift | Header appended or commas in fields | Restore bak; re-apply clean row |
@@ -237,7 +239,7 @@ Controls without SLAs are aspirations. Write the numbers you will defend.
 1. What triggers joiner in this lab?
 2. What must Nina get automatically?
 3. What is the joiner identity/birthright SLA target?
-4. Who is Nina’s managerId?
+4. Who is Nina’s managersAssociateID?
 5. Should Nina receive `MNB-Role-CloudAdmin` as a joiner?
 6. Why is inserting an HR row preferred over hand-creating a cube?
 

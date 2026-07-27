@@ -17,7 +17,7 @@
 You will be able to:
 
 1. Apply an HR leaver delta for `jordan.reed` (`MNB00092`) and propagate it through Account Aggregation and identity refresh.
-2. Distinguish **leaver** (`status=0` + `terminationDate`) from **leave of absence** (`onLeave=true`) on Meridian HR rows.
+2. Distinguish **leaver** (`inactive=true` / `status=Terminated` + `terminationDate`) from **leave of absence** (`exceptions=LOA`) on Meridian HR rows.
 3. Inventory residual high-risk access (`SAP_FI`, `AWS_ADMIN`, `GL_POST`) still present after HR marks the person inactive.
 4. Execute or document disable/revoke steps for directory and privileged links in the lab.
 5. Write a Meridian **leaver control standard** covering timing, scope, notifications, and evidence retention.
@@ -43,7 +43,7 @@ Do not confuse Jordan (terminate) with `sofia.torres` (leave). Wrong playbook = 
 | --- | --- | --- |
 | `status` | `0` (inactive) | Usually still `1` |
 | `terminationDate` | Populated (e.g. `2026-07-26`) | Empty |
-| `onLeave` | `false` | `true` |
+| `exceptions` | `false` | `true` |
 | Intent | End employment; destroy/disable access path | Temporary freeze; expected return |
 
 ### Lab persona — why Jordan is a Sev-1 leaver
@@ -62,7 +62,7 @@ Jordan also embodies the **finance-cloud toxic pair** (`SAP_FI` + `AWS_ADMIN`) f
 
 - **Disable** marks an account link inactive (login blocked; account may still exist for audit/hold).
 - **Revoke** removes entitlements/roles from the account.
-- HR `status=0` alone does **not** disable SAP or AWS — residual inventory is mandatory.
+- HR `inactive=true` alone does **not** disable SAP or AWS — residual inventory is mandatory.
 
 The wrong way: mark HR inactive, skip residual hunt, tell Audit “leavers are automatic.” That is how `AWS_ADMIN` survives termination.
 
@@ -94,7 +94,7 @@ Notify manager (deepa.nair) + evidence pack
 
 | Stage | What IIQ does | What you prove |
 | --- | --- | --- |
-| HR terminate | File row update for `MNB00092` | `status=0`, `terminationDate` set |
+| HR terminate | File row update for `MNB00092` | `inactive=true`, `terminationDate` set |
 | Aggregate + refresh | Task Results | Inactive signals on cube |
 | Residual inventory | Read Accounts/Entitlements | `SAP_FI`, `AWS_ADMIN`, `GL_POST` disposition |
 | Disable / revoke | Manage Accounts / file + agg / LCM | Critical access dead or ticketed |
@@ -123,7 +123,7 @@ Notify manager (deepa.nair) + evidence pack
 Read the delta like a change ticket. Mixing Sofia’s leave flags with Jordan’s terminate columns is the classic lab mistake.
 
 1. Open `~/iiq-lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv` (or repo `lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv`).
-2. Confirm the row: `employeeId=MNB00092`, `userName=jordan.reed`, `status=0`, `onLeave=false`, `terminationDate=2026-07-26`, manager `MNB00003`.
+2. Confirm the row: `employeeId=MNB00092`, `userName=jordan.reed`, `inactive=true`, `exceptions empty (not LOA)`, `terminationDate=2026-07-26`, manager `MNB00003`.
 3. Open the live HR feed your connector reads (often `~/iiq-lab-data/HRApplications.txt` or mapped CSV). Locate Jordan’s current row and note `status=1` before change.
 
 **Expected result:** Delta clearly shows inactive employee with termination date; current HR still shows Jordan active. You know exactly which columns will flip.
@@ -132,13 +132,13 @@ Read the delta like a change ticket. Mixing Sofia’s leave flags with Jordan’
 
 ### Task 2 — Apply the terminate delta into the authoritative HR file
 
-Only Jordan’s row changes. Leave Sofia (`onLeave=true`) and Samir (already `status=0`) alone.
+Only Jordan’s row changes. Leave Sofia (`exceptions=LOA`) and Samir (already `inactive=true`) alone.
 
 1. Update Jordan’s HR row to match the leaver CSV (do not invent columns). Preferred approach: replace the `MNB00092` line with the delta line, preserving header column order.
 2. Validate column count matches the header (comma count / CSV lint).
-3. Leave other employees unchanged — especially `sofia.torres` (`onLeave=true`) and `samir.hassan` (already `status=0`).
+3. Leave other employees unchanged — especially `sofia.torres` (`exceptions=LOA`) and `samir.hassan` (already `inactive=true`).
 
-**Expected result:** Only Jordan’s authoritative row shows `status=0` and `terminationDate=2026-07-26`. `onLeave` remains `false`.
+**Expected result:** Only Jordan’s authoritative row shows `inactive=true` and `terminationDate=2026-07-26`. `exceptions` remains `false`.
 
 **If it fails:** Restore from `lab-data/hr/MNB-HR-Employees.csv` and re-apply a single-line edit.
 
@@ -209,7 +209,9 @@ Order matters: directory first (blocks interactive login), then cloud Sev-1, the
 
 ## Acceptance criteria
 
-- [ ] Leaver CSV applied; Jordan `status=0` with `terminationDate` in authoritative HR.
+- [ ] **Bank craft exit:** Leaver flow extends `config/Workflow/MNB-Workflow-Leaver.xml` (or documents diff to seed)
+
+- [ ] Leaver CSV applied; Jordan `inactive=true` with `terminationDate` in authoritative HR.
 - [ ] Account Aggregation (MNB-HR) and Refresh MNB Identities completed successfully.
 - [ ] Identity cube shows inactive/terminated signals for `jordan.reed`.
 - [ ] Residual inventory lists `SAP_FI`, `AWS_ADMIN`, `GL_POST` (and `ELDAP`) with disposition.
@@ -225,7 +227,7 @@ Order matters: directory first (blocks interactive login), then cloud Sev-1, the
 | Jordan still active after refresh | HR file not updated or wrong path | Confirm connector file path; re-aggregate HR |
 | CSV parse / column shift | Extra comma or truncated field | Match header exactly to leaver delta |
 | No SAP/AWS on cube | Apps not aggregated or uncorrelated | Aggregate target apps; fix correlation |
-| Confused with Sofia | Mixing `onLeave` and `status` | Sofia stays leave; Jordan is terminate |
+| Confused with Sofia | Mixing `exceptions` and `status` | Sofia stays leave; Jordan is terminate |
 | LCM event never fired | `init-lcm.xml` / event not configured | File status change is enough for this lesson |
 
 ---
@@ -248,11 +250,11 @@ Order matters: directory first (blocks interactive login), then cloud Sev-1, the
 3. Name the four required parts of the Meridian leaver control standard.
 4. What runs first after editing HR: Account Aggregation or identity Refresh?
 5. Who is Jordan’s manager for notification purposes?
-6. Does HR `status=0` automatically remove `AWS_ADMIN`?
+6. Does HR `inactive=true` automatically remove `AWS_ADMIN`?
 
 ### Answers
 
-1. Leaver: `status=0` and populated `terminationDate` with `onLeave=false`. Leave: `onLeave=true`, typically still active employment status.
+1. Leaver: `inactive=true` and populated `terminationDate` with `exceptions empty (not LOA)`. Leave: `exceptions=LOA`, typically still active employment status.
 2. Holds critical finance (`SAP_FI`, `GL_POST`) plus cloud admin (`AWS_ADMIN`) — material residual risk after exit.
 3. Timing, scope, notifications, evidence retention.
 4. Account Aggregation task for HR, then Refresh MNB Identities.
@@ -273,7 +275,7 @@ Order matters: directory first (blocks interactive login), then cloud Sev-1, the
 
 ## Stretch lab
 
-1. Re-check `samir.hassan` (`status=0`) for residual `DWRP` / `SAP_FI` / `ODS` as a backlog defect — compare disabled flags in `MNB-IT-Access.csv`.
+1. Re-check `samir.hassan` (`inactive=true`) for residual `DWRP` / `SAP_FI` / `ODS` as a backlog defect — compare disabled flags in `MNB-IT-Access.csv`.
 2. If LCM is active, configure or inspect a leaver lifecycle event on `status` change and capture the workflow name in the binder.
 3. Draft a Sev-1 communications template (Security + Finance + Technology) for privileged leavers.
 

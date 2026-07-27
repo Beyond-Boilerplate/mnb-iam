@@ -1,0 +1,13 @@
+import sailpoint.object.*;
+import sailpoint.api.TaskManager;
+import java.util.HashMap;
+
+String taskName = "Refresh MNB Managers";
+TaskDefinition td = context.getObjectByName(TaskDefinition.class, taskName);
+if (td == null) {
+  System.out.println("FAIL: no TaskDefinition " + taskName);
+} else {
+  TaskManager tm = new TaskManager(context);
+  TaskResult tr = tm.runSync(td, new HashMap());
+  System.out.println("TASK=" + taskName + " STATUS=" + tr.getCompletionStatus() + " NAME=" + tr.getName());
+}

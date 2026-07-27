@@ -212,6 +212,8 @@ Re: Initial SoD policy scan
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** SoD fundamentals cite seed `config/Policy/MNB-Policy-SOD-Wire-Dual-Control.xml` before Lesson 40 activation
+
 - [ ] All matrix pairs explained in business language.
 - [ ] `MNB-SOD-Wire-DualControl` created and enabled.
 - [ ] `MNB-SOD-Finance-Cloud` created and enabled.

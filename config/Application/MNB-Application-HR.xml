@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+  Meridian P1 — authoritative HR (Delimited File / CSV). Lessons 04–06.
+  Schema mirrors a real bank HRIS extract header (userId, managersAssociateID, inactive, …).
+-->
+<Application authoritative="true"
+             connector="sailpoint.connector.DelimitedFileConnector"
+             featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA"
+             icon="enterpriseIcon"
+             name="MNB-HR"
+             type="DelimitedFile">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="MNB-HR EmployeeId Correlation"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="delimiter" value=","/>
+      <entry key="file" value="%%MNB_HR_FILE%%"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="parseType" value="delimited"/>
+      <entry key="partitionMode" value="auto"/>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+      <entry key="managerCorrelationFilter">
+        <value>
+          <Filter operation="EQ" property="userId" value="managersAssociateID"/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Meridian authoritative HR feed (academy). Header matches production-style bank HRIS extract. Create-identities ON."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="name"
+            identityAttribute="userId"
+            nativeObjectType="account"
+            objectType="account"
+            permissionsRemediationModificationType="None">
+      <AttributeDefinition name="addressWork" type="string"/>
+      <AttributeDefinition name="city" type="string"/>
+      <AttributeDefinition name="company" type="string"/>
+      <AttributeDefinition name="companyNumber" type="string"/>
+      <AttributeDefinition name="contractEndDate" type="string"/>
+      <AttributeDefinition name="corporateTitle" type="string"/>
+      <AttributeDefinition name="costCenter" type="string"/>
+      <AttributeDefinition name="costCenterName" type="string"/>
+      <AttributeDefinition name="departmentName" type="string"/>
+      <AttributeDefinition name="desc" type="string"/>
+      <AttributeDefinition name="displayName" type="string"/>
+      <AttributeDefinition name="distinguishedName" type="string"/>
+      <AttributeDefinition name="division" type="string"/>
+      <AttributeDefinition name="domain" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition name="employeeType" type="string"/>
+      <AttributeDefinition name="exceptions" type="string"/>
+      <AttributeDefinition name="expirationDate" type="string"/>
+      <AttributeDefinition name="fax" type="string"/>
+      <AttributeDefinition name="firstname" type="string"/>
+      <AttributeDefinition name="fullName" type="string"/>
+      <AttributeDefinition name="hireDate" type="string"/>
+      <AttributeDefinition name="inactive" type="string"/>
+      <AttributeDefinition name="isManager" type="string"/>
+      <AttributeDefinition name="JobCode" type="string"/>
+      <AttributeDefinition name="lastname" type="string"/>
+      <AttributeDefinition name="location" type="string"/>
+      <AttributeDefinition name="locationTypeDesc" type="string"/>
+      <AttributeDefinition name="manager" type="string"/>
+      <AttributeDefinition name="managersAssociateID" type="string"/>
+      <AttributeDefinition name="managerStatus" type="string"/>
+      <AttributeDefinition name="middleName" type="string"/>
+      <AttributeDefinition name="mobilePhone" type="string"/>
+      <AttributeDefinition name="name" type="string"/>
+      <AttributeDefinition name="postalCode" type="string"/>
+      <AttributeDefinition name="previousJobTitle" type="string"/>
+      <AttributeDefinition name="projectID" type="string"/>
+      <AttributeDefinition name="rfFinancialManagerID" type="string"/>
+      <AttributeDefinition name="rfLocationName" type="string"/>
+      <AttributeDefinition name="rfSponser" type="string"/>
+      <AttributeDefinition name="RfSupervisoryOrganizationWID" type="string"/>
+      <AttributeDefinition name="state" type="string"/>
+      <AttributeDefinition name="status" type="string"/>
+      <AttributeDefinition name="statusFlag" type="string"/>
+      <AttributeDefinition name="SupORG" type="string"/>
+      <AttributeDefinition name="telephoneNumber" type="string"/>
+      <AttributeDefinition name="terminationDate" type="string"/>
+      <AttributeDefinition name="title" type="string"/>
+      <AttributeDefinition name="type" type="string"/>
+      <AttributeDefinition name="userId" type="string"/>
+      <AttributeDefinition name="userType" type="string"/>
+      <AttributeDefinition name="wid_owner" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

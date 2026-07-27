@@ -212,6 +212,8 @@ Directory and CRM have different governance postures—read both extracts so you
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** Directory/CRM apps documented with `config/` export path (or residual risk if still UI-only)
+
 - [ ] All four apps created with correct CSV paths
 - [ ] All non-authoritative; entitlement attributes mapped
 - [ ] Four Account Aggregation tasks succeeded

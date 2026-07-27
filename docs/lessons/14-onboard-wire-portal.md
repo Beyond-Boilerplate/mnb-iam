@@ -205,6 +205,8 @@ A: Entitlements WIRE_INIT and WIRE_APPR on MNB-WirePortal; SoD policy
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** `MNB-WirePortal` matches `config/Application/MNB-Application-WirePortal.xml` (import-verify or UI+export)
+
 - [ ] `MNB-WirePortal` created; non-authoritative; aggregated (~10 accounts)
 - [ ] `WIRE_INIT` and `WIRE_APPR` both present
 - [ ] `priya.wire` = initiate; `marcus.approve` = approve verified

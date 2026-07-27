@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate name="MNB-EmailTemplate-Joiner-Notify">
+  <Body>
+    <![CDATA[
+<html>
+<body>
+<p>Welcome to Meridian National Bank.</p>
+<p>Identity: $identityName</p>
+<p>This academy template is wired by MNB-Workflow-Joiner (Lesson 49).</p>
+</body>
+</html>
+    ]]>
+  </Body>
+  <Description>Meridian joiner notification skeleton.</Description>
+  <Signature>
+    <Inputs>
+      <Argument name="identityName" type="string"/>
+    </Inputs>
+  </Signature>
+  <Subject>Meridian IAM — Joiner notification (lab)</Subject>
+</EmailTemplate>

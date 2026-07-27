@@ -191,6 +191,8 @@ Catalog go-live is dual-controlled design, not an IAM-only publish.
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** Role model notes cite seeded `MNB-Role-Birthright-Employee` / `MNB-Role-IT-Directory-User` under `config/Bundle/`
+
 - [ ] IT vs business role explanation written in Meridian language
 - [ ] Catalog v0 table with MNB-Birthright-* and MNB-Role-* entries
 - [ ] Job→role mapping includes WIR01-only initiator rule

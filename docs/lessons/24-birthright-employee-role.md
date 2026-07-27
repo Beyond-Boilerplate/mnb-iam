@@ -17,7 +17,7 @@
 You will be able to:
 
 - Create bundle **`MNB-Birthright-Employee`** containing only **ELDAP**
-- Write an assignment rule/selector for active employees (`workerType=Employee`, active status)
+- Write an assignment rule/selector for active employees (`employeeType=Employee`, `inactive=false`)
 - Run identity refresh with role assignment enabled and verify birthright on `amelia.brooks`
 - Prove terminated identities (e.g. `samir.hassan`) do not retain birthright assignment intent
 - Document birthright composition, exclusions, and joiner SLA impact
@@ -42,7 +42,7 @@ A **birthright role** is automatically assigned when an identity matches criteri
 ```
 IF identity has MNB-HR account
  AND status = active (1)
- AND workerType = Employee
+ AND employeeType = Employee
 THEN assign MNB-Birthright-Employee
          └── entitlement ELDAP (Enterprise Directory)
 ```
@@ -200,6 +200,8 @@ Positive proof without negative proof fails exams—examiners sample leavers and
 ---
 
 ## Acceptance criteria
+
+- [ ] **Bank craft exit:** Birthright role aligns with `config/Bundle/MNB-Bundle-Birthright-Employee.xml` (extend seed; re-export profiles)
 
 - [ ] `MNB-Birthright-Employee` exists with ELDAP only
 - [ ] Assignment rule limits to active Employees

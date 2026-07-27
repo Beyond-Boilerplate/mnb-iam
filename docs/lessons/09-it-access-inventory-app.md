@@ -115,6 +115,12 @@ Aggregate MNB-IT-Access
 
 ## Lab procedure
 
+### Task 0 — Bank craft (import-first)
+
+Prefer seeded `config/Application/MNB-Application-IT-Access.xml` and `Aggregate MNB-IT-Access`. If present, verify authoritative=false and CSV path; extend schema/entitlement flags in UI; re-export if you change durable settings. If missing, create in UI then export to that git path.
+
+**Expected result:** CHANGELOG cites seed verify or `config/Application/MNB-Application-IT-Access.xml` export.
+
 ### Task 1 — Inspect the dump
 
 Before creating the application, understand the multi-row-per-person shape—that design drives entitlement aggregation and later SoD detection.
@@ -207,6 +213,7 @@ Authoritative / create-identities is an **application** setting—same place you
 - [ ] `MNB-IT-Access` created with absolute path
 - [ ] `itAccess` configured as entitlement attribute
 - [ ] Create-identities disabled; CHANGELOG `MNB-IT-Access authoritative=false`
+- [ ] Bank craft exit: seed verified **or** XML under `config/Application/MNB-Application-IT-Access.xml`
 - [ ] Orphan vs uncorrelated distinction written in binder
 - [ ] `Aggregate MNB-IT-Access` succeeded with evidence
 - [ ] jordan.reed / kai.nguyen / wire personas spot-checked

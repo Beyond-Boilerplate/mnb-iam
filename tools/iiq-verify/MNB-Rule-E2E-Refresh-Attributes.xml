@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB-Rule-E2E-Refresh-Attributes">
+  <Description>Lab E2E: run Refresh MNB Attributes synchronously.</Description>
+  <Source>
+    <![CDATA[
+      import sailpoint.object.TaskDefinition;
+      import sailpoint.object.TaskResult;
+      import sailpoint.api.TaskManager;
+      import java.util.HashMap;
+
+      String taskName = "Refresh MNB Attributes";
+      TaskDefinition td = context.getObjectByName(TaskDefinition.class, taskName);
+      if (td == null) return "FAIL missing " + taskName;
+      TaskResult tr = new TaskManager(context).runSync(td, new HashMap());
+      return "OK " + taskName + " " + tr.getCompletionStatus();
+    ]]>
+  </Source>
+</Rule>

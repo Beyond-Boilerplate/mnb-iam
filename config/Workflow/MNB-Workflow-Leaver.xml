@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Meridian leaver skeleton — Lessons 31–34. -->
+<Workflow explicitTransitions="true" name="MNB-Workflow-Leaver" type="IdentityLifecycle">
+  <Variable input="true" name="identityName">
+    <Description>Leaver identity name</Description>
+  </Variable>
+  <Variable initializer="string:Leaver" name="flow"/>
+  <Variable initializer="LCM" name="source"/>
+  <Description>
+    Academy leaver lifecycle stub for Meridian. Disablement and residual hunting land in Lessons 31–34 / 20.
+  </Description>
+  <Step icon="Start" name="Start" posX="20" posY="20">
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="160" posY="20"/>
+</Workflow>

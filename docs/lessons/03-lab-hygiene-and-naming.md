@@ -13,16 +13,17 @@
 You will be able to:
 
 - Copy Meridian fixtures into `~/iiq-lab-data` with a reproducible command
-- Document absolute file paths Tomcat can read
-- Apply the `MNB-` naming standard to applications, tasks, roles, and policies
+- Document absolute file paths Tomcat can read and align `%%MNB_*_FILE%%` SSB tokens
+- Apply the `MNB-` naming standard to applications, tasks, roles, and policies — including git paths `config/<Type>/MNB-….xml`
+- Import the Meridian academy seed pack (`importdynamic` or verify HelloWorld) so learner setup matches bank-shaped SSB
 - Create a dated evidence folder pattern for screenshots and task results
 - Maintain a simple change log that an examiner could follow
 
 ## Why this matters
 
-Messy labs teach bad production habits. Banks survive exams with reproducible builds: prefixed objects, absolute data paths, and dated evidence of task success—not “it worked on my laptop yesterday.”
+Messy labs teach bad production habits. Banks survive exams with reproducible builds: prefixed objects, absolute data paths, **git-owned XML**, and dated evidence of task success—not “it worked on my laptop yesterday.”
 
-**Control / audit:** Change control asks “what did you create, when, and why?” Your naming convention and evidence folder are the training-ground version of a CAB ticket trail.
+**Control / audit:** Change control asks “what did you create, when, and why?” Your naming convention, `config/` path, and evidence folder are the training-ground version of a CAB ticket trail.
 
 ## Concepts
 
@@ -33,16 +34,20 @@ Messy labs teach bad production habits. Banks survive exams with reproducible bu
 | Refresh tasks | Clear purpose in name | `Refresh MNB Attributes`, `Refresh MNB Managers` (Lesson 06) |
 | Populations | `MNB-` + audience | `MNB-Active-Employees`, `MNB-Treasury` |
 | Roles / policies | `MNB-Role-*`, `MNB-SOD-*` | Later lessons |
+| **Git object files** | `config/<Type>/MNB-<Type>-<Business>.xml` | `Application/MNB-Application-HR.xml` |
 
 ```text
-  repo lab-data/  --copy-->  ~/iiq-lab-data/  --absolute path-->  IIQ DelimitedFile apps
+  repo lab-data/  --copy-->  ~/iiq-lab-data/  --%%TOKENS%%-->  config/ Application XML
                                       |
                                       +--> screenshots --> ~/iiq-lab-evidence/YYYY-MM-DD/
+  repo config/  --SSB build/import-->  IIQ DB (same objects Meridian Ops promotes)
 ```
+
+**Learner setup = scoped bank setup.** This repo is an SSB project. CSV fixtures live in `lab-data/`; IIQ objects live in [`config/`](../../config/PACKS.md). You will still craft some objects in the UI (first principles), but durable controls must survive wipe+import.
 
 **Delimited File ≈ CSV.** In IdentityIQ, the Delimited File connector almost always means a **CSV** feed: comma delimiter, header row, one record per line. Meridian lab files may end in `.txt` (`HRApplications.txt`, `EmployeeData.txt`)—that is only the extension. Treat the content as CSV and configure the app with comma + header. Do not invent pipe/tab formats unless a real feed requires them.
 
-**Why absolute paths:** Tomcat’s working directory is not your shell cwd. Relative paths like `./HRApplications.txt` silently fail or read the wrong file after restart.
+**Why absolute paths:** Tomcat’s working directory is not your shell cwd. Relative paths like `./HRApplications.txt` silently fail or read the wrong file after restart. SSB tokens (`%%MNB_HR_FILE%%`) must resolve to absolute paths.
 
 **Control owner (lab):** You (trainee). In prod, IAM Ops owns task schedules; Application owners own entitlement dictionaries.
 
@@ -113,22 +118,63 @@ realpath ~/iiq-lab-data/HRApplications.txt
 
 **Expected result:** Notebook has a full absolute path starting with `/` (macOS/Linux) ready for Lesson 04 application config.
 
+### Task 2b — Align SSB file tokens
+
+Bank-shaped builds substitute `%%MNB_HR_FILE%%` (and siblings) from `sandbox.target.properties`. Point them at **your** absolute lab paths so import matches the UI.
+
+1. Open `sandbox.target.properties` in the repo.
+2. Set (use your `realpath` values):
+
+```properties
+%%MNB_HR_FILE%%=/Users/<you>/iiq-lab-data/HRApplications.txt
+%%MNB_IT_ACCESS_FILE%%=/Users/<you>/iiq-lab-data/EmployeeData.txt
+%%MNB_CORE_BANKING_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-CoreBanking.csv
+%%MNB_WIRE_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-WirePortal.csv
+%%MNB_SAP_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-SAP-Finance.csv
+%%MNB_AWS_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-AWS-Cloud.csv
+```
+
+3. Do **not** commit workstation-specific paths if your team shares the repo—use a local override or document the path in CHANGELOG for the academy laptop. Homelab keeps `/opt/iiq-lab-data/…`.
+4. Skim [`config/PACKS.md`](../../config/PACKS.md) so you know which objects the academy seeds.
+
+**Expected result:** Tokens match your lab-data absolute paths; PACKS.md skimmed.
+
 ### Task 3 — Naming standard card
 
 1. Create a one-page naming card in your notebook:
 
-| Object type | Pattern | First instance |
-| --- | --- | --- |
-| HR app | `MNB-HR` | Lesson 04 |
-| IT dump app | `MNB-IT-Access` | Lesson 09 |
-| HR aggregate | `Aggregate MNB-HR` | Lesson 04 |
-| IT aggregate | `Aggregate MNB-IT-Access` | Lesson 09 |
-| Refresh (attrs / managers / roles) | `Refresh MNB Attributes`, `Refresh MNB Managers`, … | Lesson 06 |
-| Populations | `MNB-Active-Employees`, … | Lesson 07 |
+| Object type | Pattern | First instance | Git path |
+| --- | --- | --- | --- |
+| HR app | `MNB-HR` | Lesson 04 | `config/Application/MNB-Application-HR.xml` |
+| IT dump app | `MNB-IT-Access` | Lesson 09 | `config/Application/MNB-Application-IT-Access.xml` |
+| HR aggregate | `Aggregate MNB-HR` | Lesson 04 | `config/TaskDefinition/MNB-TaskDefinition-Aggregate-HR.xml` |
+| Attr refresh | `Refresh MNB Attributes` | Lesson 06 | `config/TaskDefinition/MNB-TaskDefinition-Refresh-Attributes.xml` |
+| Populations | `MNB-Active-Employees`, … | Lesson 07 | (UI / later export) |
 
-2. Rule: never create Meridian objects without the `MNB-` prefix in a shared lab.
+2. Rule: never create Meridian objects without the `MNB-` prefix in a shared lab; durable controls also land under `config/`.
 
 **Expected result:** Card you can glance at for the rest of the curriculum.
+
+### Task 3b — First SSB import (HelloWorld + seed pack)
+
+Learner setup imports the same `config/` Meridian Ops promotes. Prove the pipe works before Lesson 04 UI craft.
+
+1. From repo root (IIQ already running; `SPTARGET=sandbox`):
+
+```bash
+export SPTARGET=sandbox
+./build.sh importdynamic
+# Homelab alternate: rely on CD import after push; then assert:
+# ./tools/iiq-verify/assert-mnb-objects.sh k8s
+```
+
+2. In IIQ Debug (or Object search), confirm **`MNB-Rule-Hello-World`** exists.
+3. Optionally confirm **`MNB-HR`** Application from the seed pack (if import succeeded with your file tokens). If `MNB-HR` is present, Lesson 04 becomes **verify + attribute maps** instead of creating from scratch—still walk the UI so you understand every setting.
+4. CHANGELOG: `importdynamic — HelloWorld (+ HR pack if present)`.
+
+**Expected result:** At least HelloWorld visible in Debug; you can explain bake XML → import into DB.
+
+**If it fails:** Read console import errors; confirm `config/Rule/MNB-Rule-HelloWorld.xml` exists; fix tokens; see [docs/SSD.md](../SSD.md).
 
 ### Task 4 — Evidence folder
 
@@ -176,8 +222,9 @@ EOF
 ## Acceptance criteria
 
 - [ ] `~/iiq-lab-data` contains HR, EmployeeData, apps, scenarios, reference
-- [ ] Absolute HR path recorded
-- [ ] Naming card complete
+- [ ] Absolute HR path recorded; `%%MNB_*_FILE%%` tokens aligned
+- [ ] Naming card complete (includes git paths)
+- [ ] `MNB-Rule-Hello-World` present after import (or failure documented with fix plan)
 - [ ] Evidence folder + INTENT.txt created
 - [ ] CHANGELOG started
 - [ ] Relative-path failure explained
@@ -186,6 +233,9 @@ EOF
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
+| Import finds no objects | Wrong SPTARGET / WAR not built | `./build.sh clean war` then `importdynamic` |
+| App file path empty after import | Token not replaced | Fix `sandbox.target.properties`; rebuild |
+| Permission denied on lab file | OS user / ACL | Adjust ownership; keep path absolute |
 | `cp: No such file` | Wrong cwd | `cd` to Sailpoint repo root |
 | Permission denied reading file as Tomcat | File owned by another user | `chmod`/`chown` carefully; keep private |
 | Evidence folders multiply chaotically | No date convention | Always `YYYY-MM-DD` |
@@ -233,9 +283,9 @@ EOF
 
 ## Summary
 
-- Lab fixtures live under `~/iiq-lab-data` with absolute paths for IIQ.
-- All Meridian objects use `MNB-` naming; tasks follow `Aggregate` / `Refresh` patterns.
-- Dated evidence folders and a changelog train exam-ready habits.
+- Lab fixtures live under `~/iiq-lab-data` with absolute paths; SSB `%%MNB_*_FILE%%` tokens must match.
+- All Meridian objects use `MNB-` naming in IIQ **and** `config/<Type>/MNB-….xml` in git.
+- First `importdynamic` proves learner setup equals scoped bank SSB import; dated evidence + CHANGELOG train exam-ready habits.
 
 ---
 

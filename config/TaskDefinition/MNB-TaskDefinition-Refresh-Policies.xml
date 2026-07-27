@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Refresh MNB Policies"
+                resultAction="Rename"
+                subType="task_item_type_identity"
+                type="Identity">
+  <Attributes>
+    <Map>
+      <entry key="promoteAttributes" value="false"/>
+      <entry key="refreshManagerStatus" value="false"/>
+      <entry key="checkPolicies" value="true"/>
+      <entry key="refreshAssignedRoles" value="false"/>
+      <entry key="provision" value="false"/>
+      <entry key="synchronizeAttributes" value="false"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+    </Map>
+  </Attributes>
+  <Description>Meridian purpose-built policy refresh shell (enable after Lessons 39+).</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Identity Refresh"/>
+  </Parent>
+</TaskDefinition>

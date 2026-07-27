@@ -276,6 +276,8 @@ Write the three-artifact answer: (1) Application `MNB-ActiveDirectory` Rules tab
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** New Meridian rules land under `config/Rule/` with `MNB-Rule-*` names (HelloWorld + Correlation already seeded)
+
 - [ ] Annotated cheat sheet complete with Meridian examples column
 - [ ] Five named stubs created with correct types and comment-only bodies
 - [ ] Trace map links stubs to future lessons and attach points

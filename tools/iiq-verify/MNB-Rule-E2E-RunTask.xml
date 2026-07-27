@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB-Rule-E2E-RunTask">
+  <Description>Lab helper: run a named TaskDefinition synchronously. Arg taskName.</Description>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="taskName" type="string"/>
+    </Inputs>
+  </Signature>
+  <Source>
+    <![CDATA[
+      import sailpoint.object.TaskDefinition;
+      import sailpoint.object.TaskResult;
+      import sailpoint.api.TaskManager;
+      import java.util.HashMap;
+
+      if (taskName == null || taskName.length() == 0) {
+        return "FAIL: taskName required";
+      }
+      TaskDefinition td = context.getObjectByName(TaskDefinition.class, taskName);
+      if (td == null) {
+        return "FAIL: TaskDefinition not found: " + taskName;
+      }
+      TaskManager tm = new TaskManager(context);
+      TaskResult tr = tm.runSync(td, new HashMap());
+      String status = (tr.getCompletionStatus() == null) ? "null" : tr.getCompletionStatus().toString();
+      return "OK task=" + taskName + " status=" + status + " result=" + tr.getName();
+    ]]>
+  </Source>
+</Rule>

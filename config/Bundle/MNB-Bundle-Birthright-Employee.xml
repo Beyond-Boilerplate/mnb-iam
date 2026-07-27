@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Meridian birthright business role skeleton — Lesson 24. Profiles extended in lab. -->
+<Bundle displayName="MNB Birthright Employee" name="MNB-Role-Birthright-Employee" type="business">
+  <Attributes>
+    <Map>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Academy birthright for active Meridian employees (employeeType=Employee, inactive=false)."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Selector>
+    <IdentitySelector>
+      <MatchExpression and="true">
+        <MatchTerm name="employeeType" type="IdentityAttribute" value="Employee"/>
+        <MatchTerm name="inactive" type="IdentityAttribute" value="false"/>
+      </MatchExpression>
+    </IdentitySelector>
+  </Selector>
+</Bundle>

@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application authoritative="false"
+             connector="sailpoint.connector.DelimitedFileConnector"
+             featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA"
+             name="MNB-WirePortal"
+             type="DelimitedFile">
+  <Attributes>
+    <Map>
+      <entry key="delimiter" value=","/>
+      <entry key="file" value="%%MNB_WIRE_FILE%%"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="parseType" value="delimited"/>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Meridian wire portal extract (dual-control). Production reality: Web Services — Lesson 68."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="userName" identityAttribute="employeeId" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="userName" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition name="employeeId" type="string"/>
+      <AttributeDefinition managed="true" multi="true" name="entitlement" type="string"/>
+      <AttributeDefinition name="accountStatus" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

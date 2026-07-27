@@ -53,4 +53,13 @@ export SPTARGET=sandbox   # or: ./build.sh -Dtarget=sandbox …
 
 Lesson work should land here as XML exports so CI/CD can promote `sandbox → dev → test → prod` with the same Git history.
 
+**Academy packs:** see [PACKS.md](PACKS.md) for the rightly scoped object inventory (HR slice, inventory, target apps, roles, LCM stubs, SoD). Learner setup imports these packs — same path Meridian Ops uses for promotion.
+
 Ignore environment-only files via `sandbox.ignorefiles.properties` (and siblings).
+
+### Verify after import
+
+```bash
+./tools/iiq-verify/assert-mnb-objects.sh local   # laptop IIQ_HOME
+./tools/iiq-verify/assert-mnb-objects.sh k8s     # homelab pod
+```

@@ -202,6 +202,8 @@ Leaver residual (lab): samir.hassan — SAP_FI disabled but still present
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** `MNB-SAP-Finance` matches `config/Application/MNB-Application-SAP-Finance.xml` (import-verify or UI+export)
+
 - [ ] `MNB-SAP-Finance` created; non-authoritative
 - [ ] `Aggregate MNB-SAP-Finance` succeeded (~8 accounts)
 - [ ] `SAP_FI` entitlement mapped and dictionary-enriched

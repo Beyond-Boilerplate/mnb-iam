@@ -4,6 +4,9 @@
 set -euo pipefail
 NS="${NAMESPACE:-sailpoint}"
 DEPLOY="${IIQ_DEPLOYMENT:-identityiq}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+ASSERT="${REPO_ROOT}/tools/iiq-verify/assert-mnb-objects.sh"
 
 POD="$(kubectl -n "$NS" get pod -l "app.kubernetes.io/name=${DEPLOY}" -o jsonpath='{.items[0].metadata.name}')"
 if [[ -z "$POD" ]]; then
@@ -21,10 +24,10 @@ for _ in $(seq 1 60); do
 done
 
 INIT_XML="/usr/local/tomcat/webapps/identityiq/WEB-INF/config/sp.init-custom.xml"
-RULE_CHECK="/usr/local/tomcat/webapps/identityiq/WEB-INF/config/custom/Rule"
+CUSTOM_ROOT="/usr/local/tomcat/webapps/identityiq/WEB-INF/config/custom"
 
-echo "Custom Rule files in image:"
-kubectl -n "$NS" exec "$POD" -c identityiq -- sh -c "ls -la ${RULE_CHECK} 2>/dev/null || echo '(none yet)'"
+echo "Custom object tree in image (sample):"
+kubectl -n "$NS" exec "$POD" -c identityiq -- sh -c "find ${CUSTOM_ROOT} -name 'MNB-*.xml' 2>/dev/null | head -40 || echo '(none yet)'"
 
 echo "Importing ${INIT_XML} via iiq console (iiqBeans)…"
 kubectl -n "$NS" exec "$POD" -c identityiq -- sh -c "
@@ -35,3 +38,10 @@ kubectl -n "$NS" exec "$POD" -c identityiq -- sh -c "
 "
 
 echo "Custom object import finished."
+
+if [[ -x "$ASSERT" ]]; then
+  echo "Running Meridian object allowlist assert…"
+  NAMESPACE="$NS" IIQ_DEPLOYMENT="$DEPLOY" "$ASSERT" k8s
+else
+  echo "WARN: assert script missing at ${ASSERT}; skipping allowlist check"
+fi

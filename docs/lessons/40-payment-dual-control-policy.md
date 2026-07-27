@@ -209,6 +209,8 @@ Required fields: identity, entitlements, compensating control, expiry, ticket
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** Policy aligns with `config/Policy/MNB-Policy-SOD-Wire-Dual-Control.xml` (activate/enrich seed; re-export)
+
 - [ ] Priya/Marcus validated clean before and after.
 - [ ] Exception rules written (30-day max, `rachel.evans` signoff).
 - [ ] Violation induced, detected, and documented.

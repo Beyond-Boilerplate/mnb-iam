@@ -323,6 +323,9 @@ Binary gates (pass/fail). Any fail → no prod claim.
 
 ## Acceptance criteria
 
+- [ ] Blueprint evidence index maps controls to `config/MNB-*.xml` paths + lesson TaskResults (git + evidence)
+- [ ] Assert script allowlist called out as wipe+redeploy acceptance for academy Meridian product layer
+
 - [ ] Executive one-pager
 - [ ] Architecture diagram (includes SIEM + CI/CD)
 - [ ] App/connector register ≥ 6 apps

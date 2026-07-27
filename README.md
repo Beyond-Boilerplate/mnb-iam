@@ -13,6 +13,7 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 | [docs/SSD.md](docs/SSD.md) | How SSD/SSB works in this repo + CI/CD path |
 | [docs/HOMELAB-CD.md](docs/HOMELAB-CD.md) | GHCR + Helm + Tailscale → `sailpoint.lmsapp.us` |
 | [config/README.md](config/README.md) | Where to add XML features |
+| [config/PACKS.md](config/PACKS.md) | Meridian academy object packs (HR, apps, roles, LCM, SoD) |
 | [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) | Manual / conceptual install notes |
 | [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) | Beginner architecture |
 | [docs/lessons/README.md](docs/lessons/README.md) | Progressive Meridian lessons |

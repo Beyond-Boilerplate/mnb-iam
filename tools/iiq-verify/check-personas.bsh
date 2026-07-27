@@ -1,0 +1,28 @@
+import sailpoint.object.*;
+
+Application app = context.getObjectByName(Application.class, "MNB-HR");
+if (app == null) {
+  System.out.println("FAIL: MNB-HR missing");
+} else {
+  System.out.println("MNB-HR authoritative=" + app.isAuthoritative() + " file=" + app.getAttributeValue("file"));
+}
+
+String[] names = {"helen.ross", "priya.wire", "samir.hassan", "sofia.torres", "raj.external"};
+int ok = 0;
+for (int i = 0; i < names.length; i++) {
+  String n = names[i];
+  Identity id = context.getObjectByName(Identity.class, n);
+  if (id == null) {
+    // try search by display / links
+    System.out.println("MISSING identity name=" + n);
+  } else {
+    ok++;
+    System.out.println("OK identity=" + id.getName() + " display=" + id.getDisplayName() + " inactive=" + id.isInactive());
+  }
+}
+System.out.println("PERSONA_OK=" + ok + "/" + names.length);
+
+// Count identities with MNB-HR link
+QueryOptions qo = new QueryOptions();
+int total = context.countObjects(Identity.class, qo);
+System.out.println("IDENTITY_COUNT=" + total);

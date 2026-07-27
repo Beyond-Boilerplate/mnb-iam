@@ -206,6 +206,8 @@ Vendor/contractor admins require employeeId correlation and sponsor review.
 
 ## Acceptance criteria
 
+- [ ] **Bank craft exit:** `MNB-AWS-Cloud` matches `config/Application/MNB-Application-AWS-Cloud.xml` (import-verify or UI+export)
+
 - [ ] `MNB-AWS-Cloud` non-authoritative app created and aggregated (~9 accounts)
 - [ ] `AWS_ADMIN` mapped and marked critical / non-requestable
 - [ ] `jordan.reed` confirmed SAP_FI + AWS_ADMIN toxic pair
