@@ -46,6 +46,14 @@ if ! kubectl -n "$NS" rollout status deploy/sailpoint-edge --timeout=3m; then
   exit 1
 fi
 
+# After IIQ Service recreate, static nginx upstreams can stick on a dead ClusterIP.
+# Force a bounce so ConfigMap + DNS are fresh (resolver fix is in edge-gateway.yaml).
+kubectl -n "$NS" rollout restart deploy/sailpoint-edge
+if ! kubectl -n "$NS" rollout status deploy/sailpoint-edge --timeout=3m; then
+  kubectl -n "$NS" get pods,deploy,svc -o wide || true
+  exit 1
+fi
+
 echo "Public surface ready."
 echo "  Academy:     https://sailpoint.lmsapp.us/"
 echo "  IdentityIQ:  https://sailpoint.lmsapp.us/identityiq/login.jsf"

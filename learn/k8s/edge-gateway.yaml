@@ -13,14 +13,9 @@ metadata:
     app.kubernetes.io/name: sailpoint-edge
 data:
   default.conf: |
-    upstream iiq_upstream {
-      server identityiq.sailpoint.svc.cluster.local:8080;
-      keepalive 16;
-    }
-    upstream learn_upstream {
-      server mnb-learn.sailpoint.svc.cluster.local:8080;
-      keepalive 8;
-    }
+    # Re-resolve Service DNS (ClusterIP changes when Helm recreates Services).
+    # Static "upstream { server name; }" caches the first lookup forever.
+    resolver kube-dns.kube-system.svc.cluster.local valid=10s ipv6=off;
 
     map $http_upgrade $connection_upgrade {
       default upgrade;
@@ -53,7 +48,8 @@ data:
         proxy_send_timeout 300s;
         proxy_read_timeout 300s;
         proxy_buffering off;
-        proxy_pass http://iiq_upstream;
+        set $iiq_upstream identityiq.sailpoint.svc.cluster.local;
+        proxy_pass http://$iiq_upstream:8080;
       }
 
       # Legacy /learn → academy paths at root
@@ -74,7 +70,8 @@ data:
         proxy_connect_timeout 5s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
-        proxy_pass http://learn_upstream;
+        set $learn_upstream mnb-learn.sailpoint.svc.cluster.local;
+        proxy_pass http://$learn_upstream:8080;
       }
     }
 ---
