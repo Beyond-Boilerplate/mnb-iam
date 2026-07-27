@@ -57,6 +57,29 @@ HR authoritative ──► Correlate accounts ──► Roles / birthright
 
 ---
 
+## How it works
+
+The capstone is a **closed-loop demo**: prove the Meridian control chain end-to-end under timebox, then file a go-live checklist with residual risks. Examiners care about attributable evidence—not that every Stretch lab was finished.
+
+```text
+Pipeline (HR→apps→refresh)
+        │
+        ├── Correlation / roles / requests
+        ├── SoD + violations + risk
+        ├── Certs → remediation → reports
+        └── Binder index + go-live checklist
+```
+
+| Demo pillar | Minimum proof |
+| --- | --- |
+| Pipeline | Named aggregates + refresh Success |
+| SoD | Clean wire split + documented finance-cloud case |
+| Certs | Campaign with revoke traced |
+| JML | Joiner/mover/leaver evidence packet |
+| Assurance | Dated reports + templates reviewed |
+
+**Real-life Meridian example.** Walk `priya.wire` / `marcus.approve` dual control, then `jordan.reed` SoD case, then one cert revoke with TaskResult—three artifacts beat twenty unfinished half-demos.
+
 ## Before you start
 
 - [ ] IIQ at `http://localhost:8080/identityiq` (or homelab URL) healthy: `/identityiq` login works
@@ -71,6 +94,8 @@ HR authoritative ──► Correlate accounts ──► Roles / birthright
 ## Lab procedure
 
 ### Task 1 — Full pipeline run
+
+A closed-loop demo starts with a green pipeline—prove aggregates and refresh before SoD and cert showpieces.
 
 1. Confirm HR application authoritative; run **Account Aggregation** (or HR aggregation task) for Meridian HR.
 2. Run **Account Aggregation** for critical apps: at minimum `MNB-ActiveDirectory`, `MNB-WirePortal` (or initiator/approver extracts), `MNB-SAP-Finance`, `MNB-AWS-Cloud`, `MNB-CoreBanking`.
@@ -301,10 +326,12 @@ Store as `MNB-Capstone-Exam-Binder-YYYY-MM-DD`.
 
 ## Further reading
 
-- Full curriculum index: [docs/lessons/README.md](README.md) and Part II catalog [_CATALOG_51_110.md](_CATALOG_51_110.md).
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — version-specific release notes for go-live checklists.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — exam readiness framing.
-- [NIST SP 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — control families mapped throughout this academy.
+- Curriculum index: [docs/lessons/README.md](README.md) and Part II catalog [_CATALOG_51_110.md](_CATALOG_51_110.md).
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — version-specific release notes and go-live checklists; search “certification” / “policy” as needed for demo gaps.
+- [SailPoint Community](https://community.sailpoint.com/) — search “IdentityIQ go live checklist” for practitioner cutover lists.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — exam readiness framing for access governance evidence.
+- [NIST SP 800-53 Rev. 5](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — control families mapped throughout this academy (AC, AU, CA, IA).
+
 
 ## Stretch lab
 

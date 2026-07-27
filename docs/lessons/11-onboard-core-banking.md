@@ -63,6 +63,32 @@ Correlation (Lessons 17–18)      → link account → identity cube
 
 ---
 
+## How it works
+
+Platform apps like `MNB-CoreBanking` establish a **control boundary**: dedicated owner, critical entitlement (`CORE`), non-authoritative aggregation, and later correlation onto HR cubes. The lab CSV stands in for a midrange/mainframe extract.
+
+```text
+MNB-CoreBanking.csv
+        │
+        ▼
+Application MNB-CoreBanking (Delimited File, create OFF)
+        │
+        ▼
+Aggregate MNB-CoreBanking → accounts + CORE entitlement
+        │
+        ▼
+Correlation (17–18) → daniel.griffin & ops holders on HR cubes
+```
+
+| Concern | Meridian setting |
+| --- | --- |
+| Native identity | `userName` (employeeId for correlation) |
+| Entitlement | `CORE` (critical) |
+| Owner | `daniel.griffin` / OPS |
+| Authoritative | No |
+
+**Real-life Meridian example.** Splitting Core from the IT inventory dump lets app-owner certifications and SoD scope name a single platform—not a mixed entitlement soup.
+
 ## Before you start
 
 - [ ] IIQ reachable at `http://localhost:8080/identityiq` (homelab URL only if that is your lab)
@@ -77,6 +103,8 @@ Correlation (Lessons 17–18)      → link account → identity cube
 ## Lab procedure
 
 ### Task 1 — Inspect the Core Banking extract
+
+Confirm the CORE entitlement and holder set before modeling the app—ownership and risk come from this extract, not guesswork.
 
 1. Open `~/iiq-lab-data/apps/MNB-CoreBanking.csv` (or repo `lab-data/apps/MNB-CoreBanking.csv`).
 2. Confirm header: `userName,email,employeeId,entitlement,accountStatus`.
@@ -244,9 +272,12 @@ Examiner question to practice aloud: *“Show me the authoritative list of core 
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Delimited File” and “Account Aggregation.”
-- Lesson 82 — Mainframe RACF for the production core-security path this CSV stands in for.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — critical system access governance.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Delimited File” and “Account Aggregation” for target-app patterns.
+- [SailPoint Community](https://community.sailpoint.com/) — search “mainframe connector” / “RACF” for production core-security paths (Lesson 82 foreshadowing).
+- [NIST SP 800-53 AC-2 / AC-3](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — managing and enforcing access to critical systems of record.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — core banking / critical system access governance.
+- [CIS Controls v8 — Control 5](https://www.cisecurity.org/controls/account-management) — account management on critical systems.
+
 
 ## Stretch lab
 

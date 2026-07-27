@@ -86,6 +86,8 @@ IIQ UI / REST  ──►  Object model (Application, Identity, TaskDefinition, B
 
 ### Task 1 — Login and environment hygiene
 
+Treat first login as environment hygiene: confirm you are on the lab tenant, not a shared or mislabeled URL, before exploring cubes.
+
 1. Start Tomcat if needed (see LOCAL_SETUP).
 2. Open `http://localhost:8080/identityiq`.
 3. Sign in: **User** `spadmin`, **Password** `admin`.

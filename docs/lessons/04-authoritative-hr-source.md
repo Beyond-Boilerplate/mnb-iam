@@ -95,6 +95,8 @@ Account Aggregation task: Aggregate MNB-HR
 
 ### Task 1 — Inspect the HR header
 
+Know the columns before you wire the connector—schema mistakes here cascade into every downstream cube.
+
 1. Open the file:
 
 ```bash

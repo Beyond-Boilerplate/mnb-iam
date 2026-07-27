@@ -69,6 +69,25 @@ kai.nguyen (MNB00096)
 
 ---
 
+## How it works
+
+This lesson onboard **two** targets with different governance postures: directory (`ELDAP`) as near-birthright medium risk, and CRM as a **requestable** business app. Both stay non-authoritative; HR remains the only identity factory.
+
+```text
+MNB-ActiveDirectory.csv ──► Aggregate ──► ELDAP (medium, broad)
+MNB-CRM.csv             ──► Aggregate ──► CRM  (requestable catalog later)
+        │
+        ▼
+Correlation onto HR cubes; directory often birthright; CRM via request
+```
+
+| App | Entitlement posture | Owner cue |
+| --- | --- | --- |
+| Directory | Broad / birthright candidate | Technology / directory admin |
+| CRM | Requestable business access | Business app owner |
+
+**Real-life Meridian example.** `amelia.brooks` (teller) should get directory birthright quickly after join, but CRM only if her role needs it via catalog.
+
 ## Before you start
 
 - [ ] IIQ up; `spadmin`
@@ -82,6 +101,8 @@ kai.nguyen (MNB00096)
 ## Lab procedure
 
 ### Task 1 — Inspect all four extracts
+
+Directory and CRM have different governance postures—read both extracts so you do not configure them identically.
 
 1. Open each CSV; confirm shared header: `userName,email,employeeId,entitlement,accountStatus`.
 2. Note approximate sizes: AD large; CRM ~10; IB ~6; ECOM ~6.
@@ -244,9 +265,12 @@ Examiner question: *“Is Active Directory your authoritative identity source?�
 
 ## Further reading
 
-- Lessons 56–57 (AD Direct), 71 (Salesforce), 68–69 (Web Services/SCIM) — production connectors for each CSV app in this lesson.
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search each connector by name.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — application portfolio and SoD scope.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Active Directory connector” and “access request” for directory vs catalog apps.
+- [SailPoint Community](https://community.sailpoint.com/) — search “birthright AD group” for joiner directory patterns.
+- [NIST SP 800-53 AC-2 / AC-3](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management for directories and enforcement on business apps.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — directory and application access governance.
+- [OWASP Identity Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Identity_and_Access_Management_Cheat_Sheet.html) — lifecycle differences between baseline and requestable access.
+
 
 ## Stretch lab
 

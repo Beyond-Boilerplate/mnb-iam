@@ -69,6 +69,31 @@ If entitlements remain opaque codes, managers rubber-stamp certifications. “Ap
 | CORE | daniel.griffin | OPS |
 | ELDAP | christopher.hayes / directory admin | ITP |
 
+## How it works
+
+Raw connector values (`WIRE_INIT`) are opaque to managers. **Managed attributes** add display name, description, owner, risk, and requestable flags so certifications and access requests are human-readable and owned.
+
+```text
+entitlement-dictionary.csv (business SoT)
+        │
+        ▼
+Managed Attribute / entitlement enrichment in IIQ
+        │
+        ├── Display + description → cert UI
+        ├── Owner → escalation / app-owner campaigns
+        ├── Risk → scoring & campaign priority
+        └── Requestable → access request catalog
+```
+
+| Metadata | If missing | Bank consequence |
+| --- | --- | --- |
+| Owner | Orphan privilege | No cert/escalation owner |
+| Risk | Flat campaigns | Critical buried with ELDAP |
+| Description | Rubber-stamp reviews | Examiner rejects evidence quality |
+| Requestable=false on admin | Self-service AWS_ADMIN | Privilege sprawl |
+
+**Real-life Meridian example.** `rachel.evans` owns `WIRE_INIT`/`WIRE_APPR`. When a manager certifies `priya.wire`, dictionary-backed display “Wire Portal — Initiate” makes the decision defensible—not the raw code alone.
+
 ## Before you start
 
 - [ ] `Aggregate MNB-IT-Access` completed
@@ -78,6 +103,8 @@ If entitlements remain opaque codes, managers rubber-stamp certifications. “Ap
 ## Lab procedure
 
 ### Task 1 — Load the dictionary beside the UI
+
+Treat the CSV as the business source of truth—IIQ enrichment should mirror it, not invent display names under exam pressure.
 
 1. Open:
 
@@ -188,9 +215,12 @@ For each of `WIRE_INIT`, `WIRE_APPR`, `SAP_FI`, `AWS_ADMIN`, `ELDAP`:
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “managed attribute” and “entitlement catalog.”
-- [NIST SP 800-53 AC-2 / AC-6](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — account management and least privilege.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — entitlement ownership and certification prerequisites.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “managed attribute” and “entitlement catalog” for enrichment fields and owners.
+- [SailPoint Community](https://community.sailpoint.com/) — search “entitlement owner certification” for app-owner campaign prerequisites.
+- [NIST SP 800-53 AC-2 / AC-6](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — documenting and limiting privileges with accountable owners.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — privileged access inventories and business ownership.
+- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html) — least privilege and clear privilege meaning for reviewers.
+
 
 ## Stretch lab
 

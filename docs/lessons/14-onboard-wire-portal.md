@@ -60,6 +60,30 @@ Extract size: **10** accounts.
 
 ---
 
+## How it works
+
+`MNB-WirePortal` encodes **payment dual control**: `WIRE_INIT` and `WIRE_APPR` as distinct critical entitlements under Treasury ownership (`rachel.evans`). Healthy lab design keeps them on separate people.
+
+```text
+MNB-WirePortal.csv
+        │
+        ▼
+App MNB-WirePortal (create OFF) → Aggregate
+        │
+        ├── WIRE_INIT → priya.wire (intent)
+        └── WIRE_APPR → marcus.approve (intent)
+        │
+        ▼
+SoD / dual-control narrative + payments certs
+```
+
+| Entitlement | Duty | Healthy holder |
+| --- | --- | --- |
+| `WIRE_INIT` | Create wire instructions | `priya.wire` |
+| `WIRE_APPR` | Approve wires | `marcus.approve` |
+
+**Real-life Meridian example.** Combining both on one cube is an exam-grade finding. The platform app makes dual control visible to certifications without tribal knowledge.
+
 ## Before you start
 
 - [ ] IIQ up; `spadmin` login
@@ -73,6 +97,8 @@ Extract size: **10** accounts.
 ## Lab procedure
 
 ### Task 1 — Inspect the Wire Portal extract
+
+Dual control only works if INIT and APPR stay separable—verify the extract encodes that split before onboarding.
 
 1. Open `~/iiq-lab-data/apps/MNB-WirePortal.csv`.
 2. Build a two-column list: Initiators vs Approvers from the `entitlement` column.
@@ -232,10 +258,12 @@ Examiner question: *“Prove initiate and approve are separable entitlements wit
 
 ## Further reading
 
-- Lesson 68 — Web Services connector against the Wire Portal OpenAPI (production path).
-- Lesson 40 — Payment dual-control SoD policy deep dive.
-- [OWASP API Security Top 10](https://owasp.org/www-project-api-security/) — when the portal moves from CSV to API.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — payment dual-control expectations.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “entitlement” and “SOD policy” for encoding dual-control pairs.
+- [SailPoint Community](https://community.sailpoint.com/) — search “wire dual control” for payments access patterns.
+- [NIST SP 800-53 AC-5](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — separation of duties for critical transaction paths.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — dual control / funds transfer examiner language.
+- [FFIEC — Retail Payment Systems booklet](https://ithandbook.ffiec.gov/it-booklets/retail-payment-systems.aspx) — payments risk context Treasury maps to IAM.
+
 
 ## Stretch lab
 

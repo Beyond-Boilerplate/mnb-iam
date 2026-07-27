@@ -65,6 +65,29 @@ Advanced Analytics / Reports / Populations
 
 ---
 
+## How it works
+
+Exam readiness is a **repeatable export pipeline**: named populations or Advanced Analytics queries → dated exports → controlled assurance folder → named Risk/IAM recipients. Ad-hoc screenshots without dates fail the five-minute examiner drill.
+
+```text
+Population / Report / Advanced Analytics
+        │
+        ▼
+Export MNB-<topic>-YYYY-MM-DD
+        │
+        ├── Assurance pack folder (access-controlled)
+        └── Cover sheet: row counts + control IDs
+```
+
+| Pack item | Control question |
+| --- | --- |
+| AWS holders | Who has cloud admin? |
+| Open SoD | Which toxic pairs remain? |
+| Cert status | Are reviews on time? |
+| Terminated-with-access | Did leavers retain ents? |
+
+**Real-life Meridian example.** Examiner: “Show AWS admin as of last Friday.” Dated `MNB-AWS-Holders-2026-07-24` plus task-result proof answers in minutes; a live UI filter does not.
+
 ## Before you start
 
 - [ ] IIQ reporting / Advanced Analytics available
@@ -77,6 +100,8 @@ Advanced Analytics / Reports / Populations
 ## Lab procedure
 
 ### Task 1 — AWS holders report
+
+Start the assurance pack with the question examiners ask first: who holds cloud admin right now?
 
 1. Advanced search / Entitlement search / Report: identities with `AWS_ADMIN` on `MNB-AWS-Cloud`.
 2. Include: identity name, email, manager, worker type, account status.
@@ -185,8 +210,11 @@ Advanced Analytics / Reports / Populations
 ## Further reading
 
 - [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “advanced analytics” / “report” / “certification campaign reports.”
+- [SailPoint Community](https://community.sailpoint.com/) — search “audit report pack” for examiner evidence patterns.
 - [NIST SP 800-53 AU-6 / AU-7](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — audit review and report generation.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — evidence packs examiners expect.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — evidence packs examiners expect.
+- [CIS Controls v8 — Control 8](https://www.cisecurity.org/controls/audit-log-management) — retaining and reviewing governance evidence.
+
 
 ## Stretch lab
 

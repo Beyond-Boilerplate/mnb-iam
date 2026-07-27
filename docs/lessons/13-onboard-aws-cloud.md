@@ -58,6 +58,29 @@ Extract size: **9** accounts (mix of active/disabled).
 
 ---
 
+## How it works
+
+`MNB-AWS-Cloud` represents privileged cloud admin inventory (`AWS_ADMIN`). Non-authoritative aggregation plus Technology ownership (`christopher.hayes`) creates the other half of Meridian’s finance–cloud SoD story.
+
+```text
+MNB-AWS-Cloud.csv
+        │
+        ▼
+MNB-AWS-Cloud app (create OFF) → Aggregate → AWS_ADMIN ents
+        │
+        ▼
+Correlation → cubes; SoD with SAP_FI; privileged campaigns
+```
+
+| Checkpoint | Value |
+| --- | --- |
+| Entitlement | `AWS_ADMIN` (critical) |
+| Owner | `christopher.hayes` (ITP) |
+| Create identities | Off |
+| Risk narrative | Infra escape / control bypass |
+
+**Real-life Meridian example.** Cloud admin on `jordan.reed` plus `SAP_FI` is why Risk treats this as its own app object, not a line buried only in `MNB-IT-Access`.
+
 ## Before you start
 
 - [ ] IIQ up as `spadmin`
@@ -71,6 +94,8 @@ Extract size: **9** accounts (mix of active/disabled).
 ## Lab procedure
 
 ### Task 1 — Inspect the AWS extract
+
+Cloud admin inventory is half of Meridian’s finance–cloud SoD story—know the holders before aggregation.
 
 1. Open `~/iiq-lab-data/apps/MNB-AWS-Cloud.csv`.
 2. Confirm header matches other platform apps.
@@ -233,10 +258,12 @@ Examiner question: *“Show a privileged cloud admin that might not correlate on
 
 ## Further reading
 
-- Lesson 76 — AWS IAM connector (native upgrade path from this CSV).
-- [CIS Amazon Web Services Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon_web_services) — IAM user and access-key controls.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “AWS connector” for production aggregation of IAM users and roles.
 - [AWS IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) — why static extracts fail for cloud admin governance.
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “AWS connector.”
+- [CIS Amazon Web Services Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon_web_services) — IAM user and access-key controls.
+- [NIST SP 800-53 AC-6](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — least privilege for standing cloud admin.
+- [FFIEC IT Examination Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/it-booklets/architecture-infrastructure-and-operations.aspx) — cloud and infrastructure access oversight.
+
 
 ## Stretch lab
 

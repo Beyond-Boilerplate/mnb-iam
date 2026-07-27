@@ -59,6 +59,26 @@ You will be able to:
 
 ---
 
+## How it works
+
+A **pipeline** is an ordered set of Account Aggregation tasks plus a trailing Identity Refresh, with explicit **stop-vs-continue** rules per failure domain. HR failure stops the night; a single platform extract failure tickets and continues peers.
+
+```text
+[1] Aggregate MNB-HR                 ── FAIL → STOP
+[2] Aggregate MNB-IT-Access          ── FAIL → ticket, continue
+[3] Aggregate MNB-ActiveDirectory    ── FAIL → ticket, continue
+[4] Platform aggregates (Core…CRM)   ── FAIL → ticket each, continue
+[5] Refresh MNB Identities           ── compile whatever landed
+```
+
+| Stage | On failure | Why |
+| --- | --- | --- |
+| Authoritative HR | Stop | No trustworthy people base |
+| Inventory / platforms | Continue + ticket | Partial coverage better than zero |
+| Refresh | Re-run after fixes | Cubes reflect last good inputs |
+
+**Real-life Meridian example.** If Wire extract fails but HR and Core succeed, payments certs may be stale while retail joiners still process—ops must know which SLA broke.
+
 ## Before you start
 
 - [ ] All Meridian apps from Lessons 04–15 exist
@@ -72,6 +92,8 @@ You will be able to:
 ## Lab procedure
 
 ### Task 1 — Inventory your task catalog
+
+A pipeline is only as good as its inventory—list every Meridian aggregate and refresh before you write order and failure rules.
 
 1. Open **Tasks**. List every `Aggregate MNB-*` and your refresh task.
 2. Build a checklist table in your binder with columns: Order, Task name, App, Last result, Duration, Owner on-call.
@@ -248,10 +270,12 @@ Examiner question: *“What do you do if Wire aggregation fails at 06:40?”* �
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “task schedule” and “Account Aggregation.”
-- Lessons 54 and 105 — advanced aggregation patterns and partitioning at scale.
-- [NIST SP 800-53 SI-4 / AU-6](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — monitoring and audit review of control activities.
-- [FFIEC IT Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/) — batch job and recovery expectations.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “task schedule” and “Account Aggregation” for chaining aggregations and refresh.
+- [SailPoint Community](https://community.sailpoint.com/) — search “aggregation failure pipeline” for stop-vs-continue runbook patterns.
+- [NIST SP 800-53 AU-6 / CP-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — reviewing processing outcomes and contingency for batch controls.
+- [FFIEC IT Examination Handbook — Architecture, Infrastructure, and Operations](https://ithandbook.ffiec.gov/it-booklets/architecture-infrastructure-and-operations.aspx) — operational monitoring and resilience for scheduled jobs.
+- [CIS Controls v8 — Control 8](https://www.cisecurity.org/controls/audit-log-management) — retaining task-result evidence for control activities.
+
 
 ## Stretch lab
 

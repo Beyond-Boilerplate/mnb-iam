@@ -64,6 +64,29 @@ Do **not** filter out disabled rows at aggregation time. Disabled-but-present ac
 
 ---
 
+## How it works
+
+`MNB-SAP-Finance` mirrors Core as a non-authoritative platform extract with entitlement `SAP_FI` (critical) under Finance ownership (`deepa.nair`). It exists so SoD can pair finance SoR access with cloud admin as a named finding.
+
+```text
+MNB-SAP-Finance.csv → Application (create OFF) → Aggregate
+        │
+        ▼
+SAP_FI entitlement on finance holders
+        │
+        ▼
+Later: correlation + MNB-SOD finance/cloud policies
+```
+
+| Checkpoint | Value |
+| --- | --- |
+| Entitlement | `SAP_FI` |
+| Owner | `deepa.nair` (FIN) |
+| Create identities | Off |
+| SoD partner | `AWS_ADMIN` |
+
+**Real-life Meridian example.** `jordan.reed` holding `SAP_FI` plus `AWS_ADMIN` is the intentional finance–cloud toxic pair—visible because SAP is its own application object.
+
 ## Before you start
 
 - [ ] IIQ up; logged in as `spadmin`
@@ -77,6 +100,8 @@ Do **not** filter out disabled rows at aggregation time. Disabled-but-present ac
 ## Lab procedure
 
 ### Task 1 — Inspect the SAP Finance extract
+
+Finance SoR access is an exam magnet—inventory who holds SAP_FI before you create the application object.
 
 1. Open `~/iiq-lab-data/apps/MNB-SAP-Finance.csv`.
 2. List each `userName` and `accountStatus`.
@@ -230,10 +255,12 @@ Examiner question: *“How do you detect finance users who also hold cloud admin
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “SAP Direct connector.”
-- Lesson 79 — native SAP role aggregation that replaces this CSV in production.
-- [ISACA](https://www.isaca.org/) — search “SAP segregation of duties” for SOX framing of finance access.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — financial application controls.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “SAP Direct connector” for the production path this CSV simulates.
+- [SailPoint Community](https://community.sailpoint.com/) — search “SAP segregation of duties” for finance SoD design patterns.
+- [ISACA](https://www.isaca.org/) — search “SAP segregation of duties” for SOX/ITGC framing of finance access.
+- [NIST SP 800-53 AC-5](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — separation of duties behind finance vs infrastructure privilege splits.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — financial application access controls.
+
 
 ## Stretch lab
 

@@ -71,6 +71,28 @@ Avoid subjects like “IdentityIQ notification” or “You have a work item” 
 
 ---
 
+## How it works
+
+IIQ **EmailTemplate** objects render notifications for certifications, work items, policy violations, and lifecycle events. Templates must be **actionable** (campaign, due date, CTA path)—generic “you have a work item” mail trains managers to ignore governance.
+
+```text
+Event (cert open / reminder / SoD / LCM)
+        │
+        ▼
+EmailTemplate (MNB-* naming in lab notes)
+        │
+        ├── SMTP (if enabled) → manager / owner inbox
+        └── Work Item still required in IIQ (mail ≠ decision)
+```
+
+| Template family | Must include |
+| --- | --- |
+| Cert open / reminder | Campaign, scope, due date, Inbox CTA |
+| SoD / policy | Policy name, identity, next action |
+| Break-glass | Identity, entitlement, ticket, TTL |
+
+**Real-life Meridian example.** `rachel.evans` receives “Action required — MNB-Mgr-Cert-Treasury — due Friday” with Inbox path—she can act. Subject “IdentityIQ notification” gets filtered and becomes a completion-rate finding.
+
 ## Before you start
 
 - [ ] Read `~/iiq-lab-data/notifications/certification-sample.txt` end-to-end
@@ -83,6 +105,8 @@ Avoid subjects like “IdentityIQ notification” or “You have a work item” 
 ## Lab procedure
 
 ### Task 1 — Study the Meridian sample
+
+Copy the sample’s actionable pattern (campaign, due date, CTA) before editing EmailTemplate objects.
 
 1. Open `lab-data/notifications/certification-sample.txt`.
 2. Highlight: subject urgency (“Action required”), campaign name `MNB-Q3-Manager-Cert-Treasury`, scope line, 10-business-day due, CTA path.
@@ -185,9 +209,12 @@ Fill:
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “email template” and “notification.”
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “email template” and “notification” for EmailTemplate objects and variables.
+- [SailPoint Community](https://community.sailpoint.com/) — search “certification reminder email” for actionable CTA patterns.
 - [NIST SP 800-53 SI-5](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) — security alerts and notifications.
 - [OWASP](https://owasp.org/) — search “HTML email injection” when customizing templates with identity data.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — communication of control obligations to accountable managers.
+
 
 ## Stretch lab
 

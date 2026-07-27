@@ -59,6 +59,32 @@ Most banks start with a messy entitlement dump before perfect connectors. Meridi
 
 **SoD demo holders:** `jordan.reed` (`SAP_FI`+`AWS_ADMIN`), `kai.nguyen` (`IBSI`+`ECOM`), wire pair `priya.wire` / `marcus.approve`.
 
+## How it works
+
+`MNB-IT-Access` is a **non-authoritative** multi-valued entitlement inventory: many CSV rows share one `userName`, each carrying an `itAccess` code. Aggregation creates/updates accounts and entitlements; it must **never** mint Identity cubes.
+
+```text
+EmployeeData.txt  (userName × itAccess rows)
+        │
+        ▼
+MNB-IT-Access (create-identities OFF)
+        │
+        ▼
+Aggregate MNB-IT-Access
+        │
+        ├── Account / Link per native id
+        ├── Entitlements (WIRE_INIT, SAP_FI, …)
+        └── Correlation later (Lessons 17–19) → HR cubes
+```
+
+| Config checkpoint | Required value | Exam talk-track |
+| --- | --- | --- |
+| Authoritative / create identities | **Off** | Only HR creates people |
+| Entitlement attribute | `itAccess` | Managed attribute source |
+| Correlation keys | employeeId / email (later) | Owned access |
+
+**Real-life Meridian example.** `jordan.reed` has separate IT dump rows for `SAP_FI` and `AWS_ADMIN`. That multi-row shape is how SoD later detects a toxic combo on one cube—if create-identities were on, you would also invent ghost people for unmatched vendor rows.
+
 ## Before you start
 
 - [ ] `~/iiq-lab-data/EmployeeData.txt` exists (absolute path recorded)
@@ -68,6 +94,8 @@ Most banks start with a messy entitlement dump before perfect connectors. Meridi
 ## Lab procedure
 
 ### Task 1 — Inspect the dump
+
+Before creating the application, understand the multi-row-per-person shape—that design drives entitlement aggregation and later SoD detection.
 
 1. Inspect header and samples:
 
@@ -191,10 +219,12 @@ cut -d',' -f7 ~/iiq-lab-data/EmployeeData.txt | sort | uniq -c | sort -nr
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Delimited File connector” and “authoritative application.”
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “Delimited File connector” and “create identities” for non-authoritative target patterns.
 - [SailPoint Developer Community](https://developer.sailpoint.com/discuss/) — threads on inventory dumps vs per-app connectors.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — access inventory and ownership expectations.
-- Lessons 51–55 and 56+ — where each dump system graduates to a native connector.
+- [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management requiring known owners for accounts and privileges.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — access inventory and ownership expectations.
+- [CIS Controls v8 — Control 5](https://www.cisecurity.org/controls/account-management) — maintaining an inventory of accounts and entitlements.
+
 
 ## Stretch lab
 

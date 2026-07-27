@@ -68,6 +68,32 @@ Critical ents weighted
 
 ---
 
+## How it works
+
+IdentityIQ computes (or refreshes) a **composite risk score** on the identity from configured inputs—entitlement criticality, open policy violations, and related signals. Scores are a **prioritization layer**, not an enforcement engine.
+
+```text
+Entitlement risk + SoD violations (+ optional unused-access signals)
+        │
+        ▼
+Identity risk score (Refresh / risk config)
+        │
+        ├── Sort / filter manager cert work items
+        ├── Weekly IAM huddle top-N
+        └── Optional targeted campaigns
+        │
+        └── NEVER auto-revoke or replace SoD
+```
+
+| Score use | Meridian OK? |
+| --- | --- |
+| Prioritize `jordan.reed` in cert inbox | Yes |
+| Drive huddle top-10 | Yes |
+| Auto-disable at threshold | **No** |
+| Replace `MNB-SOD-*` policies | **No** |
+
+**Real-life Meridian example.** `priya.wire` and `marcus.approve` should rank high because `WIRE_*` is critical—even when SoD is clean—so managers review payment access first, not alphabetically.
+
 ## Before you start
 
 - [ ] IIQ up; login as `spadmin`
@@ -81,6 +107,8 @@ Critical ents weighted
 ## Lab procedure
 
 ### Task 1 — Locate risk UI
+
+Scores only help if operators can find and explain them—locate the risk surface before tuning weights.
 
 1. Search admin menus for **Risk** / **Identity Risk** / **Scoring** (or equivalent under Compliance / System Setup).
 2. Open identity risk configuration or scorecard settings.
@@ -191,9 +219,12 @@ Add one limitation: scores lag HR events; rapid offboarding (Lesson 34) must not
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “identity risk” and “risk score.”
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “identity risk” and “risk score” for composite scoring configuration.
+- [SailPoint Community](https://community.sailpoint.com/) — search “identity risk score certification” for prioritization (not auto-revoke) patterns.
 - [NIST SP 800-30](https://csrc.nist.gov/pubs/sp/800/30/r1/final) — risk assessment concepts underlying scoring models.
-- [FFIEC IT Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security/) — risk-based access review expectations.
+- [NIST SP 800-53 RA family](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — risk assessment controls examiners map to IAM prioritization.
+- [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — risk-based access review expectations.
+
 
 ## Stretch lab
 
