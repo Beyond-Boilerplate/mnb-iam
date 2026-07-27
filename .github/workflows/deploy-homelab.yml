@@ -59,6 +59,8 @@ jobs:
     name: Decide deploy
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     outputs:
       deploy: ${{ steps.gate.outputs.deploy }}
       reason: ${{ steps.gate.outputs.reason }}
@@ -262,6 +264,7 @@ jobs:
     steps:
       - name: Aggregate
         env:
+          DECIDE: ${{ needs.decide.result }}
           DEPLOY: ${{ needs.decide.outputs.deploy }}
           REASON: ${{ needs.decide.outputs.reason }}
           HELM: ${{ needs.helm-upgrade.result }}
@@ -273,11 +276,15 @@ jobs:
             echo "## Homelab deploy (sailpoint)"
             echo ""
             echo "- Ref: \`${REF}\`"
-            echo "- Decide: deploy=\`${DEPLOY}\` (${REASON})"
+            echo "- Decide job: \`${DECIDE}\` → deploy=\`${DEPLOY}\` (${REASON:-})"
             echo "- Helm: \`${HELM}\`"
             echo "- Smoke: \`${SMOKE}\` (opt-in; skipped is OK)"
           } >> "$GITHUB_STEP_SUMMARY"
 
+          if [ "$DECIDE" != "success" ]; then
+            echo "::error::Decide job failed"
+            exit 1
+          fi
           if [ "$DEPLOY" != "true" ]; then
             echo "Skipped deploy — ${REASON}"
             exit 0
