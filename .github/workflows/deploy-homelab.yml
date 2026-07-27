@@ -173,10 +173,9 @@ jobs:
         run: |
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
-          # Give Tomcat time before in-cluster / public smoke; do not fail the job if the
-          # deployment is stuck — smoke scripts emit diagnostics instead.
-          kubectl -n sailpoint rollout status deploy/identityiq --timeout=8m || \
-            echo "::warning::identityiq rollout not ready yet; continuing to smoke diagnostics"
+          # Startup probe can take up to ~12 minutes (72 × 10s) before login.jsf is Ready.
+          kubectl -n sailpoint rollout status deploy/identityiq --timeout=15m
+          kubectl -n sailpoint get pods -l app.kubernetes.io/name=identityiq -o wide
 
       - name: In-cluster smoke (edge path split)
         # Retries IIQ through edge while Tomcat warms (see smoke-in-cluster-surface.sh).
