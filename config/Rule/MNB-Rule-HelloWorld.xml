@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB-Rule-Hello-World" type="BuildMap">
+  <Description>Meridian lab hello rule — safe stub for CD smoke test.</Description>
+  <Source>
+    <![CDATA[
+      // Meridian stub — Lesson-style hello rule
+      // Does not mutate data; safe to deploy.
+      if (log != null) {
+        log.warn("MNB-Rule-Hello-World executed");
+      }
+      return null;
+    ]]>
+  </Source>
+</Rule>
