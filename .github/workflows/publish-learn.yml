@@ -120,6 +120,25 @@ jobs:
           chmod +x learn/k8s/install-public-surface.sh
           ./learn/k8s/install-public-surface.sh
 
+      - name: In-cluster smoke (edge path split)
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          kubectl -n sailpoint delete pod curl-edge-smoke --ignore-not-found --wait=true
+          kubectl -n sailpoint run curl-edge-smoke --restart=Never --image=curlimages/curl:8.5.0 --command -- \
+            sleep 120
+          kubectl -n sailpoint wait --for=condition=Ready pod/curl-edge-smoke --timeout=60s
+          # Academy at /
+          BODY=$(kubectl -n sailpoint exec curl-edge-smoke -- curl -fsS http://sailpoint-edge:8080/)
+          echo "$BODY" | grep -qiE 'Meridian|IAM Academy|Curriculum'
+          # IIQ login through edge
+          CODE=$(kubectl -n sailpoint exec curl-edge-smoke -- curl -sS -o /dev/null -w '%{http_code}' \
+            http://sailpoint-edge:8080/identityiq/login.jsf)
+          echo "iiq via edge: HTTP ${CODE}"
+          case "$CODE" in 200|302) ;; *) echo "unexpected IIQ code"; exit 1 ;; esac
+          kubectl -n sailpoint delete pod curl-edge-smoke --ignore-not-found --wait=false
+          echo "In-cluster path split OK"
+
   smoke:
     name: Smoke academy + IIQ
     needs: deploy
@@ -128,12 +147,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Probe public URLs
+        id: public
+        continue-on-error: true
         run: |
           set -euo pipefail
           probe() {
             local url="$1" label="$2"
             local ok=0 code
-            for i in $(seq 1 24); do
+            for i in $(seq 1 18); do
               code=$(curl -sS -o /tmp/smoke.body -w '%{http_code}' --connect-timeout 10 "$url" || echo "000")
               echo "${label} attempt ${i}: HTTP ${code}"
               if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
@@ -142,22 +163,39 @@ jobs:
               fi
               sleep 5
             done
-            if [ "$ok" != "1" ]; then
-              echo "::error::Smoke failed for ${url}"
-              echo "Cloudflare Tunnel Public Hostname must be:"
-              echo "  Subdomain: sailpoint  Domain: lmsapp.us"
-              echo "  Type: HTTP  URL: sailpoint-edge.sailpoint.svc.cluster.local:8080"
-              exit 1
-            fi
+            [ "$ok" = "1" ]
           }
           probe "$LEARN_SMOKE_URL" "academy"
-          # Academy HTML should look like the curriculum (not IIQ login)
           if ! grep -qiE 'Meridian|IAM Academy|Curriculum' /tmp/smoke.body; then
-            echo "::warning::Academy response did not look like Meridian learn HTML — check tunnel path routing"
-            head -c 400 /tmp/smoke.body || true
+            echo "::error::https://sailpoint.lmsapp.us/ is not serving the academy yet."
+            echo "Update Cloudflare Tunnel Public Hostname URL to:"
+            echo "  sailpoint-edge.sailpoint.svc.cluster.local:8080"
+            echo "(was identityiq.sailpoint.svc.cluster.local:8080)"
+            head -c 200 /tmp/smoke.body || true
+            exit 1
           fi
           probe "$IIQ_SMOKE_URL" "iiq"
           echo "Public surface OK: / and /identityiq"
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Public tunnel checklist
+        if: steps.public.outcome != 'success'
+        run: |
+          {
+            echo "## Action required — Cloudflare Tunnel"
+            echo ""
+            echo "Cluster deploy succeeded. Public home route will work after this one change:"
+            echo ""
+            echo "1. Open Cloudflare Zero Trust → Networks → Tunnels → your tunnel → **Public Hostname**"
+            echo "2. Edit **sailpoint.lmsapp.us**"
+            echo "3. Set URL to \`sailpoint-edge.sailpoint.svc.cluster.local:8080\`"
+            echo "4. Save, then re-run **Publish learn site** smoke (or wait ~1 min and curl)"
+            echo ""
+            echo "- Academy: https://sailpoint.lmsapp.us/"
+            echo "- IIQ: https://sailpoint.lmsapp.us/identityiq/login.jsf"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
 
   gate:
     name: Publish learn gate
