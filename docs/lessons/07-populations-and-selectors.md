@@ -49,7 +49,7 @@ A **population** (identity selector / group filter—wording varies) is a saved 
 A **population** (identity selector) is a saved filter over Identity attributes and/or Links. Tasks, certifications, and reports reference the population by name so scope stays consistent instead of retyping filters under pressure.
 
 ```text
-Identity attrs (status, workerType, departmentCode, onLeave)
+Identity attrs (status, employeeType, departmentName, exceptions (LOA))
         │
         ▼
 Population / selector definition (MNB-*)
@@ -79,7 +79,7 @@ Population / selector definition (MNB-*)
 
 Populations only work if the attributes you filter on are present and promoted on cubes—spot-check personas before building selectors.
 
-1. Open `amelia.brooks` — confirm active status and `departmentCode=RET`.
+1. Open `amelia.brooks` — confirm active status and a Retail-related `departmentName` / `division` / `JobCode`.
 2. Open `raj.external` — confirm `employeeType=Contractor`.
 3. Open `priya.wire` — confirm `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury.
 4. Open `samir.hassan` — confirm inactive/terminated.
@@ -179,7 +179,7 @@ In the binder, for each population write:
 | String `"1"` vs number | Type mismatch in filter | Match stored type; test with known user |
 | Cannot find Populations UI | Version/menu difference | Use Advanced Analytics saved query; note equivalent |
 | Refresh ignores filter | Filter not saved on task | Re-open task; confirm population attached |
-| Contractors include employees | Wrong attribute / typo | Verify `workerType` exact value `Contractor` |
+| Contractors include employees | Wrong attribute / typo | Verify `employeeType` exact value `Contractor` |
 
 ## Training binder evidence
 
@@ -217,7 +217,7 @@ In the binder, for each population write:
 ## Stretch lab
 
 - Create `MNB-On-Leave` (`exceptions=LOA`) and write which control freezes access for `sofia.torres`.
-- Create `MNB-Finance` (`departmentCode=FIN`) for later SoD campaigns targeting `jordan.reed`’s org.
+- Create `MNB-Finance` (`departmentName contains Finance`) for later SoD campaigns targeting `jordan.reed`’s org.
 - Export member lists (if UI allows) into evidence for count reconciliation vs HR file.
 - Create `MNB-Terminated` on inactive status and attach it as a future input to Lesson 20 orphan/dormant hunting notes.
 

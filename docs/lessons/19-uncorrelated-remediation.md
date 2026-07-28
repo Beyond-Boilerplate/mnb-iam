@@ -148,7 +148,7 @@ Classification before action prevents the classic mistake: disabling someone who
 
 1. For each highlighted row, assign disposition: Correlate / Disable / Exception.
 2. Apply rules:
-   - Has matching HR `employeeId` → **Correlate**
+   - Has matching HR `userId` → **Correlate**
    - Vendor with no HR cube and privileged access → **Disable** (or Exception only with named sponsor)
    - Service-looking name without HR → **Exception** with owner or **Disable**
 3. Assign severity: privileged uncorrelated = **Sev-1**; standard ELDAP/CRM = Sev-2/3.

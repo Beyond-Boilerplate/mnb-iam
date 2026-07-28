@@ -70,7 +70,7 @@ Lesson 04 taught governance mechanics on a flat file. That file is still Meridia
 | `MNB-SAP-HR` (this lesson) | Infotype-backed RFC | PERNR, org assignment, SAP status | ECC posting roles |
 | `MNB-SAP-Finance` (Lesson 12) | Entitlement extract | Coarse `SAP_FI` label | Hire date, org, leave, PERNR |
 
-**Wrong way:** use `MNB-SAP-Finance.csv` as an HR source because "it has employeeId." That file is a **security entitlement** extract. It will never be a safe authoritative feed.
+**Wrong way:** use `MNB-SAP-Finance.csv` as an HR source because "it has userId." That file is a **security entitlement** extract. It will never be a safe authoritative feed.
 
 ### Three Meridian SAP-shaped apps — do not mix them
 
@@ -142,7 +142,7 @@ Read this even if you use the mock fallback — the knowledge check and the exam
 
 1. Agree which personnel areas / employee groups / subsidiaries are in scope for `MNB-SAP-HR`.
 2. Agree the PERNR↔`employeeId` bridge source of truth (HRIS table, IdM attribute, or controlled CSV maintained by `sofia.torres`'s team).
-3. Align field list with Lesson 05 HR schema naming where possible (`department`, `title`, `onLeave`, `workerType`).
+3. Align field list with Lesson 05 HR schema naming where possible (`department`, `title`, `exceptions` (LOA), `employeeType`).
 
 ### Step 4 — Governance records
 
@@ -167,7 +167,7 @@ Document: SID/client, RFC user (no password), role name, SNC flag, population sc
 Ground the architecture in writing before clicking Create Application.
 
 1. Write and paste into the binder: *SAP HR feeds who people are; SAP Direct feeds what they can do in SAP; Lesson 12 `MNB-SAP-Finance` is a legacy entitlement extract, not an HR system.*
-2. Open `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or repo copy). Note flat columns: `employeeId`, `managerId`, `onLeave`, `workerType` — the shape IIQ already understands from Lesson 04.
+2. Open `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or repo copy). Note flat columns: `employeeId`, `managersAssociateID`, `exceptions` (LOA), `employeeType` — the shape IIQ already understands from Lesson 04.
 3. Open `~/iiq-lab-data/apps/MNB-SAP-Finance.csv`. Note it only has `userName`, `email`, `employeeId`, `entitlement` (`SAP_FI`), `accountStatus` — **no org assignment, no PERNR, no hire date**.
 4. Write one sentence: why neither file replaces a live SAP HCM feed for a subsidiary — and why the finance file must never become authoritative HR.
 
@@ -207,7 +207,7 @@ If you have no SAP system, simulate what personnel aggregation *would* return. T
 1. Create `~/iiq-lab-data/connectors/sap/MNB-SAP-HR-mock.csv`:
 
 ```csv
-sapPernr,employeeId,userName,email,status,orgUnit,managerPernr,onLeave
+sapPernr,employeeId,userName,email,status,orgUnit,managerPernr,exceptions (LOA)
 00001001,MNB00095,sofia.torres,sofia.torres@meridiannb.com,active,CML,00001000,true
 00001002,MNB00094,samir.hassan,samir.hassan@meridiannb.com,inactive,IT,00001000,false
 00001003,MNB00098,amelia.brooks,amelia.brooks@meridiannb.com,active,CML,00001000,false

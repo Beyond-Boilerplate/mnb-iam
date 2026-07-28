@@ -99,7 +99,7 @@ Before scheduling anything, inventory what already exists—orphan or misnamed t
 | Aggregate MNB-HR | Account Aggregation | HR file path (CSV) | Nightly |
 | Aggregate MNB-IT-Access | Account Aggregation | Lesson 09 | Nightly after HR |
 | Refresh MNB Attributes | Identity Refresh | HR (and app) aggregates | Nightly after aggs |
-| Refresh MNB Managers | Identity Refresh | Attrs refresh / HR managerIds | Nightly after attrs |
+| Refresh MNB Managers | Identity Refresh | After attrs; resolve managersAssociateID | Nightly after attrs |
 | Refresh MNB Roles | Identity Refresh | Role model (later) | After role changes |
 | Refresh MNB Policies | Identity Refresh | Policies (later) | After policy changes |
 

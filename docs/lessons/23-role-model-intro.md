@@ -71,7 +71,7 @@ The naive alternative is to skip roles and certify every entitlement forever. Th
 Roles sit between HR attributes and entitlements. Refresh evaluates assignment rules; LCM later lets humans request privileged packs. Detection (Lesson 27) is analytical—do not confuse it with assignment.
 
 ```
-HR identity attributes (jobCode, workerType, status)
+HR identity attributes (jobCode, employeeType, status)
         │
         ▼
 Assignment rules / selectors
@@ -86,7 +86,7 @@ Identity cube: Assigned roles ──► provisioning plan (when connectors live)
 
 | Layer | Object | What it answers |
 | --- | --- | --- |
-| HR | `jobCode`, `workerType`, `status` | Who is this person at Meridian? |
+| HR | `jobCode`, `employeeType`, `status` | Who is this person at Meridian? |
 | Role (Bundle) | `MNB-Birthright-*` / `MNB-Role-*` | What pack should they have? |
 | Entitlement | ELDAP, WIRE_INIT, AWS_ADMIN… | What access does the pack grant? |
 | Request path | LCM catalog | What can they ask for that rules do not auto-grant? |

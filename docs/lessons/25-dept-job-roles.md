@@ -19,7 +19,7 @@ You will be able to:
 - Create **`MNB-Role-Developer`** with DWRP + ODS for `DEV01` / `SRE01`
 - Create **`MNB-Role-RelationshipManager`** with CRM for `RM01` / `LO01`
 - Create **`MNB-Role-WireInitiator`** with WIRE_INIT for **`WIR01` only** (never `WIR02`)
-- Assign via HR `jobCode` (and optionally `departmentCode`) and verify after refresh
+- Assign via HR `jobCode` (and optionally `departmentName`) and verify after refresh
 - Preview why Priya’s mover delta will swap wire → RM packs in Lesson 30
 - Prove `marcus.approve` never receives the initiator role (dual control)
 
@@ -37,7 +37,7 @@ You will be able to:
 
 ### Job codes are the assignment key
 
-HR `jobCode` (and sometimes `departmentCode`) drives who gets which business role. Birthright still applies underneath for employees; job packs layer on top.
+HR `jobCode` (and sometimes `departmentName`) drives who gets which business role. Birthright still applies underneath for employees; job packs layer on top.
 
 ```
 HR jobCode ──► Assignment rule ──► Business role ──► Entitlements
@@ -63,7 +63,7 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 
 ### LoA nuance
 
-`sofia.torres` may be `RM01` with `onLeave=true` (Lesson 33). Job roles may still assign while freeze disables interactive access. Do not “fix” leave by removing job packs blindly—freeze is lifecycle, not catalog redesign.
+`sofia.torres` may be `RM01` with `exceptions=LOA` (Lesson 33). Job roles may still assign while freeze disables interactive access. Do not “fix” leave by removing job packs blindly—freeze is lifecycle, not catalog redesign.
 
 ---
 
@@ -72,7 +72,7 @@ HR jobCode ──► Assignment rule ──► Business role ──► Entitleme
 Refresh re-evaluates every identity against every assignment rule. When HR attributes change, packs should follow—without a ticket for every entitlement.
 
 ```
-Aggregate MNB-HR (jobCode, departmentCode, status)
+Aggregate MNB-HR (jobCode, departmentName, status)
         │
         ▼
 Refresh MNB Identities (assign roles)
@@ -97,7 +97,7 @@ Refresh MNB Identities (assign roles)
 
 - [ ] Birthright role working (Lesson 24)
 - [ ] Entitlements DWRP, ODS, CRM, WIRE_INIT exist on onboarded apps
-- [ ] HR identity attributes `jobCode` and `departmentCode` populated on cubes
+- [ ] HR identity attributes `jobCode` and `departmentName` populated on cubes
 - [ ] Do **not** merge WIRE_APPR into the initiator role
 - [ ] Notebook matrix ready for job→role
 
@@ -110,7 +110,7 @@ Refresh MNB Identities (assign roles)
 Named personas make dual-control proof examiner-ready. Guessing job codes fails the lab.
 
 1. From HR, identify at least one DEV01 or SRE01 identity (e.g. `diego.hayes` DEV01).
-2. Identify an RM persona (e.g. `sofia.torres` RM01—note onLeave flag if present).
+2. Identify an RM persona (e.g. `sofia.torres` RM01—note exceptions (LOA) flag if present).
 3. Confirm `priya.wire` is WIR01 in **baseline** HR (before mover).
 4. Confirm `marcus.approve` is WIR02—must **not** get WireInitiator role.
 
@@ -209,7 +209,7 @@ Do not apply the delta yet—predict the outcome so Lesson 30 has a baseline.
 | Priya missing WireInitiator | Already moved to RM01 in HR file | Restore baseline WIR01 or use another WIR01 identity |
 | Marcus got WireInitiator | Rule uses department TRS only | Key off WIR01 explicitly |
 | Developer missing ODS | Entitlement not aggregated | Aggregate source app; attach managed attribute |
-| RM role on LOA user | Rule ignores onLeave | Decide policy: assign but disable accounts later (Lesson 33) |
+| RM role on LOA user | Rule ignores exceptions (LOA) | Decide policy: assign but disable accounts later (Lesson 33) |
 | Roles assign but ents not on account | File lab without provisioning | Verify **assignment** on cube; track entitlement via app account separately |
 
 ---

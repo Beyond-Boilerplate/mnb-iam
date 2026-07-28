@@ -29,6 +29,10 @@ on:
         type: string
         required: false
         default: auto
+      wipe_mnb_leftovers:
+        description: Delete leftover MNB apps/tasks/identities (keep spadmin + HelloWorld)
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       run_smoke:
@@ -43,6 +47,10 @@ on:
         description: Helm install phase (auto|app|all|data)
         type: string
         default: app
+      wipe_mnb_leftovers:
+        description: Delete leftover MNB apps/tasks/identities (keep spadmin + HelloWorld)
+        type: boolean
+        default: false
 
 concurrency:
   # Shared with publish-learn / publish-ghcr deploy so kubectl+Helm never race.
@@ -239,6 +247,16 @@ jobs:
           set -euo pipefail
           export KUBECONFIG="$HOME/.kube/config"
           chmod +x deploy/helm/scripts/import-custom-objects.sh
+          ./deploy/helm/scripts/import-custom-objects.sh
+
+      - name: Wipe Meridian academy leftovers (opt-in)
+        if: inputs.wipe_mnb_leftovers == true
+        run: |
+          set -euo pipefail
+          export KUBECONFIG="$HOME/.kube/config"
+          chmod +x tools/iiq-verify/wipe-mnb-leftovers.sh
+          ./tools/iiq-verify/wipe-mnb-leftovers.sh k8s
+          # Re-import smoke Rule in case wipe removed a duplicate/stale copy
           ./deploy/helm/scripts/import-custom-objects.sh
 
       - name: In-cluster smoke (opt-in)

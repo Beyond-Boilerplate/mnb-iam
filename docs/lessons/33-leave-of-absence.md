@@ -3,10 +3,10 @@
 **Level:** Intermediate  
 **Track:** Lifecycle  
 **Time:** 45–60 minutes  
-**Prereq:** Lesson 32 (contractor lifecycle); HR `onLeave` mapped (Lesson 05); CRM/directory apps onboarded  
+**Prereq:** Lesson 32 (contractor lifecycle); HR `exceptions` (LOA) mapped (Lesson 05); CRM/directory apps onboarded  
 
 **Lab data:**
-- HR row: `sofia.torres` (`MNB00095`) — `onLeave=true`, `status=1`
+- HR row: `sofia.torres` (`MNB00095`) — `exceptions=LOA`, `status=1`
 - Access context: `lab-data/apps/MNB-Salesforce-CRM.csv`, `lab-data/apps/MNB-ActiveDirectory.csv`, `lab-data/apps/MNB-IT-Access.csv`
 - Contrast: Lesson 31 leaver `jordan.reed` (`status=0`)
 - Manager: `sanjay.kapoor` (`MNB00006`)
@@ -17,7 +17,7 @@
 
 You will be able to:
 
-- Locate on-leave identities using HR `onLeave=true`, with `sofia.torres` as the primary case
+- Locate on-leave identities using HR `exceptions=LOA`, with `sofia.torres` as the primary case
 - Explain **freeze vs terminate** in Meridian policy language (keep identity, pause interactive/privileged access)
 - Design a freeze package: disable directory login / revoke or suspend privileged entitlements; retain CRM ownership notes
 - Specify manager notification / work-item expectations within 24 hours
@@ -28,7 +28,7 @@ You will be able to:
 
 ## Why this matters
 
-**Business.** People on leave still have credentials. `sofia.torres` is a Relationship Manager (`RM01`) with `onLeave=true` but `status=1`—employment continues; interactive access should not. Quiet misuse of CRM or residual privilege during parental/medical leave creates fraud and privacy incidents without the “clean” story of a termination.
+**Business.** People on leave still have credentials. `sofia.torres` is a Relationship Manager (`RM01`) with `exceptions=LOA` but `status=1`—employment continues; interactive access should not. Quiet misuse of CRM or residual privilege during parental/medical leave creates fraud and privacy incidents without the “clean” story of a termination.
 
 **Control / audit.** Examiners ask whether leave is monitored separately from termination. Control owner: IAM + HR Business Partner; manager `sanjay.kapoor` owns Sofia’s commercial banking access decisions. Leaving leave active with wire or cloud rights is unacceptable. Do not “simulate” leave by setting `status=0`.
 
@@ -40,7 +40,7 @@ You will be able to:
 
 | Dimension | Freeze (LoA) | Terminate (Leaver) |
 | --- | --- | --- |
-| HR signal | `onLeave=true`, usually `status=1` | `status=0` + `terminationDate` |
+| HR signal | `exceptions=LOA`, usually `status=1` | `status=0` + `terminationDate` |
 | Identity cube | Remains; expected return | Inactive; end of employment |
 | Directory | Disable interactive login | Disable + long-term deprovision |
 | Privileged ents | Suspend / revoke for duration | Revoke / disable same day |
@@ -56,7 +56,7 @@ You will be able to:
 | email | `sofia.torres@meridiannb.com` |
 | manager | `sanjay.kapoor` (`MNB00006`) |
 | dept / job | `CML` / `RM01` Relationship Manager |
-| onLeave | `true` |
+| exceptions (LOA) | `true` |
 | Typical access | `ELDAP`, `CRM`, `ODS` |
 
 ### Job roles vs freeze
@@ -74,7 +74,7 @@ Running Lesson 31 leaver destruction (mailbox wipe, full deprovision, status=0) 
 LoA is an HR attribute change that should drive a freeze package and a manager work item—not a termination workflow.
 
 ```
-HR onLeave=true
+HR exceptions=LOA
       │
       ▼
 Aggregate MNB-HR → Refresh MNB Identities
@@ -88,7 +88,7 @@ Detect LoA population / lifecycle event (optional LCM)
       └──► Work item → manager within 24h
       │
       ▼
-Return: onLeave=false → staged re-enable → mini cert
+Return: exceptions (LOA)=false → staged re-enable → mini cert
          (privileged: new request only)
 ```
 
@@ -105,7 +105,7 @@ Return: onLeave=false → staged re-enable → mini cert
 ## Before you start
 
 - [ ] IIQ available at `http://localhost:8080/identityiq`; `spadmin` login works
-- [ ] HR feed contains Sofia with `onLeave=true` (baseline lab data already does)
+- [ ] HR feed contains Sofia with `exceptions=LOA` (baseline lab data already does)
 - [ ] You can open identity cubes and account links
 - [ ] Lesson 31 completed so you will not accidentally “terminate” Sofia
 - [ ] Optional LCM: note whether `init-lcm.xml` was imported—stretch only
@@ -118,14 +118,14 @@ Return: onLeave=false → staged re-enable → mini cert
 
 Prove Sofia is leave, not leaver, before touching accounts.
 
-1. In `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or live HR file), filter `onLeave` = `true`.
-2. Confirm Sofia’s row: `MNB00095`, `status=1`, `onLeave=true`, manager `MNB00006`.
+1. In `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or live HR file), filter `exceptions` (LOA) = `true`.
+2. Confirm Sofia’s row: `MNB00095`, `status=1`, `exceptions=LOA`, manager `MNB00006`.
 3. Note other on-leave rows if present (e.g. `chloe.joshi`, `samir.hughes`, `amelia.foster`, `deepa.khatri`, `rohan.price`) for population sizing.
-4. In IIQ, search identity `sofia.torres` and confirm `onLeave` attribute is true after Aggregate + Refresh if you just remapped schema.
+4. In IIQ, search identity `sofia.torres` and confirm `exceptions` (LOA) attribute is true after Aggregate + Refresh if you just remapped schema.
 
 **Expected result:** List of on-leave identities with Sofia highlighted; clear proof she is **not** a leaver (`status` still active).
 
-**If it fails:** Remap `onLeave` boolean on HR app; Aggregate MNB-HR; Refresh MNB Identities.
+**If it fails:** Remap `exceptions` (LOA) boolean on HR app; Aggregate MNB-HR; Refresh MNB Identities.
 
 ### Task 2 — Write the Meridian freeze policy
 
@@ -136,7 +136,7 @@ Policy language prevents ops from applying the wrong runbook under pressure.
 ```text
 MNB Leave-of-Absence Freeze (RM example)
 1. Keep identity cube and HR linkage (not a termination).
-2. Disable interactive directory (ELDAP) within 24 hours of onLeave=true.
+2. Disable interactive directory (ELDAP) within 24 hours of exceptions=LOA.
 3. Disable or suspend CRM interactive access; record account ownership for coverage.
 4. Immediately revoke/suspend any privileged entitlements if present
    (WIRE_INIT/APPR, AWS_ADMIN, CORE, SAP_FI, PRIV_BREAK).
@@ -173,7 +173,7 @@ Leave without manager awareness leaves CRM books uncovered and freeze unacknowle
 
 ```text
 Subject: LoA freeze review — sofia.torres (MNB00095)
-Due: 24 hours from onLeave detection
+Due: 24 hours from exceptions (LOA) detection
 Ask: Confirm coverage for CRM book; acknowledge freeze; list any access that must remain
 ```
 
@@ -190,24 +190,24 @@ Silent full restore of privilege is the classic LoA failure mode.
 1. Write return procedure:
 
 ```text
-Return-to-work (onLeave cleared)
-1. HR clears onLeave; Aggregate + Refresh.
+Return-to-work (exceptions (LOA) cleared)
+1. HR clears exceptions (LOA); Aggregate + Refresh.
 2. Re-enable ELDAP only after manager confirmation.
 3. Re-enable CRM after mini certification (manager attests still needed).
 4. Privileged access: never auto-restore; new request (Lessons 35–37).
 5. Evidence: HR delta, re-enable timestamps, mini-cert id.
 ```
 
-2. Optionally flip Sofia’s `onLeave` to `false` in a **sandbox copy** of the HR file, aggregate/refresh, then restore `true` so shared labs stay consistent.
+2. Optionally flip Sofia’s `exceptions` (LOA) to `false` in a **sandbox copy** of the HR file, aggregate/refresh, then restore `true` so shared labs stay consistent.
 
 **Expected result:** Written return control that forbids silent full restore of privilege.
 
-**If it fails:** Keep Sofia `onLeave=true` in shared lab; document procedure only.
+**If it fails:** Keep Sofia `exceptions=LOA` in shared lab; document procedure only.
 
 ### Task 6 — Optional LCM hook (if available)
 
 1. If `init-lcm.xml` was imported, inspect Lifecycle Manager events / business processes for attribute change triggers (or equivalent menu).
-2. Design (do not break prod): event on `onLeave` changing to `true` → workflow that creates manager work item + disable plan.
+2. Design (do not break prod): event on `exceptions` (LOA) changing to `true` → workflow that creates manager work item + disable plan.
 3. Screenshot or note object names for the binder.
 
 **Expected result:** Either a config note “LCM event designed” or “LCM not active—manual freeze SOP applies.”
@@ -216,7 +216,7 @@ Return-to-work (onLeave cleared)
 
 *”Show me how leave differs from termination for sofia.torres, and prove privileged access would freeze.”*
 
-Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, (2) freeze policy vs Jordan leaver policy, (3) ELDAP/CRM disable evidence + privileged rule for WIRE_*/AWS_ADMIN.
+Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=1`, (2) freeze policy vs Jordan leaver policy, (3) ELDAP/CRM disable evidence + privileged rule for WIRE_*/AWS_ADMIN.
 
 **Expected result:** Written proof steps in the binder.
 
@@ -224,7 +224,7 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 
 ## Acceptance criteria
 
-- [ ] On-leave users identified; Sofia confirmed `onLeave=true`, `status=1`
+- [ ] On-leave users identified; Sofia confirmed `exceptions=LOA`, `status=1`
 - [ ] Freeze vs terminate comparison written
 - [ ] Freeze actions for ELDAP/CRM practiced or ticketed
 - [ ] Manager 24h notification artifact created
@@ -237,8 +237,8 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Sofia looks terminated | Wrong lesson applied / status flipped | Restore `status=1`, `onLeave=true` |
-| onLeave not on cube | Schema mapping missing | Map boolean; Aggregate; Refresh |
+| Sofia looks terminated | Wrong lesson applied / status flipped | Restore `status=1`, `exceptions=LOA` |
+| exceptions (LOA) not on cube | Schema mapping missing | Map boolean; Aggregate; Refresh |
 | Tempted to delete CRM | Over-applying leaver SOP | Freeze retains ownership notes |
 | Manager unclear | Hierarchy not refreshed | Lesson 21 manager mapping |
 | Privileged still live on other LoA user | No LoA+priv detection | Add population/policy in Stretch |
@@ -247,7 +247,7 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 
 ## Training binder evidence
 
-1. HR filter screenshot showing Sofia `onLeave=true`
+1. HR filter screenshot showing Sofia `exceptions=LOA`
 2. Identity cube attribute screenshot
 3. Freeze policy text (freeze vs terminate)
 4. Disable/ticket evidence for ELDAP/CRM
@@ -262,7 +262,7 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 ## Knowledge check
 
 1. How does leave differ from terminate in Meridian HR attributes?
-2. What must happen to privileged entitlements when `onLeave=true`?
+2. What must happen to privileged entitlements when `exceptions=LOA`?
 3. What is the manager notification SLA for LoA detection?
 4. On return, may privileged access auto-restore with directory?
 5. Who is Sofia’s manager in the lab?
@@ -270,7 +270,7 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 
 ### Answers
 
-1. Leave: `onLeave=true` with employment usually still active (`status=1`). Terminate: `status=0` and `terminationDate` set.
+1. Leave: `exceptions=LOA` with employment usually still active (`status=1`). Terminate: `status=0` and `terminationDate` set.
 2. Suspend or revoke immediately—do not leave WIRE_*, AWS_ADMIN, CORE, etc. usable during leave.
 3. Manager work item / notification within 24 hours (faster for privileged).
 4. No—privileged access requires a new request; only approved baseline may return after mini cert.
@@ -281,7 +281,7 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “lifecycle events” and “identity attributes” for `onLeave`-style triggers.
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “lifecycle events” and “identity attributes” for `exceptions` (LOA)-style triggers.
 - [SailPoint Community](https://community.sailpoint.com/) — search “leave of absence” / “disable on leave” for freeze vs terminate workflows.
 - [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management for temporary disablement without destroying the account record.
 - [NIST SP 800-53 AC-3](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — access enforcement during periods when interactive use is not authorized.
@@ -291,8 +291,8 @@ Write the three-artifact answer: (1) HR attributes `onLeave=true` / `status=1`, 
 
 ## Stretch lab
 
-1. Create population `MNB-OnLeave` (`onLeave == true`) and a policy or report flagging on-leave + (`WIRE_*` OR `AWS_ADMIN`).
-2. Configure LCM lifecycle event on `onLeave` if licensed/imported.
+1. Create population `MNB-OnLeave` (`exceptions (LOA) == true`) and a policy or report flagging on-leave + (`WIRE_*` OR `AWS_ADMIN`).
+2. Configure LCM lifecycle event on `exceptions` (LOA) if licensed/imported.
 3. Write Legal/HR communications snippet for privacy-sensitive leave without disclosing reason in IAM tickets.
 
 ---

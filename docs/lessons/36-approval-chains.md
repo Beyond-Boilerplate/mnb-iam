@@ -198,7 +198,7 @@ Queues die when managers are OOO. Escalation is the anti-deadlock control.
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Work item to wrong person | Manager attribute wrong | Fix HR managerId; Refresh |
+| Work item to wrong person | Manager attribute wrong | Fix HR managersAssociateID; Refresh |
 | Stuck Pending | Approver inactive / no escalation | Reassign; add escalation |
 | Dual not enforced | Scheme still manager-only | Update approval scheme / workflow |
 | Reject still provisioned | Bug or manual grant | Revoke; file defect; check plan |

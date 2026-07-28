@@ -1,0 +1,110 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB-Rule-E2E-WipeAcademy">
+  <Description>
+    Lab wipe: remove learner leftover Meridian academy objects and non-spadmin identities
+    so the tenant is clean for UI-first lessons. Keeps MNB-Rule-Hello-World.
+  </Description>
+  <Source>
+    <![CDATA[
+      import sailpoint.api.Terminator;
+      import sailpoint.object.Application;
+      import sailpoint.object.Bundle;
+      import sailpoint.object.CorrelationConfig;
+      import sailpoint.object.EmailTemplate;
+      import sailpoint.object.Identity;
+      import sailpoint.object.Policy;
+      import sailpoint.object.QueryOptions;
+      import sailpoint.object.Rule;
+      import sailpoint.object.TaskDefinition;
+      import sailpoint.object.TaskResult;
+      import sailpoint.object.Workflow;
+      import sailpoint.tools.Util;
+      import java.util.ArrayList;
+      import java.util.Iterator;
+      import java.util.List;
+
+      Terminator terminator = new Terminator(context);
+      StringBuilder log = new StringBuilder();
+      int deleted = 0;
+
+      void delByName(Class clazz, String name) {
+        Object o = context.getObjectByName(clazz, name);
+        if (o != null) {
+          terminator.deleteObject(o);
+          deleted++;
+          log.append("DEL ").append(clazz.getSimpleName()).append(" ").append(name).append("\n");
+        }
+      }
+
+      // Identities first (clears Links to apps)
+      QueryOptions qo = new QueryOptions();
+      Iterator it = context.search(Identity.class, qo);
+      List toKill = new ArrayList();
+      while (it.hasNext()) {
+        Identity id = (Identity) it.next();
+        if (id != null && !"spadmin".equals(id.getName())) {
+          toKill.add(id.getName());
+        }
+      }
+      Util.flushIterator(it);
+      for (Object n : toKill) {
+        Identity id = context.getObjectByName(Identity.class, (String) n);
+        if (id != null) {
+          terminator.deleteObject(id);
+          deleted++;
+        }
+      }
+      log.append("DEL Identity count=").append(toKill.size()).append(" (kept spadmin)\n");
+
+      String[] apps = {
+        "MNB-HR", "MNB-IT-Access", "MNB-CoreBanking", "MNB-WirePortal",
+        "MNB-SAP-Finance", "MNB-AWS-Cloud"
+      };
+      for (String n : apps) delByName(Application.class, n);
+
+      String[] tasks = {
+        "Aggregate MNB-HR", "Aggregate MNB-IT-Access", "Aggregate MNB-CoreBanking",
+        "Aggregate MNB-WirePortal", "Aggregate MNB-SAP-Finance", "Aggregate MNB-AWS-Cloud",
+        "Refresh MNB Attributes", "Refresh MNB Managers", "Refresh MNB Roles",
+        "Refresh MNB Policies", "Refresh MNB Identities", "Aggregate MNB-HR-DRYRUN"
+      };
+      for (String n : tasks) delByName(TaskDefinition.class, n);
+
+      delByName(CorrelationConfig.class, "MNB-HR EmployeeId Correlation");
+      delByName(CorrelationConfig.class, "MNB-HR UserId Correlation");
+      delByName(Rule.class, "MNB-Rule-Correlation-EmployeeId");
+      delByName(Bundle.class, "MNB-Role-Birthright-Employee");
+      delByName(Bundle.class, "MNB-Role-IT-Directory-User");
+      delByName(Workflow.class, "MNB-Workflow-Joiner");
+      delByName(Workflow.class, "MNB-Workflow-Leaver");
+      delByName(EmailTemplate.class, "MNB-EmailTemplate-Joiner-Notify");
+      delByName(Policy.class, "MNB-SOD-Wire-Dual-Control");
+
+      // Best-effort: drop TaskResults whose names mention MNB / Aggregate MNB
+      QueryOptions tq = new QueryOptions();
+      Iterator trIt = context.search(TaskResult.class, tq);
+      List trKill = new ArrayList();
+      while (trIt.hasNext()) {
+        TaskResult tr = (TaskResult) trIt.next();
+        if (tr == null || tr.getName() == null) continue;
+        String tn = tr.getName();
+        if (tn.indexOf("MNB") >= 0 || tn.indexOf("Aggregate MNB") >= 0 || tn.indexOf("Refresh MNB") >= 0) {
+          trKill.add(tr.getId());
+        }
+      }
+      Util.flushIterator(trIt);
+      for (Object id : trKill) {
+        TaskResult tr = context.getObject(TaskResult.class, (String) id);
+        if (tr != null) {
+          terminator.deleteObject(tr);
+          deleted++;
+        }
+      }
+      log.append("DEL TaskResult MNB-ish count=").append(trKill.size()).append("\n");
+
+      context.commitTransaction();
+      return "OK wiped deletedOps≈" + deleted + "\n" + log.toString();
+    ]]>
+  </Source>
+</Rule>

@@ -169,7 +169,7 @@ Application `MNB-Oracle-GL`; IAM owner `helen.ross`; technical contact `samir.ha
 
 Training still delivers aggregation muscle memory when TNS is dead.
 
-1. Schema attributes: `username` (native identity), `email`, `employeeId`, `status`, entitlement `dbRole` (multi-valued if multiple roles).
+1. Schema attributes: `username` (native identity), `email`, `userId`, `status`, entitlement `dbRole` (multi-valued if multiple roles).
 2. Create `~/iiq-lab-data/connectors/oracle/MNB-Oracle-GL-mock.csv`:
 
 ```csv

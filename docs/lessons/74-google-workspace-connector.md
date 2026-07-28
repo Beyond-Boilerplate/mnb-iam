@@ -283,7 +283,7 @@ Record `RR-GW-DRIVE-01`: *Shared Drive memberships granted directly to users (ou
 | Groups aggregate empty | `group.member` scope not delegated, or domain/customer field wrong | Add member scope; verify domain value |
 | OU move fails during provisioning | `orgunit` scope missing or OU path typo | Delegate orgunit scope; paths are case-sensitive and start with `/` |
 | Password operations fail | Users federated via Okta SSO | Expected — manage passwords at the IdP, disable password feature |
-| Contractor appears in `/Employees` | Joiner playbook never set OU | Fix create-provisioning policy to set `orgUnitPath` by `workerType` |
+| Contractor appears in `/Employees` | Joiner playbook never set OU | Fix create-provisioning policy to set `orgUnitPath` by `employeeType` |
 
 ---
 

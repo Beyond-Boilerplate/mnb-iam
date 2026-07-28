@@ -69,7 +69,7 @@ IIQ UI / REST  ──►  Object model (Application, Identity, TaskDefinition, B
 | Surface | IIQ objects you touch | Meridian lab habit |
 | --- | --- | --- |
 | Config | Application, Bundle, Policy | Always `MNB-` prefix |
-| People | Identity (+ Links) | Search by `userName` / `employeeId` |
+| People | Identity (+ Links) | Search by Identity **name** (`helen.ross`) or promoted attrs; HR key is `userId` |
 | Jobs | TaskDefinition / TaskResult | Prefer named tasks (`Aggregate MNB-HR`) |
 | Human control | WorkItem, Certification | Bookmark Inbox day one |
 
@@ -162,7 +162,7 @@ ls ~/iiq-lab-data/
 
 Copy this starter table into your notebook and keep it for Lessons 04–40:
 
-| Persona | employeeId | Why it matters |
+| Persona | userId (HR) | Why it matters |
 | --- | --- | --- |
 | helen.ross | MNB00001 | IAM / security leadership |
 | christopher.hayes | MNB00002 | Technology / AWS owner |
@@ -173,10 +173,12 @@ Copy this starter table into your notebook and keep it for Lessons 04–40:
 | jordan.reed | MNB00092 | SAP_FI + AWS_ADMIN (SoD) |
 | raj.external | MNB00093 | Contractor + bad email |
 | samir.hassan | MNB00094 | Terminated + residual IT |
-| sofia.torres | MNB00095 | onLeave=true |
+| sofia.torres | MNB00095 | exceptions=LOA |
 | kai.nguyen | MNB00096 | IBSI + ECOM (SoD) |
 | amelia.brooks | MNB00097 | New teller / joiner patterns |
 | nina.joiner | MNB00120 | Scenario joiner (later) |
+
+> **ID map:** HR key = `userId`. IT dump column `employeeId` uses the **same** `MNB#####` values for correlation (Lesson 09+).
 
 **Expected result:** Cheat sheet filed; you can recall wire and SoD personas without reopening CSV files.
 

@@ -31,8 +31,9 @@ else
   echo "==> 1. SKIP_BUILD=1 (using existing import)"
 fi
 
-echo "==> 2. Assert Meridian objects"
+echo "==> 2. Assert CD smoke (HelloWorld)"
 IIQ_HOME="$IIQ_HOME" "$VERIFY/assert-mnb-objects.sh" local
+echo "    NOTE: MNB-HR and refresh tasks must already exist (Lessons 04–06)."
 
 echo "==> 3. Aggregate MNB-HR (sync via helper rule)"
 iiq <<EOF

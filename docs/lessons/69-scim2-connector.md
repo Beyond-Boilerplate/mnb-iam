@@ -68,7 +68,7 @@ Matrix: **SCIM-compliant SaaS → SCIM 2.0**, alternate Web Services.
 
 ### Why `externalId` beats email correlation
 
-Email renames break correlation; HR `employeeId` in `externalId` survives. Meridian lab fixture already carries `MNB00090` / `MNB00091` — use them.
+Email renames break correlation; HR `userId` in `externalId` survives. Meridian lab fixture already carries `MNB00090` / `MNB00091` — use them.
 
 ```
 IIQ MNB-SCIM-SaaS

@@ -18,8 +18,8 @@ One-stop **SailPoint IdentityIQ 8.5** curriculum for enterprise IAM engineers: g
 
 Learner setup **is** the scoped bank setup: same SSB repo, same `config/` objects, same tokens—academy-sized Meridian, not HA prod.
 
-1. Complete [LOCAL_SETUP.md](../LOCAL_SETUP.md) until you can log in as `spadmin`.
-2. Skim [INFRASTRUCTURE.md](../INFRASTRUCTURE.md), [SSD.md](../SSD.md), and [config/PACKS.md](../../config/PACKS.md).
+1. Complete [LOCAL_SETUP.md](../LOCAL_SETUP.md) until you can log in as `spadmin` (or use the shared homelab URL).
+2. Skim [INFRASTRUCTURE.md](../INFRASTRUCTURE.md), [SSD.md](../SSD.md), and [config/PACKS.md](../../config/PACKS.md) — CD ships **HelloWorld only**; you build the rest in lessons.
 3. Copy lab fixtures (CSV truth) and record absolute paths:
 
 ```bash
@@ -31,12 +31,12 @@ realpath ~/iiq-lab-data/HRApplications.txt
 # less lab-data/reference/hr-column-map.md
 ```
 
-4. Align SSB file tokens in `sandbox.target.properties` (`%%MNB_HR_FILE%%`, `%%MNB_IT_ACCESS_FILE%%`, …) to those absolute paths (Lesson 03).
-5. Import Meridian seed objects (after WAR/deploy or via console):
+4. In Lesson 03, learn SSB layout / tokens. Set `%%MNB_*_FILE%%` when you **export** apps (usually Lesson 04+), not before you have Applications in git.
+5. Homelab already imported HelloWorld via CD. On a laptop WAR, optional:
 
 ```bash
 export SPTARGET=sandbox
-./build.sh importdynamic   # or use homelab CD import after push
+./build.sh importdynamic   # smoke Rule only until you export your own objects
 ```
 
 6. Optional live connector backends (OpenLDAP + Postgres):
@@ -45,7 +45,7 @@ export SPTARGET=sandbox
 docker compose -f docker-compose.connectors.yml up -d
 ```
 
-7. Keep a CHANGELOG of `MNB-*` objects, **`config/` paths**, and evidence screenshots.
+7. Keep a CHANGELOG of `MNB-*` objects you **create**, optional `config/` exports, and evidence screenshots.
 
 ---
 
@@ -53,11 +53,12 @@ docker compose -f docker-compose.connectors.yml up -d
 
 See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and real-life context first, then guided setup, then verification — never a bare task list.
 
-- **Hybrid bank craft:** Foundations teach UI first principles; from Applications onward prefer **import → verify → extend** seeded packs in [`config/`](../../config/). Durable controls exit as `MNB-*.xml` (or reviewed diffs to seeds). Capstones grade **git + evidence**.
-- Connector lessons (51+) teach the **native connector as the primary path**, including the real-world setup (service accounts, app registrations, API scopes) you would perform against a live tenant. A clearly labeled **lab-without-live-target** fallback keeps training runnable on a laptop.
-- Early application lessons (09–16) use Delimited File on purpose to teach governance mechanics; each carries a **Production reality** box pointing to the Part II lesson that covers the real connector.
-- Intermediate+ lessons end with a **Further reading** list (SailPoint docs, vendor admin guides, standards/whitepapers).
-- Lesson **101 / 108** deepen promotion and multi-env CAB—not first contact with SSB (that starts in Lesson 03).
+- **UI-first bank craft:** You **build** Meridian objects in each lesson. Optional export to [`config/`](../../config/) practices promotion (Lesson 101+). CD does **not** pre-create `MNB-HR` or other academy packs.
+- HR attributes follow [`lab-data/reference/hr-column-map.md`](../../lab-data/reference/hr-column-map.md) across lessons 01–110 (`userId`, `managersAssociateID`, `exceptions=LOA`, `employeeType`, …).
+- Connector lessons (51+) teach the **native connector as the primary path**, including real-world setup outside IIQ. A **lab-without-live-target** fallback keeps laptop training runnable.
+- Early application lessons (09–16) use Delimited File on purpose; each has a **Production reality** box linking to the Part II connector lesson.
+- Intermediate+ lessons end with **Further reading**.
+- Lesson **03** = SSB awareness; **101 / 108** = promotion / multi-env maturity after you have objects worth exporting.
 
 ---
 

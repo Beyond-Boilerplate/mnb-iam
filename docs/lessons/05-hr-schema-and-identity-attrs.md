@@ -191,9 +191,9 @@ Add these “do not” rules to the dictionary footer:
 
 - [ ] Identity vs Link inventory complete
 - [ ] `MNB-HR` mappings updated and saved
-- [ ] **Bank craft:** Mapping changes noted for re-export of `config/Application/MNB-Application-HR.xml` when identity maps are durable
+- [ ] **Bank craft:** Optional export of maps/app of `config/Application/MNB-Application-HR.xml` when identity maps are durable
 - [ ] Manager chain sketched for priya.wire → rachel.evans
-- [ ] Termination vs onLeave comparison written
+- [ ] Termination vs exceptions (LOA) comparison written
 - [ ] raj.external email anomaly noted
 - [ ] Attribute dictionary published in notes/binder
 - [ ] Anti-patterns checklist written
@@ -204,15 +204,15 @@ Add these “do not” rules to the dictionary footer:
 | --- | --- | --- |
 | Identity attrs blank | Not mapped / no refresh yet | Fix maps; run `Refresh MNB Attributes` (Lesson 06) |
 | Manager shows raw id only | Manager correlation not run | Run `Refresh MNB Managers` |
-| Wrong department on cube | Mapped display name instead of code | Map `departmentCode` |
+| Wrong department on cube | Mapped display name instead of code | Map `departmentName` |
 | Duplicate custom attributes | Invented names | Align to standard identity attrs |
-| Contractor looks like employee | `workerType` not promoted | Promote; re-aggregate; run `Refresh MNB Attributes` |
+| Contractor looks like employee | `employeeType` not promoted | Promote; re-aggregate; run `Refresh MNB Attributes` |
 
 ## Training binder evidence
 
 - Attribute inventory table
 - Screenshot: `priya.wire` attributes showing department/job/manager (or id)
-- Screenshot: `sofia.torres` onLeave vs `samir.hassan` inactive
+- Screenshot: `sofia.torres` exceptions (LOA) vs `samir.hassan` inactive
 - Attribute dictionary v1 document
 
 **Examiner question:** “Which identity attributes drive your termination controls versus leave-of-absence controls?”

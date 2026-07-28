@@ -16,7 +16,7 @@ You will be able to:
 - Explain each major **Identity Refresh** option and when Meridian turns it on
 - Create **separate** purpose-built refresh tasks (attributes, managers, roles, optional policy)
 - Run the pipeline `Aggregate MNB-HR` → `Refresh MNB Attributes` (and managers) to promote HR Link data onto cubes
-- Prove a file change (`onLeave`) appears on the cube after re-aggregate + attribute refresh
+- Prove a file change (`exceptions` (LOA)) appears on the cube after re-aggregate + attribute refresh
 
 ## Why this matters
 
@@ -36,7 +36,7 @@ Aggregation loads accounts; refresh recalculates the person. Without the right r
 | Task name | Purpose | Typical options ON |
 | --- | --- | --- |
 | `Refresh MNB Attributes` | Promote/update identity attrs from HR Link after aggregation | Refresh identity attributes from accounts |
-| `Refresh MNB Managers` | Resolve `managerId` → manager Identity | Refresh manager / manager correlation |
+| `Refresh MNB Managers` | Resolve `managersAssociateID` → manager Identity | Refresh manager / manager correlation |
 | `Refresh MNB Roles` | Recalculate assigned/detected roles (later lessons) | Refresh assigned / detected roles |
 | `Refresh MNB Policies` *(optional early)* | Evaluate policy violations | Check active policies |
 
@@ -49,7 +49,7 @@ Labels vary slightly by IIQ version; meanings do not. Enable only options you ca
 | Option (typical label) | What it does | When Meridian uses it | Cost |
 | --- | --- | --- | --- |
 | **Refresh identity attributes** / promote attributes from accounts | Copies mapped Link fields onto the Identity | **Always after `Aggregate MNB-HR`** (and after map changes) | Moderate |
-| **Refresh manager** / manager correlation | Resolves manager references (`managerId` → manager cube) | After HR manager changes; hierarchy certs/approvals | Moderate |
+| **Refresh manager** / manager correlation | Resolves manager references (`managersAssociateID` → manager cube) | After HR manager changes; hierarchy certs/approvals | Moderate |
 | **Refresh assigned / detected roles** | Re-evaluates birthright and detection | After role model changes (Lessons 23+) | Higher |
 | **Check active policies** / process policy violations | Evaluates SoD and other policies | After policy edits (Lessons 39+); not needed every early-lab run | Higher |
 | **Refresh entitlements / needs refresh** *(if present)* | Marks or recalculates entitlement-related state | When entitlement catalogs or assignment flags change | Moderate–high |
@@ -90,7 +90,7 @@ Refresh MNB Managers (optional same night / after hierarchy edits)
         └── (later) Refresh MNB Policies → SoD / policy flags
 ```
 
-**Real-life Meridian example.** `priya.wire`’s `managerId` points at `rachel.evans`. Aggregation alone may leave department/`onLeave` blank on the Identity and manager display unresolved. After `Refresh MNB Attributes`, org flags appear; after `Refresh MNB Managers`, Rachel appears as manager so wire certifications and approvals route correctly.
+**Real-life Meridian example.** `priya.wire`’s `managersAssociateID` points at `rachel.evans`. Aggregation alone may leave department/`exceptions` (LOA) blank on the Identity and manager display unresolved. After `Refresh MNB Attributes`, org flags appear; after `Refresh MNB Managers`, Rachel appears as manager so wire certifications and approvals route correctly.
 
 ## Before you start
 
@@ -126,33 +126,33 @@ Before creating tasks, lock the meanings so you never enable mystery toggles.
 
 **Expected result:** Written option dictionary in your notebook. No “I don’t know what this does” left checked.
 
-### Task 3 — Purpose-built refresh tasks (seed or create)
+### Task 3 — Create purpose-built refresh tasks (UI)
 
-Prefer the academy seeds under `config/TaskDefinition/MNB-TaskDefinition-Refresh-*.xml`. Create in the UI only if import did not land them; then export to match git.
+CD does not ship these. Create them now so every HR aggregate has a clear promote/manager path.
 
 #### 3a — Refresh MNB Attributes *(required after every HR aggregate)*
 
-1. **Tasks** → search `Refresh MNB Attributes`. If present, open and verify options (promote attributes **on**; manager/roles/policies/provisioning **off**).
-2. If missing: New Task → type **Identity Refresh**; name `Refresh MNB Attributes`; enable **only** refresh / promote identity attributes from accounts.
+1. **Tasks** → New Task → type **Identity Refresh**; name `Refresh MNB Attributes`.
+2. Enable **only** refresh / promote identity attributes from accounts (manager/roles/policies/provisioning **off**).
 3. Scope: all lab identities, or filter to identities with an account on `MNB-HR` if the UI allows.
-4. Save. CHANGELOG: `Refresh MNB Attributes verified from seed` **or** `created + export to config/TaskDefinition/…`.
+4. Save. CHANGELOG: `created Refresh MNB Attributes`.
 
 #### 3b — Refresh MNB Managers
 
-1. Confirm or create `Refresh MNB Managers` with **only** manager correlation / refresh manager options.
-2. Save. CHANGELOG cites seed or export.
+1. Create `Refresh MNB Managers` with **only** manager correlation / refresh manager options.
+2. Save. CHANGELOG: `created Refresh MNB Managers`.
 
 #### 3c — Refresh MNB Roles *(shell for later)*
 
-1. Confirm seeded `Refresh MNB Roles` or create the shell (assigned/detected role refresh when roles exist—Lesson 23+).
+1. Create `Refresh MNB Roles` (assigned/detected role refresh when roles exist—Lesson 23+).
 2. Leave unscheduled for early labs.
 
 #### 3d — Refresh MNB Policies *(optional shell)*
 
-1. Confirm seeded `Refresh MNB Policies` or create with policy-check options prepared but **not** scheduled early (cost).
+1. Optionally create `Refresh MNB Policies` with policy-check options prepared but **not** scheduled early (cost).
 2. Document the choice.
 
-**Expected result:** At least `Refresh MNB Attributes` and `Refresh MNB Managers` exist as separate TaskDefinitions aligned with `config/`. Option lists documented per task.
+**Expected result:** At least `Refresh MNB Attributes` and `Refresh MNB Managers` exist as separate TaskDefinitions. Option lists documented per task.
 
 **If it fails:** Some editions nest options under “advanced”—expand panels before assuming a checkbox is missing.
 
@@ -172,7 +172,7 @@ This is the control sequence after any HR feed change.
 2. Run **`Refresh MNB Attributes`** → wait for Success. This is the task that **promotes/updates identity attributes from the HR Link**.
 3. Run **`Refresh MNB Managers`** → wait for Success.
 4. Screenshot all three task results into `~/iiq-lab-evidence/YYYY-MM-DD/`.
-5. Re-open `priya.wire` and confirm department/job/`onLeave` (as mapped) and manager toward `rachel.evans`.
+5. Re-open `priya.wire` and confirm department/job/`exceptions` (LOA) (as mapped) and manager toward `rachel.evans`.
 
 **Expected result:** Three successful task results; at least one identity shows promoted attributes and a resolved manager.
 
@@ -221,7 +221,7 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 
 - [ ] Cube deep-dive notes for `christopher.hayes` complete
 - [ ] Identity Refresh options defined in notebook (table mapped to your UI labels)
-- [ ] Separate tasks present: `Refresh MNB Attributes`, `Refresh MNB Managers` (plus roles/policy shells) — seed verified **or** UI+export to `config/TaskDefinition/`
+- [ ] Separate tasks present: `Refresh MNB Attributes`, `Refresh MNB Managers` (plus roles/policy shells) — works in IIQ; optional UI+export to `config/TaskDefinition/`
 - [ ] Aggregate → Attributes → Managers pipeline run with evidence screenshots
 - [ ] Change-detect drill completed and HR file restored
 - [ ] Three-persona comparison table complete
@@ -232,7 +232,7 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Refresh success but attrs stale | Attribute option off / wrong task | Run `Refresh MNB Attributes` with promote-attrs enabled |
-| Manager still blank | Ran attrs-only; manager task not run | Run `Refresh MNB Managers`; confirm managerId exists as employeeId |
+| Manager still blank | Ran attrs-only; manager task not run | Run `Refresh MNB Managers`; confirm managersAssociateID exists as userId |
 | Refresh very slow | Too many options on one task | Split tasks; disable policy check for early labs |
 | Change not visible | Edited wrong file copy | Confirm IIQ path matches edited absolute path |
 | Restore forgotten | Skipped bak restore | Restore `.bak` immediately; re-aggregate + attrs refresh |
@@ -242,7 +242,7 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 
 - Screenshots: Aggregate + `Refresh MNB Attributes` + `Refresh MNB Managers` task results
 - Screenshot: `priya.wire` manager/attributes after refresh
-- Before/after `onLeave` screenshots (then restored)
+- Before/after `exceptions` (LOA) screenshots (then restored)
 - Option checklist per purpose-built task (not one mega-list)
 
 **Examiner question:** “Show the job that recalculates identity attributes after HR aggregation and its last success—and explain why manager refresh is a separate task.”
@@ -253,7 +253,7 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 2. Which Meridian task must run after HR aggregation to promote identity attributes from the HR Link?
 3. Why create separate Identity Refresh tasks instead of one with all options?
 4. Name two Identity Refresh options and what each does.
-5. Why restore the HR file after the onLeave drill?
+5. Why restore the HR file after the exceptions (LOA) drill?
 
 ### Answers
 
@@ -281,7 +281,7 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 ## Summary
 
 - Cubes are the operational person record; Identity Refresh options are the calculation knobs—define them before enabling them.
-- Meridian uses purpose-built tasks in git: after `Aggregate MNB-HR`, run **`Refresh MNB Attributes`**, then **`Refresh MNB Managers`**.
+- Meridian uses purpose-built tasks you create in Lesson 06: after `Aggregate MNB-HR`, run **`Refresh MNB Attributes`**, then **`Refresh MNB Managers`**.
 - Change-detect drills prove evidence that ops and examiners expect; bank craft exit is TaskDefinition XML under `config/`.
 
 ---

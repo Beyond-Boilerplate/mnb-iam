@@ -41,8 +41,8 @@ A **mover** is an identity whose job context changes while employment continues:
 
 | Attribute | Before (baseline) | After (delta) |
 | --- | --- | --- |
-| managerId | `MNB00005` (`rachel.evans`) | `MNB00006` (`sanjay.kapoor`) |
-| departmentCode | `TRS` | `CML` |
+| managersAssociateID | `MNB00005` (`rachel.evans`) | `MNB00006` (`sanjay.kapoor`) |
+| departmentName | `TRS` | `CML` |
 | jobCode | `WIR01` | `RM01` |
 | jobTitle | Wire Specialist | Relationship Manager |
 | costCenter | `CC-TRS-210` | `CC-CML-220` |
@@ -289,7 +289,7 @@ Hierarchy changes are governance changes: future manager certs and approvals mus
 
 ## Stretch lab
 
-- Configure a Lifecycle Event on `departmentCode` or `jobCode` change to open a “mover residual access” work item automatically.
+- Configure a Lifecycle Event on `departmentName` or `jobCode` change to open a “mover residual access” work item automatically.
 - Extend remediation to `ACH_OPS` if Priya still carries it from baseline IT inventory.
 - Draft manager email template notifying Sanjay of transfer certification responsibility.
 

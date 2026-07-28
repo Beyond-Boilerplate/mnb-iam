@@ -17,7 +17,7 @@ You will be able to:
 
 - Explain **SSD** vs **SSB** and where Meridian customizations live (`config/`, `src/`, `web/`, `pluginsrc/`) — building on Lesson 03 import, not first contact
 - Promote a change to an existing academy pack (or export a UI delta) with `%%TOKENS%%`
-- Run `./build.sh -Dtarget=sandbox clean war` and `importdynamic`, then assert with `tools/iiq-verify/assert-mnb-objects.sh`
+- Run `./build.sh -Dtarget=sandbox clean war` and `importdynamic`, then assert HelloWorld with `tools/iiq-verify/assert-mnb-objects.sh`; verify learner objects in Debug
 - Describe the promotion pipeline: sandbox → dev → prod property files with CAB evidence
 - List secrets that must never be committed and how CI injects them
 - Decide when `importdynamic` is enough vs when a full WAR redeploy is mandatory

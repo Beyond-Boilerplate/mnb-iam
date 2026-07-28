@@ -30,15 +30,15 @@ Authoritative HR carries structural codes that drive later IIQ rules:
 
 | HR field | Purpose |
 | --- | --- |
-| `departmentCode` | Org bucket (RET, TRS, FIN, …) for roles and populations |
+| `departmentName` | Org bucket (RET, TRS, FIN, …) for roles and populations |
 | `jobCode` | Role of record (WIR01, GL01, TEL01, …) |
-| `workerType` | Employee vs Contractor lifecycle SLAs |
-| `status` / `onLeave` | Active, terminated, temporary freeze |
+| `employeeType` | Employee vs Contractor lifecycle SLAs |
+| `status` / `exceptions` (LOA) | Active, terminated, temporary freeze |
 
 Entitlements are codes with a risk dictionary. SoD pairs encode toxic combinations.
 
 ```text
-  departmentCode + jobCode  -->  birthright / IT roles
+  departmentName + jobCode  -->  birthright / IT roles
   entitlement risk tier     -->  cert campaign scope
   sod-matrix pairs          -->  policy violations + remediation
 ```
@@ -54,13 +54,13 @@ Entitlements are codes with a risk dictionary. SoD pairs encode toxic combinatio
 
 ## How it works
 
-Meridian’s org model is not invented in IIQ—it is **imported from HR codes** and **enriched by reference dictionaries**. Roles, populations, SoD policies, and certification scopes later consume the same `departmentCode`, `jobCode`, and entitlement risk tiers you learn here.
+Meridian’s org model is not invented in IIQ—it is **imported from HR codes** and **enriched by reference dictionaries**. Roles, populations, SoD policies, and certification scopes later consume the same `departmentName`, `jobCode`, and entitlement risk tiers you learn here.
 
 ```text
 departments.csv + job-codes.csv
         │
         ▼
-HR row (departmentCode, jobCode, workerType)
+HR row (departmentName, jobCode, employeeType)
         │
         ▼
 Identity attributes after Aggregate MNB-HR / Refresh
@@ -72,7 +72,7 @@ Identity attributes after Aggregate MNB-HR / Refresh
 
 | Artifact | Drives | Exam narrative |
 | --- | --- | --- |
-| `departmentCode` | Populations, role assignment filters | “Retail vs Treasury scope” |
+| `departmentName` | Populations, role assignment filters | “Retail vs Treasury scope” |
 | `jobCode` | Birthright / IT role design | “WIR01 gets WIRE_INIT” |
 | Entitlement risk tier | Cert campaign priority | “Critical first” |
 | `sod-matrix.csv` | Policy objects | “Toxic pairs with rationale” |
@@ -93,7 +93,7 @@ Identity attributes after Aggregate MNB-HR / Refresh
 2. Open `lab-data/reference/job-codes.csv`.
 3. Sketch Meridian leadership from HR (`MNB00001`–`MNB00008`):
 
-| employeeId | userName | Dept | Owns |
+| userId (HR) | userName | Dept | Owns |
 | --- | --- | --- | --- |
 | MNB00001 | helen.ross | SEC | IAM / cyber |
 | MNB00002 | christopher.hayes | ITP | Technology |
@@ -103,6 +103,8 @@ Identity attributes after Aggregate MNB-HR / Refresh
 | MNB00006 | sanjay.kapoor | CML | Commercial |
 | MNB00007 | emily.bennett | RET | Retail branches |
 | MNB00008 | daniel.griffin | OPS | Operations / core |
+
+> IT dumps label the same associate key `employeeId` (= HR `userId`).
 
 **Expected result:** Sketch shows ten department codes (RET, CML, TRS, FIN, RSK, OPS, DIG, ITP, HRP, SEC) and leaders who will own apps/entitlements later.
 
@@ -141,7 +143,7 @@ Identity attributes after Aggregate MNB-HR / Refresh
 
 ### Task 5 — Contractor vs employee
 
-1. In `HRApplications.txt`, find rows with `workerType=Contractor` (e.g. `raj.external` MNB00093, plus others).
+1. In `HRApplications.txt`, find rows with `employeeType=Contractor` (e.g. `raj.external` MNB00093, plus others).
 2. Note `raj.external` email domain: `raj.contractor@vendor-mail.invalid` (bad/vendor mail—data quality lesson later).
 3. Write why contractors need tighter joiner/leaver SLAs than employees.
 

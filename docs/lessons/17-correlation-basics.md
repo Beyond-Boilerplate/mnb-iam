@@ -33,6 +33,8 @@ You will be able to:
 
 ---
 
+**Meridian ID map:** HR native key is `userId`. IT dumps use `employeeId` with the **same values** as HR `userId`. Promote/correlate accordingly—do not invent a separate HR `employeeId` column.
+
 ## Concepts
 
 ### What correlation actually does
@@ -139,7 +141,7 @@ Enterprises that skip this step end up with silent UI experiments and no standar
 
 ```text
 MNB-IT-Access correlation order:
-1) account.employeeId → identity.employeeId
+1) account.employeeId → identity.userId
 2) account.email → identity.email
 ```
 

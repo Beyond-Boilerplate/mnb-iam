@@ -98,23 +98,24 @@ Account Aggregation task: Aggregate MNB-HR
 
 ## Before you start
 
-- [ ] `realpath ~/iiq-lab-data/HRApplications.txt` works; `%%MNB_HR_FILE%%` aligned (Lesson 03)
+- [ ] `realpath ~/iiq-lab-data/HRApplications.txt` recorded (Lesson 03)
 - [ ] Logged in as `spadmin`
 - [ ] Evidence folder for today exists (`~/iiq-lab-evidence/YYYY-MM-DD/`)
 - [ ] Naming card from Lesson 03 available
-- [ ] Prefer: `config/Application/MNB-Application-HR.xml` already imported (Debug shows `MNB-HR`)
+- [ ] Debug confirms **`MNB-HR` does not exist yet** (or you deleted a leftover lab copy)
 
 ## Lab procedure
 
-### Task 0 — Bank craft path (import-first vs UI-first)
+### Task 0 — You build `MNB-HR` (UI craft)
 
-Meridian Ops does not rebuild `MNB-HR` from memory on every laptop. The academy seed owns the Application in git.
+CD does **not** ship `MNB-HR`. This lesson is where the authoritative HR application is created.
 
-1. Open Debug / Applications. If **`MNB-HR`** exists from Lesson 03 import, take the **verify path**: open the app, confirm authoritative / CSV settings, fix file path if needed, skip create-from-scratch tasks but still walk Tasks 3–7 for schema and aggregation.
-2. If `MNB-HR` is missing, take the **UI craft path** (Tasks 2–4), then **export** clean XML to `config/Application/MNB-Application-HR.xml` (or diff against the seed) as the bank craft exit gate.
-3. CHANGELOG either: `Verified seed MNB-HR` or `UI-created MNB-HR → exported to config/`.
+1. Open Debug / Applications and confirm `MNB-HR` is absent (if a leftover exists from an old lab, delete it or rename—do not maintain two HR apps).
+2. Create `MNB-HR` with the UI path below (Tasks 2–4).
+3. Optional stretch: after it works, export clean XML to `config/Application/MNB-Application-HR.xml` for promotion practice (Lesson 101 deepens this).
+4. CHANGELOG: `UI-created MNB-HR + Aggregate MNB-HR`.
 
-**Expected result:** You know which path you are on before creating duplicates.
+**Expected result:** Clear ownership — you are the engineer building Meridian’s HR source.
 
 ### Task 1 — Inspect the HR header
 
@@ -153,7 +154,7 @@ You are creating a Delimited File application whose feed is CSV in all but name.
 ### Task 3 — Schema discovery and identity attribute
 
 1. Open `MNB-HR` → Schema (or Configuration → Schema).
-2. Discover/preview attributes from the file header (or confirm the seeded schema from `config/Application/MNB-Application-HR.xml`).
+2. Discover/preview attributes from the file header (from the CSV header / schema discovery).
 3. Set **account identity attribute** (native identity) to **`userId`**.
 4. Ensure key fields exist on the schema: `name`, `email`, `firstname`, `lastname`, `managersAssociateID`, `inactive`, `status`, `exceptions`, `departmentName`, `JobCode`, `employeeType`, `location`.
 5. Save.
@@ -203,11 +204,11 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR` (a
 
 ## Acceptance criteria
 
-- [ ] `MNB-HR` Delimited File app present (seed import **or** UI create) with absolute CSV path
+- [ ] `MNB-HR` Delimited File app **you created** with absolute CSV path
 - [ ] Account identity attribute = `userId`
 - [ ] Authoritative / create identities enabled **on the application**; CHANGELOG: `MNB-HR authoritative=true`
-- [ ] Bank craft exit: seed verified **or** XML exported/diffed under `config/Application/MNB-Application-HR.xml`
-- [ ] `Aggregate MNB-HR` ran with non-zero accounts (task from seed or UI)
+- [ ] Bank craft exit: object works in IIQ; optional export under `config/Application/MNB-Application-HR.xml`
+- [ ] `Aggregate MNB-HR` task **you created** ran with non-zero accounts
 - [ ] Notebook notes the post-aggregate refresh tasks required (Lesson 06)
 - [ ] Cubes verified for helen.ross, priya.wire, samir.hassan
 - [ ] Evidence screenshot of task result filed
@@ -217,7 +218,7 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR` (a
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Duplicate MNB-HR | Created UI copy over seed | Delete duplicate; keep seed; re-import |
+| Duplicate MNB-HR | Accidental second create | Delete duplicate; keep one authoritative HR app |
 | 0 accounts aggregated | Bad path / perms / delimiter | Fix absolute path; confirm comma + header (CSV); check `%%MNB_HR_FILE%%` |
 | Duplicate identities | Wrong account id (email) | Rebuild schema with `userId` |
 | Missing columns | Schema not rediscovered after file change | Rediscover schema; re-aggregate |
@@ -272,9 +273,9 @@ Write: “Meridian’s authoritative workforce source is application `MNB-HR` (a
 
 ## Summary
 
-- `MNB-HR` is Meridian’s authoritative Delimited File (CSV) application keyed on **`userId`** (bank-style HRIS header); authoritative is set **on the app** (seed: `config/Application/MNB-Application-HR.xml`).
+- `MNB-HR` is Meridian’s authoritative Delimited File (CSV) application keyed on **`userId`** (bank-style HRIS header); authoritative is set **on the app** (you build in Lesson 04).
 - `Aggregate MNB-HR` materializes identity cubes from `HRApplications.txt`; Identity Refresh (Lesson 06) promotes Link attributes onto cubes.
-- Bank craft exit: object survives in git — verify seed or export UI work to `config/`.
+- Bank craft exit: working `MNB-HR` in IIQ; optional export to `config/` for promotion practice.
 
 ---
 

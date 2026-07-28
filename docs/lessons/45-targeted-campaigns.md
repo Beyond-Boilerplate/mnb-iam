@@ -39,7 +39,7 @@ A **targeted / focused certification** is a narrowly scoped campaign (population
 | Focus option | Population logic | Why Meridian cares |
 | --- | --- | --- |
 | **Terminated-with-access** | HR inactive / terminated **and** still holds app ents | Classic orphan / residual access (`jordan.reed`) |
-| **Contractors-with-AWS** | `workerType=Contractor` (or equivalent) **and** `AWS_ADMIN` | Vendor cloud blast radius (`raj.external`) |
+| **Contractors-with-AWS** | `employeeType=Contractor` (or equivalent) **and** `AWS_ADMIN` | Vendor cloud blast radius (`raj.external`) |
 | On-leave-with-privileged | LOA flag + critical ents | Stretch; Lesson 33 adjacency |
 
 ### Air cover and success metrics

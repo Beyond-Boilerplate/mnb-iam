@@ -86,7 +86,7 @@ Correlation → cubes; SoD with SAP_FI; privileged campaigns
 - [ ] IIQ up as `spadmin`
 - [ ] `~/iiq-lab-data/apps/MNB-AWS-Cloud.csv` present
 - [ ] `MNB-SAP-Finance` aggregated; Jordan’s SAP_FI noted
-- [ ] HR contains `raj.external` (contractor, `workerType` Contractor) and `jordan.reed`
+- [ ] HR contains `raj.external` (contractor, `employeeType` Contractor) and `jordan.reed`
 - [ ] Dictionary: AWS_ADMIN critical, non-requestable; owner intent `christopher.hayes`
 
 ---
@@ -206,7 +206,7 @@ Vendor/contractor admins require employeeId correlation and sponsor review.
 
 ## Acceptance criteria
 
-- [ ] **Bank craft exit:** `MNB-AWS-Cloud` matches `config/Application/MNB-Application-AWS-Cloud.xml` (import-verify or UI+export)
+- [ ] **Bank craft exit:** `MNB-AWS-Cloud` works in IIQ; optional export to `config/Application/MNB-Application-AWS-Cloud.xml`
 
 - [ ] `MNB-AWS-Cloud` non-authoritative app created and aggregated (~9 accounts)
 - [ ] `AWS_ADMIN` mapped and marked critical / non-requestable

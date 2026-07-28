@@ -6,10 +6,10 @@
 **Prereq:** Lesson 31 (leaver disablement); populations from Lesson 07; AWS app from Lesson 13  
 
 **Lab data:**
-- `lab-data/hr/MNB-HR-Employees.csv` — filter `workerType=Contractor`
+- `lab-data/hr/MNB-HR-Employees.csv` — filter `employeeType=Contractor`
 - Spotlight identity: `raj.external` (`MNB00093`) — `lab-data/apps/MNB-AWS-Cloud.csv`
 - Related: `lab-data/reference/entitlement-dictionary.csv` (`AWS_ADMIN` critical)
-- Birthright exclusion: Lesson 24 `MNB-Birthright-Employee` requires `workerType=Employee`
+- Birthright exclusion: Lesson 24 `MNB-Birthright-Employee` requires `employeeType=Employee`
 
 ---
 
@@ -17,7 +17,7 @@
 
 You will be able to:
 
-- Inventory Meridian contractors from HR using `workerType=Contractor`
+- Inventory Meridian contractors from HR using `employeeType=Contractor`
 - Define a contractor birthright policy that is stricter than employees (minimal or request-only directory access)
 - Enforce expiry / end-date expectations for contractors holding `AWS_ADMIN`, using `raj.external` as the worked example
 - Draft a manager attestation cadence for contingent workers
@@ -38,7 +38,7 @@ You will be able to:
 
 ### Worker type as a first-class control attribute
 
-| `workerType` | Birthright expectation | Privileged access | Attestation |
+| `employeeType` | Birthright expectation | Privileged access | Attestation |
 | --- | --- | --- | --- |
 | `Employee` | `MNB-Birthright-Employee` / ELDAP (Lesson 24) | Role / request with approvals | Periodic manager cert |
 | `Contractor` | Minimal or request-only; no broad packs | Mandatory end date + tighter SLA | Monthly manager attestation |
@@ -68,7 +68,7 @@ Broadening `MNB-Birthright-Employee` to “fix” contractors who cannot log in.
 Contractor lifecycle is HR signal → role exclusion → privileged request with expiry → attestation → same-day privileged disable at SOW end.
 
 ```
-SOW start ──► HR row (workerType=Contractor, end date)
+SOW start ──► HR row (employeeType=Contractor, end date)
                     │
                     ▼
          Aggregate MNB-HR + Refresh
@@ -96,7 +96,7 @@ SOW start ──► HR row (workerType=Contractor, end date)
 | While AWS active | Weekly manager + cloud owner review |
 | After SOW | Same-day disable (Sev-1) |
 
-**IIQ terms:** *Population* (e.g. `MNB-Contractors`) filters identities for certs and reports. *Birthright* assignment rules must require `workerType == "Employee"`. *Attestation / certification* is evidence the manager still needs the contractor.
+**IIQ terms:** *Population* (e.g. `MNB-Contractors`) filters identities for certs and reports. *Birthright* assignment rules must require `employeeType == "Employee"`. *Attestation / certification* is evidence the manager still needs the contractor.
 
 ---
 
@@ -104,7 +104,7 @@ SOW start ──► HR row (workerType=Contractor, end date)
 
 - [ ] IIQ up at `http://localhost:8080/identityiq`; login as `spadmin`
 - [ ] `~/iiq-lab-data/` includes HR and `apps/MNB-AWS-Cloud.csv`
-- [ ] Population `MNB-Contractors` exists (Lesson 07) or you can recreate: `workerType equals Contractor`
+- [ ] Population `MNB-Contractors` exists (Lesson 07) or you can recreate: `employeeType equals Contractor`
 - [ ] You understand Jordan’s leaver residual pattern (Lesson 31)—contractors use the same privileged urgency
 - [ ] Notebook for policy and attestation cadence
 
@@ -117,20 +117,20 @@ SOW start ──► HR row (workerType=Contractor, end date)
 You cannot control what you cannot list. Start with a roster.
 
 1. Open `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or your live HR feed).
-2. Filter / search `Contractor` in the `workerType` column.
+2. Filter / search `Contractor` in the `employeeType` column.
 3. List at least: `raj.external`, plus other contractors (e.g. `rachel.khatri`, `james.nguyen`, `priya.torres`, `grace.howard`, `rohan.price` if present).
-4. In IIQ, open population `MNB-Contractors` (or Advanced Search on identity attribute `workerType` = `Contractor`) and compare counts.
+4. In IIQ, open population `MNB-Contractors` (or Advanced Search on identity attribute `employeeType` = `Contractor`) and compare counts.
 
 **Expected result:** Written contractor roster with employeeId, manager, department, and whether each holds privileged entitlements.
 
-**If it fails:** Confirm `workerType` is mapped on the HR application schema (Lesson 05).
+**If it fails:** Confirm `employeeType` is mapped on the HR application schema (Lesson 05).
 
 ### Task 2 — Define contractor birthright policy
 
 Employee birthright must already exclude contractors—verify, then write policy text Risk can sign.
 
 1. Open the employee birthright role from Lesson 24 (`MNB-Birthright-Employee`).
-2. Confirm assignment logic requires `workerType` = `Employee` (or excludes Contractor).
+2. Confirm assignment logic requires `employeeType` = `Employee` (or excludes Contractor).
 3. Write Meridian policy text:
 
 ```text
@@ -143,7 +143,7 @@ MNB Contractor Birthright Policy
 
 4. Identify one contractor who incorrectly looks “employee-like” in access (notebook). Confirm `raj.external` does **not** hold `MNB-Birthright-Employee`.
 
-**Expected result:** Policy paragraph + confirmation that employee birthright does not assign to `workerType=Contractor`.
+**Expected result:** Policy paragraph + confirmation that employee birthright does not assign to `employeeType=Contractor`.
 
 **If it fails:** Document the gap and open a config ticket—do not broaden birthright to “fix” contractors.
 
@@ -230,10 +230,10 @@ Contractors must never receive wire initiate/approve birthright. Dual control is
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Population empty | Attribute not mapped / not refreshed | Map `workerType`; Aggregate HR; Refresh |
+| Population empty | Attribute not mapped / not refreshed | Map `employeeType`; Aggregate HR; Refresh |
 | Raj missing in IIQ | HR row absent or aggregation skipped | Re-aggregate MNB-HR |
 | AWS not on cube | Uncorrelated account | Use employeeId correlation; fix email |
-| Contractors got employee role | Assignment rule too broad | Restrict to Employee workerType |
+| Contractors got employee role | Assignment rule too broad | Restrict to Employee employeeType |
 | No end date in HR | Schema gap | Add SOW end attribute or use terminationDate process |
 
 ---
@@ -284,7 +284,7 @@ Contractors must never receive wire initiate/approve birthright. Dual control is
 
 ## Stretch lab
 
-1. Propose a second authoritative **Contingent Worker** delimited file (vendor id, SOW end, badge id) feeding a separate application that correlates to HR `employeeId`.
+1. Propose a second authoritative **Contingent Worker** delimited file (vendor id, SOW end, badge id) feeding a separate application that correlates to HR `userId`.
 2. Create or refine population `MNB-Contractors-AWS` (Contractor AND entitlement `AWS_ADMIN`) for weekly certs.
 3. Draft an onboarding email template requiring `@meridiannb.com` before cloud access approval.
 

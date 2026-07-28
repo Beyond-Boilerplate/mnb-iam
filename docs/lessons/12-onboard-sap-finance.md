@@ -202,7 +202,7 @@ Leaver residual (lab): samir.hassan — SAP_FI disabled but still present
 
 ## Acceptance criteria
 
-- [ ] **Bank craft exit:** `MNB-SAP-Finance` matches `config/Application/MNB-Application-SAP-Finance.xml` (import-verify or UI+export)
+- [ ] **Bank craft exit:** `MNB-SAP-Finance` works in IIQ; optional export to `config/Application/MNB-Application-SAP-Finance.xml`
 
 - [ ] `MNB-SAP-Finance` created; non-authoritative
 - [ ] `Aggregate MNB-SAP-Finance` succeeded (~8 accounts)

@@ -14,16 +14,16 @@ You will be able to:
 
 - Copy Meridian fixtures into `~/iiq-lab-data` with a reproducible command
 - Document absolute file paths Tomcat can read and align `%%MNB_*_FILE%%` SSB tokens
-- Apply the `MNB-` naming standard to applications, tasks, roles, and policies — including git paths `config/<Type>/MNB-….xml`
-- Import the Meridian academy seed pack (`importdynamic` or verify HelloWorld) so learner setup matches bank-shaped SSB
+- Apply the `MNB-` naming standard to applications, tasks, roles, and policies — and know the optional git export path `config/<Type>/MNB-….xml`
+- Confirm CD / `importdynamic` smoke (`MNB-Rule-Hello-World`) so you understand bake → import — **you build apps in later lessons**
 - Create a dated evidence folder pattern for screenshots and task results
 - Maintain a simple change log that an examiner could follow
 
 ## Why this matters
 
-Messy labs teach bad production habits. Banks survive exams with reproducible builds: prefixed objects, absolute data paths, **git-owned XML**, and dated evidence of task success—not “it worked on my laptop yesterday.”
+Messy labs teach bad production habits. Banks survive exams with reproducible builds: prefixed objects, absolute data paths, evidence of task success, and (later) **git-owned XML** when you promote—not “it worked on my laptop yesterday.”
 
-**Control / audit:** Change control asks “what did you create, when, and why?” Your naming convention, `config/` path, and evidence folder are the training-ground version of a CAB ticket trail.
+**Control / audit:** Change control asks “what did you create, when, and why?” Your naming convention, CHANGELOG, and evidence folder are the training-ground version of a CAB ticket trail.
 
 ## Concepts
 
@@ -37,13 +37,14 @@ Messy labs teach bad production habits. Banks survive exams with reproducible bu
 | **Git object files** | `config/<Type>/MNB-<Type>-<Business>.xml` | `Application/MNB-Application-HR.xml` |
 
 ```text
-  repo lab-data/  --copy-->  ~/iiq-lab-data/  --%%TOKENS%%-->  config/ Application XML
+  repo lab-data/  --copy-->  ~/iiq-lab-data/  --absolute path-->  apps you build in Lessons 04+
                                       |
                                       +--> screenshots --> ~/iiq-lab-evidence/YYYY-MM-DD/
-  repo config/  --SSB build/import-->  IIQ DB (same objects Meridian Ops promotes)
+  CD / config/  --imports-->  HelloWorld smoke only
+  (optional later) export your MNB-* objects --> config/ --> importdynamic (Lesson 101+)
 ```
 
-**Learner setup = scoped bank setup.** This repo is an SSB project. CSV fixtures live in `lab-data/`; IIQ objects live in [`config/`](../../config/PACKS.md). You will still craft some objects in the UI (first principles), but durable controls must survive wipe+import.
+**UI-first academy.** This repo is an SSB project. CSV fixtures live in `lab-data/`. Homelab CD ships **HelloWorld only** ([`config/PACKS.md`](../../config/PACKS.md)). You **create** `MNB-HR` and other Meridian objects in the lessons; optional export to `config/` comes when you practice promotion.
 
 **Delimited File ≈ CSV.** In IdentityIQ, the Delimited File connector almost always means a **CSV** feed: comma delimiter, header row, one record per line. Meridian lab files may end in `.txt` (`HRApplications.txt`, `EmployeeData.txt`)—that is only the extension. Treat the content as CSV and configure the app with comma + header. Do not invent pipe/tab formats unless a real feed requires them.
 
@@ -118,26 +119,15 @@ realpath ~/iiq-lab-data/HRApplications.txt
 
 **Expected result:** Notebook has a full absolute path starting with `/` (macOS/Linux) ready for Lesson 04 application config.
 
-### Task 2b — Align SSB file tokens
+### Task 2b — Know SSB tokens (use when you export later)
 
-Bank-shaped builds substitute `%%MNB_HR_FILE%%` (and siblings) from `sandbox.target.properties`. Point them at **your** absolute lab paths so import matches the UI.
+When you eventually export Applications to git, SSB substitutes `%%MNB_HR_FILE%%` (and siblings) from `sandbox.target.properties`. For now, record absolute paths for **UI** config in Lesson 04; set tokens only when you export (Lesson 101) or if your facilitator asks.
 
-1. Open `sandbox.target.properties` in the repo.
-2. Set (use your `realpath` values):
+1. Skim `sandbox.target.properties` and [`config/PACKS.md`](../../config/PACKS.md).
+2. Note that CD ships **HelloWorld only** — no pre-built `MNB-HR`.
+3. Keep your `realpath` notebook entry for Lesson 04’s file path field.
 
-```properties
-%%MNB_HR_FILE%%=/Users/<you>/iiq-lab-data/HRApplications.txt
-%%MNB_IT_ACCESS_FILE%%=/Users/<you>/iiq-lab-data/EmployeeData.txt
-%%MNB_CORE_BANKING_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-CoreBanking.csv
-%%MNB_WIRE_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-WirePortal.csv
-%%MNB_SAP_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-SAP-Finance.csv
-%%MNB_AWS_FILE%%=/Users/<you>/iiq-lab-data/apps/MNB-AWS-Cloud.csv
-```
-
-3. Do **not** commit workstation-specific paths if your team shares the repo—use a local override or document the path in CHANGELOG for the academy laptop. Homelab keeps `/opt/iiq-lab-data/…`.
-4. Skim [`config/PACKS.md`](../../config/PACKS.md) so you know which objects the academy seeds.
-
-**Expected result:** Tokens match your lab-data absolute paths; PACKS.md skimmed.
+**Expected result:** You know tokens exist for promotion; Lesson 04 will paste the absolute path into the UI.
 
 ### Task 3 — Naming standard card
 
@@ -151,30 +141,30 @@ Bank-shaped builds substitute `%%MNB_HR_FILE%%` (and siblings) from `sandbox.tar
 | Attr refresh | `Refresh MNB Attributes` | Lesson 06 | `config/TaskDefinition/MNB-TaskDefinition-Refresh-Attributes.xml` |
 | Populations | `MNB-Active-Employees`, … | Lesson 07 | (UI / later export) |
 
-2. Rule: never create Meridian objects without the `MNB-` prefix in a shared lab; durable controls also land under `config/`.
+2. Rule: never create Meridian objects without the `MNB-` prefix in a shared lab. Optional later: export durable controls under `config/`.
 
 **Expected result:** Card you can glance at for the rest of the curriculum.
 
-### Task 3b — First SSB import (HelloWorld + seed pack)
+### Task 3b — Confirm CD / SSB smoke (HelloWorld only)
 
-Learner setup imports the same `config/` Meridian Ops promotes. Prove the pipe works before Lesson 04 UI craft.
+Prove bake → import works. Homelab CD already imported HelloWorld; on a laptop WAR you may run `importdynamic`.
 
-1. From repo root (IIQ already running; `SPTARGET=sandbox`):
+1. From repo root (if using local WAR):
 
 ```bash
 export SPTARGET=sandbox
 ./build.sh importdynamic
-# Homelab alternate: rely on CD import after push; then assert:
+# Homelab: CD already imported; optional assert:
 # ./tools/iiq-verify/assert-mnb-objects.sh k8s
 ```
 
 2. In IIQ Debug (or Object search), confirm **`MNB-Rule-Hello-World`** exists.
-3. Optionally confirm **`MNB-HR`** Application from the seed pack (if import succeeded with your file tokens). If `MNB-HR` is present, Lesson 04 becomes **verify + attribute maps** instead of creating from scratch—still walk the UI so you understand every setting.
-4. CHANGELOG: `importdynamic — HelloWorld (+ HR pack if present)`.
+3. Confirm **`MNB-HR` does not** exist yet — you create it in Lesson 04.
+4. CHANGELOG: `Confirmed HelloWorld smoke; academy apps are learner-built`.
 
-**Expected result:** At least HelloWorld visible in Debug; you can explain bake XML → import into DB.
+**Expected result:** HelloWorld visible; you can explain bake XML → import into DB; no expectation of pre-seeded apps.
 
-**If it fails:** Read console import errors; confirm `config/Rule/MNB-Rule-HelloWorld.xml` exists; fix tokens; see [docs/SSD.md](../SSD.md).
+**If it fails:** Read console import errors; confirm `config/Rule/MNB-Rule-HelloWorld.xml` exists; see [docs/SSD.md](../SSD.md).
 
 ### Task 4 — Evidence folder
 
@@ -222,9 +212,9 @@ EOF
 ## Acceptance criteria
 
 - [ ] `~/iiq-lab-data` contains HR, EmployeeData, apps, scenarios, reference
-- [ ] Absolute HR path recorded; `%%MNB_*_FILE%%` tokens aligned
-- [ ] Naming card complete (includes git paths)
-- [ ] `MNB-Rule-Hello-World` present after import (or failure documented with fix plan)
+- [ ] Absolute HR path recorded (for Lesson 04 UI)
+- [ ] Naming card complete (includes optional git export paths)
+- [ ] `MNB-Rule-Hello-World` present (CD or importdynamic); `MNB-HR` not expected yet
 - [ ] Evidence folder + INTENT.txt created
 - [ ] CHANGELOG started
 - [ ] Relative-path failure explained

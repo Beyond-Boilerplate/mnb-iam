@@ -41,7 +41,7 @@ You will be able to:
 | --- | --- | --- |
 | **Workgroup** | Membership list used as owner, approver, or assignment target | `MNB-WG-IAM-Ops` owns tasks and receives escalations |
 | **Capability** | Rights (menu + object actions) granted to identities/workgroups | Certifier, Compliance Officer — not SystemAdministrator for day-2 |
-| **Scope** | Filters which identities/objects an operator may access | Helpdesk scoped to `workerType == contractor` |
+| **Scope** | Filters which identities/objects an operator may access | Helpdesk scoped to `employeeType == contractor` |
 
 ```
   Identity / Workgroup
@@ -113,8 +113,8 @@ Workgroups stabilize ownership when people rotate: certifications and LCM escala
 
 ### Step 2 — Populations from HR
 
-1. Prefer HR attributes (`workerType`, cost center, branch) for populations — not manually curated lists that drift.
-2. Name `MNB-Pop-Contractors` from `workerType=contractor`.
+1. Prefer HR attributes (`employeeType`, cost center, branch) for populations — not manually curated lists that drift.
+2. Name `MNB-Pop-Contractors` from `employeeType=contractor`.
 
 ### Step 3 — Change control
 
@@ -179,7 +179,7 @@ Stable assignment targets beat chasing individuals.
 
 ### Task 4 — Scope helpdesk (or certifiers)
 
-1. Create or reuse a **Population** (Advanced Analytics / Populations): e.g., `MNB-Pop-Contractors` filter `workerType` equals contractor (or equivalent HR attribute).
+1. Create or reuse a **Population** (Advanced Analytics / Populations): e.g., `MNB-Pop-Contractors` filter `employeeType` equals contractor (or equivalent HR attribute).
 2. Open **Setup** → **Scopes** (or equivalent).
 3. Create scope `MNB-Scope-Helpdesk-Contractors` bound to that population.
 4. Assign the scope to a helpdesk identity (use `kai.nguyen` as lab helpdesk) with limited capabilities.
@@ -210,7 +210,7 @@ Positive grants are not enough — show intentional denial.
 ### Task 7 — ControlledScope mechanism note
 
 1. Document whether your IIQ build uses ControlledScope attributes on the identity, assigned Scope objects, or both.
-2. For Meridian contractors, prefer population `MNB-Pop-Contractors` driven from HR `workerType`.
+2. For Meridian contractors, prefer population `MNB-Pop-Contractors` driven from HR `employeeType`.
 3. Record cache/re-login requirement after scope assignment.
 
 **Expected result:** Scope mechanism note specific to your build.
@@ -280,7 +280,7 @@ Do not create twenty micro-capabilities on day one. Record Meridian starter bund
 3. Examples: `MNB-WG-IAM-Ops` / `helen.ross`; `MNB-WG-Cert-Approvers` / `marcus.approve`; `MNB-WG-Risk-Review` / Risk proxy.
 4. Workgroups are stable assignment targets when people rotate; certifications and LCM can route to the group.
 5. “Prove helpdesk/IAM ops cannot perform unrestricted admin” — shows intentional denial.
-6. `workerType` (contractor) from the authoritative HR source.
+6. `employeeType` (contractor) from the authoritative HR source.
 
 ---
 

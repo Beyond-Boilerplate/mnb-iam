@@ -1,41 +1,31 @@
-# Meridian HR E2E verification (local)
+# Meridian IIQ verify tools
 
-## What it proves
-
-1. SSB `importdynamic` lands academy packs from `config/`
-2. `assert-mnb-objects.sh` allowlist passes
-3. `Aggregate MNB-HR` creates cubes from the **bank-style** `HRApplications.txt` (52 columns)
-4. `Refresh MNB Attributes` / `Refresh MNB Managers` complete successfully
-5. Personas exist with `MNB-HR` links (`helen.ross`, `priya.wire`, `samir.hassan` terminated, `sofia.torres` `exceptions=LOA`)
-
-## Run
+## CD smoke
 
 ```bash
-# One-time: point sandbox tokens at your machine (already set for this workstation)
-# %%MNB_HR_FILE%%=/Users/<you>/iiq-lab-data/HRApplications.txt
+./tools/iiq-verify/assert-mnb-objects.sh local   # or k8s
+```
 
-export IIQ_HOME=~/iiq-lab/tomcat/webapps/identityiq
-export SPTARGET=sandbox
-./tools/iiq-verify/e2e-hr-slice.sh
+Asserts **`MNB-Rule-Hello-World` only**. Academy apps (`MNB-HR`, …) are **learner-built** in lessons — not pre-seeded by CD.
 
-# Faster re-run after objects already imported:
+## Optional local E2E (after you complete Lessons 04–06)
+
+`e2e-hr-slice.sh` assumes **you already created** `MNB-HR`, `Aggregate MNB-HR`, and the Refresh MNB Attributes/Managers tasks in IIQ (or imported your own exports). It is a facilitator/regression aid, not day-1 CD.
+
+```bash
+export IIQ_HOME=~/iiq-lab/tomcat/webapps/identityiq SPTARGET=sandbox
+# After Lesson 06 objects exist:
 SKIP_BUILD=1 ./tools/iiq-verify/e2e-hr-slice.sh
 ```
 
-## Live result (2026-07-27, local Tomcat)
+Helper Rules under this folder run tasks via `TaskManager.runSync` (console `run` is unreliable when the console process exits).
 
-| Step | Result |
-| --- | --- |
-| `./build.sh importdynamic` | All 25 MNB objects imported |
-| Assert allowlist | **PASS** (21 named objects) |
-| Aggregate MNB-HR | **PASS** — 80 HR identities + `spadmin` (count Identity = 81) |
-| File path on app | `/Users/alishaghatane/iiq-lab-data/HRApplications.txt` |
-| Native identity | `userId` / cube name from `name` (`priya.wire`, …) |
-| Link attrs | Full bank header present (`JobCode`, `departmentName`, `managersAssociateID`, `exceptions=LOA`, `inactive=true` for Samir) |
-| Refresh attrs/managers | **PASS** (`OK … Success` via sync helper rules) |
+## Homelab wipe (clean “build it yourself”)
 
-### Known follow-up (not a Phase-1 blocker)
+```bash
+# Via Actions: Deploy homelab → Run workflow → wipe_mnb_leftovers=true
+# Or against a pod:
+./tools/iiq-verify/wipe-mnb-leftovers.sh k8s
+```
 
-Identity **Attributes** map still shows mostly `displayName` until Lesson 05 identity attribute maps / ObjectConfig promote Link → Identity. Cube **creation** and Link truth already validate the HR vertical slice.
-
-Console `run "Task"` is unreliable here (Quartz shuts down when the console process exits). E2E uses sync `TaskManager.runSync` via helper Rules under `tools/iiq-verify/`.
+Deletes leftover `MNB-*` apps/tasks/roles/workflows and all identities except `spadmin`. Keeps HelloWorld.

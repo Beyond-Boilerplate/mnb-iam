@@ -254,7 +254,7 @@ For each of `WIRE_INIT`, `WIRE_APPR`, `SAP_FI`, `AWS_ADMIN`, `ELDAP`:
 
 Durable entitlement metadata belongs in git once your build exports ManagedAttributes (or document enrichment in binder until export is practical). At minimum CHANGELOG the five enriched codes and note `config/` as the SoT for Application/TaskDefinition that produce those ManagedAttributes.
 
-**Expected result:** Binder lists codes + “ManagedAttribute enrichment applied; Application seed = MNB-Application-IT-Access.”
+**Expected result:** Binder lists codes + “ManagedAttribute enrichment applied; Application = MNB-IT-Access.”
 
 ## Acceptance criteria
 

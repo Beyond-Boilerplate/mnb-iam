@@ -51,28 +51,28 @@ Use this for every lesson authored or rewritten. Voice: **a senior IAM engineer 
 - Connector lessons (51+) teach the **native connector as the primary path**: real prerequisites, real field-by-field configuration, real aggregation/provisioning behavior. The **lab-without-live-target** path stays, but as a clearly labeled fallback ("If you have no tenant…"), never as the main event.
 - Where `docker-compose.connectors.yml` provides a live backend (OpenLDAP, Postgres), the live path is mandatory, not optional.
 
-## Bank craft exit gate (SSB / hybrid pedagogy)
+## Bank craft exit gate (UI build → optional git export)
 
-Learner setup is the **same scoped bank setup** Meridian Ops uses: SSB repo → `config/` → tokens → import. Lessons teach product skill; durable controls live in git.
+CD ships **HelloWorld smoke only**. Learners **build** Meridian objects in IIQ through the lessons. Optional export into [`config/`](../../config/README.md) practices the same promotion path Meridian Ops uses (deepened in Lesson 101 / 108).
 
 | Track | Pedagogy | Exit gate |
 | --- | --- | --- |
-| Foundations 01–03 | UI orientation + SSB awareness | Know `config/`, `SPTARGET`, `importdynamic`; lab-data absolute paths |
-| Foundations 04–06 | **UI craft first** (authoritative HR, refresh options) | Object exists in IIQ **and** matches / is exported to `config/<Type>/MNB-….xml` |
-| Applications 09+ | Prefer **import → verify → extend** seeded packs | Diff or re-export landed in `config/`; CHANGELOG cites git path |
-| Intermediate+ (roles, LCM, SoD, certs) | Extend seeded packs; UI for first-principles only | Acceptance includes committed XML or reviewed seed diff |
-| Lesson 101 / 108 | Promotion / CAB / multi-env | Git SHA + TaskResult evidence — not first contact with SSB |
-| Capstone 50 / 110 | End-to-end Meridian controls | Grades **git + evidence**, not screenshots alone |
+| Foundations 01–03 | UI orientation + SSB awareness | Know `config/`, `SPTARGET`, lab-data paths; HelloWorld smoke exists after CD |
+| Foundations 04–08 | **UI craft** (HR app, schema maps, refresh tasks, populations) | Objects work in IIQ; CHANGELOG lists what you built |
+| Applications 09–16 | **UI craft** each Delimited File app + aggregate task | App aggregates; optional export to `config/Application/…` |
+| Intermediate+ | Build / extend controls in UI | Acceptance is working control + evidence; export optional until 101 |
+| Lesson 101 / 108 | Promotion / CAB / multi-env | Export learner-built objects → git → `importdynamic` |
+| Capstone 50 / 110 | End-to-end Meridian controls | Evidence + optional git pack of what you built |
 
 **Rules:**
 
-- Durable Meridian controls use SSB names: `MNB-<Type>-<BusinessName>.xml` under [`config/`](../../config/README.md) (e.g. `Application/MNB-Application-HR.xml`). Display names in IIQ may stay short (`MNB-HR`) when that is the lesson brand.
-- Prefer **import → verify → extend** once a pack exists in `config/`. Use **UI create → export** when teaching first principles (first HR app, first SoD, first workflow).
-- Purpose-built refresh tasks stay split: `Refresh MNB Attributes`, `Refresh MNB Managers`, `Refresh MNB Roles`, `Refresh MNB Policies` (optional demo umbrella only).
-- Env-specific paths/hosts use `%%TOKENS%%` from `*.target.properties` — never hard-code a teammate’s home directory in committed XML.
-- Homelab wipe+redeploy+import must still show the same core personas/objects (academy seed packs).
+- Name objects `MNB-*` in IIQ. When exporting: `MNB-<Type>-<BusinessName>.xml` under `config/`.
+- **Never** assume CD pre-created `MNB-HR`, roles, workflows, or SoD — the lesson that introduces them is where they are created.
+- Purpose-built refresh tasks stay split: `Refresh MNB Attributes`, `Refresh MNB Managers`, `Refresh MNB Roles`, `Refresh MNB Policies`.
+- HR attributes follow the **bank column map** ([`lab-data/reference/hr-column-map.md`](../../lab-data/reference/hr-column-map.md)): `userId`, `managersAssociateID`, `inactive`/`status`, `exceptions=LOA`, `employeeType`, `departmentName`/`JobCode` — not legacy `employeeId`/`onLeave`/`workerType`/`departmentCode` on the HR feed.
+- Env-specific paths use `%%TOKENS%%` from `*.target.properties` when you export Applications.
 
-See [`config/PACKS.md`](../../config/PACKS.md) for the rightly scoped Meridian object inventory.
+See [`config/PACKS.md`](../../config/PACKS.md).
 
 ## Length targets
 

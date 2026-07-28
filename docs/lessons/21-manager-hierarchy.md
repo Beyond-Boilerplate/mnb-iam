@@ -4,7 +4,7 @@
 **Track:** Correlation  
 **Time:** 45–60 minutes  
 **Prereq:** Lesson 20 (orphan/dormant hunting); MNB-HR aggregated with manager identity attribute mapped  
-**Lab data:** `~/iiq-lab-data/HRApplications.txt` (source of `managerId`); personas `priya.wire`, `rachel.evans`
+**Lab data:** `~/iiq-lab-data/HRApplications.txt` (source of `managersAssociateID`); personas `priya.wire`, `rachel.evans`
 
 ---
 
@@ -12,45 +12,47 @@
 
 You will be able to:
 
-- Trace a `managerId` chain from HR through the identity cube to a live manager identity
-- Explain why empty `managerId` on executives is intentional vs broken mid-chain managers
+- Trace a `managersAssociateID` chain from HR through the identity cube to a live manager identity
+- Explain why empty `managersAssociateID` on executives is intentional vs broken mid-chain managers
 - Simulate a manager field change, re-aggregate HR, refresh identities, and verify the cube
 - Document the certification and approval routing risk when a manager terminates or is wrong
 - Define a Meridian fallback certifier policy for broken hierarchy chains
-- State the production rule: HR owns managerId; IIQ must not invent permanent overrides
+- State the production rule: HR owns managersAssociateID; IIQ must not invent permanent overrides
 
 ---
 
 ## Why this matters
 
-**Business.** Approvals, access reviews, and escalations all assume every identity has a correct manager. At Meridian National Bank, a wrong managerId means wire exceptions for `priya.wire` land on the wrong inbox and quarterly certifications stall while IAM chases “who owns this person?”
+**Business.** Approvals, access reviews, and escalations all assume every identity has a correct manager. At Meridian National Bank, a wrong managersAssociateID means wire exceptions for `priya.wire` land on the wrong inbox and quarterly certifications stall while IAM chases “who owns this person?”
 
 **Control / audit.** Examiners ask who reviews employee access. Your answer is “the line manager resolved from authoritative HR.” Broken chains are a control failure, not a UI quirk. Evidence is a verified chain plus a documented fallback when HR data is incomplete — never a silent admin edit on the cube.
 
 ---
 
+**Meridian ID map:** HR native key is `userId`. IT dumps use `employeeId` with the **same values** as HR `userId`. Promote/correlate accordingly—do not invent a separate HR `employeeId` column.
+
 ## Concepts
 
 ### How IIQ gets a manager
 
-IdentityIQ resolves **manager** from an identity attribute typically populated from MNB-HR `managerId` (the employeeId of the manager). During aggregation and refresh, that value is correlated to another identity cube. Certifications and many approval schemas use that link for routing work items.
+IdentityIQ resolves **manager** from an identity attribute typically populated from MNB-HR `managersAssociateID` (the employeeId of the manager). During aggregation and refresh, that value is correlated to another identity cube. Certifications and many approval schemas use that link for routing work items.
 
-**Real-life Meridian example.** Priya’s HR row carries `managerId=MNB00005`. After Aggregate MNB-HR + Refresh, her cube’s Manager field resolves to `rachel.evans`. Wire Portal access reviews and many approval schemas therefore land with Rachel — the Payments Ops manager who actually owns Priya’s line of work.
+**Real-life Meridian example.** Priya’s HR row carries `managersAssociateID=MNB00005`. After Aggregate MNB-HR + Refresh, her cube’s Manager field resolves to `rachel.evans`. Wire Portal access reviews and many approval schemas therefore land with Rachel — the Payments Ops manager who actually owns Priya’s line of work.
 
 ### Intentional tops vs broken chains
 
-Empty `managerId` is not automatically a defect. Lab executives and branch tops (Rachel, Sanjay-style leaders) intentionally have empty manager fields — the chain has to end somewhere. A **broken chain** is a non-empty `managerId` that does not resolve to a live identity, or a blank manager on a mid-level specialist who is not an exec. Those break cert launches with “no certifier.”
+Empty `managersAssociateID` is not automatically a defect. Lab executives and branch tops (Rachel, Sanjay-style leaders) intentionally have empty manager fields — the chain has to end somewhere. A **broken chain** is a non-empty `managersAssociateID` that does not resolve to a live identity, or a blank manager on a mid-level specialist who is not an exec. Those break cert launches with “no certifier.”
 
 ### Reassignment is an HR event, reflected in IIQ
 
-When someone changes managers, the durable fix is updating HR `managerId`, then running Account Aggregation for MNB-HR and Identity Refresh. Hand-editing the cube’s Manager field “for today’s cert” creates dual sources of truth that diverge again on the next HR load (Lesson 22 hygiene).
+When someone changes managers, the durable fix is updating HR `managersAssociateID`, then running Account Aggregation for MNB-HR and Identity Refresh. Hand-editing the cube’s Manager field “for today’s cert” creates dual sources of truth that diverge again on the next HR load (Lesson 22 hygiene).
 
 ### Fallback certifiers for campaign survival
 
 | Situation | Risk | Meridian response |
 | --- | --- | --- |
 | Manager terminated; HR still points reports at them | Open certs / approvals stall or route to inactive identity | Fallback certifier (Security IAM queue or named successor) + HR correction SLA |
-| Non-exec blank managerId | Campaign cannot assign reviewer | Defect to HR; population `MNB-Pop-Broken-Manager-Chain` |
+| Non-exec blank managersAssociateID | Campaign cannot assign reviewer | Defect to HR; population `MNB-Pop-Broken-Manager-Chain` |
 | Admin invents manager in IIQ only | Next HR aggregate overwrites or conflicts | Forbidden — HR owns the value |
 
 The wrong way is to launch a manager certification campaign and “fix” missing reviewers by assigning everything to `spadmin` or Helen Ross permanently. That passes the send button and fails the exam: reviewers must be accountable line management, with a **named temporary fallback** and an HR SLA to repair the chain — not a permanent IAM dump queue.
@@ -63,12 +65,12 @@ The wrong way is to launch a manager certification campaign and “fix” missin
 
 ```
 HR row: priya.wire (MNB00090)
-  managerId = MNB00005
+  managersAssociateID = MNB00005
        │
        ▼  Aggregate MNB-HR + Refresh
 Identity: priya.wire
   manager ──► rachel.evans (MNB00005)
-                 managerId = (empty)  ← intentional chain top
+                 managersAssociateID = (empty)  ← intentional chain top
 ```
 
 ```
@@ -76,18 +78,18 @@ Identity: priya.wire
            │
     rachel.evans (MNB00005)
       ┌────┴────┐
-priya.wire   marcus.approve  (examples; both managerId=MNB00005)
+priya.wire   marcus.approve  (examples; both managersAssociateID=MNB00005)
 ```
 
 | Term | Meaning at Meridian |
 | --- | --- |
-| `managerId` | HR employeeId of the person’s manager (authoritative) |
+| `managersAssociateID` | HR employeeId of the person’s manager (authoritative) |
 | Manager link | IIQ identity attribute pointing at another Identity |
-| Broken chain | Non-empty managerId that does not resolve, or mid-level empty when not an exec |
+| Broken chain | Non-empty managersAssociateID that does not resolve, or mid-level empty when not an exec |
 | Fallback certifier | Named role/person (e.g. Security queue or successor) when chain fails |
-| Reassignment | Updating HR managerId then aggregating + refreshing so work items route correctly |
+| Reassignment | Updating HR managersAssociateID then aggregating + refreshing so work items route correctly |
 
-One operational consequence: mover events (Lesson 30) often change **both** department/job **and** managerId. Treating manager as a one-off IIQ edit while HR still points at Rachel means the next nightly Aggregate MNB-HR silently undoes your “fix” — and any open approvals may already have routed wrong.
+One operational consequence: mover events (Lesson 30) often change **both** department/job **and** managersAssociateID. Treating manager as a one-off IIQ edit while HR still points at Rachel means the next nightly Aggregate MNB-HR silently undoes your “fix” — and any open approvals may already have routed wrong.
 
 ---
 
@@ -103,15 +105,15 @@ One operational consequence: mover events (Lesson 30) often change **both** depa
 
 ## Lab procedure
 
-### Task 1 — Locate Priya’s HR managerId
+### Task 1 — Locate Priya’s HR managersAssociateID
 
 Start in the authoritative file, not the cube. If HR and IIQ disagree later, you need a known baseline from source.
 
 1. Open `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`).
 2. Find the row for `priya.wire` / `MNB00090`.
-3. Record: `employeeId`, `managerId`, `departmentCode`, `jobCode`, `jobTitle`.
+3. Record: `employeeId`, `managersAssociateID`, `departmentName`, `jobCode`, `jobTitle`.
 
-**Expected result:** Baseline row shows `managerId=MNB00005`, `departmentCode=TRS`, `jobCode=WIR01`, title Wire Specialist.
+**Expected result:** Baseline row shows `managersAssociateID=MNB00005`, `departmentName=TRS`, `jobCode=WIR01`, title Wire Specialist.
 
 **If it fails:** Confirm you did not already apply the Lesson 30 mover delta (that file switches manager to `MNB00006`).
 
@@ -133,7 +135,7 @@ Prove the promotion path worked: HR employeeId of the manager became a live Mana
 Hierarchy is easier to defend when you can sketch it. Add at least one peer under Rachel so the diagram is not a single edge.
 
 1. From Priya, walk manager → manager’s manager if present.
-2. Pick two additional active employees who report to Rachel (search HR for `managerId,MNB00005` or browse cubes).
+2. Pick two additional active employees who report to Rachel (search HR for `managersAssociateID,MNB00005` or browse cubes).
 3. Sketch in your notebook:
 
 ```
@@ -146,15 +148,15 @@ priya.wire   marcus.approve  (examples)
 
 **Expected result:** One clear diagram showing Priya under Rachel; at least one peer under the same manager.
 
-**If it fails:** Use `marcus.approve` (also `managerId=MNB00005` in baseline HR) as the second leaf.
+**If it fails:** Use `marcus.approve` (also `managersAssociateID=MNB00005` in baseline HR) as the second leaf.
 
-### Task 4 — Classify empty managerId
+### Task 4 — Classify empty managersAssociateID
 
 Train yourself to separate intentional tops from data defects before you open tickets against executives.
 
 1. Open HR rows for leaders `MNB00001`–`MNB00008` (or search cubes for empty manager).
-2. Mark each empty managerId as **intentional executive top** or **data defect**.
-3. Search for any **non-executive** with blank managerId—those are defects.
+2. Mark each empty managersAssociateID as **intentional executive top** or **data defect**.
+3. Search for any **non-executive** with blank managersAssociateID—those are defects.
 
 **Expected result:** Rachel / Sanjay / Emily-style leaders documented as intentional tops; zero unexplained blank managers among specialists.
 
@@ -165,15 +167,15 @@ Train yourself to separate intentional tops from data defects before you open ti
 Prove the reassignment path end-to-end: edit HR, aggregate, refresh, verify — then restore so Lesson 30 and peers stay consistent.
 
 1. **Backup** `~/iiq-lab-data/HRApplications.txt`.
-2. Change `priya.wire`’s `managerId` temporarily to `MNB00006` (`sanjay.kapoor`)—do **not** change dept/job yet (that is Lesson 30).
+2. Change `priya.wire`’s `managersAssociateID` temporarily to `MNB00006` (`sanjay.kapoor`)—do **not** change dept/job yet (that is Lesson 30).
 3. Run **Account Aggregation** task for **MNB-HR**.
 4. Run **Refresh MNB Identities** (or equivalent refresh with manager correlation / identity attributes enabled).
 5. Re-open `priya.wire` and confirm Manager is now Sanjay Kapoor.
-6. **Restore** baseline `managerId=MNB00005` (or leave changed only if you will continue into Lesson 30 immediately—note the state in your binder).
+6. **Restore** baseline `managersAssociateID=MNB00005` (or leave changed only if you will continue into Lesson 30 immediately—note the state in your binder).
 
 **Expected result:** After aggregate + refresh, cube manager matches the HR file you just wrote. After restore + re-pipeline, manager returns to Rachel.
 
-**If it fails:** Confirm CSV/TXT column alignment; a shifted column silently breaks managerId.
+**If it fails:** Confirm CSV/TXT column alignment; a shifted column silently breaks managersAssociateID.
 
 ### Task 6 — Broken-chain risk note for certifications
 
@@ -193,7 +195,7 @@ Tabletop the failure mode before campaigns exist. The control note is the artifa
 Close with the non-negotiable production rule. Temporary cube edits create Lesson 22 flip-flops.
 
 1. Confirm you did **not** hand-edit manager on the cube as a permanent fix.
-2. Record the rule: **HR owns managerId; IIQ reflects it.**
+2. Record the rule: **HR owns managersAssociateID; IIQ reflects it.**
 
 **Expected result:** Explicit line in evidence: “No IIQ-only manager overrides in production pattern.”
 
@@ -202,7 +204,7 @@ Close with the non-negotiable production rule. Temporary cube edits create Lesso
 ## Acceptance criteria
 
 - [ ] Documented chain: `priya.wire` → `rachel.evans` (MNB00005)
-- [ ] Exec empty managerId classified as intentional vs defect
+- [ ] Exec empty managersAssociateID classified as intentional vs defect
 - [ ] Manager change simulation completed (or reasoned skip with instructor approval) with aggregate + refresh
 - [ ] Fallback certifier named for broken chains
 - [ ] Control statement: HR updates managers before terminations when possible
@@ -213,8 +215,8 @@ Close with the non-negotiable production rule. Temporary cube edits create Lesso
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Manager blank on Priya | Attribute not promoted / refresh skipped | Map managerId → identity manager; re-aggregate; refresh |
-| Manager shows employeeId string only | Correlation to Identity failed | Ensure manager identities exist from HR; check type/format of managerId |
+| Manager blank on Priya | Attribute not promoted / refresh skipped | Map managersAssociateID → identity manager; re-aggregate; refresh |
+| Manager shows employeeId string only | Correlation to Identity failed | Ensure manager identities exist from HR; check type/format of managersAssociateID |
 | Wrong manager after restore | Stale HR file or wrong copy path | Confirm IIQ app file path points at `~/iiq-lab-data/` |
 | Peer has different manager than HR | Manual cube edit or dual sources | Re-aggregate HR; remove non-authoritative manager sources (Lesson 22) |
 | Cert preview shows “no certifier” | Broken chain | Apply fallback population/owner policy before launch |
@@ -227,7 +229,7 @@ Close with the non-negotiable production rule. Temporary cube edits create Lesso
 - Screenshot: `rachel.evans` with empty manager (annotated “chain top”)
 - Hand-drawn or digital hierarchy sketch (3+ nodes)
 - Control note `MNB-Ctrl-Manager-Fallback` with primary/secondary and SLA
-- Before/after note from managerId simulation (include restore confirmation)
+- Before/after note from managersAssociateID simulation (include restore confirmation)
 
 **Control owner:** HR Operations (data) + IAM Engineering (IIQ mapping)  
 **Evidence retention:** Keep with correlation track artifacts for exam binder
@@ -238,15 +240,15 @@ Close with the non-negotiable production rule. Temporary cube edits create Lesso
 
 1. What HR field drives Meridian’s manager link for `priya.wire`?
 2. Why do certifications need accurate managers?
-3. Is an empty `managerId` on `rachel.evans` automatically a defect?
-4. What two IIQ tasks must run after editing HR managerId?
+3. Is an empty `managersAssociateID` on `rachel.evans` automatically a defect?
+4. What two IIQ tasks must run after editing HR managersAssociateID?
 5. Who should own permanent manager corrections—IIQ admin or HR?
 
 ### Answers
 
-1. `managerId` = `MNB00005` (Rachel Evans).
+1. `managersAssociateID` = `MNB00005` (Rachel Evans).
 2. Manager certifications and many approvals route to the resolved manager; wrong managers = wrong reviewers and stalled campaigns.
-3. No—lab executives/tops intentionally have empty managerId; mid-level blanks are defects.
+3. No—lab executives/tops intentionally have empty managersAssociateID; mid-level blanks are defects.
 4. Account Aggregation for MNB-HR, then Refresh MNB Identities (with manager/identity attribute processing enabled).
 5. HR owns the authoritative value; IIQ must not permanently invent managers that HR does not know.
 

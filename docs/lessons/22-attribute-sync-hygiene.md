@@ -47,9 +47,9 @@ During aggregation and refresh, IdentityIQ can promote account attributes onto t
 | --- | --- | --- | --- |
 | email | MNB-HR | Yes (copy only) | HR |
 | status (active/inactive) | MNB-HR | Account status only | HR |
-| departmentCode / jobCode | MNB-HR | Display title noise | HR |
-| managerId / manager | MNB-HR | No | HR |
-| workerType / onLeave | MNB-HR | No | HR |
+| departmentName / jobCode | MNB-HR | Display title noise | HR |
+| managersAssociateID / manager | MNB-HR | No | HR |
+| employeeType / exceptions (LOA) | MNB-HR | No | HR |
 | entitlements (WIRE_INIT, …) | Target apps | Yes | App owner |
 | accountStatus on link | Target app | Yes | App |
 | lastLogin / tech aliases | Target app | Yes (account-level) | App |
@@ -114,7 +114,7 @@ Mapping defects that can overwrite **status** or **email** are Sev-2 with a **2 
 Write the control before poking the UI. Every lifecycle attribute needs an owner; entitlements are not lifecycle attributes.
 
 1. In your notebook, create table columns: Attribute | Source app | Authoritative? | Notes.
-2. Fill rows for: email, first/last name, status, departmentCode, jobCode, jobTitle, manager, workerType, onLeave, locationCode.
+2. Fill rows for: email, first/last name, status, departmentName, jobCode, jobTitle, manager, employeeType, exceptions (LOA), locationCode.
 3. Mark entitlement codes as **not** identity lifecycle attributes.
 
 **Expected result:** Every lifecycle attribute lists **MNB-HR** as authoritative; entitlements list target apps.
@@ -242,7 +242,7 @@ Some attributes *should* come from targets — as long as they never replace HR 
 ### Answers
 
 1. MNB-HR (authoritative HR source).
-2. Inventory/title fields are often stale, free-text, or role-inflated; roles must key off HR `jobCode`/`departmentCode`.
+2. Inventory/title fields are often stale, free-text, or role-inflated; roles must key off HR `jobCode`/`departmentName`.
 3. Two sources alternately overwriting the same identity attribute based on last aggregation/refresh.
 4. No—non-authoritative inventory/correlation aid only.
 5. Examples: entitlement membership, accountStatus, lastLogin, AWS-specific aliases (any account-scoped tech attribute).

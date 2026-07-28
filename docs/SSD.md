@@ -10,19 +10,19 @@ Official Compass docs (login required):
 - [Get Started with the SSD](https://community.sailpoint.com/t5/Services-Standard-Deployment/Get-Started-with-the-SSD/ta-p/73449)
 - [Services Standard Build User Guide](https://community.sailpoint.com/t5/Services-Standard-Deployment/Services-Standard-Build-User-Guide-SSB/ta-p/73434)
 
-## Learner setup = scoped bank setup
+## Learner setup = build in IIQ, optional export to SSB
 
-The Meridian academy and a forward-deployed IAM team use the **same** SSB layout:
+CD ships **HelloWorld smoke** only. Learners build Meridian objects in lessons, then optionally export into `config/` for promotion practice.
 
 | Layer | Path | Role |
 | --- | --- | --- |
-| CSV fixtures | `lab-data/` → `~/iiq-lab-data/` | HR / app extracts |
-| IIQ objects | [`config/`](../config/) | Applications, tasks, rules, roles, workflows, policies |
-| Tokens | `*.target.properties` | `%%MNB_HR_FILE%%`, etc. |
-| Pack inventory | [`config/PACKS.md`](../config/PACKS.md) | What is seeded vs lesson-extended |
-| Verify | [`tools/iiq-verify/assert-mnb-objects.sh`](../tools/iiq-verify/assert-mnb-objects.sh) | Post-import allowlist |
+| CSV fixtures | `lab-data/` → `~/iiq-lab-data/` | HR / app extracts (copy before Lesson 04) |
+| IIQ objects | Built in UI; export → [`config/`](../config/) | Applications, tasks, rules, roles, workflows, policies |
+| Tokens | `*.target.properties` | `%%MNB_HR_FILE%%`, etc. (when you export apps) |
+| Inventory | [`config/PACKS.md`](../config/PACKS.md) | What CD ships vs what lessons create |
+| Verify | [`tools/iiq-verify/assert-mnb-objects.sh`](../tools/iiq-verify/assert-mnb-objects.sh) | CD smoke (`HelloWorld`) only |
 
-Day-1 for learners (Lesson 03): copy lab-data → set tokens → `./build.sh importdynamic` → confirm `MNB-Rule-Hello-World` / `MNB-HR`. Lessons 04+ teach UI craft against that product layer; durable changes re-export to `config/`. Lesson **101** is promotion/CAB maturity, not first contact with SSB.
+Day-1 (Lesson 03): copy lab-data → confirm SSB layout → see HelloWorld after CD/`importdynamic`. Lessons **04+** create `MNB-HR` and everything else in the UI. Lesson **101** is when exports + promotion/CAB mature.
 
 ## Layout
 
@@ -66,12 +66,12 @@ Bundled Ant (no system Ant required):
 
 ## Adding a feature (happy path)
 
-1. Prefer **extend a seeded pack** from [`config/PACKS.md`](../config/PACKS.md); use UI create only for first-principles lessons.  
-2. Export clean XML → `config/<Type>/MNB-…xml` (or edit the seed in place).  
+1. Build the control in IIQ (lesson procedure).  
+2. Export clean XML → `config/<Type>/MNB-…xml`.  
 3. Replace hard-coded env values with `%%TOKENS%%` from `*.target.properties`.  
 4. `./build.sh -Dtarget=sandbox clean war`  
-5. `./build.sh importdynamic` (or wait for homelab CD import).  
-6. `./tools/iiq-verify/assert-mnb-objects.sh local` (or `k8s`).  
+5. `./build.sh importdynamic`  
+6. `./tools/iiq-verify/assert-mnb-objects.sh local` (CD smoke); verify your new object with Debug/`get`.  
 7. Commit XML + property token changes (not `build/`).  
 8. CI builds the same way (see `.github/workflows/ssb-ci.yml`).
 

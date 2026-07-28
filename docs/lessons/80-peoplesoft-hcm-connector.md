@@ -175,7 +175,7 @@ Every connector choice becomes tribal knowledge unless written down.
 2. Bridge design: `employeeId,psEmplId` — same discipline as Workday Worker ID and SAP PERNR.
 3. `userName` / OPRID strategy: document whether OPRID is correlated as an HCM attribute or deferred to a future PS **security** application (recommended: do not overload this HCM app with PS roles).
 4. `hrStatus` / `emplStatus` → active/inactive; separate leave indicator if present.
-5. `deptId`, `jobCode`, `managerId` (supervisor EMPLID) → identity attrs + manager resolution plan.
+5. `deptId`, `jobCode`, `managersAssociateID` (supervisor EMPLID) → identity attrs + manager resolution plan.
 6. **Create identities: OFF** — authoritative candidate only.
 
 **Expected result:** Schema/bridge map table; create-identities off; security scope boundary noted.
@@ -185,7 +185,7 @@ Every connector choice becomes tribal knowledge unless written down.
 1. Create `~/iiq-lab-data/connectors/peoplesoft/MNB-PeopleSoft-HCM-mock.csv`:
 
 ```csv
-emplId,employeeId,userName,email,hrStatus,onLeave,deptId,jobCode,managerId
+emplId,employeeId,userName,email,hrStatus,exceptions (LOA),deptId,jobCode,managersAssociateID
 PS10095,MNB00095,sofia.torres,sofia.torres@meridiannb.com,A,true,CML,RM01,PS10006
 PS10096,MNB00096,kai.nguyen,kai.nguyen@meridiannb.com,A,false,IT,ENG01,PS10003
 PS10120,MNB00120,nina.joiner,nina.joiner@meridiannb.com,A,false,RET,TEL01,PS10007
@@ -244,7 +244,7 @@ Extend the Lesson 78 coexistence matrix:
 
 Record `RR-PS-EFFDT-01`: *Incorrect effective-date filtering duplicates workers or oscillates department/manager attributes. Compensating control: certified current-effective view owned by HRIS/DBA; aggregation tests on EFFDT boundaries.* Owner: `sofia.torres`.
 
-Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Workday still authoritative for the same EMPLID/`employeeId` creates duplicate cubes. Compensating control: population segmentation + dual-run gate.* Owner: `helen.ross`.
+Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Workday still authoritative for the same EMPLID/`userId` creates duplicate cubes. Compensating control: population segmentation + dual-run gate.* Owner: `helen.ross`.
 
 **Expected result:** Both RRs logged with owners.
 
@@ -317,7 +317,7 @@ Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Wo
 
 ## Stretch lab
 
-Design a JDBC view SQL sketch (do **not** run against production PS) selecting current effective-dated JOB and PERSONAL_DATA-style fields aligned to Meridian lab schema naming (`employeeId`, `psEmplId`, `hrStatus`, `onLeave`, `deptId`, `jobCode`, `managerId`). Then add a SETID/company column to the coexistence matrix and propose the population rule that would allow PeopleSoft to become authoritative *only* for that entity while Workday owns corporate.
+Design a JDBC view SQL sketch (do **not** run against production PS) selecting current effective-dated JOB and PERSONAL_DATA-style fields aligned to Meridian lab schema naming (`employeeId`, `psEmplId`, `hrStatus`, `exceptions` (LOA), `deptId`, `jobCode`, `managersAssociateID`). Then add a SETID/company column to the coexistence matrix and propose the population rule that would allow PeopleSoft to become authoritative *only* for that entity while Workday owns corporate.
 
 ---
 

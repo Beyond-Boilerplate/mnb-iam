@@ -115,11 +115,11 @@ Aggregate MNB-IT-Access
 
 ## Lab procedure
 
-### Task 0 — Bank craft (import-first)
+### Task 0 — Build in the UI
 
-Prefer seeded `config/Application/MNB-Application-IT-Access.xml` and `Aggregate MNB-IT-Access`. If present, verify authoritative=false and CSV path; extend schema/entitlement flags in UI; re-export if you change durable settings. If missing, create in UI then export to that git path.
+Create `MNB-IT-Access` and `Aggregate MNB-IT-Access` in the UI (authoritative=false). Optional export to `config/Application/MNB-Application-IT-Access.xml`.
 
-**Expected result:** CHANGELOG cites seed verify or `config/Application/MNB-Application-IT-Access.xml` export.
+**Expected result:** CHANGELOG cites UI create (and optional config export path).
 
 ### Task 1 — Inspect the dump
 
@@ -213,7 +213,7 @@ Authoritative / create-identities is an **application** setting—same place you
 - [ ] `MNB-IT-Access` created with absolute path
 - [ ] `itAccess` configured as entitlement attribute
 - [ ] Create-identities disabled; CHANGELOG `MNB-IT-Access authoritative=false`
-- [ ] Bank craft exit: seed verified **or** XML under `config/Application/MNB-Application-IT-Access.xml`
+- [ ] Bank craft exit: works in IIQ; optional XML under `config/Application/MNB-Application-IT-Access.xml`
 - [ ] Orphan vs uncorrelated distinction written in binder
 - [ ] `Aggregate MNB-IT-Access` succeeded with evidence
 - [ ] jordan.reed / kai.nguyen / wire personas spot-checked

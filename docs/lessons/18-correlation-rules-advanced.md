@@ -33,6 +33,8 @@ You will be able to:
 
 ---
 
+**Meridian ID map:** HR native key is `userId`. IT dumps use `employeeId` with the **same values** as HR `userId`. Promote/correlate accordingly—do not invent a separate HR `employeeId` column.
+
 ## Concepts
 
 ### False merge vs false orphan
@@ -100,7 +102,7 @@ No match → uncorrelated (ticket / Lesson 19)
 ## Before you start
 
 - [ ] Lesson 17 complete; most staff correlate on `MNB-IT-Access`
-- [ ] HR cube exists for `raj.external` / MNB00093 (`workerType` Contractor)
+- [ ] HR cube exists for `raj.external` / MNB00093 (`employeeType` Contractor)
 - [ ] `MNB-AWS-Cloud` aggregated (Lesson 13)
 - [ ] Binder section “Correlation edge cases”
 - [ ] Agreement: you will **not** invent a second “Raj” identity to force a link
@@ -132,7 +134,7 @@ Before adding “clever” matching, write down what you refuse to do. This tabl
 | Rejected idea | Failure mode |
 | --- | --- |
 | Match `userName` local part to email local part only | Collisions across domains |
-| Match `lastName` + `departmentCode` | Common names in FIN/ITP |
+| Match `lastName` + `departmentName` | Common names in FIN/ITP |
 | Auto-create identity when AWS_ADMIN uncorrelated | Privileged ghost identities |
 
 2. Write the accepted Meridian rule of thumb: *Unique stable HR id first; exact email second; never create identities from privileged targets.*

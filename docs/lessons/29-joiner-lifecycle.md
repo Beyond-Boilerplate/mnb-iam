@@ -105,7 +105,7 @@ Identity cube nina.joiner
 
 ### Task 1 — Read the joiner delta
 
-Before you merge anything into production HR (or the lab feed that stands in for it), read the delta like a change ticket. Column shifts corrupt `managerId` and `status` silently — examiners will not accept “we thought she was active.”
+Before you merge anything into production HR (or the lab feed that stands in for it), read the delta like a change ticket. Column shifts corrupt `managersAssociateID` and `status` silently — examiners will not accept “we thought she was active.”
 
 1. Open `~/iiq-lab-data/scenarios/joiner/hr-delta-new-hire.csv`.
 2. Verify header columns match `HRApplications.txt`.
@@ -199,7 +199,7 @@ Controls without SLAs are aspirations. Write the numbers you will defend.
 
 ## Acceptance criteria
 
-- [ ] **Bank craft exit:** Joiner flow extends `config/Workflow/MNB-Workflow-Joiner.xml` (or documents diff to seed)
+- [ ] **Bank craft exit:** Joiner flow works in IIQ; optional export to `config/Workflow/MNB-Workflow-Joiner.xml`
 
 - [ ] Nina’s HR row applied without corrupting HR file
 - [ ] MNB-HR aggregation and identity refresh succeeded

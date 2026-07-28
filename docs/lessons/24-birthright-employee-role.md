@@ -59,7 +59,7 @@ Directory login is the shared baseline for employees. Payment initiate, cloud ad
 
 ### Contractors are a different promise
 
-`raj.external` is a Cloud Platform Engineer contractor with vendor email and `AWS_ADMIN` risk. He must **not** receive `MNB-Birthright-Employee`. Lesson 32 defines a stricter contingent path. If your assignment rule forgets `workerType=Employee`, every contractor inherits employee baseline—and examiners will find it in population reports.
+`raj.external` is a Cloud Platform Engineer contractor with vendor email and `AWS_ADMIN` risk. He must **not** receive `MNB-Birthright-Employee`. Lesson 32 defines a stricter contingent path. If your assignment rule forgets `employeeType=Employee`, every contractor inherits employee baseline—and examiners will find it in population reports.
 
 ---
 
@@ -68,7 +68,7 @@ Directory login is the shared baseline for employees. Payment initiate, cloud ad
 Identity refresh is the engine that turns the rule into cube state. Without assign-roles options enabled, the Bundle exists but nobody receives it.
 
 ```
-MNB-HR aggregation ──► identity attributes (workerType, status)
+MNB-HR aggregation ──► identity attributes (employeeType, status)
         │
         ▼
 Refresh MNB Identities (assign roles ON)
@@ -145,11 +145,11 @@ The rule is the difference between “every human” and “active employees onl
 1. Configure assignment rule / identity selector approximately:
    - Application account on MNB-HR present (optional but recommended)
    - `status` active / `1`
-   - `workerType` equals `Employee`
+   - `employeeType` equals `Employee`
 2. Explicitly **exclude** `Contractor` (and terminated).
 3. Document the rule in binder in plain English and as pseudo-logic.
 
-**Expected result:** Rule text captured; matches Lesson 23 intent; Raj’s workerType would not match.
+**Expected result:** Rule text captured; matches Lesson 23 intent; Raj’s employeeType would not match.
 
 **If it fails:** If UI rule builder differs by IIQ version, implement closest Match Filter / BeanShell per your lab guide—keep logic identical.
 
@@ -173,7 +173,7 @@ The rule is the difference between “every human” and “active employees onl
 
 **Expected result:** Assigned birthright role present on Amelia.
 
-**If it fails:** Verify HR attributes on cube (`workerType`, status); re-run refresh; check rule.
+**If it fails:** Verify HR attributes on cube (`employeeType`, status); re-run refresh; check rule.
 
 ### Task 7 — Negative verify: terminated / non-employee
 
@@ -201,7 +201,7 @@ Positive proof without negative proof fails exams—examiners sample leavers and
 
 ## Acceptance criteria
 
-- [ ] **Bank craft exit:** Birthright role aligns with `config/Bundle/MNB-Bundle-Birthright-Employee.xml` (extend seed; re-export profiles)
+- [ ] **Bank craft exit:** Birthright role works in IIQ; optional export to `config/Bundle/MNB-Bundle-Birthright-Employee.xml`
 
 - [ ] `MNB-Birthright-Employee` exists with ELDAP only
 - [ ] Assignment rule limits to active Employees
@@ -216,7 +216,7 @@ Positive proof without negative proof fails exams—examiners sample leavers and
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Role created but never assigned | Refresh without assign option | Enable assign/provision roles on refresh |
-| Everyone gets birthright including contractors | Rule too broad | Add workerType=Employee |
+| Everyone gets birthright including contractors | Rule too broad | Add employeeType=Employee |
 | Amelia missing role | Inactive flag / wrong type | Fix HR attributes; re-aggregate HR; refresh |
 | Provisioning errors for ELDAP | No connector provisioning in file lab | Document as detection/assignment-only lab; still verify assignment |
 | Birthright contains extras | Editing mistake | Remove; re-approve composition |
@@ -249,7 +249,7 @@ Positive proof without negative proof fails exams—examiners sample leavers and
 ### Answers
 
 1. ELDAP only.
-2. No—Employee workerType only; contractors need a tighter separate pack (Lesson 32).
+2. No—Employee employeeType only; contractors need a tighter separate pack (Lesson 32).
 3. When HR status becomes inactive/terminated, refresh/lifecycle removes assignment (and provisioning disables/removes access in full implementations).
 4. No—automatic only; not requestable.
 5. She is an active Employee teller with ELDAP-appropriate baseline and no treasury privilege expectation.
@@ -269,7 +269,7 @@ Positive proof without negative proof fails exams—examiners sample leavers and
 
 ## Stretch lab
 
-- Create `MNB-Birthright-Contractor` with ELDAP only **or** a time-boxed directory group; exclude all critical ents; assignment `workerType=Contractor` AND active.
+- Create `MNB-Birthright-Contractor` with ELDAP only **or** a time-boxed directory group; exclude all critical ents; assignment `employeeType=Contractor` AND active.
 - Add audit note: any birthright composition change requires change ticket + Risk approval.
 - Compare Amelia vs `nina.joiner` after Lesson 29—both tellers should converge on same birthright.
 

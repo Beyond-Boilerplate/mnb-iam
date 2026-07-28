@@ -63,7 +63,7 @@ Full joiner/mover/leaver workflows arrive later. Until then, Meridian still owes
 
 ## How it works
 
-Authoritative HR status drives the hunt. Target aggregations supply residual evidence. Correlation must largely work so residuals appear on the cube; otherwise hunt on application account lists by `employeeId` / userName.
+Authoritative HR status drives the hunt. Target aggregations supply residual evidence. Correlation must largely work so residuals appear on the cube; otherwise hunt on application account lists by `userId` / userName.
 
 ```
 HR status=0 (samir.hassan) + terminationDate
@@ -197,7 +197,7 @@ Wrong playbook is itself a finding. Confirm Jordan is active toxic access, not a
 2. Write one sentence differentiating:
    - Jordan = active toxic combination (policy)
    - Samir = terminated residual (lifecycle)
-3. Optional: check `onLeave` users later (Lesson 33)—do not revoke the same way as terminations without policy.
+3. Optional: check `exceptions` (LOA) users later (Lesson 33)—do not revoke the same way as terminations without policy.
 
 **Expected result:** Clear taxonomy in binder; avoids wrong playbook.
 

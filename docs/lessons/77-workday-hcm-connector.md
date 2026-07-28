@@ -43,7 +43,7 @@ Workday HCM stores people as **Workers**. A Worker is keyed by a Worker ID / Emp
 | **Worker (Employee)** | Regular employee record | `helen.ross` — Head of IAM, `MNB00001` |
 | **Contingent Worker** | Contractor / temp with a Worker ID | Future contractor feed — treat like `raj.external` today |
 | **Supervisory Org** | Manager + org tree for approvals | Sofia's manager chain under Commercial Lending |
-| **Leave / Absence** | On-leave flag without termination | `sofia.torres` with `onLeave=true` in HR — mailbox stays, sensitive access may pause |
+| **Leave / Absence** | On-leave flag without termination | `sofia.torres` with `exceptions=LOA` in HR — mailbox stays, sensitive access may pause |
 | **Job Profile / Position** | Title, job family, often department | Feeds `department`, `title`, birthright role selectors |
 
 ### Contingent workers are not optional scope
@@ -52,7 +52,7 @@ The naive cutover says "employees only — contractors stay in a spreadsheet." T
 
 ### Leave is not termination
 
-`sofia.torres` is active (`status=1`) but `onLeave=true` in the HR file. Workday surfaces similar leave states. Mapping leave to "inactive identity" would fire the leaver workflow and destroy her accounts — wrong. Leave is an **identity attribute** that may drive temporary entitlement suspension; termination is the leaver event. Confusing them is a classic HR-connector defect under exam.
+`sofia.torres` is active (`status=1`) but `exceptions=LOA` in the HR file. Workday surfaces similar leave states. Mapping leave to "inactive identity" would fire the leaver workflow and destroy her accounts — wrong. Leave is an **identity attribute** that may drive temporary entitlement suspension; termination is the leaver event. Confusing them is a classic HR-connector defect under exam.
 
 ### Authoritative means "creates people"
 
@@ -183,8 +183,8 @@ The schema decides whether leave, manager, and contingent flags become usable go
 2. Map email → `email`; legal/preferred name → display attributes.
 3. Map supervisory manager Worker ID → manager correlation (resolve to identity, not raw ID forever).
 4. Map active/terminated (+ termination date) → IIQ inactive semantics for *future* authoritative use.
-5. Map leave / absence → `onLeave` (or equivalent) — **do not** equate to terminated. Anchor with `sofia.torres`.
-6. Map contingent vs employee → `workerType` (align with Lesson 05 HR naming where possible).
+5. Map leave / absence → `exceptions` (LOA) (or equivalent) — **do not** equate to terminated. Anchor with `sofia.torres`.
+6. Map contingent vs employee → `employeeType` (align with Lesson 05 HR naming where possible).
 7. **Create identities: OFF.** Document that this remains true until cutover Phase 3.
 
 **Expected result:** Attribute map table; create-identities disabled; leave ≠ terminate called out.
@@ -196,7 +196,7 @@ If you have no tenant, simulate what Worker aggregation *would* return. This is 
 1. Create `~/iiq-lab-data/connectors/workday/MNB-Workday-HCM-mock.csv`:
 
 ```csv
-workerId,userName,email,managerId,status,workerType,onLeave,department,title
+workerId,userName,email,managersAssociateID,status,employeeType,exceptions (LOA),department,title
 MNB00120,nina.joiner,nina.joiner@meridiannb.com,MNB00007,active,Employee,false,RET,Teller
 MNB00001,helen.ross,helen.ross@meridiannb.com,,active,Employee,false,SEC,Head of Identity & Access
 MNB00095,sofia.torres,sofia.torres@meridiannb.com,MNB00006,active,Employee,true,CML,Relationship Manager
@@ -238,7 +238,7 @@ This is the examiner-facing artifact. Dual-run means both feeds produce comparab
 Connect the feed to lifecycle conceptually (Lessons 29–31, 34).
 
 1. **Joiner:** Workday active Worker for `nina.joiner` → (when authoritative) cube create → birthright — SLA clock starts at Worker active, not at CSV drop.
-2. **Leave:** `sofia.torres` onLeave → temporary access policy; accounts stay; do not run full leaver.
+2. **Leave:** `sofia.torres` exceptions (LOA) → temporary access policy; accounts stay; do not run full leaver.
 3. **Leaver:** terminated Worker → disable targets within SLA; re-aggregate shows inactive — evidence.
 4. Note contingent joiners need the same clock; excluding them recreates the contractor blind spot.
 
