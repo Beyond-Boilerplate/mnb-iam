@@ -4,6 +4,10 @@ After each lesson, learners prove the lab matches expected outcomes. **Verify no
 
 JSON paste / manual report import is **disabled** — you cannot mark a lesson PASS without a successful live check.
 
+## Streamlined public academy (homelab)
+
+https://sailpoint.lmsapp.us/ — **Verify now** calls `/api/verify` on the academy pod, which checks the **in-cluster** IdentityIQ. Lesson 01 only needs the login page; later lessons need objects you built in that shared lab (or use a laptop stack below).
+
 ## Streamlined local (IIQ + Academy in Docker)
 
 ```bash

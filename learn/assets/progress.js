@@ -3,6 +3,7 @@
  */
 (() => {
   const KEY = "mnb-academy-progress-v1";
+  let apiAvailable = null; // null=unknown, true/false after probe
 
   const load = () => {
     try {
@@ -40,6 +41,16 @@
     }
   };
 
+  const probeApi = async () => {
+    try {
+      const res = await fetch("/api/health", { method: "GET", cache: "no-store" });
+      apiAvailable = res.ok;
+    } catch {
+      apiAvailable = false;
+    }
+    return apiAvailable;
+  };
+
   /** Persist only reports produced by the live verify API. */
   const applyLiveReport = (report, expectedStem) => {
     if (!report || typeof report !== "object") {
@@ -71,13 +82,22 @@
     msgEl.textContent = "Running checks against your IIQ lab…";
     if (btn) btn.disabled = true;
     try {
-      const res = await fetch(`/api/verify/${encodeURIComponent(num)}`, { method: "POST" });
-      let report;
-      try {
-        report = await res.json();
-      } catch {
-        throw new Error(`Verify API returned non-JSON (HTTP ${res.status})`);
+      const ok = await probeApi();
+      if (!ok) {
+        throw new Error(
+          "Verify API is not on this host. On a laptop run ./tools/lab/up.sh (or docker/up.sh), then open http://localhost:4173/ — or wait for the academy image with /api/verify to deploy."
+        );
       }
+      const res = await fetch(`/api/verify/${encodeURIComponent(num)}`, { method: "POST" });
+      const ctype = res.headers.get("content-type") || "";
+      if (!ctype.includes("application/json")) {
+        const hint =
+          res.status === 405
+            ? "This page is still being served as static HTML (no Verify API). Redeploy mnb-iam-learn or use ./tools/lab/up.sh locally."
+            : `HTTP ${res.status}`;
+        throw new Error(hint);
+      }
+      const report = await res.json();
       if (!report.stem) report.stem = stem;
       const saved = applyLiveReport(report, stem);
       const gapN = saved.gaps?.length || 0;
@@ -87,9 +107,7 @@
           : `FAIL — ${gapN} gap(s). Fix in IIQ, then Verify now again.`;
       renderPanel();
     } catch (e) {
-      msgEl.textContent =
-        "Verify API unavailable. Use ./tools/lab/up.sh or ./tools/lab/docker/up.sh — " +
-        (e.message || e);
+      msgEl.textContent = String(e.message || e);
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -120,13 +138,18 @@
         "</ul>";
     }
 
+    const apiNote =
+      apiAvailable === false
+        ? `<p class="verify-status verify-fail">Verify API not reachable here. Use <code>./tools/lab/up.sh</code> or <code>./tools/lab/docker/up.sh</code> and open <a href="http://localhost:4173/${stem || ""}.html">localhost:4173</a>, or wait for the public academy deploy that includes <code>/api/verify</code>.</p>`
+        : `<p class="muted">Progress updates only from a <strong>live</strong> check of your IIQ lab. Pasting or editing JSON cannot mark a lesson PASS.</p>`;
+
     host.innerHTML = `
       <h2>Lesson verify</h2>
-      <p class="muted">Progress updates only from a <strong>live</strong> check of your IIQ lab. Pasting or editing JSON cannot mark a lesson PASS.</p>
+      ${apiNote}
       ${status}
       ${gaps}
       <div class="verify-actions">
-        <button type="button" class="btn primary" id="verifyRun">Verify now</button>
+        <button type="button" class="btn primary" id="verifyRun" ${apiAvailable === false ? "disabled" : ""}>Verify now</button>
         <button type="button" class="btn ghost" id="verifyClear">Clear this lesson</button>
       </div>
       <p id="verifyMsg" class="muted" role="status"></p>
@@ -183,6 +206,7 @@
   pointLabLinkLocal();
   paintToc();
   renderPanel();
+  probeApi().then(() => renderPanel());
 
-  window.MnbAcademyProgress = { load, paintToc, runVerify };
+  window.MnbAcademyProgress = { load, paintToc, runVerify, probeApi };
 })();

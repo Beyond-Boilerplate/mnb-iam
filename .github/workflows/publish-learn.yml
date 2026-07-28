@@ -10,6 +10,11 @@ on:
     paths:
       - "docs/lessons/**"
       - "learn/**"
+      - "tools/academy/**"
+      - "tools/iiq-verify/**"
+      - "lab-data/**"
+      - "config/PACKS.md"
+      - "config/Rule/**"
       # Intentionally omit this workflow file: editing CD YAML alone should not rebuild academy.
   workflow_dispatch:
     inputs:

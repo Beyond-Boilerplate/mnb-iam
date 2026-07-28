@@ -1,39 +1,50 @@
-# Meridian IAM Academy — static learn site
+# Meridian IAM Academy — learn site + Verify API
 
-Markdown lessons in `docs/lessons/` compile to static HTML under `learn/dist/`.
+Markdown lessons in `docs/lessons/` compile to static HTML under `learn/dist/`, then the academy image serves them with **`POST /api/verify/<lesson>`** against IdentityIQ.
 
-## Local preview
+## Local preview (with Verify now)
+
+```bash
+./tools/lab/up.sh
+# or: ./tools/lab/docker/up.sh
+# Academy http://localhost:4173/   IIQ http://localhost:8080/identityiq
+```
+
+Static HTML only (no Verify API):
 
 ```bash
 python3 learn/build.py
 cd learn/dist && python3 -m http.server 4173
-# open http://127.0.0.1:4173/
 ```
 
-Docker (root path, production shape):
+## Production image
 
 ```bash
 docker build -f learn/Dockerfile -t mnb-learn .
-docker run --rm -p 4173:8080 mnb-learn
-# open http://127.0.0.1:4173/
+docker run --rm -p 4173:8080 \
+  -e IIQ_BASE_URL=http://host.docker.internal:8080/identityiq \
+  -e IIQ_VERIFY_MODE=local \
+  mnb-learn
 ```
 
 ## Production URLs
 
 | Surface | URL |
 | --- | --- |
-| Academy | https://sailpoint.lmsapp.us/ |
+| Academy + Verify | https://sailpoint.lmsapp.us/ |
 | IdentityIQ | https://sailpoint.lmsapp.us/identityiq/login.jsf |
 
 ```text
 docs/lessons/*.md  →  learn/build.py  →  learn/dist/*.html
                                               ↓
-                                    mnb-learn (nginx)
+                         mnb-learn (serve.py + /api/verify)
                                               ↓
                          sailpoint-edge (path router)
                                               ↓
                     Cloudflare → sailpoint.lmsapp.us
 ```
+
+On the public site, Verify now checks the **homelab IIQ** in-cluster (`identityiq` Service). Laptop labs should use `./tools/lab/up.sh` so Verify targets your local IIQ.
 
 ## Deploy
 

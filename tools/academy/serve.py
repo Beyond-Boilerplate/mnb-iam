@@ -49,12 +49,12 @@ class AcademyHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
-        if parsed.path == "/api/health":
+        if parsed.path in ("/api/health", "/healthz"):
             return self._json(200, {
                 "ok": True,
                 "iiqBaseUrl": IIQ_BASE_URL,
                 "mode": IIQ_VERIFY_MODE,
-            })
+            }) if parsed.path == "/api/health" else self._text(200, "ok")
         return super().do_GET()
 
     def do_POST(self):
@@ -128,6 +128,15 @@ class AcademyHandler(SimpleHTTPRequestHandler):
         if guess.exists():
             return json.loads(guess.read_text())
         return None
+
+    def _text(self, status: int, body: str) -> None:
+        raw = body.encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(raw)
 
     def _json(self, status: int, payload: dict) -> None:
         raw = json.dumps(payload).encode()
