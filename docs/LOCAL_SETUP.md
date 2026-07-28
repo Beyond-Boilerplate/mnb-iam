@@ -9,6 +9,14 @@ This guide walks you through standing up a **local IdentityIQ 8.5** lab. **Two s
 
 Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.md](LESSON_VERIFY.md)). Homelab CD remains the shared site option.
 
+### Learn site + Verify now (any IIQ path)
+
+```bash
+# With IIQ already running on :8080
+./tools/lab/start-academy.sh
+# → http://localhost:4173/  lessons, progress, Verify now
+```
+
 ### Path A — Docker (quick)
 
 ```bash

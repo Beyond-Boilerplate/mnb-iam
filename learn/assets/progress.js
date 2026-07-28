@@ -1,6 +1,5 @@
 /**
- * Meridian academy progress (localStorage) + lesson verify report ingest.
- * No server submission — learners keep reports under ~/iiq-lab-evidence/verify/.
+ * Meridian academy progress (localStorage) + live verify via local academy server.
  */
 (() => {
   const KEY = "mnb-academy-progress-v1";
@@ -43,6 +42,23 @@
 
   const ingestReport = (report) => {
     if (!report || report.schema !== "mnb-lesson-verify-report/v1") {
+      if (report && report.verdict) {
+        // tolerate minimal payload from API errors
+        const stem = report.stem || stemFromPath();
+        if (!stem) throw new Error("Report missing stem");
+        const data = load();
+        data[stem] = {
+          verdict: report.verdict,
+          checkedAt: report.checkedAt || new Date().toISOString(),
+          gaps: report.gaps || [],
+          summary: report.summary,
+          target: report.target,
+          error: report.error,
+        };
+        save(data);
+        paintToc();
+        return data[stem];
+      }
       throw new Error("Not a Meridian verify report (expected schema mnb-lesson-verify-report/v1)");
     }
     const stem = report.stem;
@@ -60,6 +76,33 @@
     return data[stem];
   };
 
+  const runVerify = async (stem, msgEl, btn) => {
+    const num = lessonNum(stem);
+    msgEl.textContent = "Running checks against your IIQ lab…";
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch(`/api/verify/${encodeURIComponent(num)}`, { method: "POST" });
+      const report = await res.json();
+      if (!report.stem) report.stem = stem;
+      if (!report.schema && report.verdict) {
+        // attach schema if verifier returned full report already
+      }
+      const saved = ingestReport(
+        report.schema === "mnb-lesson-verify-report/v1"
+          ? report
+          : { ...report, schema: "mnb-lesson-verify-report/v1", stem, lesson: num }
+      );
+      msgEl.textContent = `${saved.verdict} — ${saved.gaps?.length || 0} gap(s)`;
+      renderPanel();
+    } catch (e) {
+      msgEl.textContent =
+        "Verify API unavailable. Start the academy server: python3 tools/academy/serve.py — " +
+        (e.message || e);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
+
   const renderPanel = () => {
     const host = document.getElementById("verifyPanel");
     if (!host) return;
@@ -68,34 +111,47 @@
     const entry = stem ? data[stem] : null;
     const status = entry
       ? `<p class="verify-status verify-${(entry.verdict || "").toLowerCase()}">Last result: <strong>${entry.verdict}</strong> · ${entry.checkedAt || ""}</p>`
-      : `<p class="verify-status">No verify report saved yet for this lesson.</p>`;
+      : `<p class="verify-status">No verify result yet for this lesson.</p>`;
 
     let gaps = "";
     if (entry?.gaps?.length) {
       gaps =
         "<ul class='verify-gaps'>" +
-        entry.gaps.map((g) => `<li><code>${g.id}</code> — ${g.message}<br/><span class="muted">${g.detail || ""}</span></li>`).join("") +
+        entry.gaps
+          .map(
+            (g) =>
+              `<li><code>${g.id}</code> — ${g.message}<br/><span class="muted">${g.detail || ""}</span>${
+                g.hint ? `<br/><span class="muted">hint: ${g.hint}</span>` : ""
+              }</li>`
+          )
+          .join("") +
         "</ul>";
     }
 
     host.innerHTML = `
       <h2>Lesson verify</h2>
-      <p class="muted">After you finish the lab, run the CLI against your IIQ (local by default), then paste the JSON report here. Progress stays in this browser only.</p>
-      <pre class="verify-cmd">./tools/iiq-verify/verify-lesson.sh ${lessonNum(stem) || "NN"}</pre>
+      <p class="muted">Click <strong>Verify now</strong> to check your local (or configured) IIQ lab. Progress stays in this browser.</p>
       ${status}
       ${gaps}
-      <label class="verify-label">Paste verify JSON
-        <textarea id="verifyJson" rows="8" placeholder='{ "schema": "mnb-lesson-verify-report/v1", ... }'></textarea>
-      </label>
       <div class="verify-actions">
-        <button type="button" class="btn primary" id="verifyIngest">Save result</button>
+        <button type="button" class="btn primary" id="verifyRun">Verify now</button>
         <button type="button" class="btn ghost" id="verifyClear">Clear this lesson</button>
       </div>
+      <details class="verify-advanced">
+        <summary>Advanced: paste CLI JSON</summary>
+        <label class="verify-label">Paste verify JSON
+          <textarea id="verifyJson" rows="6" placeholder='{ "schema": "mnb-lesson-verify-report/v1", ... }'></textarea>
+        </label>
+        <button type="button" class="btn ghost" id="verifyIngest">Save pasted result</button>
+      </details>
       <p id="verifyMsg" class="muted" role="status"></p>
     `;
 
+    const msg = host.querySelector("#verifyMsg");
+    host.querySelector("#verifyRun")?.addEventListener("click", () => {
+      runVerify(stem, msg, host.querySelector("#verifyRun"));
+    });
     host.querySelector("#verifyIngest")?.addEventListener("click", () => {
-      const msg = host.querySelector("#verifyMsg");
       try {
         const report = JSON.parse(host.querySelector("#verifyJson").value);
         const saved = ingestReport(report);
@@ -115,7 +171,6 @@
     });
   };
 
-  // Index progress chip
   const ensureProgressChip = () => {
     const top = document.querySelector(".topbar");
     if (!top || document.getElementById("progressBar")) return;
@@ -126,7 +181,6 @@
     top.insertBefore(el, top.querySelector(".lab-link"));
   };
 
-  // Inject verify panel before pager on lesson pages
   const ensurePanel = () => {
     if (!stemFromPath()) return;
     if (document.getElementById("verifyPanel")) return;
@@ -140,11 +194,20 @@
     main.insertBefore(panel, pager);
   };
 
+  const pointLabLinkLocal = () => {
+    const link = document.querySelector(".lab-link");
+    if (!link) return;
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      link.href = "http://localhost:8080/identityiq/login.jsf";
+      link.textContent = "Open local IIQ ↗";
+    }
+  };
+
   ensureProgressChip();
   ensurePanel();
+  pointLabLinkLocal();
   paintToc();
   renderPanel();
 
-  // Expose for debugging
-  window.MnbAcademyProgress = { load, save, ingestReport, paintToc };
+  window.MnbAcademyProgress = { load, save, ingestReport, paintToc, runVerify };
 })();

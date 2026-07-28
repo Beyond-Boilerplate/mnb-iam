@@ -2,7 +2,18 @@
 
 After each lesson, learners prove the lab matches expected outcomes. The CLI talks to the **live IIQ** (local by default, or Docker / homelab CD), emits a **PASS/FAIL** report with **gap analysis**, and the learn site can store progress in the browser (no submission server required).
 
-## Quick start
+## Streamlined local (learn UI + Verify now)
+
+```bash
+# IIQ must already be up (Tomcat lab or Docker)
+./tools/lab/start-academy.sh
+# → http://localhost:4173/  (lessons + progress + Verify now button)
+```
+
+Open a lesson → scroll to **Lesson verify** → **Verify now**. Gaps appear immediately; TOC turns green/red.
+
+## Quick start (CLI)
+
 
 ```bash
 # Local Tomcat lab (default)
