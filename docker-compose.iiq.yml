@@ -1,15 +1,14 @@
-# Local IdentityIQ lab (Docker) — alternative to tools/lab Tomcat+MySQL.
-# Keep both paths: this file OR ./tools/lab/setup-local.sh
+# Meridian local stack: Postgres + IdentityIQ + Academy (lessons + Verify now)
 #
-# Prerequisites: Docker Desktop / Engine, and either:
-#   - pull access to ghcr.io/beyond-boilerplate/identityiq:<tag>
-#   - or: docker build -f docker/Dockerfile -t mnb-identityiq:local .
-#
-# Usage:
+# One command:
 #   ./tools/lab/docker/up.sh
-#   ./tools/lab/docker/bootstrap.sh   # schema already applied; imports init + HelloWorld
-#   open http://localhost:8080/identityiq   (spadmin / admin)
-#   ./tools/lab/docker/down.sh
+#   # or: docker compose -f docker-compose.iiq.yml up -d --build
+#
+# URLs:
+#   Academy  http://localhost:4173/
+#   IIQ      http://localhost:8080/identityiq  (spadmin / admin)
+#
+# Tear down: ./tools/lab/docker/down.sh [-v]
 
 name: mnb-iiq-lab
 
@@ -50,6 +49,7 @@ services:
 
   identityiq:
     image: ${IIQ_IMAGE:-ghcr.io/beyond-boilerplate/identityiq:0.1.0}
+    container_name: mnb-identityiq
     depends_on:
       schema-init:
         condition: service_completed_successfully
@@ -77,7 +77,40 @@ services:
       interval: 15s
       timeout: 10s
       retries: 40
-      start_period: 90s
+      start_period: 120s
+
+  academy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.academy
+    image: ${ACADEMY_IMAGE:-mnb-academy:local}
+    container_name: mnb-academy
+    depends_on:
+      identityiq:
+        condition: service_healthy
+    ports:
+      - "${ACADEMY_PORT:-4173}:4173"
+    environment:
+      ACADEMY_HOST: "0.0.0.0"
+      ACADEMY_PORT: "4173"
+      IIQ_BASE_URL: http://identityiq:8080/identityiq
+      IIQ_USER: spadmin
+      IIQ_PASSWORD: admin
+      IIQ_VERIFY_MODE: docker
+      IIQ_DOCKER_CONTAINER: mnb-identityiq
+    volumes:
+      # Console fallback for object.exists checks (docker exec into IIQ)
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:4173/api/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
 volumes:
   mnb-iiq-pg:

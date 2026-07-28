@@ -9,25 +9,24 @@ This guide walks you through standing up a **local IdentityIQ 8.5** lab. **Two s
 
 Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.md](LESSON_VERIFY.md)). Homelab CD remains the shared site option.
 
-### Learn site + Verify now (any IIQ path)
-
-```bash
-# With IIQ already running on :8080
-./tools/lab/start-academy.sh
-# → http://localhost:4173/  lessons, progress, Verify now
-```
-
-### Path A — Docker (quick)
+### Path A — Docker (IIQ + Academy, one command)
 
 ```bash
 ./tools/lab/docker/up.sh
-./tools/lab/docker/bootstrap.sh
-open http://localhost:8080/identityiq   # spadmin / admin
-# File paths in apps: /opt/iiq-lab-data/...  (repo lab-data mounted)
-./tools/iiq-verify/verify-lesson.sh 01
+# Academy: http://localhost:4173/   (lessons + Verify now)
+# IIQ:     http://localhost:8080/identityiq  (spadmin / admin)
 ```
 
-### Path B — Tomcat lab (automated)
+See [`tools/lab/docker/README.md`](../tools/lab/docker/README.md).
+
+### Learn site only (host Tomcat IIQ already running)
+
+```bash
+./tools/lab/start-academy.sh
+# → http://localhost:4173/
+```
+
+### Path B — Tomcat + MySQL (host install)
 
 ```bash
 # macOS / Linux / WSL — runtime bootstrap

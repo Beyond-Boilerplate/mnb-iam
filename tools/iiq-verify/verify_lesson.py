@@ -133,8 +133,22 @@ class IIQClient:
 
     def _console_docker(self, command: str) -> str:
         self.transport_notes.append("console-docker")
-        # Escape for remote shell
         safe = command.replace('"', '\\"')
+        container = os.environ.get("IIQ_DOCKER_CONTAINER", "").strip()
+        if container:
+            # Preferred in Compose academy sidecar (docker.sock + named container)
+            shell = (
+                'cd "$IIQ_HOME/WEB-INF/bin" 2>/dev/null || '
+                "cd /usr/local/tomcat/webapps/identityiq/WEB-INF/bin; "
+                f'./iiq console iiqBeans -c "{safe}"'
+            )
+            proc = subprocess.run(
+                ["docker", "exec", "-T", container, "sh", "-c", shell],
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+            return (proc.stdout or "") + (proc.stderr or "")
         proc = subprocess.run(
             [
                 "docker",
@@ -154,7 +168,6 @@ class IIQClient:
             timeout=180,
         )
         return (proc.stdout or "") + (proc.stderr or "")
-
     def _console_k8s(self, command: str) -> str:
         self.transport_notes.append("console-k8s")
         ns = os.environ.get("NAMESPACE", "sailpoint")

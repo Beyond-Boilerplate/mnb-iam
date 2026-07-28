@@ -1,41 +1,36 @@
-# Local IIQ via Docker
+# Local Meridian stack (Docker)
 
-Alternative to the host Tomcat + MySQL path in [`tools/lab/README.md`](../README.md).
-
-| Path | When to use |
-| --- | --- |
-| **Docker** (`docker-compose.iiq.yml`) | Prefer containers; Postgres; matches homelab image shape |
-| **Tomcat lab** (`./tools/lab/setup-local.sh`) | Prefer native macOS/Windows tools; MySQL on :3307 |
-
-Both use the same curriculum, `lab-data/`, and `./tools/iiq-verify/verify-lesson.sh`.
-
-## Quick start
+**One command** starts Postgres + IdentityIQ + Academy (lessons + **Verify now**):
 
 ```bash
-# Optional: build from this repo (needs GHCR base pull or local base)
-# docker build -f docker/Dockerfile -t mnb-identityiq:local .
-# export IIQ_IMAGE=mnb-identityiq:local
-
 ./tools/lab/docker/up.sh
-./tools/lab/docker/bootstrap.sh
-open http://localhost:8080/identityiq   # spadmin / admin
-
-# Point file paths in UI at /opt/iiq-lab-data/... (volume-mounted from repo lab-data/)
 ```
 
-Tear down:
+| URL | What |
+| --- | --- |
+| http://localhost:4173/ | Academy lessons + progress + Verify now |
+| http://localhost:8080/identityiq | IIQ UI (`spadmin` / `admin`) |
+
+Lab CSV files are mounted at `/opt/iiq-lab-data` inside IIQ (from repo `lab-data/`).
+
+## Stop / wipe
 
 ```bash
 ./tools/lab/docker/down.sh          # keep DB volume
-./tools/lab/docker/down.sh -v       # wipe Postgres volume too
+./tools/lab/docker/down.sh -v       # wipe Postgres too
 ```
 
-## Verify lessons
+## Image notes
+
+- IIQ defaults to `ghcr.io/beyond-boilerplate/identityiq:0.1.0` (or `IIQ_IMAGE=mnb-identityiq:local` if you built it).
+- Academy builds from `docker/Dockerfile.academy` on first `up`.
+- Verify uses HTTP/SCIM when available and `docker exec` into `mnb-identityiq` for object checks (docker.sock mounted on academy).
+
+## Alternative: Tomcat on the host
 
 ```bash
-export IIQ_BASE_URL=http://localhost:8080/identityiq
-export IIQ_USER=spadmin IIQ_PASSWORD=admin
-./tools/iiq-verify/verify-lesson.sh 04
+./tools/lab/setup-local.sh
+./tools/lab/start-academy.sh    # Academy only; uses host IIQ
 ```
 
-See [`docs/LESSON_VERIFY.md`](../../../docs/LESSON_VERIFY.md).
+See [`docs/LOCAL_SETUP.md`](../../../docs/LOCAL_SETUP.md) and [`docs/LESSON_VERIFY.md`](../../../docs/LESSON_VERIFY.md).

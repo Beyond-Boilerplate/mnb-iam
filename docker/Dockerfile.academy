@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1.6
+# Meridian academy: learn site + Verify API (talks to Compose IIQ).
+FROM python:3.12-slim-bookworm AS build
+WORKDIR /src
+COPY docs/lessons /src/docs/lessons
+COPY learn /src/learn
+RUN python3 /src/learn/build.py
+
+FROM python:3.12-slim-bookworm
+# docker CLI for console fallback via docker.sock → identityiq container
+COPY --from=docker:27-cli /usr/local/bin/docker /usr/local/bin/docker
+
+WORKDIR /app
+COPY --from=build /src/learn/dist /app/learn/dist
+COPY tools/academy /app/tools/academy
+COPY tools/iiq-verify /app/tools/iiq-verify
+COPY lab-data /app/lab-data
+COPY docs/lessons /app/docs/lessons
+
+ENV ACADEMY_HOST=0.0.0.0 \
+    ACADEMY_PORT=4173 \
+    IIQ_BASE_URL=http://identityiq:8080/identityiq \
+    IIQ_VERIFY_MODE=docker \
+    IIQ_DOCKER_CONTAINER=mnb-identityiq \
+    IIQ_USER=spadmin \
+    IIQ_PASSWORD=admin \
+    PYTHONUNBUFFERED=1
+
+EXPOSE 4173
+HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
+  CMD python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4173/api/health')" || exit 1
+
+CMD ["python3", "tools/academy/serve.py"]

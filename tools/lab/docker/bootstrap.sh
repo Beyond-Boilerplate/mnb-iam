@@ -4,21 +4,23 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT"
 COMPOSE=(docker compose -f docker-compose.iiq.yml)
+PORT="${IIQ_HTTP_PORT:-8080}"
 
-echo "Waiting for identityiq container healthy…"
-for _ in $(seq 1 60); do
-  st="$("${COMPOSE[@]}" ps --format json identityiq 2>/dev/null | head -1 || true)"
-  if echo "$st" | grep -qi healthy; then
-    break
-  fi
-  # fallback: HTTP login page
-  if curl -sf -o /dev/null "http://127.0.0.1:${IIQ_HTTP_PORT:-8080}/identityiq/login.jsf"; then
+echo "Waiting for identityiq…"
+for _ in $(seq 1 90); do
+  if curl -sf -o /dev/null "http://127.0.0.1:${PORT}/identityiq/login.jsf"; then
     break
   fi
   sleep 5
 done
 
-echo "Importing stock init + LCM (idempotent-ish)…"
+if ! curl -sf -o /dev/null "http://127.0.0.1:${PORT}/identityiq/login.jsf"; then
+  echo "ERROR: IIQ login page not reachable on :${PORT}" >&2
+  "${COMPOSE[@]}" ps || true
+  exit 1
+fi
+
+echo "Importing stock init + LCM…"
 "${COMPOSE[@]}" exec -T identityiq sh -c '
   cd "$IIQ_HOME/WEB-INF/bin"
   chmod +x iiq 2>/dev/null || true
@@ -36,8 +38,7 @@ if [[ -f "$ROOT/config/Rule/MNB-Rule-HelloWorld.xml" ]]; then
     ./iiq console iiqBeans <<EOF
 import /tmp/MNB-Rule-HelloWorld.xml
 EOF
-  '
+  ' || echo "WARN: HelloWorld import failed"
 fi
 
-echo "Bootstrap done. Login http://localhost:${IIQ_HTTP_PORT:-8080}/identityiq"
-echo "Verify smoke: IIQ_BASE_URL=http://localhost:${IIQ_HTTP_PORT:-8080}/identityiq ./tools/iiq-verify/verify-lesson.sh 03"
+echo "Bootstrap done."

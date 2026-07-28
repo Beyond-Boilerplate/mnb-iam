@@ -4,6 +4,16 @@ SailPoint **Services Standard Deployment (SSD)** project for IdentityIQ **8.5**,
 
 Day-to-day customization uses **SSB** (Services Standard Build) — do not reinvent Ant packaging; use `./build.sh`.
 
+## Quick start (Docker — IIQ + Academy)
+
+```bash
+./tools/lab/docker/up.sh
+# Academy → http://localhost:4173/
+# IIQ     → http://localhost:8080/identityiq  (spadmin / admin)
+```
+
+Tomcat host path remains: `./tools/lab/setup-local.sh` then `./tools/lab/start-academy.sh`.
+
 ---
 
 ## Quick links
@@ -19,7 +29,7 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 | [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) | Beginner architecture |
 | [docs/lessons/README.md](docs/lessons/README.md) | Progressive Meridian lessons |
 | [tools/lab/README.md](tools/lab/README.md) | Tomcat laptop bootstrap |
-| [tools/lab/docker/README.md](tools/lab/docker/README.md) | Docker Compose local IIQ |
+| [tools/lab/docker/README.md](tools/lab/docker/README.md) | **One-command** Docker: IIQ + Academy |
 
 ---
 

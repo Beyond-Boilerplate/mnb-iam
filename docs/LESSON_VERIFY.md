@@ -2,15 +2,21 @@
 
 After each lesson, learners prove the lab matches expected outcomes. The CLI talks to the **live IIQ** (local by default, or Docker / homelab CD), emits a **PASS/FAIL** report with **gap analysis**, and the learn site can store progress in the browser (no submission server required).
 
-## Streamlined local (learn UI + Verify now)
+## Streamlined local (IIQ + Academy in Docker)
 
 ```bash
-# IIQ must already be up (Tomcat lab or Docker)
-./tools/lab/start-academy.sh
-# → http://localhost:4173/  (lessons + progress + Verify now button)
+./tools/lab/docker/up.sh
+# → Academy http://localhost:4173/  |  IIQ http://localhost:8080/identityiq
 ```
 
-Open a lesson → scroll to **Lesson verify** → **Verify now**. Gaps appear immediately; TOC turns green/red.
+Open a lesson → **Lesson verify** → **Verify now**. Gaps appear immediately; TOC turns green/red.
+
+## Streamlined (Academy only; host IIQ already up)
+
+```bash
+./tools/lab/start-academy.sh
+# → http://localhost:4173/
+```
 
 ## Quick start (CLI)
 
