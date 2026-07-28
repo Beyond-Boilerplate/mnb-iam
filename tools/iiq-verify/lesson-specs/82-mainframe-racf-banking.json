@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "82",
+  "stem": "82-mainframe-racf-banking",
+  "title": "Mainframe RACF for Banking",
+  "description": "Auto-generated verify checks for Lesson 82. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-RACF-Core",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-RACF-Core' exists"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "22",
+  "stem": "22-attribute-sync-hygiene",
+  "title": "Identity Attribute Sync Hygiene",
+  "description": "Auto-generated verify checks for Lesson 22. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Attributes",
+      "id": "object-exists-3",
+      "message": "TaskDefinition 'Refresh MNB Attributes' exists"
+    },
+    {
+      "type": "identity.attr",
+      "name": "helen.ross",
+      "attr": "email",
+      "contains": "@",
+      "id": "identity-attr-4",
+      "message": "Identity 'helen.ross' has attribute email"
+    }
+  ]
+}

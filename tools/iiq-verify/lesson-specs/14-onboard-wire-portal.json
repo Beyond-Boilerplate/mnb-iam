@@ -1,0 +1,41 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "14",
+  "stem": "14-onboard-wire-portal",
+  "title": "Onboard Wire Portal (Dual Control)",
+  "description": "Auto-generated verify checks for Lesson 14. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-WirePortal",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-WirePortal' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-WirePortal",
+      "id": "object-exists-3",
+      "message": "TaskDefinition 'Aggregate MNB-WirePortal' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "identity-exists-4",
+      "message": "Identity 'priya.wire' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "marcus.approve",
+      "id": "identity-exists-5",
+      "message": "Identity 'marcus.approve' exists"
+    }
+  ]
+}

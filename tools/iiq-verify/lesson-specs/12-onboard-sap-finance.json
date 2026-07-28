@@ -1,0 +1,35 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "12",
+  "stem": "12-onboard-sap-finance",
+  "title": "Onboard SAP Finance",
+  "description": "Auto-generated verify checks for Lesson 12. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-SAP-Finance",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-SAP-Finance' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-SAP-Finance",
+      "id": "object-exists-3",
+      "message": "TaskDefinition 'Aggregate MNB-SAP-Finance' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "jordan.reed",
+      "id": "identity-exists-4",
+      "message": "Identity 'jordan.reed' exists"
+    }
+  ]
+}

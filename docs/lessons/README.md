@@ -46,14 +46,17 @@ docker compose -f docker-compose.connectors.yml up -d
 ```
 
 7. Keep a CHANGELOG of `MNB-*` objects you **create**, optional `config/` exports, and evidence screenshots.
-8. After each lesson, run the verifier and paste the JSON into the learn site panel:
+8. After each lesson, run **Verify now** in the Academy (or the CLI). Progress updates only from a live IIQ check — JSON paste is disabled.
 
 ```bash
+./tools/lab/up.sh   # or ./tools/lab/docker/up.sh
+# Open lesson → Lesson verify → Verify now
+
+# CLI equivalent (writes evidence JSON only):
 ./tools/iiq-verify/verify-lesson.sh 04
-# → ~/iiq-lab-evidence/verify/lesson-04.json  (PASS/FAIL + gaps)
 ```
 
-See [LESSON_VERIFY.md](../LESSON_VERIFY.md). Specs for lessons **01–10** ship today; more lessons follow the same pattern.
+See [LESSON_VERIFY.md](../LESSON_VERIFY.md). Specs cover lessons **01–110**.
 
 ---
 

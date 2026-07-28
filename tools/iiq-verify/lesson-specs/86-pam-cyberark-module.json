@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "86",
+  "stem": "86-pam-cyberark-module",
+  "title": "PAM / CyberArk Module",
+  "description": "Auto-generated verify checks for Lesson 86. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-PAM-CyberArk",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-PAM-CyberArk' exists"
+    }
+  ]
+}

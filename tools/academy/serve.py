@@ -71,6 +71,20 @@ class AcademyHandler(SimpleHTTPRequestHandler):
         env["IIQ_PASSWORD"] = IIQ_PASSWORD
         env["IIQ_HOME"] = IIQ_HOME
         env["IIQ_VERIFY_MODE"] = IIQ_VERIFY_MODE
+
+        specs = list(SPECS.glob(f"{lesson}-*.json"))
+        if lesson.isdigit():
+            n = int(lesson)
+            specs = list(SPECS.glob(f"{n:02d}-*.json")) + list(SPECS.glob(f"{n}-*.json")) + specs
+        if not specs:
+            return self._json(404, {
+                "schema": "mnb-lesson-verify-report/v1",
+                "verdict": "FAIL",
+                "lesson": lesson,
+                "error": f"No lesson spec for '{lesson}' under {SPECS}",
+                "gaps": [{"id": "spec-missing", "message": "Lesson spec not found", "detail": lesson, "hint": ""}],
+            })
+
         try:
             proc = subprocess.run(
                 [sys.executable, str(VERIFY_PY), "--lesson", lesson, "--mode", IIQ_VERIFY_MODE],
@@ -83,15 +97,23 @@ class AcademyHandler(SimpleHTTPRequestHandler):
             report = self._load_report(lesson)
             if report is None:
                 report = {
+                    "schema": "mnb-lesson-verify-report/v1",
                     "verdict": "PASS" if proc.returncode == 0 else "FAIL",
+                    "lesson": lesson,
                     "rawStdout": proc.stdout,
                     "rawStderr": proc.stderr,
+                    "gaps": [] if proc.returncode == 0 else [{
+                        "id": "verify-cli",
+                        "message": "Verifier failed without writing a report",
+                        "detail": (proc.stderr or proc.stdout or "")[-800],
+                        "hint": "Check IIQ is up and IIQ_HOME / IIQ_VERIFY_MODE",
+                    }],
                 }
             return self._json(200, report)
         except subprocess.TimeoutExpired:
-            return self._json(504, {"verdict": "FAIL", "error": "verify timed out"})
+            return self._json(504, {"schema": "mnb-lesson-verify-report/v1", "verdict": "FAIL", "error": "verify timed out"})
         except Exception as e:
-            return self._json(500, {"verdict": "FAIL", "error": str(e)})
+            return self._json(500, {"schema": "mnb-lesson-verify-report/v1", "verdict": "FAIL", "error": str(e)})
 
     def _load_report(self, lesson: str):
         specs = list(SPECS.glob(f"{lesson}-*.json"))

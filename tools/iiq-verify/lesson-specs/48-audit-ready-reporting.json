@@ -1,0 +1,28 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "48",
+  "stem": "48-audit-ready-reporting",
+  "title": "Audit-Ready Reporting & Dashboards",
+  "description": "Auto-generated verify checks for Lesson 48. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "identity.countMin",
+      "min": 50,
+      "id": "identity-countMin-3",
+      "message": "At least 50 identities"
+    }
+  ]
+}

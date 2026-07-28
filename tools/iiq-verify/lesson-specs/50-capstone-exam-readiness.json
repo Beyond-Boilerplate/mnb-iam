@@ -1,0 +1,56 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "50",
+  "stem": "50-capstone-exam-readiness",
+  "title": "Capstone: Exam Readiness & Go-Live Checklist",
+  "description": "Auto-generated verify checks for Lesson 50. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "object-exists-3",
+      "message": "Application 'MNB-IT-Access' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-WirePortal",
+      "id": "object-exists-4",
+      "message": "Application 'MNB-WirePortal' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Policy",
+      "name": "MNB-SOD-Wire-DualControl",
+      "id": "object-exists-5",
+      "message": "Policy 'MNB-SOD-Wire-DualControl' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "object-exists-6",
+      "message": "Bundle 'MNB-Birthright-Employee' exists"
+    },
+    {
+      "type": "identity.countMin",
+      "min": 50,
+      "id": "identity-countMin-7",
+      "message": "At least 50 identities"
+    }
+  ]
+}

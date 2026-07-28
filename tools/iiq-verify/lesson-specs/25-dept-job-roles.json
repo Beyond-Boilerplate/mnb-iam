@@ -1,0 +1,32 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "25",
+  "stem": "25-dept-job-roles",
+  "title": "Department & Job-Based Roles",
+  "description": "Auto-generated verify checks for Lesson 25. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "object-exists-2",
+      "message": "Bundle 'MNB-Birthright-Employee' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Finance",
+      "alternateClasses": [
+        "Population"
+      ],
+      "id": "object-exists-3",
+      "message": "GroupDefinition 'MNB-Finance' exists"
+    }
+  ]
+}

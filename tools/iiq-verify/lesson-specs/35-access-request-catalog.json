@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "35",
+  "stem": "35-access-request-catalog",
+  "title": "Access Request Catalog",
+  "description": "Auto-generated verify checks for Lesson 35. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-IT-Access' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "object-exists-3",
+      "message": "Bundle 'MNB-Birthright-Employee' exists"
+    }
+  ]
+}

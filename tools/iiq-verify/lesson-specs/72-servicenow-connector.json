@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "72",
+  "stem": "72-servicenow-connector",
+  "title": "ServiceNow Connector",
+  "description": "Auto-generated verify checks for Lesson 72. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-ServiceNow",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-ServiceNow' exists"
+    }
+  ]
+}

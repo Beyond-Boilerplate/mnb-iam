@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "59",
+  "stem": "59-azure-entra-id-connector",
+  "title": "Azure / Entra ID Connector",
+  "description": "Auto-generated verify checks for Lesson 59. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-EntraID",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-EntraID' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-EntraID",
+      "id": "object-exists-3",
+      "message": "TaskDefinition 'Aggregate MNB-EntraID' exists"
+    }
+  ]
+}

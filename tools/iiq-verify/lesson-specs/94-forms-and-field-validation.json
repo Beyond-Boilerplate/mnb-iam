@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "94",
+  "stem": "94-forms-and-field-validation",
+  "title": "Forms and Field Validation",
+  "description": "Auto-generated verify checks for Lesson 94. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Form",
+      "name": "MNB-Form-AccessRequest-Extras",
+      "id": "object-exists-2",
+      "message": "Form 'MNB-Form-AccessRequest-Extras' exists"
+    }
+  ]
+}

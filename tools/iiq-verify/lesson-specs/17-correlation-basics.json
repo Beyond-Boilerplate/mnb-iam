@@ -1,0 +1,28 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "17",
+  "stem": "17-correlation-basics",
+  "title": "Account Correlation Basics",
+  "description": "Auto-generated verify checks for Lesson 17. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-IT-Access' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "identity-exists-3",
+      "message": "Identity 'priya.wire' exists"
+    }
+  ]
+}

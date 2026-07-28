@@ -6,13 +6,19 @@
 ./tools/iiq-verify/verify-lesson.sh 04
 ```
 
-- Specs: [`lesson-specs/`](lesson-specs/) (01–10 today)
-- Report: `~/iiq-lab-evidence/verify/lesson-NN.json`
+- Specs: [`lesson-specs/`](lesson-specs/) — **all 110 lessons**
+- Report: `~/iiq-lab-evidence/verify/lesson-NN.json` (evidence only)
 - Docs: [`docs/LESSON_VERIFY.md`](../../docs/LESSON_VERIFY.md)
 - Prefer **SCIM/REST** when enabled; **iiq console** fallback for Applications/Tasks
 - Modes: `local` (default), `docker`, `k8s`
 
-Paste the JSON into the learn site **Lesson verify** panel to track progress (browser localStorage only — no submission upload).
+Track progress in the Academy UI with **Verify now** only (live IIQ). Pasting JSON cannot mark a lesson PASS.
+
+```bash
+./tools/lab/up.sh            # Tomcat + Academy
+# or
+./tools/lab/docker/up.sh     # Docker IIQ + Academy
+```
 
 ## CD smoke
 
@@ -25,3 +31,9 @@ Asserts **`MNB-Rule-Hello-World` only**. Academy apps are learner-built.
 ## Optional E2E / wipe
 
 See `e2e-hr-slice.sh` (after Lessons 04–06 objects exist) and `wipe-mnb-leftovers.sh` for clean UI-first labs.
+
+## Regenerating specs
+
+```bash
+python3 tools/iiq-verify/generate_lesson_specs.py --overwrite
+```

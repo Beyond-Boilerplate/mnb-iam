@@ -1,0 +1,28 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "42",
+  "stem": "42-risk-scores",
+  "title": "Risk Scores & Scoring Models",
+  "description": "Auto-generated verify checks for Lesson 42. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-AWS-Cloud",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-AWS-Cloud' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "jordan.reed",
+      "id": "identity-exists-3",
+      "message": "Identity 'jordan.reed' exists"
+    }
+  ]
+}

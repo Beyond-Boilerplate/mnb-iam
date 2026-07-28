@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "76",
+  "stem": "76-aws-iam-connector",
+  "title": "AWS IAM Connector",
+  "description": "Auto-generated verify checks for Lesson 76. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-AWS-IAM",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-AWS-IAM' exists"
+    }
+  ]
+}

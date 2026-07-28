@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "90",
+  "stem": "90-beanshell-vs-java-rules",
+  "title": "BeanShell vs Java Rules",
+  "description": "Auto-generated verify checks for Lesson 90. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Rule",
+      "name": "MNB-Rule-Hello-World",
+      "id": "object-exists-2",
+      "message": "Rule 'MNB-Rule-Hello-World' exists"
+    }
+  ]
+}

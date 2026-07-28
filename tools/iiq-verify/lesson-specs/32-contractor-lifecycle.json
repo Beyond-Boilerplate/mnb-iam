@@ -1,0 +1,31 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "32",
+  "stem": "32-contractor-lifecycle",
+  "title": "Contractor & Contingent Worker Lifecycle",
+  "description": "Auto-generated verify checks for Lesson 32. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Contractors",
+      "alternateClasses": [
+        "Population"
+      ],
+      "id": "object-exists-2",
+      "message": "GroupDefinition 'MNB-Contractors' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "raj.external",
+      "id": "identity-exists-3",
+      "message": "Identity 'raj.external' exists"
+    }
+  ]
+}

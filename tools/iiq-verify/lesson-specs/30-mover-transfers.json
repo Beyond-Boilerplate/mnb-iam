@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "30",
+  "stem": "30-mover-transfers",
+  "title": "Mover / Transfer Events",
+  "description": "Auto-generated verify checks for Lesson 30. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Attributes",
+      "id": "object-exists-3",
+      "message": "TaskDefinition 'Refresh MNB Attributes' exists"
+    }
+  ]
+}

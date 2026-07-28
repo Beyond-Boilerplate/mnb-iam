@@ -1,0 +1,33 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "20",
+  "stem": "20-orphan-dormant-hunting",
+  "title": "Orphan & Dormant Access Hunting",
+  "description": "Auto-generated verify checks for Lesson 20. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Terminated-With-Access",
+      "alternateClasses": [
+        "Population",
+        "GroupFactory"
+      ],
+      "id": "object-exists-2",
+      "message": "GroupDefinition 'MNB-Terminated-With-Access' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-3",
+      "message": "Application 'MNB-HR' exists"
+    }
+  ]
+}

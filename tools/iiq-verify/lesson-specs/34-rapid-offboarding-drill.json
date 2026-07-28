@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "34",
+  "stem": "34-rapid-offboarding-drill",
+  "title": "Rapid Offboarding Incident Drill",
+  "description": "Auto-generated verify checks for Lesson 34. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Role-BreakGlass",
+      "id": "object-exists-3",
+      "message": "Bundle 'MNB-Role-BreakGlass' exists"
+    }
+  ]
+}

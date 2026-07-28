@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "81",
+  "stem": "81-oracle-ebs-connector",
+  "title": "Oracle E-Business Suite Connector",
+  "description": "Auto-generated verify checks for Lesson 81. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-Oracle-EBS",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-Oracle-EBS' exists"
+    }
+  ]
+}

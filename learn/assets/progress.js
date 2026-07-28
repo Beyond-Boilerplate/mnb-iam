@@ -1,5 +1,5 @@
 /**
- * Meridian academy progress (localStorage) + live verify via local academy server.
+ * Meridian academy progress — localStorage + live Verify only (no JSON paste).
  */
 (() => {
   const KEY = "mnb-academy-progress-v1";
@@ -40,36 +40,26 @@
     }
   };
 
-  const ingestReport = (report) => {
-    if (!report || report.schema !== "mnb-lesson-verify-report/v1") {
-      if (report && report.verdict) {
-        // tolerate minimal payload from API errors
-        const stem = report.stem || stemFromPath();
-        if (!stem) throw new Error("Report missing stem");
-        const data = load();
-        data[stem] = {
-          verdict: report.verdict,
-          checkedAt: report.checkedAt || new Date().toISOString(),
-          gaps: report.gaps || [],
-          summary: report.summary,
-          target: report.target,
-          error: report.error,
-        };
-        save(data);
-        paintToc();
-        return data[stem];
-      }
-      throw new Error("Not a Meridian verify report (expected schema mnb-lesson-verify-report/v1)");
+  /** Persist only reports produced by the live verify API. */
+  const applyLiveReport = (report, expectedStem) => {
+    if (!report || typeof report !== "object") {
+      throw new Error("Empty verify response");
     }
-    const stem = report.stem;
+    const stem = report.stem || expectedStem;
     if (!stem) throw new Error("Report missing stem");
+    if (expectedStem && report.stem && report.stem !== expectedStem) {
+      throw new Error(`Report stem mismatch (got ${report.stem}, expected ${expectedStem})`);
+    }
+    const verdict = report.verdict === "PASS" ? "PASS" : "FAIL";
     const data = load();
     data[stem] = {
-      verdict: report.verdict,
-      checkedAt: report.checkedAt,
+      verdict,
+      source: "live-verify",
+      checkedAt: report.checkedAt || new Date().toISOString(),
       gaps: report.gaps || [],
       summary: report.summary,
       target: report.target,
+      error: report.error,
     };
     save(data);
     paintToc();
@@ -82,21 +72,23 @@
     if (btn) btn.disabled = true;
     try {
       const res = await fetch(`/api/verify/${encodeURIComponent(num)}`, { method: "POST" });
-      const report = await res.json();
-      if (!report.stem) report.stem = stem;
-      if (!report.schema && report.verdict) {
-        // attach schema if verifier returned full report already
+      let report;
+      try {
+        report = await res.json();
+      } catch {
+        throw new Error(`Verify API returned non-JSON (HTTP ${res.status})`);
       }
-      const saved = ingestReport(
-        report.schema === "mnb-lesson-verify-report/v1"
-          ? report
-          : { ...report, schema: "mnb-lesson-verify-report/v1", stem, lesson: num }
-      );
-      msgEl.textContent = `${saved.verdict} — ${saved.gaps?.length || 0} gap(s)`;
+      if (!report.stem) report.stem = stem;
+      const saved = applyLiveReport(report, stem);
+      const gapN = saved.gaps?.length || 0;
+      msgEl.textContent =
+        saved.verdict === "PASS"
+          ? `PASS — all checks green`
+          : `FAIL — ${gapN} gap(s). Fix in IIQ, then Verify now again.`;
       renderPanel();
     } catch (e) {
       msgEl.textContent =
-        "Verify API unavailable. Start the academy server: python3 tools/academy/serve.py — " +
+        "Verify API unavailable. Use ./tools/lab/up.sh or ./tools/lab/docker/up.sh — " +
         (e.message || e);
     } finally {
       if (btn) btn.disabled = false;
@@ -110,8 +102,8 @@
     const data = load();
     const entry = stem ? data[stem] : null;
     const status = entry
-      ? `<p class="verify-status verify-${(entry.verdict || "").toLowerCase()}">Last result: <strong>${entry.verdict}</strong> · ${entry.checkedAt || ""}</p>`
-      : `<p class="verify-status">No verify result yet for this lesson.</p>`;
+      ? `<p class="verify-status verify-${(entry.verdict || "").toLowerCase()}">Last live verify: <strong>${entry.verdict}</strong> · ${entry.checkedAt || ""}</p>`
+      : `<p class="verify-status">Not verified yet — run <strong>Verify now</strong> against your IIQ lab.</p>`;
 
     let gaps = "";
     if (entry?.gaps?.length) {
@@ -130,20 +122,13 @@
 
     host.innerHTML = `
       <h2>Lesson verify</h2>
-      <p class="muted">Click <strong>Verify now</strong> to check your local (or configured) IIQ lab. Progress stays in this browser.</p>
+      <p class="muted">Progress updates only from a <strong>live</strong> check of your IIQ lab. Pasting or editing JSON cannot mark a lesson PASS.</p>
       ${status}
       ${gaps}
       <div class="verify-actions">
         <button type="button" class="btn primary" id="verifyRun">Verify now</button>
         <button type="button" class="btn ghost" id="verifyClear">Clear this lesson</button>
       </div>
-      <details class="verify-advanced">
-        <summary>Advanced: paste CLI JSON</summary>
-        <label class="verify-label">Paste verify JSON
-          <textarea id="verifyJson" rows="6" placeholder='{ "schema": "mnb-lesson-verify-report/v1", ... }'></textarea>
-        </label>
-        <button type="button" class="btn ghost" id="verifyIngest">Save pasted result</button>
-      </details>
       <p id="verifyMsg" class="muted" role="status"></p>
     `;
 
@@ -151,21 +136,11 @@
     host.querySelector("#verifyRun")?.addEventListener("click", () => {
       runVerify(stem, msg, host.querySelector("#verifyRun"));
     });
-    host.querySelector("#verifyIngest")?.addEventListener("click", () => {
-      try {
-        const report = JSON.parse(host.querySelector("#verifyJson").value);
-        const saved = ingestReport(report);
-        msg.textContent = `Saved ${saved.verdict} for ${stem || report.stem}`;
-        renderPanel();
-      } catch (e) {
-        msg.textContent = String(e.message || e);
-      }
-    });
     host.querySelector("#verifyClear")?.addEventListener("click", () => {
       if (!stem) return;
-      const data = load();
-      delete data[stem];
-      save(data);
+      const next = load();
+      delete next[stem];
+      save(next);
       paintToc();
       renderPanel();
     });
@@ -177,7 +152,7 @@
     const el = document.createElement("span");
     el.id = "progressBar";
     el.className = "progress-chip";
-    el.title = "Lessons with a PASS verify report in this browser";
+    el.title = "Lessons with a live PASS verify in this browser";
     top.insertBefore(el, top.querySelector(".lab-link"));
   };
 
@@ -209,5 +184,5 @@
   paintToc();
   renderPanel();
 
-  window.MnbAcademyProgress = { load, save, ingestReport, paintToc, runVerify };
+  window.MnbAcademyProgress = { load, paintToc, runVerify };
 })();

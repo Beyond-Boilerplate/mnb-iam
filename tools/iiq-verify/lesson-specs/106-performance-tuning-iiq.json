@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "106",
+  "stem": "106-performance-tuning-iiq",
+  "title": "Performance Tuning IIQ",
+  "description": "Auto-generated verify checks for Lesson 106. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "object.exists",
+      "objectClass": "Identity",
+      "name": "MNB-WG-IAM-Ops",
+      "id": "object-exists-1",
+      "message": "Identity 'MNB-WG-IAM-Ops' exists"
+    },
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-2",
+      "message": "IIQ login page reachable"
+    }
+  ]
+}

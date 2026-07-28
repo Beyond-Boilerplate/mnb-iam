@@ -1,0 +1,28 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "108",
+  "stem": "108-multi-env-promotion",
+  "title": "Multi-Environment Promotion",
+  "description": "Auto-generated verify checks for Lesson 108. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Rule",
+      "name": "MNB-Rule-Hello-World",
+      "id": "object-exists-2",
+      "message": "Rule 'MNB-Rule-Hello-World' exists"
+    },
+    {
+      "type": "host.file.exists",
+      "path": "config/PACKS.md",
+      "id": "host-file-exists-3",
+      "message": "Repo/lab file present: config/PACKS.md"
+    }
+  ]
+}

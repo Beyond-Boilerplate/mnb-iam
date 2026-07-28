@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "60",
+  "stem": "60-ldif-connector",
+  "title": "LDIF Connector",
+  "description": "Auto-generated verify checks for Lesson 60. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-LDIF-DirectoryDump",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-LDIF-DirectoryDump' exists"
+    }
+  ]
+}

@@ -353,7 +353,13 @@ def run_check(client: IIQClient, check: dict[str, Any]) -> dict[str, Any]:
                 ok, detail = client.object_exists(clazz, check["name"])
                 if ok:
                     break
-            result["status"] = "PASS" if ok else "FAIL"
+            if ok:
+                result["status"] = "PASS"
+            elif check.get("severity") or check.get("softFail"):
+                result["status"] = "WARN"
+                result["hint"] = result["hint"] or "Soft check — document equivalent object name if yours differs."
+            else:
+                result["status"] = "FAIL"
             result["detail"] = detail
         elif ctype == "object.absent":
             ok, detail = client.object_exists(check["objectClass"], check["name"])
@@ -482,7 +488,7 @@ def main() -> int:
         for g in report["gaps"]:
             print(f"  - {g['id']}: {g['message']} — {g['detail']}")
     print(f"Report: {out_path}")
-    print("Paste this JSON into the learn site Verify panel to track progress.")
+    print("Track progress via Academy → Verify now (live IIQ only; JSON paste is disabled).")
     return 0 if verdict == "PASS" else 1
 
 

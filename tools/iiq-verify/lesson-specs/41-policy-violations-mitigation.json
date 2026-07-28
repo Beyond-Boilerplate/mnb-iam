@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "41",
+  "stem": "41-policy-violations-mitigation",
+  "title": "Policy Violations & Mitigation",
+  "description": "Auto-generated verify checks for Lesson 41. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Policy",
+      "name": "MNB-SOD-Wire-DualControl",
+      "id": "object-exists-2",
+      "message": "Policy 'MNB-SOD-Wire-DualControl' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Policy",
+      "name": "MNB-SOD-Finance-Cloud",
+      "id": "object-exists-3",
+      "message": "Policy 'MNB-SOD-Finance-Cloud' exists"
+    }
+  ]
+}

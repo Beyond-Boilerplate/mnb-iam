@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "95",
+  "stem": "95-quicklinks-custom-ui",
+  "title": "QuickLinks and Custom UI",
+  "description": "Auto-generated verify checks for Lesson 95. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "QuickLink",
+      "name": "MNB-QL-Request-Payments",
+      "id": "object-exists-2",
+      "message": "QuickLink 'MNB-QL-Request-Payments' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "QuickLink",
+      "name": "MNB-QL-BreakGlass-Info",
+      "id": "object-exists-3",
+      "message": "QuickLink 'MNB-QL-BreakGlass-Info' exists"
+    }
+  ]
+}

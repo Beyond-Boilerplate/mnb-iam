@@ -1,0 +1,32 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "45",
+  "stem": "45-targeted-campaigns",
+  "title": "Targeted & Focused Campaigns",
+  "description": "Auto-generated verify checks for Lesson 45. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-AWS-Cloud",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-AWS-Cloud' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Finance",
+      "alternateClasses": [
+        "Population"
+      ],
+      "id": "object-exists-3",
+      "message": "GroupDefinition 'MNB-Finance' exists"
+    }
+  ]
+}

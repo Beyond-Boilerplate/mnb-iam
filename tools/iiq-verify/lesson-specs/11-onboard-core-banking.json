@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "11",
+  "stem": "11-onboard-core-banking",
+  "title": "Onboard Core Banking Extract",
+  "description": "Auto-generated verify checks for Lesson 11. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-CoreBanking",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-CoreBanking' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-CoreBanking",
+      "id": "object-exists-3",
+      "message": "TaskDefinition 'Aggregate MNB-CoreBanking' exists"
+    }
+  ]
+}

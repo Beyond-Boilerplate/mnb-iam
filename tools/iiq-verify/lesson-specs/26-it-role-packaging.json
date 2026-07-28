@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "26",
+  "stem": "26-it-role-packaging",
+  "title": "IT Role Packaging & Least Privilege",
+  "description": "Auto-generated verify checks for Lesson 26. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Role-IT-Directory-User",
+      "id": "object-exists-2",
+      "message": "Bundle 'MNB-Role-IT-Directory-User' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "object-exists-3",
+      "message": "Application 'MNB-IT-Access' exists"
+    }
+  ]
+}

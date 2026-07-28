@@ -1,0 +1,28 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "21",
+  "stem": "21-manager-hierarchy",
+  "title": "Manager Hierarchy & Reassignment",
+  "description": "Auto-generated verify checks for Lesson 21. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Managers",
+      "id": "object-exists-2",
+      "message": "TaskDefinition 'Refresh MNB Managers' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "identity-exists-3",
+      "message": "Identity 'priya.wire' exists"
+    }
+  ]
+}

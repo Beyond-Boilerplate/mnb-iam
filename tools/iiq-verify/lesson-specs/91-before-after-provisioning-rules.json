@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "91",
+  "stem": "91-before-after-provisioning-rules",
+  "title": "Before / After Provisioning Rules",
+  "description": "Auto-generated verify checks for Lesson 91. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-ActiveDirectory",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-ActiveDirectory' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Rule",
+      "name": "MNB-Rule-Hello-World",
+      "id": "object-exists-3",
+      "message": "Rule 'MNB-Rule-Hello-World' exists"
+    }
+  ]
+}

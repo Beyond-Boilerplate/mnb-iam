@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "78",
+  "stem": "78-sap-hr-hcm-connector",
+  "title": "SAP HR/HCM Connector",
+  "description": "Auto-generated verify checks for Lesson 78. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-SAP-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-SAP-HR' exists"
+    }
+  ]
+}

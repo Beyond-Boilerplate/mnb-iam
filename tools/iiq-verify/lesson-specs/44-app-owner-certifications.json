@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "44",
+  "stem": "44-app-owner-certifications",
+  "title": "Application Owner Certifications",
+  "description": "Auto-generated verify checks for Lesson 44. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-WirePortal",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-WirePortal' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "object-exists-3",
+      "message": "Application 'MNB-IT-Access' exists"
+    }
+  ]
+}

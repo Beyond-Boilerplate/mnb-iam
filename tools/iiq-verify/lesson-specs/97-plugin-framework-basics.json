@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "97",
+  "stem": "97-plugin-framework-basics",
+  "title": "Plugin Framework Basics",
+  "description": "Auto-generated verify checks for Lesson 97. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "object.exists",
+      "objectClass": "Rule",
+      "name": "MNB-Rule-Hello-World",
+      "id": "object-exists-1",
+      "message": "Rule 'MNB-Rule-Hello-World' exists"
+    },
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-2",
+      "message": "IIQ login page reachable"
+    }
+  ]
+}

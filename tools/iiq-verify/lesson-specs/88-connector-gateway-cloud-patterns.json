@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "88",
+  "stem": "88-connector-gateway-cloud-patterns",
+  "title": "Connector Gateway / Cloud Patterns",
+  "description": "Auto-generated verify checks for Lesson 88. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-1",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-2",
+      "message": "IIQ login page reachable"
+    }
+  ]
+}

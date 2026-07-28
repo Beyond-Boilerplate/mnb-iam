@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "65",
+  "stem": "65-mssql-direct-connector",
+  "title": "Microsoft SQL Server Direct Connector",
+  "description": "Auto-generated verify checks for Lesson 65. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-MSSQL-Reporting",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-MSSQL-Reporting' exists"
+    }
+  ]
+}

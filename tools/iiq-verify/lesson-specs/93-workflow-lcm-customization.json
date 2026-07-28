@@ -1,0 +1,31 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "93",
+  "stem": "93-workflow-lcm-customization",
+  "title": "LCM Workflow Customization",
+  "description": "Auto-generated verify checks for Lesson 93. Live IIQ only — no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-IT-Access' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Workflow",
+      "name": "MNB-WF-LCM-AccessRequest",
+      "id": "object-exists-3",
+      "message": "Workflow 'MNB-WF-LCM-AccessRequest' exists",
+      "softFail": true,
+      "hint": "Custom LCM workflow name may differ; soft if you customized an OOTB copy under another MNB-WF-* name."
+    }
+  ]
+}

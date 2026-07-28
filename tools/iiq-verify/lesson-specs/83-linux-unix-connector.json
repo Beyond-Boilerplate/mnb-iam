@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "83",
+  "stem": "83-linux-unix-connector",
+  "title": "Linux / Unix Connector",
+  "description": "Auto-generated verify checks for Lesson 83. Live IIQ only \u2014 no JSON paste.",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-Linux-Hosts",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-Linux-Hosts' exists"
+    }
+  ]
+}
