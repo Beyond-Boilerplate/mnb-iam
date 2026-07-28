@@ -59,7 +59,7 @@ Never “empty the uncorrelated list” by turning create-identities on for `MNB
 | Column | Role |
 | --- | --- |
 | `userName` | Account native id candidate |
-| `employeeId` | Correlation help toward HR |
+| `employeeId` | Correlation help toward HR — **same values as HR `userId`** (`MNB#####`) |
 | `email` | Secondary correlation / quality |
 | `itAccess` | **Entitlement** code (WIRE_INIT, SAP_FI, …) |
 | `accountStatus` | active/disabled on IT side |
