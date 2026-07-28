@@ -11,12 +11,14 @@ After each lesson, learners prove the lab matches expected outcomes. The CLI tal
 
 Open a lesson → **Lesson verify** → **Verify now**. Gaps appear immediately; TOC turns green/red.
 
-## Streamlined (Academy only; host IIQ already up)
+## Streamlined (Tomcat host — IIQ + Academy)
 
 ```bash
-./tools/lab/start-academy.sh
-# → http://localhost:4173/
+./tools/lab/up.sh
+# → Academy http://localhost:4173/  |  IIQ http://localhost:8080/identityiq
 ```
+
+Academy only (IIQ already up): `./tools/lab/up.sh --academy-only`
 
 ## Quick start (CLI)
 
@@ -64,7 +66,7 @@ Check types: `http.ok`, `host.file.exists`, `object.exists`, `object.absent`, `i
 
 | Runtime | Setup | Verify mode |
 | --- | --- | --- |
-| Tomcat + MySQL | [`docs/LOCAL_SETUP.md`](LOCAL_SETUP.md) / `./tools/lab/setup-local.sh` | `local` (auto) |
+| Tomcat + MySQL | [`docs/LOCAL_SETUP.md`](LOCAL_SETUP.md) / `./tools/lab/up.sh` | `local` (auto) |
 | Docker + Postgres | [`tools/lab/docker/README.md`](../tools/lab/docker/README.md) | `docker` |
 | Homelab k8s | [`docs/HOMELAB-CD.md`](HOMELAB-CD.md) | `k8s` |
 

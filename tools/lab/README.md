@@ -8,8 +8,8 @@ Automation for the local IdentityIQ 8.5 lab.
 
 | OS | Entry point | Notes |
 | --- | --- | --- |
-| **macOS** | `./tools/lab/setup-local.sh` | Installs Homebrew if missing, then JDK 11 + mysql@8.4 (or portable fallbacks) |
-| **Linux / WSL2** | `./tools/lab/setup-local.sh` | Uses apt/dnf when available; otherwise portable Temurin + MySQL tarball |
+| **macOS** | `./tools/lab/up.sh` | Installs (via setup-local) then Academy; JDK 11 + mysql@8.4 |
+| **Linux / WSL2** | `./tools/lab/up.sh` | Same; apt/dnf or portable Temurin + MySQL tarball |
 | **Windows** | `.\tools\lab\setup-local.ps1` or `setup-local.cmd` | Native PowerShell; winget Temurin when possible + portable MySQL/Tomcat |
 | Git Bash on Windows | ❌ redirected | Use PowerShell or WSL2 (script exits with instructions) |
 
@@ -62,13 +62,16 @@ Your existing system MySQL on **:3306** (if any) is left alone.
 ### macOS / Linux / WSL
 
 ```bash
-./tools/lab/setup-local.sh --check     # preflight only
-./tools/lab/setup-local.sh             # full setup
+./tools/lab/up.sh --check              # preflight only
+./tools/lab/up.sh                      # IIQ (setup or start) + Academy
+# Academy → http://localhost:4173/  |  IIQ → http://localhost:8080/identityiq
+
+./tools/lab/up.sh --force-db           # rebuild schemas + re-import, then Academy
+./tools/lab/setup-local.sh             # install-only (no Academy)
 source ~/.zshrc   # or ~/.bashrc
 iiq-help
 iiq-status
 
-./tools/lab/setup-local.sh --force-db  # rebuild schemas + re-import
 ./tools/lab/teardown-local.sh --yes
 ./tools/lab/teardown-local.sh --yes --purge-mysql
 ```
@@ -90,7 +93,9 @@ iiq-help
 
 | File | Purpose |
 | --- | --- |
-| `setup-local.sh` / `teardown-local.sh` | Unix / WSL |
+| `up.sh` | **One command:** ensure IIQ + start Academy |
+| `setup-local.sh` / `teardown-local.sh` | Install-only / teardown (Unix / WSL) |
+| `start-academy.sh` | Wrapper → `up.sh --academy-only` |
 | `setup-local.ps1` / `teardown-local.ps1` | Windows native |
 | `setup-local.cmd` / `teardown-local.cmd` | Windows launchers |
 | `iiq-aliases.sh` / `iiq-aliases.ps1` | Day-2 helpers |

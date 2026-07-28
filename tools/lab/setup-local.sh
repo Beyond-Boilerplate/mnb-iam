@@ -558,6 +558,11 @@ cat <<EOF
    iiq-logs    iiq-console   iiq-status
    iiq-open    iiq-env
 
+ Academy + Verify now (IIQ already running):
+   ./tools/lab/up.sh --academy-only
+ Or one command next time (start IIQ if needed + Academy):
+   ./tools/lab/up.sh
+
  Teardown:
    ./tools/lab/teardown-local.sh
 ============================================

@@ -5,7 +5,7 @@ This guide walks you through standing up a **local IdentityIQ 8.5** lab. **Two s
 | Path | Best for | Start here |
 | --- | --- | --- |
 | **A. Docker** (Postgres + GHCR/local IIQ image) | Container-first; closer to homelab | [`tools/lab/docker/README.md`](../tools/lab/docker/README.md) |
-| **B. Tomcat + MySQL** (host install) | Native macOS/Linux/Windows lab | Sections below / `./tools/lab/setup-local.sh` |
+| **B. Tomcat + MySQL** (host install) | Native macOS/Linux/Windows lab | Sections below / `./tools/lab/up.sh` |
 
 Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.md](LESSON_VERIFY.md)). Homelab CD remains the shared site option.
 
@@ -19,22 +19,19 @@ Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.m
 
 See [`tools/lab/docker/README.md`](../tools/lab/docker/README.md).
 
-### Learn site only (host Tomcat IIQ already running)
+### Path B — Tomcat + MySQL (one command)
 
 ```bash
-./tools/lab/start-academy.sh
-# → http://localhost:4173/
+./tools/lab/up.sh
+# Academy: http://localhost:4173/   (lessons + Verify now)
+# IIQ:     http://localhost:8080/identityiq  (spadmin / admin)
 ```
 
-### Path B — Tomcat + MySQL (host install)
+First run installs JDK/MySQL/Tomcat + init; later runs start MySQL/Tomcat if needed, then Academy.
+Preflight: `./tools/lab/up.sh --check`. Install-only (no Academy): `./tools/lab/setup-local.sh`.
 
 ```bash
-# macOS / Linux / WSL — runtime bootstrap
-./tools/lab/setup-local.sh --check
-./tools/lab/setup-local.sh
-source ~/.zshrc   # or ~/.bashrc
-
-# Day-2 customization builds (SSD/SSB)
+# Day-2 customization builds (SSD/SSB) — separate from lab up
 export SPTARGET=sandbox
 ./build.sh clean war
 ```

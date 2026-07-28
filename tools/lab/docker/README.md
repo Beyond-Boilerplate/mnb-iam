@@ -29,8 +29,7 @@ Lab CSV files are mounted at `/opt/iiq-lab-data` inside IIQ (from repo `lab-data
 ## Alternative: Tomcat on the host
 
 ```bash
-./tools/lab/setup-local.sh
-./tools/lab/start-academy.sh    # Academy only; uses host IIQ
+./tools/lab/up.sh               # Tomcat IIQ + Academy
 ```
 
 See [`docs/LOCAL_SETUP.md`](../../../docs/LOCAL_SETUP.md) and [`docs/LESSON_VERIFY.md`](../../../docs/LESSON_VERIFY.md).

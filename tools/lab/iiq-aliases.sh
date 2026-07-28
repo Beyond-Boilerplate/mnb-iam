@@ -226,7 +226,8 @@ IdentityIQ lab aliases
   iiq-help         This help
 
 Setup / teardown (from repo):
-  ./tools/lab/setup-local.sh
+  ./tools/lab/up.sh              # IIQ + Academy
+  ./tools/lab/setup-local.sh     # install-only
   ./tools/lab/teardown-local.sh --yes
 EOF
 }

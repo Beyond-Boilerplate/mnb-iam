@@ -12,7 +12,13 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 # IIQ     → http://localhost:8080/identityiq  (spadmin / admin)
 ```
 
-Tomcat host path remains: `./tools/lab/setup-local.sh` then `./tools/lab/start-academy.sh`.
+Tomcat host path (one command):
+
+```bash
+./tools/lab/up.sh
+# Academy → http://localhost:4173/
+# IIQ     → http://localhost:8080/identityiq  (spadmin / admin)
+```
 
 ---
 
@@ -55,14 +61,14 @@ docs/                        ← lessons, LOCAL_SETUP, INFRASTRUCTURE, HOMELAB-C
 
 ## 1) First-time laptop (runtime)
 
-Bootstrap Tomcat + lab MySQL + import stock IIQ (once):
+Bootstrap Tomcat + lab MySQL + Academy (once, or day-2 restart):
 
 ```bash
-./tools/lab/setup-local.sh
-source ~/.zshrc
-iiq-status
-iiq-open
+./tools/lab/up.sh
+# Academy → http://localhost:4173/  |  IIQ → http://localhost:8080/identityiq
 ```
+
+Install-only (no Academy): `./tools/lab/setup-local.sh` then `source ~/.zshrc`.
 
 Windows: `.\tools\lab\setup-local.ps1`
 
