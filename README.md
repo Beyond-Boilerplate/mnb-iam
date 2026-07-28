@@ -14,10 +14,12 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 | [docs/HOMELAB-CD.md](docs/HOMELAB-CD.md) | GHCR + Helm + Tailscale → `sailpoint.lmsapp.us` |
 | [config/README.md](config/README.md) | Where to add XML features |
 | [config/PACKS.md](config/PACKS.md) | What CD ships (HelloWorld) vs what learners build |
-| [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) | Manual / conceptual install notes |
+| [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) | Local IIQ: **Docker or Tomcat** dual path |
+| [docs/LESSON_VERIFY.md](docs/LESSON_VERIFY.md) | Lesson pass/fail verifier + learn-site progress |
 | [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) | Beginner architecture |
 | [docs/lessons/README.md](docs/lessons/README.md) | Progressive Meridian lessons |
-| [tools/lab/README.md](tools/lab/README.md) | Automated laptop bootstrap |
+| [tools/lab/README.md](tools/lab/README.md) | Tomcat laptop bootstrap |
+| [tools/lab/docker/README.md](tools/lab/docker/README.md) | Docker Compose local IIQ |
 
 ---
 

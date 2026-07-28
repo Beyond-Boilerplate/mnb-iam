@@ -1,0 +1,22 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "10",
+  "stem": "10-entitlement-dictionary",
+  "title": "Entitlement Dictionary",
+  "description": "IT Access app still present after dictionary work.",
+  "checks": [
+    {
+      "id": "app-it",
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "message": "MNB-IT-Access present for entitlement dictionary work"
+    },
+    {
+      "id": "identity-priya",
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "message": "priya.wire still available for entitlement inspection"
+    }
+  ]
+}

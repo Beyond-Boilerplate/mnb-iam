@@ -1,0 +1,29 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "06",
+  "stem": "06-identity-cubes-and-refresh",
+  "title": "Identity Cubes & Refresh",
+  "description": "Purpose-built refresh tasks exist.",
+  "checks": [
+    {
+      "id": "refresh-attrs",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Attributes",
+      "message": "Refresh MNB Attributes task exists"
+    },
+    {
+      "id": "refresh-managers",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Managers",
+      "message": "Refresh MNB Managers task exists"
+    },
+    {
+      "id": "priya-exists",
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "message": "priya.wire cube present for refresh drills"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "02",
+  "stem": "02-meridian-org-model",
+  "title": "Meridian Org Model",
+  "description": "Org model — IIQ reachable; lab-data present on disk (host check).",
+  "checks": [
+    {
+      "id": "ui-reachable",
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "id": "lab-data-hr",
+      "type": "host.file.exists",
+      "path": "lab-data/HRApplications.txt",
+      "message": "Repo lab-data/HRApplications.txt present"
+    },
+    {
+      "id": "lab-data-map",
+      "type": "host.file.exists",
+      "path": "lab-data/reference/hr-column-map.md",
+      "message": "HR column map reference present"
+    }
+  ]
+}

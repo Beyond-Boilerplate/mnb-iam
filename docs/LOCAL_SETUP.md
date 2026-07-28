@@ -1,8 +1,25 @@
 # Local Setup — SailPoint IdentityIQ 8.5
 
-This guide walks you through standing up a **local IdentityIQ 8.5** lab on a single machine (macOS / Linux / Windows). Follow the steps **in order**. Do not skip ahead.
+This guide walks you through standing up a **local IdentityIQ 8.5** lab. **Two supported paths** (pick one):
 
-**Prefer the automated path?** Works on a blank machine (bootstraps tools):
+| Path | Best for | Start here |
+| --- | --- | --- |
+| **A. Docker** (Postgres + GHCR/local IIQ image) | Container-first; closer to homelab | [`tools/lab/docker/README.md`](../tools/lab/docker/README.md) |
+| **B. Tomcat + MySQL** (host install) | Native macOS/Linux/Windows lab | Sections below / `./tools/lab/setup-local.sh` |
+
+Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.md](LESSON_VERIFY.md)). Homelab CD remains the shared site option.
+
+### Path A — Docker (quick)
+
+```bash
+./tools/lab/docker/up.sh
+./tools/lab/docker/bootstrap.sh
+open http://localhost:8080/identityiq   # spadmin / admin
+# File paths in apps: /opt/iiq-lab-data/...  (repo lab-data mounted)
+./tools/iiq-verify/verify-lesson.sh 01
+```
+
+### Path B — Tomcat lab (automated)
 
 ```bash
 # macOS / Linux / WSL — runtime bootstrap
@@ -25,10 +42,11 @@ export SPTARGET=sandbox
 Tear down lab runtime:
 
 ```bash
-./tools/lab/teardown-local.sh --yes
+./tools/lab/teardown-local.sh --yes          # Tomcat path
+./tools/lab/docker/down.sh -v                # Docker path (+ wipe DB volume)
 ```
 
-See [SSD.md](SSD.md) for build/CI and [../tools/lab/README.md](../tools/lab/README.md) for bootstrap. The rest of this document is the **manual** walkthrough.
+See [SSD.md](SSD.md) for build/CI, [../tools/lab/README.md](../tools/lab/README.md) for Tomcat bootstrap, and [LESSON_VERIFY.md](LESSON_VERIFY.md) for pass/fail checks. The rest of this document is the **manual Tomcat** walkthrough.
 
 Official deep docs also live in `identityiq-8.5/doc/` (especially `8.5_IdentityIQ_Installation_Guide.pdf`).
 
@@ -64,12 +82,13 @@ Sailpoint/
 │   ├── integration/            ← optional connectors / add-ons
 │   └── ConnectorGateway-*.zip  ← optional
 ├── lab-data/                   ← Meridian HR, apps, SoD, JML scenario files
-├── docs/lessons/               ← 50-lesson IdentityIQ curriculum (Markdown)
-├── learn/                      ← static site builder for iam.lmsapp.us/learn
-└── email.txt                   ← sample certification email output
+├── docs/lessons/               ← IdentityIQ curriculum (Markdown)
+├── learn/                      ← static site builder for sailpoint.lmsapp.us
+├── docker-compose.iiq.yml      ← optional Docker local IIQ
+└── tools/iiq-verify/           ← lesson pass/fail verifier
 ```
 
-If `identityiq.war` is missing, stop and obtain the IdentityIQ 8.5 distribution again.
+If `identityiq.war` is missing **and** you are not using the Docker GHCR image path, stop and obtain the IdentityIQ 8.5 distribution again.
 
 ---
 

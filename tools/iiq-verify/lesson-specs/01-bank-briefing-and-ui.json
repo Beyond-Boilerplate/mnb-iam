@@ -1,0 +1,15 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "01",
+  "stem": "01-bank-briefing-and-ui",
+  "title": "Bank Briefing & UI Orientation",
+  "description": "Orientation — IIQ reachable (no Meridian objects required).",
+  "checks": [
+    {
+      "id": "ui-reachable",
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "message": "IIQ login page reachable"
+    }
+  ]
+}

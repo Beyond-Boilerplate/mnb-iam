@@ -1,0 +1,83 @@
+# Local IdentityIQ lab (Docker) — alternative to tools/lab Tomcat+MySQL.
+# Keep both paths: this file OR ./tools/lab/setup-local.sh
+#
+# Prerequisites: Docker Desktop / Engine, and either:
+#   - pull access to ghcr.io/beyond-boilerplate/identityiq:<tag>
+#   - or: docker build -f docker/Dockerfile -t mnb-identityiq:local .
+#
+# Usage:
+#   ./tools/lab/docker/up.sh
+#   ./tools/lab/docker/bootstrap.sh   # schema already applied; imports init + HelloWorld
+#   open http://localhost:8080/identityiq   (spadmin / admin)
+#   ./tools/lab/docker/down.sh
+
+name: mnb-iiq-lab
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - mnb-iiq-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  schema-init:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      IIQ_DB_PASSWORD: identityiq
+      IIQ_PLUGIN_DB_PASSWORD: identityiqPlugin
+      IIQ_AH_DB_PASSWORD: identityiqah
+    volumes:
+      - ./docs/vendor/iiq-8.5/database/create_identityiq_tables-8.5.postgresql:/sql/create_identityiq_tables-8.5.postgresql:ro
+      - ./tools/lab/docker/schema-init.sh:/schema-init.sh:ro
+    entrypoint: ["/bin/sh", "/schema-init.sh"]
+    restart: "no"
+
+  identityiq:
+    image: ${IIQ_IMAGE:-ghcr.io/beyond-boilerplate/identityiq:0.1.0}
+    depends_on:
+      schema-init:
+        condition: service_completed_successfully
+    ports:
+      - "${IIQ_HTTP_PORT:-8080}:8080"
+    environment:
+      IIQ_DB_TYPE: postgresql
+      IIQ_DB_URL: jdbc:postgresql://postgres:5432/identityiq
+      IIQ_DB_USER: identityiq
+      IIQ_DB_PASSWORD: identityiq
+      IIQ_PLUGIN_DB_URL: jdbc:postgresql://postgres:5432/identityiqPlugin
+      IIQ_PLUGIN_DB_USER: identityiqPlugin
+      IIQ_PLUGIN_DB_PASSWORD: identityiqPlugin
+      IIQ_AH_DB_URL: jdbc:postgresql://postgres:5432/identityiqah
+      IIQ_AH_DB_USER: identityiqah
+      IIQ_AH_DB_PASSWORD: identityiqah
+    volumes:
+      - ./lab-data:/opt/iiq-lab-data:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://127.0.0.1:8080/identityiq/login.jsf || exit 1",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 90s
+
+volumes:
+  mnb-iiq-pg:

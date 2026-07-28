@@ -604,3 +604,64 @@ body.rail-open::before {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+/* Progress + lesson verify */
+.progress-chip {
+  margin-left: auto;
+  margin-right: 0.75rem;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  color: var(--ink-soft);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  position: relative;
+  overflow: hidden;
+}
+.progress-chip::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--pct, 0%);
+  background: rgba(15, 92, 90, 0.18);
+  z-index: 0;
+}
+.toc-item.is-passed .toc-num { color: #1a7a4c; }
+.toc-item.is-failed .toc-num { color: #a33b2b; }
+.verify-panel {
+  margin: 2.5rem 0 1rem;
+  padding: 1.25rem 1.35rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.verify-panel h2 { margin-top: 0; font-family: var(--display); font-size: 1.35rem; }
+.verify-cmd {
+  background: var(--rail);
+  color: #d7dde8;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+.verify-label { display: block; font-weight: 600; margin-top: 1rem; }
+.verify-label textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+}
+.verify-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.verify-status { margin: 0.75rem 0; }
+.verify-pass { color: #1a7a4c; }
+.verify-fail { color: #a33b2b; }
+.verify-gaps { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+.verify-gaps .muted, .verify-panel .muted { color: var(--ink-soft); font-size: 0.92rem; }

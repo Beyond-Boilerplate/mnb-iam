@@ -1,8 +1,10 @@
 # Scripts
 
-Automation for the local IdentityIQ 8.5 lab on a **brand-new machine** (no JDK / MySQL / Tomcat required up front).
+Automation for the local IdentityIQ 8.5 lab.
 
-## Platform support
+**Prefer Docker instead?** See [`docker/README.md`](docker/README.md) (`docker-compose.iiq.yml`). Both paths stay supported.
+
+## Platform support (Tomcat + MySQL host install)
 
 | OS | Entry point | Notes |
 | --- | --- | --- |

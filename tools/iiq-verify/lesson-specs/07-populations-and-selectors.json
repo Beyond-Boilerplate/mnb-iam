@@ -1,0 +1,32 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "07",
+  "stem": "07-populations-and-selectors",
+  "title": "Populations & Identity Selectors",
+  "description": "Core Meridian populations saved.",
+  "checks": [
+    {
+      "id": "pop-active",
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Active-Employees",
+      "alternateClasses": ["GroupDefinition", "Bundle"],
+      "softFailHint": "If your build stores populations under a different class name, confirm in Debug and update the spec.",
+      "message": "Population MNB-Active-Employees exists"
+    },
+    {
+      "id": "pop-contractors",
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Contractors",
+      "message": "Population MNB-Contractors exists"
+    },
+    {
+      "id": "pop-treasury",
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-Treasury",
+      "message": "Population MNB-Treasury exists"
+    }
+  ]
+}

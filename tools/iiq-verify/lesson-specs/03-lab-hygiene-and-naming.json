@@ -1,0 +1,30 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "03",
+  "stem": "03-lab-hygiene-and-naming",
+  "title": "Lab Hygiene, Naming & Evidence Habits",
+  "description": "CD/Docker smoke Rule present; MNB-HR not required yet.",
+  "checks": [
+    {
+      "id": "ui-reachable",
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "id": "hello-world",
+      "type": "object.exists",
+      "objectClass": "Rule",
+      "name": "MNB-Rule-Hello-World",
+      "message": "HelloWorld smoke Rule imported"
+    },
+    {
+      "id": "no-hr-yet",
+      "type": "object.absent",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "severity": true,
+      "message": "MNB-HR should not exist yet (you create it in Lesson 04)"
+    }
+  ]
+}

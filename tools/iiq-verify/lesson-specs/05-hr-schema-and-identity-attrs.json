@@ -1,0 +1,32 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "05",
+  "stem": "05-hr-schema-and-identity-attrs",
+  "title": "HR Schema & Identity Attribute Design",
+  "description": "Promoted identity attributes after maps + refresh.",
+  "checks": [
+    {
+      "id": "app-mnb-hr",
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "message": "MNB-HR still present"
+    },
+    {
+      "id": "helen-email",
+      "type": "identity.attr",
+      "name": "helen.ross",
+      "attr": "email",
+      "contains": "@",
+      "message": "helen.ross has promoted email (Identity attr, not only Link)"
+    },
+    {
+      "id": "helen-firstname",
+      "type": "identity.attr",
+      "name": "helen.ross",
+      "attr": "firstname",
+      "equalsIgnoreCase": "Helen",
+      "message": "helen.ross firstname promoted to Identity"
+    }
+  ]
+}

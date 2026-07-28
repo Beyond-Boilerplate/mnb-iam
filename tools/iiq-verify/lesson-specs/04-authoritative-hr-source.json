@@ -1,0 +1,41 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "04",
+  "stem": "04-authoritative-hr-source",
+  "title": "Authoritative HR Source",
+  "description": "Learner-built MNB-HR + Aggregate MNB-HR with cubes.",
+  "checks": [
+    {
+      "id": "app-mnb-hr",
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "message": "Application MNB-HR exists"
+    },
+    {
+      "id": "task-agg-hr",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-HR",
+      "message": "Task Aggregate MNB-HR exists"
+    },
+    {
+      "id": "identity-helen",
+      "type": "identity.exists",
+      "name": "helen.ross",
+      "message": "Identity helen.ross created from HR aggregate"
+    },
+    {
+      "id": "identity-priya",
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "message": "Identity priya.wire exists"
+    },
+    {
+      "id": "identity-count",
+      "type": "identity.countMin",
+      "min": 50,
+      "message": "At least 50 identities (HR file is ~80 workers)"
+    }
+  ]
+}

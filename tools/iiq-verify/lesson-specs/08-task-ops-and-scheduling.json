@@ -1,0 +1,30 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "08",
+  "stem": "08-task-ops-and-scheduling",
+  "title": "Task Ops & Scheduling",
+  "description": "Core Meridian tasks still present for runbook.",
+  "checks": [
+    {
+      "id": "agg-hr",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-HR",
+      "message": "Aggregate MNB-HR present"
+    },
+    {
+      "id": "refresh-attrs",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Attributes",
+      "message": "Refresh MNB Attributes present"
+    },
+    {
+      "id": "refresh-managers",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Managers",
+      "message": "Refresh MNB Managers present"
+    }
+  ]
+}

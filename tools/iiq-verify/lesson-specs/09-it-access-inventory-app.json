@@ -1,0 +1,30 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "09",
+  "stem": "09-it-access-inventory-app",
+  "title": "IT Access Inventory App",
+  "description": "Non-authoritative MNB-IT-Access + aggregate task.",
+  "checks": [
+    {
+      "id": "app-it",
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "message": "Application MNB-IT-Access exists"
+    },
+    {
+      "id": "task-agg-it",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Aggregate MNB-IT-Access",
+      "message": "Task Aggregate MNB-IT-Access exists"
+    },
+    {
+      "id": "hr-still",
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "message": "Authoritative MNB-HR still present"
+    }
+  ]
+}
