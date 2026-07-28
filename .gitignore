@@ -18,6 +18,8 @@ local.iiq.properties
 
 # Node / misc
 node_modules/
+**/__pycache__/
+*.py[cod]
 
 # Java
 *.class
