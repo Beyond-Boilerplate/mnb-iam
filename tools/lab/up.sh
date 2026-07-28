@@ -25,7 +25,16 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --academy-only) ACADEMY_ONLY=1 ;;
     -h|--help)
-      sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+      cat <<'EOF'
+One command: host Tomcat IdentityIQ + Academy (lessons + Verify now).
+
+  ./tools/lab/up.sh                 # ensure IIQ + Academy
+  ./tools/lab/up.sh --force-db      # rebuild DB, then Academy
+  ./tools/lab/up.sh --check         # preflight only
+  ./tools/lab/up.sh --academy-only  # Academy only (IIQ must be up)
+
+Install-only (no Academy): ./tools/lab/setup-local.sh
+EOF
       exit 0
       ;;
     *) SETUP_ARGS+=("$1") ;;
