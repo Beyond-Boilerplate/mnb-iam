@@ -125,8 +125,8 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 
 | # | Lesson | Track | Level | Time |
 | ---: | --- | --- | --- | ---: |
-| 01 | [Bank Briefing & UI Orientation](01-bank-briefing-and-ui.md) | Foundations | Beginner | 60–75 minutes |
-| 02 | [Meridian Org Model & Risk Language](02-meridian-org-model.md) | Foundations | Beginner | 60 minutes |
+| 01 | [Bank Briefing & UI Orientation](01-bank-briefing-and-ui.md) | Foundations | Beginner | 75–90 minutes |
+| 02 | [Meridian Org Model & Risk Language](02-meridian-org-model.md) | Foundations | Beginner | 75–90 minutes |
 | 03 | [Lab Hygiene, Naming & Evidence Habits](03-lab-hygiene-and-naming.md) | Foundations | Beginner | 45 minutes |
 | 04 | [Authoritative HR Source](04-authoritative-hr-source.md) | Foundations | Beginner | 75–90 minutes |
 | 05 | [HR Schema & Identity Attribute Design](05-hr-schema-and-identity-attrs.md) | Foundations | Beginner | 60–75 minutes |
