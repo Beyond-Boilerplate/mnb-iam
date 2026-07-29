@@ -10,80 +10,107 @@ The installer is intended for developers who want to learn and use Claude Code w
 
 > **macOS only:** This version supports Apple Silicon and Intel Macs.
 
+**Scripts in this folder:**
+
+| File | Purpose |
+| --- | --- |
+| `setup-cc-free.sh` | Real installer (bash) |
+| `setup-claude-code-openrouter-free-macos.sh` | Thin wrapper that calls `setup-cc-free.sh` |
+
 ---
 
 ## What the installer does
 
 The script automatically:
 
-- Installs Apple-compatible prerequisites.
-- Installs Homebrew when it is not already available.
+- Installs Apple-compatible prerequisites (skipped in `--sandbox` when already on PATH).
+- Installs Homebrew when it is not already available (host install only; not in sandbox).
 - Installs or updates Node.js 22+, Python 3, Claude Code, and CCR.
-- Opens the OpenRouter API-key page.
-- Prompts once for your OpenRouter key using hidden Terminal input.
+- Opens the OpenRouter API-key page (interactive host install only).
+- Accepts an OpenRouter key from prompt, `OPENROUTER_API_KEY`, or `OPENROUTER_API_KEY_FILE`.
 - Validates the key before continuing.
-- Stores the OpenRouter key in macOS Keychain.
+- Stores secrets in macOS Keychain (or a file keystore under `--sandbox`).
 - Discovers the currently available OpenRouter free models that advertise tool support.
 - Configures those models in CCR.
 - Selects a coding-oriented free model as the initial default when available.
 - Configures Claude Code to use the local CCR gateway.
-- Stores the local CCR client key in macOS Keychain.
 - Creates the `cc` command for launching Claude Code through CCR.
 - Starts CCR and runs an end-to-end routing test.
 - Backs up an existing CCR configuration before replacing it.
-
-The only required manual action is creating and pasting an OpenRouter API key.
 
 ---
 
 ## Requirements
 
 - macOS 10.15 or newer.
-- An administrator-capable macOS account for installing system prerequisites.
+- An administrator-capable macOS account for installing system prerequisites (host install).
 - Internet access.
 - An OpenRouter account.
 - Terminal access.
 
-You do not need to install Homebrew, Node.js, Python, Claude Code, or CCR beforehand.
+You do not need to install Homebrew, Node.js, Python, Claude Code, or CCR beforehand for a normal host install.
 
 ---
 
-## Download
+## Quick start (from this repo)
 
-Download the installer script:
+```bash
+cd scripts/free-claude-code
+bash setup-cc-free.sh
+```
+
+Or:
+
+```bash
+bash setup-claude-code-openrouter-free-macos.sh
+```
+
+Do not run the entire installer with `sudo`.
+
+Non-interactive key injection:
+
+```bash
+OPENROUTER_API_KEY_FILE=/path/to/key \
+  bash setup-cc-free.sh
+```
+
+---
+
+## Sandbox mode (does not touch your real setup)
+
+Use this to validate the installer without writing your real `~/.zshrc`, macOS Keychain, host CCR config, or ports `3456`/`3458`.
+
+```bash
+cd scripts/free-claude-code
+OPENROUTER_API_KEY_FILE=/path/to/key \
+  bash setup-cc-free.sh --sandbox ./sandbox-run
+```
+
+Sandbox behavior:
+
+- Uses an isolated `HOME` under the sandbox directory
+- Installs CCR into a sandbox npm prefix (host global npm untouched)
+- Stores secrets in `sandbox-run/keystore/` (not Keychain)
+- Runs the gateway on `127.0.0.1:13456` and management UI on `:13458`
+- Writes `cc` alias only to the sandbox `HOME/.zshrc`
+
+Stop the sandbox CCR when finished:
+
+```bash
+HOME="$PWD/sandbox-run/home" PATH="$HOME/.npm-global/bin:$PATH" ccr stop
+```
+
+`sandbox-run/` is gitignored.
+
+---
+
+## Download / standalone copy
+
+If you copy the installer elsewhere, take `setup-cc-free.sh` (or the wrapper plus that file). The browser-friendly name is:
 
 ```text
 setup-claude-code-openrouter-free-macos.sh
 ```
-
-Your browser will usually save it in:
-
-```text
-~/Downloads
-```
-
----
-
-## Quick start
-
-Open **Terminal** and run:
-
-```bash
-cd ~/Downloads
-bash setup-claude-code-openrouter-free-macos.sh
-```
-
-Running through `bash` means you do not need to make the file executable first.
-
-Alternatively:
-
-```bash
-cd ~/Downloads
-chmod +x setup-claude-code-openrouter-free-macos.sh
-./setup-claude-code-openrouter-free-macos.sh
-```
-
-Do not run the entire installer with `sudo`.
 
 ---
 

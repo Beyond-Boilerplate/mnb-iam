@@ -1,6 +1,4 @@
-from pathlib import Path
-
-script = r'''#!/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # Claude Code + CCR + OpenRouter Free Models — macOS bootstrap
 #
@@ -47,6 +45,12 @@ CCR_GATEWAY_URL="http://${CCR_GATEWAY_HOST}:${CCR_GATEWAY_PORT}"
 PREFERRED_MODEL="${CCR_DEFAULT_MODEL:-cohere/north-mini-code:free}"
 RESET_EXISTING=1
 BACKUP_DIR=""
+SECURITY_BIN="${SECURITY_BIN:-/usr/bin/security}"
+SANDBOX_ROOT="${CC_FREE_SANDBOX_ROOT:-}"
+SANDBOX_MODE=0
+SKIP_SYSTEM_INSTALLS=0
+CCR_START_LOG="/tmp/ccr-setup-start.log"
+
 
 BOLD=""
 DIM=""
@@ -63,8 +67,9 @@ if [[ -t 1 ]]; then
   RESET=$'\033[0m'
 fi
 
-info()    { printf '%s\n' "${BOLD}▶${RESET} $*"; }
-success() { printf '%s\n' "${GREEN}✓${RESET} $*"; }
+# Logging must go to stderr so command substitutions (API keys, counts) stay clean.
+info()    { printf '%s\n' "${BOLD}▶${RESET} $*" >&2; }
+success() { printf '%s\n' "${GREEN}✓${RESET} $*" >&2; }
 warn()    { printf '%s\n' "${YELLOW}!${RESET} $*" >&2; }
 die()     { printf '%s\n' "${RED}Error:${RESET} $*" >&2; exit 1; }
 
@@ -89,29 +94,163 @@ on macOS, then creates the interactive zsh alias:
   cc
 
 Usage:
-  bash ${SCRIPT_NAME}
+  bash ${SCRIPT_NAME} [options]
 
-Optional default-model override:
-  CCR_DEFAULT_MODEL='cohere/north-mini-code:free' bash ${SCRIPT_NAME}
+Options:
+  -h, --help              Show this help
+  --sandbox [DIR]         Fully isolated run under DIR (default: <script>/sandbox-run)
+                          Does not touch real ~/.zshrc, macOS Keychain, or host CCR
+                          ports 3456/3458. Uses sandbox ports 13456/13458, a file
+                          keystore, and a sandbox npm prefix.
 
-The only required interactive input is your OpenRouter API key when it is not
-already stored in macOS Keychain.
+Environment:
+  CCR_DEFAULT_MODEL='provider/model:free'
+  OPENROUTER_API_KEY='sk-or-...'
+  OPENROUTER_API_KEY_FILE=/path/to/keyfile
+  CC_FREE_SANDBOX_ROOT=/path
+
+Interactive OpenRouter key input is skipped when the key is provided via env,
+file, Keychain, or the sandbox file keystore.
 EOF
 }
 
-case "${1:-}" in
-  -h|--help)
-    usage
-    exit 0
+install_file_keystore_shim() {
+  local shim_dir="$1"
+  local store_dir="$2"
+  mkdir -p "${shim_dir}" "${store_dir}"
+  cat > "${shim_dir}/security" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+STORE_DIR="${CC_FREE_KEYSTORE_DIR:?}"
+mkdir -p "${STORE_DIR}"
+account=""
+service=""
+password=""
+action=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    find-generic-password) action="find"; shift ;;
+    add-generic-password) action="add"; shift ;;
+    -a) account="${2:-}"; shift 2 ;;
+    -s) service="${2:-}"; shift 2 ;;
+    -w)
+      if [[ "${action}" == "add" ]]; then
+        password="${2:-}"; shift 2
+      else
+        shift
+      fi
+      ;;
+    -U) shift ;;
+    *) shift ;;
+  esac
+done
+[[ -n "${action}" && -n "${account}" && -n "${service}" ]] || exit 1
+safe_service="${service//\//_}"
+safe_account="${account//\//_}"
+file="${STORE_DIR}/${safe_service}__${safe_account}"
+case "${action}" in
+  find)
+    [[ -f "${file}" ]] || exit 1
+    cat "${file}"
     ;;
-  "")
+  add)
+    [[ -n "${password}" ]] || exit 1
+    umask 077
+    printf '%s' "${password}" > "${file}"
+    chmod 600 "${file}"
     ;;
   *)
-    die "Unknown option: $1. Run with --help."
+    exit 1
     ;;
 esac
+EOF
+  chmod 700 "${shim_dir}/security"
+  export CC_FREE_KEYSTORE_DIR="${store_dir}"
+  export SECURITY_BIN="${shim_dir}/security"
+  export PATH="${shim_dir}:${PATH}"
+}
+
+activate_sandbox() {
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [[ -z "${SANDBOX_ROOT}" ]]; then
+    SANDBOX_ROOT="${script_dir}/sandbox-run"
+  fi
+  mkdir -p "${SANDBOX_ROOT}"
+  SANDBOX_ROOT="$(cd "${SANDBOX_ROOT}" && pwd)"
+
+  export HOME="${SANDBOX_ROOT}/home"
+  mkdir -p \
+    "${HOME}" \
+    "${HOME}/.local/bin" \
+    "${HOME}/.npm-global" \
+    "${HOME}/.ccr-setup-backups" \
+    "${SANDBOX_ROOT}/keystore" \
+    "${SANDBOX_ROOT}/bin" \
+    "${SANDBOX_ROOT}/logs"
+
+  CCR_DIR="${HOME}/.claude-code-router"
+  CLAUDE_DIR="${HOME}/.claude"
+  LOCAL_BIN="${HOME}/.local/bin"
+  BACKUP_ROOT="${HOME}/.ccr-setup-backups"
+  ZSHRC="${HOME}/.zshrc"
+  CCR_START_LOG="${SANDBOX_ROOT}/logs/ccr-setup-start.log"
+  KEYCHAIN_ACCOUNT="sandbox"
+
+  CCR_GATEWAY_PORT="13456"
+  CCR_MANAGEMENT_PORT="13458"
+  CCR_GATEWAY_URL="http://${CCR_GATEWAY_HOST}:${CCR_GATEWAY_PORT}"
+
+  export npm_config_prefix="${HOME}/.npm-global"
+  export PATH="${LOCAL_BIN}:${HOME}/.npm-global/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:${PATH}"
+
+  install_file_keystore_shim "${SANDBOX_ROOT}/bin" "${SANDBOX_ROOT}/keystore"
+  SKIP_SYSTEM_INSTALLS=1
+  touch "${ZSHRC}"
+
+  info "Sandbox HOME=${HOME}"
+  info "Sandbox gateway ${CCR_GATEWAY_URL} (management :${CCR_MANAGEMENT_PORT})"
+  info "Host Keychain, ~/.zshrc, and host CCR :3456/:3458 will not be modified"
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      --sandbox)
+        SANDBOX_MODE=1
+        if [[ $# -ge 2 && "${2}" != -* ]]; then
+          SANDBOX_ROOT="$2"
+          shift
+        fi
+        ;;
+      --sandbox=*)
+        SANDBOX_MODE=1
+        SANDBOX_ROOT="${1#*=}"
+        ;;
+      *)
+        die "Unknown option: $1. Run with --help."
+        ;;
+    esac
+    shift
+  done
+}
+
+parse_args "$@"
+
+if [[ -n "${CC_FREE_SANDBOX_ROOT:-}" ]]; then
+  SANDBOX_MODE=1
+  [[ -n "${SANDBOX_ROOT}" ]] || SANDBOX_ROOT="${CC_FREE_SANDBOX_ROOT}"
+fi
 
 [[ "$(uname -s)" == "Darwin" ]] || die "This installer currently supports macOS only."
+
+if (( SANDBOX_MODE )); then
+  activate_sandbox
+fi
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -130,9 +269,9 @@ ${BOLD}Claude Code + CCR + OpenRouter Free Setup${RESET}
 
 This installer will:
   • install/update the required command-line tools
-  • ask you to paste one OpenRouter API key (input is hidden)
+  • ask you to paste one OpenRouter API key (input is hidden), unless provided via env/file
   • discover free models that currently support tools
-  • keep OpenRouter and CCR keys in macOS Keychain
+  • keep OpenRouter and CCR keys in macOS Keychain (or a file keystore in --sandbox mode)
   • configure a local-only gateway at ${CCR_GATEWAY_URL}
   • add the interactive command: ${BOLD}cc${RESET}
 
@@ -140,12 +279,15 @@ Existing CCR configuration will be backed up before replacement.
 EOF
 }
 
+
 ensure_command_line_tools() {
   if xcode-select -p >/dev/null 2>&1; then
     success "Apple Command Line Tools are available"
     return
   fi
-
+  if (( SKIP_SYSTEM_INSTALLS )); then
+    die "Apple Command Line Tools are required even in sandbox mode. Install them on the host, then rerun."
+  fi
   info "Requesting Apple Command Line Tools"
   xcode-select --install >/dev/null 2>&1 || true
   cat <<'EOF'
@@ -156,6 +298,7 @@ EOF
   exit 0
 }
 
+
 load_homebrew_shellenv() {
   if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -164,20 +307,23 @@ load_homebrew_shellenv() {
   fi
 }
 
+
 install_homebrew() {
   load_homebrew_shellenv
   if command_exists brew; then
     success "Homebrew is available"
     return
   fi
-
+  if (( SKIP_SYSTEM_INSTALLS )); then
+    die "Homebrew is required. Install it on the host, then rerun the sandbox."
+  fi
   info "Installing Homebrew"
-  NONINTERACTIVE=1 /bin/bash -c \
-    "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  NONINTERACTIVE=1 /bin/bash -c     "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   load_homebrew_shellenv
   command_exists brew || die "Homebrew installation completed but brew is not on PATH."
   success "Homebrew installed"
 }
+
 
 node_major_version() {
   if ! command_exists node; then
@@ -187,11 +333,14 @@ node_major_version() {
   node -p 'Number(process.versions.node.split(".")[0])' 2>/dev/null || printf '0\n'
 }
 
+
 install_runtime_dependencies() {
   local node_major
   node_major="$(node_major_version)"
-
   if (( node_major < 22 )); then
+    if (( SKIP_SYSTEM_INSTALLS )); then
+      die "Sandbox mode requires Node.js 22+ on the host PATH (found $(node --version 2>/dev/null || echo none))."
+    fi
     info "Installing Node.js 22"
     if brew list --versions node@22 >/dev/null 2>&1; then
       brew upgrade node@22 || true
@@ -201,24 +350,32 @@ install_runtime_dependencies() {
     brew link --overwrite --force node@22
     hash -r
   fi
-
   if ! command_exists python3; then
+    if (( SKIP_SYSTEM_INSTALLS )); then
+      die "Sandbox mode requires python3 on the host PATH."
+    fi
     info "Installing Python 3"
     brew install python
     hash -r
   fi
-
   command_exists node || die "Node.js is not available after installation."
   command_exists npm || die "npm is not available after installation."
   command_exists python3 || die "Python 3 is not available after installation."
-
   node_major="$(node_major_version)"
   (( node_major >= 22 )) || die "CCR requires Node.js 22 or newer; found $(node --version)."
-
   success "Node $(node --version), npm $(npm --version), and Python $(python3 --version 2>&1 | awk '{print $2}') are available"
 }
 
+
+
 install_claude_code() {
+  if command_exists claude; then
+    success "Reusing Claude Code $(claude --version 2>/dev/null | head -1)"
+    return
+  fi
+  if (( SKIP_SYSTEM_INSTALLS )); then
+    die "Sandbox mode needs the host 'claude' binary on PATH."
+  fi
   info "Installing or updating Claude Code"
   curl -fsSL https://claude.ai/install.sh | bash
   ensure_path_for_current_script
@@ -226,7 +383,20 @@ install_claude_code() {
   success "Claude Code $(claude --version 2>/dev/null | head -1) is installed"
 }
 
+
+
 install_ccr() {
+  if (( SKIP_SYSTEM_INSTALLS )); then
+    info "Installing CCR into the sandbox npm prefix (host global npm untouched)"
+    mkdir -p "${HOME}/.npm-global"
+    export npm_config_prefix="${HOME}/.npm-global"
+    export PATH="${HOME}/.npm-global/bin:${PATH}"
+    npm install -g @musistudio/claude-code-router@latest
+    hash -r
+    command_exists ccr || die "CCR installed in sandbox, but ccr was not found on PATH."
+    success "CCR is installed in sandbox: $(command -v ccr)"
+    return
+  fi
   info "Installing or updating Claude Code Router"
   npm install -g @musistudio/claude-code-router@latest
   hash -r
@@ -234,8 +404,9 @@ install_ccr() {
   success "CCR is installed"
 }
 
+
 read_key_from_keychain() {
-  /usr/bin/security find-generic-password \
+  ${SECURITY_BIN} find-generic-password \
     -a "${KEYCHAIN_ACCOUNT}" \
     -s "${OPENROUTER_KEYCHAIN_SERVICE}" \
     -w 2>/dev/null || true
@@ -243,7 +414,7 @@ read_key_from_keychain() {
 
 store_key_in_keychain() {
   local key="$1"
-  /usr/bin/security add-generic-password \
+  ${SECURITY_BIN} add-generic-password \
     -U \
     -a "${KEYCHAIN_ACCOUNT}" \
     -s "${OPENROUTER_KEYCHAIN_SERVICE}" \
@@ -252,12 +423,35 @@ store_key_in_keychain() {
 
 prompt_for_openrouter_key() {
   local key=""
-  key="$(read_key_from_keychain)"
 
-  if [[ -n "${key}" ]]; then
-    success "Found an OpenRouter API key in macOS Keychain"
+  if [[ -n "${OPENROUTER_API_KEY:-}" ]]; then
+    success "Using OpenRouter API key from OPENROUTER_API_KEY"
+    printf '%s' "${OPENROUTER_API_KEY}"
+    return
+  fi
+
+  if [[ -n "${OPENROUTER_API_KEY_FILE:-}" ]]; then
+    [[ -f "${OPENROUTER_API_KEY_FILE}" ]] || die "OPENROUTER_API_KEY_FILE not found: ${OPENROUTER_API_KEY_FILE}"
+    key="$(tr -d '\r\n' < "${OPENROUTER_API_KEY_FILE}")"
+    [[ -n "${key}" ]] || die "OPENROUTER_API_KEY_FILE is empty: ${OPENROUTER_API_KEY_FILE}"
+    success "Using OpenRouter API key from OPENROUTER_API_KEY_FILE"
     printf '%s' "${key}"
     return
+  fi
+
+  key="$(read_key_from_keychain)"
+  if [[ -n "${key}" ]]; then
+    if (( SANDBOX_MODE )); then
+      success "Found an OpenRouter API key in the sandbox file keystore"
+    else
+      success "Found an OpenRouter API key in macOS Keychain"
+    fi
+    printf '%s' "${key}"
+    return
+  fi
+
+  if (( SANDBOX_MODE )) || [[ ! -t 0 ]]; then
+    die "No OpenRouter key available. Set OPENROUTER_API_KEY or OPENROUTER_API_KEY_FILE for non-interactive/sandbox runs."
   fi
 
   cat <<'EOF'
@@ -273,10 +467,8 @@ Purchasing at least $10 in OpenRouter credits is handled on OpenRouter's site,
 not by this installer.
 EOF
 
-  if [[ -t 0 ]]; then
-    printf '\nPress Enter to open OpenRouter API Keys...'
-    read -r _
-  fi
+  printf '\nPress Enter to open OpenRouter API Keys...'
+  read -r _
   open "https://openrouter.ai/settings/keys" >/dev/null 2>&1 || true
 
   while [[ -z "${key}" ]]; do
@@ -290,12 +482,15 @@ EOF
   printf '%s' "${key}"
 }
 
+
 validate_openrouter_key() {
   local key="$1"
   local response_file http_code error_message
   response_file="$(mktemp)"
 
   info "Validating the OpenRouter key"
+  # Keep validation payload on one line; curl failure must not trip ERR before we can report HTTP status.
+  set +e
   http_code="$(
     curl -sS \
       -o "${response_file}" \
@@ -303,16 +498,12 @@ validate_openrouter_key() {
       "https://openrouter.ai/api/v1/chat/completions" \
       -H "Authorization: Bearer ${key}" \
       -H "Content-Type: application/json" \
-      -d '{
-        "model": "openrouter/free",
-        "messages": [
-          {"role": "user", "content": "Reply with OK."}
-        ],
-        "max_tokens": 64
-      }'
+      --data-binary '{"model":"openrouter/free","messages":[{"role":"user","content":"Reply with OK."}],"max_tokens":64}'
   )"
+  local curl_ec=$?
+  set -e
 
-  if [[ "${http_code}" != "200" ]]; then
+  if [[ "${curl_ec}" -ne 0 || "${http_code}" != "200" ]]; then
     error_message="$(
       python3 - "${response_file}" <<'PY' 2>/dev/null || true
 import json
@@ -325,6 +516,9 @@ except Exception:
 PY
     )"
     rm -f "${response_file}"
+    if [[ "${curl_ec}" -ne 0 ]]; then
+      die "OpenRouter key validation request failed (curl exit ${curl_ec})."
+    fi
     die "OpenRouter rejected the key (HTTP ${http_code}): ${error_message:-unknown error}"
   fi
 
@@ -496,7 +690,7 @@ PY
 
 store_local_ccr_key() {
   local key="$1"
-  /usr/bin/security add-generic-password \
+  ${SECURITY_BIN} add-generic-password \
     -U \
     -a "${KEYCHAIN_ACCOUNT}" \
     -s "${CCR_KEYCHAIN_SERVICE}" \
@@ -510,7 +704,7 @@ create_api_key_helper() {
   cat > "${helper}" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-exec /usr/bin/security find-generic-password \\
+exec ${SECURITY_BIN} find-generic-password \\
   -a '${KEYCHAIN_ACCOUNT}' \\
   -s '${CCR_KEYCHAIN_SERVICE}' \\
   -w
@@ -609,7 +803,7 @@ command -v claude >/dev/null 2>&1 || {
 }
 
 openrouter_key="\$(
-  /usr/bin/security find-generic-password \\
+  ${SECURITY_BIN} find-generic-password \\
     -a "\${KEYCHAIN_ACCOUNT}" \\
     -s "\${OPENROUTER_KEYCHAIN_SERVICE}" \\
     -w 2>/dev/null
@@ -721,8 +915,8 @@ start_ccr_service() {
       --host "${CCR_GATEWAY_HOST}" \
       --port "${CCR_MANAGEMENT_PORT}" \
       --no-open \
-      --gateway >/tmp/ccr-setup-start.log 2>&1 || {
-        cat /tmp/ccr-setup-start.log >&2
+      --gateway >"${CCR_START_LOG}" 2>&1 || {
+        cat "${CCR_START_LOG}" >&2
         die "CCR failed to start."
       }
 
@@ -741,7 +935,7 @@ start_ccr_service() {
     sleep 0.4
   done
 
-  cat /tmp/ccr-setup-start.log >&2 || true
+  cat "${CCR_START_LOG}" >&2 || true
   die "CCR started, but its gateway did not become reachable."
 }
 
@@ -844,6 +1038,7 @@ main() {
   local local_ccr_key
 
   print_intro
+  ensure_path_for_current_script
   ensure_command_line_tools
   install_homebrew
   install_runtime_dependencies
@@ -853,7 +1048,11 @@ main() {
   openrouter_key="$(prompt_for_openrouter_key)"
   validate_openrouter_key "${openrouter_key}"
   store_key_in_keychain "${openrouter_key}"
-  success "Stored the OpenRouter key in macOS Keychain"
+  if (( SANDBOX_MODE )); then
+    success "Stored the OpenRouter key in the sandbox file keystore"
+  else
+    success "Stored the OpenRouter key in macOS Keychain"
+  fi
 
   temp_dir="$(mktemp -d)"
   raw_models="${temp_dir}/openrouter-models-response.json"
@@ -894,9 +1093,3 @@ main() {
 }
 
 main "$@"
-'''
-
-path = Path("/mnt/data/setup-claude-code-openrouter-free-macos.sh")
-path.write_text(script)
-path.chmod(0o755)
-print(f"Created {path} ({path.stat().st_size:,} bytes)")
