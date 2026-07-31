@@ -7,12 +7,17 @@ COMPOSE=(docker compose -f docker-compose.iiq.yml)
 PORT="${IIQ_HTTP_PORT:-8080}"
 
 echo "Waiting for identityiq…"
-for _ in $(seq 1 90); do
-  if curl -sf -o /dev/null "http://127.0.0.1:${PORT}/identityiq/login.jsf"; then
-    break
-  fi
-  sleep 5
-done
+if [[ "${IIQ_BOOTSTRAP_SKIP_WAIT:-}" == "1" ]] \
+  && curl -sf -o /dev/null "http://127.0.0.1:${PORT}/identityiq/login.jsf"; then
+  echo "Login already up — skipping wait loop."
+else
+  for _ in $(seq 1 90); do
+    if curl -sf -o /dev/null "http://127.0.0.1:${PORT}/identityiq/login.jsf"; then
+      break
+    fi
+    sleep 5
+  done
+fi
 
 if ! curl -sf -o /dev/null "http://127.0.0.1:${PORT}/identityiq/login.jsf"; then
   echo "ERROR: IIQ login page not reachable on :${PORT}" >&2

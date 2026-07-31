@@ -1,10 +1,23 @@
 # Local Meridian stack (Docker)
 
-**One command** starts Postgres + OpenLDAP + IdentityIQ + Academy + MCP + OpenAPI docs:
+**One command** starts Postgres + OpenLDAP + IdentityIQ + Academy + MCP + OpenAPI + Teller,
+installs/enables the Meridian plugin, and seeds **MNB-HR** + **MNB-OpenLDAP**:
 
 ```bash
 ./tools/lab/docker/up.sh
+# preflight only (fail-fast on occupied ports):
+./tools/lab/docker/up.sh --check
+# force rebuild images (slower):
+./tools/lab/docker/up.sh --rebuild
+# start without HR/LDAP IIQ seeding:
+./tools/lab/docker/up.sh --skip-seed
+# if host MCP/OpenAPI leftovers hold 8765/8766:
+./tools/lab/docker/up.sh --kill-host-sidecars
 ```
+
+By default `up.sh` skips Docker image rebuilds when local images already exist (big speed win), packages the plugin in the background while containers start, and probes IIQ/MCP/Teller/Academy/LDAP in parallel. Use `--rebuild` after Dockerfile or MCP source changes.
+
+Startup **fails fast** if required host ports are taken by something other than this Compose project (`mnb-iiq-lab`). It also verifies `mnb-identityiq` is running and that MCP can resolve `http://identityiq:8080` (avoids the “Name or service not known” seed failure when only host Tomcat is on `:8080`).
 
 | URL | What |
 | --- | --- |
@@ -25,17 +38,15 @@ Override the MCP key with `MCP_API_KEY=…` when running `up.sh` / Compose.
 ## Stop / wipe
 
 ```bash
-./tools/lab/docker/down.sh          # keep DB + LDAP volumes
-./tools/lab/docker/down.sh -v       # wipe Postgres + MCP audit + OpenLDAP volumes
+./tools/lab/docker/down.sh                 # FULL wipe (containers + volumes)
+./tools/lab/docker/down.sh --keep-volumes  # stop but keep Postgres / LDAP / MCP data
 ```
 
 Reload LDAP seed after editing `lab-data/connectors/ldap/mnb-openldap.ldif`:
 
 ```bash
-docker compose -f docker-compose.iiq.yml build openldap
-docker compose -f docker-compose.iiq.yml stop openldap
-docker volume rm mnb-iiq-lab_mnb-openldap-data mnb-iiq-lab_mnb-openldap-config
-docker compose -f docker-compose.iiq.yml up -d openldap
+./tools/lab/docker/down.sh
+./tools/lab/docker/up.sh --rebuild
 ```
 
 ## Image notes
