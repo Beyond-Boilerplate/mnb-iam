@@ -15,7 +15,6 @@ sys.path.insert(0, str(CHAT_ROOT))
 from catalog import CATALOG, ToolCatalog, FAVORITE_PRESETS  # noqa: E402
 from llm import LlmError, OpenRouterClient, _bad_summary, _local_summary, _skippable_model_error  # noqa: E402
 from normalize import normalize_tool_args, resolve_identity_username  # noqa: E402
-import actions  # noqa: E402
 
 
 def _fake_search_factory(payload_by_query: dict):
@@ -87,8 +86,6 @@ FAKE_MCP_TOOLS = [
 
 
 def test_no_static_llm_tool_catalog():
-    assert actions.LLM_TOOL_CATALOG == []
-    assert "for job title" not in OpenRouterClient.__module__ or True
     from llm import SYSTEM_PROMPT
 
     assert "get_identity_accounts" not in SYSTEM_PROMPT

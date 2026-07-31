@@ -32,13 +32,10 @@ ZIP="$DIST/${NAME}-${VER}.zip"
 rm -f "$ZIP"
 ( cd "$STAGE" && zip -qr "$ZIP" manifest.xml "${NAME}.jar" import ui )
 
-# convenience copies (folder may keep hyphen for repo path)
+# convenience copy for SSB plugin drop folder
 mkdir -p "$ROOT/ssdplugins/mnb_iam_toolkit"
 cp "$ZIP" "$ROOT/ssdplugins/mnb_iam_toolkit/${NAME}-${VER}.zip"
 cp "$ZIP" "$ROOT/ssdplugins/mnb_iam_toolkit/${NAME}.zip"
-# also hyphen alias for operators looking under pluginsrc path
-mkdir -p "$ROOT/ssdplugins/mnb-iam-toolkit"
-cp "$ZIP" "$ROOT/ssdplugins/mnb-iam-toolkit/${NAME}-${VER}.zip"
 
 echo "Built $ZIP"
 unzip -l "$ZIP"

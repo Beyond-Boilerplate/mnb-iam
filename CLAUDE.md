@@ -30,4 +30,4 @@ SailPoint IdentityIQ **8.5** SSD repo. Be **agentic**: pursue the user’s goal 
 
 Lab only if IIQ isn’t already at `http://localhost:8080/identityiq`.
 
-More: `docs/SSD.md` · `docs/api/MCP-TOOLS.md` · `tools/iiq-mcp/README.md` · `.ai-delivery/_memory/GOTCHAS.md`
+More: `docs/SSD.md` · `docs/REPO_LAYOUT.md` · `docs/api/MCP-TOOLS.md` · `tools/iiq-mcp/README.md` · `.ai-delivery/_memory/GOTCHAS.md`

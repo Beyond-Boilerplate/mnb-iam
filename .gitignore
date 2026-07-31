@@ -48,6 +48,11 @@ deploy/helm/values/*.secrets.yaml
 /build/
 /learn/dist/
 
+# Local MCP / lab runtime state (recreated by stack)
+/var/
+**/mcp-idempotency.sqlite
+**/mcp-write-audit.jsonl
+
 # Claude Code delivery bus (runtime state + per-ticket evidence)
 .ai-delivery/_state/*.sqlite
 .ai-delivery/_state/*.db
@@ -57,6 +62,12 @@ deploy/helm/values/*.secrets.yaml
 /IIQDBDump/
 /IIQDBDump.rar
 *.rar
+
+# Pytest / Python local
+.pytest_cache/
+tools/iiq-mcp/.venv/
+tools/iiq-mcp/build/
+tools/iiq-chat/.venv/
 
 # Eclipse metadata (optional IDE)
 .classpath

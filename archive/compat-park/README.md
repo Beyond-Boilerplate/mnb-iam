@@ -1,5 +1,7 @@
 # Compatibility park
 
+> Relocated from `tools/compat-park/` → **`archive/compat-park/`**. Not runtime lab tooling.
+
 Stock SSD sample artifacts that are **not** part of the Meridian build.
 
 | Path | Why parked |

@@ -58,7 +58,8 @@ You do not need to install Homebrew, Node.js, Python, Claude Code, or CCR before
 ## Quick start (from this repo)
 
 ```bash
-cd scripts/free-claude-code
+cd archive/helpers/free-claude-code
+
 bash setup-cc-free.sh
 ```
 
@@ -84,7 +85,8 @@ OPENROUTER_API_KEY_FILE=/path/to/key \
 Use this to validate the installer without writing your real `~/.zshrc`, macOS Keychain, host CCR config, or ports `3456`/`3458`.
 
 ```bash
-cd scripts/free-claude-code
+cd archive/helpers/free-claude-code
+
 OPENROUTER_API_KEY_FILE=/path/to/key \
   bash setup-cc-free.sh --sandbox ./sandbox-run
 ```

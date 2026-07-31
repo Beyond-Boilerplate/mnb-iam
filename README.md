@@ -32,6 +32,7 @@ Tomcat host path (one command):
 | Doc | Purpose |
 | --- | --- |
 | [docs/SSD.md](docs/SSD.md) | How SSD/SSB works in this repo + CI/CD path |
+| [docs/REPO_LAYOUT.md](docs/REPO_LAYOUT.md) | Live paths vs `archive/` (cleanup map) |
 | [docs/HOMELAB-CD.md](docs/HOMELAB-CD.md) | GHCR + Helm + Tailscale → `sailpoint.lmsapp.us` |
 | [config/README.md](config/README.md) | Where to add XML features |
 | [config/PACKS.md](config/PACKS.md) | What CD ships (HelloWorld) vs what learners build |
@@ -56,8 +57,10 @@ build.properties             ← SSB knobs (IIQ 8.5, LCM, SSF flags)
 sandbox.* / homelab.*        ← SPTARGET property sets
 servers.properties           ← hostname → SPTARGET
 scripts/                     ← SailPoint SSB Ant scripts (do not fork lightly)
-tools/lab/                   ← greenfield Tomcat/MySQL laptop bootstrap
-lab-data/                    ← HR / IT sample files
+tools/lab/                   ← Docker (preferred) + host Tomcat bootstrap
+tools/iiq-mcp/  iiq-chat/    ← MCP + Teller
+lab-data/                    ← HR / OpenLDAP sample files
+archive/                     ← parked SSD samples (not runtime) — see docs/REPO_LAYOUT.md
 docs/                        ← lessons, LOCAL_SETUP, INFRASTRUCTURE, HOMELAB-CD, vendor
 .github/workflows/           ← SSB CI, publish GA OCI, publish image, deploy-homelab
 ```
