@@ -6,8 +6,8 @@
 **Prereq:** Lesson 57 — AD Groups, OUs & Exchange; connector matrix OpenLDAP row  
 
 **Lab data:**
-- Repo: `lab-data/connectors/ldap/mnb-openldap.ldif` (copy to `~/iiq-lab-data/connectors/ldap/`)
-- Repo: `docker-compose.connectors.yml` — **live OpenLDAP backend, required for this lesson**
+- Repo: `lab-data/connectors/ldap/mnb-openldap.ldif` + `README.md` (connection sheet)
+- Live OpenLDAP is part of `./tools/lab/docker/up.sh` (service `openldap`). Standalone: `docker compose -f docker-compose.connectors.yml up -d openldap`
 
 ---
 
@@ -53,15 +53,19 @@ The practical consequence: when you sit down in front of an unfamiliar directory
 
 An LDAP directory is a tree called the **Directory Information Tree (DIT)**. Every entry has a **Distinguished Name (DN)** — its full address in the tree, written leaf-first. The leftmost component is the **Relative Distinguished Name (RDN)**, the entry's name within its parent container.
 
-Meridian's lab DIT:
+Meridian's lab DIT (abbreviated — full seed in `mnb-openldap.ldif`):
 
 ```
-dc=meridiannb,dc=com                      ← suffix (the tree root)
-├── ou=people,dc=meridiannb,dc=com        ← container for user entries
-│   ├── uid=helen.ross,ou=people,dc=meridiannb,dc=com
-│   └── uid=priya.wire,ou=people,dc=meridiannb,dc=com
-└── ou=groups,dc=meridiannb,dc=com        ← container for group entries
-    └── cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
+dc=meridiannb,dc=com                         ← suffix (the tree root)
+├── ou=people,…                              ← inetOrgPerson accounts (10)
+│   ├── uid=helen.ross … uid=priya.wire …
+│   ├── uid=raj.external (contractor)
+│   └── uid=samir.hassan (Inactive / leaver)
+├── ou=groups,…                              ← groupOfNames entitlements (8)
+│   ├── cn=wire-initiators, cn=wire-approvers
+│   ├── cn=vpn-network-admins, cn=app-ldap-admins
+│   └── cn=dept-*, cn=all-employees
+└── ou=service,…                             ← reserved; read bind is cn=svc-iiq-read at suffix
 ```
 
 Read `uid=priya.wire,ou=people,dc=meridiannb,dc=com` right to left: in the `meridiannb.com` tree, inside the `people` organizational unit, the entry whose RDN is `uid=priya.wire`. Unlike AD, where OUs mostly organize policy, in a plain LDAP directory the OUs are just containers — but you still need to know them, because they become your search bases.
@@ -109,9 +113,9 @@ LDAP simple bind over TCP 389 (lab) / LDAPS 636 (production)
         ▼
 OpenLDAP (osixia container, suffix dc=meridiannb,dc=com)
         ├── search base ou=people,  filter (objectClass=inetOrgPerson)
-        │        → account aggregation (2 entries in the lab)
+        │        → account aggregation (10 entries in the lab)
         ├── search base ou=groups,  filter (objectClass=groupOfNames)
-        │        → group / entitlement aggregation (1 group)
+        │        → group / entitlement aggregation (8 groups)
         └── member DNs on groups → membership resolution back to accounts
 ```
 
@@ -136,13 +140,17 @@ Per the style contract, this lesson's live path is mandatory — the repo ships 
 From the repo root:
 
 ```bash
+# Preferred: main Meridian stack (includes OpenLDAP)
+./tools/lab/docker/up.sh
+
+# Or OpenLDAP alone
 docker compose -f docker-compose.connectors.yml up -d openldap
 docker compose -f docker-compose.connectors.yml ps
 ```
 
-The `osixia/openldap:1.5.0` image reads its environment (`LDAP_DOMAIN: meridiannb.com`, `LDAP_ADMIN_PASSWORD: admin`) and builds the suffix `dc=meridiannb,dc=com` with admin `cn=admin,dc=meridiannb,dc=com` on first start. It then loads the mounted bootstrap file `lab-data/connectors/ldap/mnb-openldap.ldif`. Port 389 is mapped to localhost.
+The `osixia/openldap:1.5.0` image reads its environment (`LDAP_DOMAIN: meridiannb.com`, `LDAP_ADMIN_PASSWORD: admin`) and builds the suffix `dc=meridiannb,dc=com` with admin `cn=admin,dc=meridiannb,dc=com` on first start. It then loads the mounted bootstrap file `lab-data/connectors/ldap/mnb-openldap.ldif`. Port 389 is mapped to localhost. From the IIQ container, use host **`openldap`**, not `localhost`.
 
-One osixia quirk worth knowing now: **bootstrap LDIF is applied only on first container creation.** If you edit the LDIF later, `docker compose -f docker-compose.connectors.yml down && docker compose -f docker-compose.connectors.yml up -d openldap` to recreate.
+One osixia quirk worth knowing now: **bootstrap LDIF is applied only on first container creation.** If you edit the LDIF later, recreate and wipe the OpenLDAP volumes (see `tools/lab/docker/README.md`).
 
 ### Step 2 — Verify with ldapsearch before touching IIQ
 
@@ -154,21 +162,23 @@ ldapsearch -x -H ldap://localhost:389 \
   -D cn=admin,dc=meridiannb,dc=com -w admin
 ```
 
-Flag by flag: `-x` simple bind (no SASL), `-H` the directory URL, `-b` search base, `-D` bind DN, `-w` bind password. Expect six entries back: the suffix, `ou=people`, `ou=groups`, two `inetOrgPerson` entries, and one `groupOfNames`.
+Flag by flag: `-x` simple bind (no SASL), `-H` the directory URL, `-b` search base, `-D` bind DN, `-w` bind password. Expect the suffix, three OUs (`people`, `groups`, `service`), ten `inetOrgPerson` entries, two service binds, and eight `groupOfNames` — see `lab-data/connectors/ldap/README.md` for the inventory.
 
 ### Step 3 — Read the LDIF and predict the aggregation
 
 Open `lab-data/connectors/ldap/mnb-openldap.ldif` and account for every entry. This is the discipline that makes aggregation results *verifiable* rather than merely *plausible*:
 
-- `helen.ross` — `inetOrgPerson`, `employeeNumber: MNB00001`, `mail: helen.ross@meridiannb.com`
-- `priya.wire` — `inetOrgPerson`, `employeeNumber: MNB00090`, and she is the sole `member` of `cn=wire-initiators`
-- `wire-initiators` — `groupOfNames` with exactly one member DN
+- Ten people keyed by `uid` / `employeeNumber` (e.g. `helen.ross` / `MNB00001`, `priya.wire` / `MNB00090`)
+- Eight groups including `wire-initiators` (Priya, Michael Ross, Noah Ibrahim) and `wire-approvers` (Rachel Evans, Sanjay Kapoor)
+- `samir.hassan` present but `description: Inactive` and **not** in any group (leaver drill)
+- `raj.external` contractor in `dept-technology` only
+- Service binds under `ou=service` (not aggregated as accounts if you filter `inetOrgPerson`)
 
-So before running anything, write the prediction: **account aggregation scans 2 accounts; group aggregation finds 1 group; `priya.wire` carries 1 entitlement; `helen.ross` carries 0.** Any other numbers mean the configuration is wrong, no matter how green the task result looks.
+So before running anything, write the prediction: **account aggregation scans 10 accounts; group aggregation finds 8 groups; `priya.wire` carries `wire-initiators` + `dept-treasury` + `all-employees`.** Any other numbers mean the configuration is wrong, no matter how green the task result looks.
 
 ### Production notes (what changes outside the lab)
 
-- **Dedicated read-only bind account.** Never bind as the directory admin. Create `cn=svc-iiq-read,ou=service,dc=meridiannb,dc=com` with read-only ACLs scoped to the people and groups subtrees, password in the vault, rotation on schedule. The lab's `cn=admin` / `admin` is a lab-only convenience — label it that way in your binder.
+- **Dedicated service binds.** Prefer `cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com` / `Provision1!` as the IIQ application bind when PROVISIONING is enabled (OpenLDAP connector uses **one** bind for aggregate + provision). Use `cn=svc-iiq-read,dc=meridiannb,dc=com` / `Readonly1!` only for aggregate-only labs. Never leave `cn=admin` in the app long-term.
 - **LDAPS everywhere.** Simple binds send the password in cleartext. Production uses `ldaps://` on 636 (or StartTLS), which means the directory's certificate chain must live in the IIQ trust store — document who owns that trust store, because expired directory certs are a classic 2 a.m. outage.
 - **Paged results.** Directories enforce a server-side size limit (OpenLDAP defaults to 500). A 40,000-entry directory will throw *size limit exceeded* mid-aggregation unless the connector requests the paged-results control. Two entries won't trigger it in the lab; forty thousand in production will, on your first full run.
 
@@ -177,9 +187,9 @@ So before running anything, write the prediction: **account aggregation scans 2 
 ## Before you start
 
 - [ ] IIQ up at `http://localhost:8080/identityiq` as `spadmin`; `MNB-HR` identities exist (Lesson 06+) so correlation has targets
-- [ ] Docker running; `docker compose -f docker-compose.connectors.yml up -d openldap` succeeds
+- [ ] OpenLDAP up (`./tools/lab/docker/up.sh` or `docker compose -f docker-compose.connectors.yml up -d openldap`)
 - [ ] `ldapsearch` available (macOS ships it; Linux: `openldap-clients` / `ldap-utils` package)
-- [ ] LDIF copied to `~/iiq-lab-data/connectors/ldap/mnb-openldap.ldif` for reference
+- [ ] LDIF / connection sheet at `lab-data/connectors/ldap/`
 - [ ] Lesson 52 connector selection record names **OpenLDAP - Direct** as preferred type
 
 ---
@@ -190,11 +200,11 @@ So before running anything, write the prediction: **account aggregation scans 2 
 
 Everything downstream depends on a directory that actually answers, so prove that first — exactly the order a production engineer follows when a new LDAP endpoint lands on their desk.
 
-1. From the repo root, run `docker compose -f docker-compose.connectors.yml up -d openldap`.
+1. From the repo root, ensure OpenLDAP is up (`./tools/lab/docker/up.sh` or `docker compose -f docker-compose.connectors.yml up -d openldap`).
 2. Run the Step 2 `ldapsearch` and count the entries returned.
-3. Confirm you can name each entry: suffix, two OUs, `helen.ross`, `priya.wire`, `wire-initiators`.
+3. Confirm you can name the shape: suffix, three OUs, ten people, two service binds, eight groups — including `wire-initiators` with Priya, Michael, and Noah as members.
 
-**Expected result:** `ldapsearch` returns 6 entries with `result: 0 Success` at the bottom; `priya.wire`'s DN appears as the `member` of `wire-initiators`.
+**Expected result:** `ldapsearch` returns Success; `priya.wire`'s DN appears as a `member` of `wire-initiators`.
 
 **If it fails:** `Can't contact LDAP server` → container not running or port 389 not mapped (`docker compose ps`); `err=49` → bind DN/password typo (lab password is exactly `admin`).
 
@@ -202,7 +212,7 @@ Everything downstream depends on a directory that actually answers, so prove tha
 
 Auditable aggregation starts with a written prediction — if you cannot say in advance what the task will return, you cannot detect when it returns the wrong thing.
 
-1. Create `~/iiq-lab-data/connectors/ldap/MNB-OpenLDAP-schema-58.md` and record the prediction card: 2 accounts (`helen.ross`, `priya.wire`), 1 group (`wire-initiators`), 1 membership (Priya).
+1. Create `~/iiq-lab-data/connectors/ldap/MNB-OpenLDAP-schema-58.md` and record the prediction card: 10 accounts, 8 groups, Priya in `wire-initiators` (+ dept/all-employees).
 2. Add the schema map:
 
 | LDAP attribute | Schema use |
@@ -224,8 +234,8 @@ Now consume the coordinates from concepts: host, port, bind DN, base DN. In prod
 1. Applications → Add New → **OpenLDAP - Direct** (or the generic **LDAP** type if Direct is absent from your build — document which you used, or equivalent menu path).
 2. Name: `MNB-OpenLDAP`. Owner: `helen.ross` (lab session as `spadmin`).
 3. Connection section:
-   - **Host:** `localhost` — **Port:** `389`
-   - **Bind DN (user):** `cn=admin,dc=meridiannb,dc=com` — **Password:** `admin` (annotate: *lab-only; production uses a vaulted read-only service bind*)
+   - **Host:** `openldap` if IIQ is in Docker; `localhost` if IIQ is on the host — **Port:** `389`
+   - **Bind DN (user):** `cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com` — **Password:** `Provision1!` (annotate: *use this when PROVISIONING is on; aggregate-only labs may use `cn=svc-iiq-read` / `Readonly1!`*)
    - **Base / search DN:** `dc=meridiannb,dc=com`; if the form takes separate bases, people `ou=people,dc=meridiannb,dc=com` and groups `ou=groups,dc=meridiannb,dc=com`
    - **SSL/LDAPS:** off — label *lab only* in your notes
 4. Save.
@@ -263,11 +273,11 @@ Now run the inventory and hold it against your Task 2 prediction. A green task r
 1. Tasks → New → Account Aggregation: `MNB-OpenLDAP-Account-Aggregation` (curriculum alias `Aggregate MNB-OpenLDAP`), application `MNB-OpenLDAP`.
 2. Run it. Open the Task Result and record accounts scanned, created, updated.
 3. Run group/entitlement aggregation per your build (separate Account Group Aggregation task or the connector's group scan).
-4. Reconcile: **2 accounts scanned, 1 group discovered.** Open `priya.wire`'s identity cube — the `MNB-OpenLDAP` link shows entitlement `wire-initiators`. Open `helen.ross` — link present, zero group entitlements.
-5. Confirm both links correlated to their HR cubes via `employeeNumber` (MNB00090, MNB00001) — no new identities created.
+4. Reconcile: **10 accounts scanned, 8 groups discovered.** Open `priya.wire`'s identity cube — the `MNB-OpenLDAP` link shows entitlement `wire-initiators` (plus dept/all-employees). Confirm `samir.hassan` correlates but has no group entitlements.
+5. Confirm links correlated to their HR cubes via `employeeNumber` — no new identities created.
 6. Schedule design note: nightly, after `MNB-HR` aggregation so correlation targets exist first.
 
-**Expected result:** Task Result success with exactly 2 accounts; Priya's cube shows `wire-initiators`; zero identities created.
+**Expected result:** Task Result success with exactly 10 accounts; Priya's cube shows `wire-initiators`; zero identities created.
 
 **If it fails:** 0 accounts → base DN or objectClass filter wrong (Task 5); group empty → `member` vs `uniqueMember` mapping; accounts uncorrelated → `employeeNumber` map or HR cubes missing.
 
@@ -302,11 +312,11 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 
 ## Acceptance criteria
 
-- [ ] OpenLDAP container running; `ldapsearch` returns 6 entries with `result: 0 Success`
-- [ ] Prediction card written *before* aggregation (2 accounts / 1 group / 1 membership)
+- [ ] OpenLDAP container running; `ldapsearch` returns Success with the seeded DIT
+- [ ] Prediction card written *before* aggregation (10 accounts / 8 groups / Priya in wire-initiators)
 - [ ] `MNB-OpenLDAP` created with live values; Test Connection passed
 - [ ] Schema: `inetOrgPerson` accounts on `uid`, `groupOfNames` entitlements, create-identities off
-- [ ] Aggregation Task Result matches the prediction exactly; Priya and Helen correlated by `employeeNumber`
+- [ ] Aggregation Task Result matches the prediction exactly; accounts correlated by `employeeNumber`
 - [ ] `wire-initiators` described and risk-flagged; leaver evidence chain written
 - [ ] Hardening notes: read-only bind, LDAPS, paged results (fallback path: deferred note instead of live results)
 
@@ -327,7 +337,7 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 
 ## Training binder evidence
 
-- `ldapsearch` output showing all 6 entries and `result: 0 Success`
+- `ldapsearch` output showing Success and the seeded DIT
 - Prediction card + `MNB-OpenLDAP-schema-58.md` with schema map and correlation decision
 - Application screenshot (bind/base values visible, password masked) and Test Connection success
 - Aggregation Task Result with counts reconciled against the prediction; Priya's cube showing `wire-initiators`
@@ -352,8 +362,8 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 2. RDN is `uid=priya.wire` — her name within her container; the rest is the path: the `people` OU inside the `dc=meridiannb,dc=com` suffix.
 3. The filter is a search predicate, not a validation — no entries carry `objectClass=user` in this directory, so the search legitimately matches nothing and succeeds with zero results.
 4. Lab convenience on a disposable container. Production requires a dedicated read-only bind account with scoped ACLs, vaulted credentials, and rotation — admin binds violate least privilege and put a directory-admin password in connector config.
-5. 2 accounts scanned, 1 group, 1 membership (Priya). Writing the prediction first turns the Task Result into verifiable evidence — a green task with wrong counts is otherwise invisible.
-6. "Disabled" is not an available control; leaver evidence must be group removal (`member` gone on re-aggregation) and/or entry deletion, and the runbook must state which.
+5. 10 accounts scanned, 8 groups (Priya in `wire-initiators` among others). Writing the prediction first turns the Task Result into verifiable evidence — a green task with wrong counts is otherwise invisible.
+6. "Disabled" is not an available control; leaver evidence must be group removal (`member` gone on re-aggregation) and/or entry deletion, and the runbook must state which. (`samir.hassan` already models Inactive + no groups.)
 
 ---
 
@@ -369,14 +379,14 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 
 ## Stretch lab
 
-Extend the LDIF: add `samir.hassan` (MNB00094) and `raj.external` (MNB00093, contractor) as `inetOrgPerson` entries and a `cn=wire-approvers` group containing Samir. Recreate the container (`down` then `up -d` — remember bootstrap LDIF only loads on first creation), re-run the aggregation, and verify your new prediction: 4 accounts, 2 groups. Then write the finding Raj represents if he ever appears in `wire-initiators`: a contractor holding wire initiation is an SoD/risk event for Lesson 40's policies. Finally, convert the container to LDAPS with a self-signed cert and document the trust-store import on the IIQ side.
+Add a new `inetOrgPerson` and a SoD-risky membership (e.g. put `raj.external` into `wire-initiators`). Recreate OpenLDAP volumes so bootstrap reloads, re-run aggregation, and verify the new prediction. Document the contractor-in-wire-initiators finding for Lesson 40 policies. Optionally convert the container to LDAPS with a self-signed cert and document the trust-store import on the IIQ side.
 
 ---
 
 ## Summary
 
 - LDAP is a protocol with a portable mental model — DIT, DN, bind DN, objectClass, and the base/scope/filter triad — that governs any directory, and AD habits (`sAMAccountName`, `user`) actively break non-AD directories.
-- The live path is the lesson: a real container, a real `ldapsearch`, and an aggregation whose counts (2 accounts, 1 group, Priya in `wire-initiators`) were predicted from the LDIF before the task ran.
+- The live path is the lesson: a real container, a real `ldapsearch`, and an aggregation whose counts (10 accounts, 8 groups, Priya in `wire-initiators`) were predicted from the LDIF before the task ran.
 - Production hardening is three deltas from the lab: dedicated read-only bind, LDAPS with an owned trust store, and paged results — plus the honesty note that OpenLDAP has no standard disable flag.
 
 ---

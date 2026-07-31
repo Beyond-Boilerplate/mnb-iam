@@ -1,35 +1,308 @@
-dn: dc=meridiannb,dc=com
-objectClass: top
-objectClass: dcObject
-objectClass: organization
-o: Meridian National Bank
-dc: meridiannb
+# Meridian OpenLDAP bootstrap — enterprise-shaped DIT for IIQ OpenLDAP - Direct
+#
+# Loaded once on first container create (baked into mnb-openldap image).
+# Recreate + wipe volumes to reload after editing this file and rebuilding:
+#   docker compose -f docker-compose.iiq.yml build openldap
+#   docker compose -f docker-compose.iiq.yml up -d --force-recreate openldap
+#
+# Suffix / admin (from compose env): dc=meridiannb,dc=com
+#   Bind admin:  cn=admin,dc=meridiannb,dc=com / admin
+#   Bind read:   cn=svc-iiq-read,dc=meridiannb,dc=com / Readonly1!   (aggregate-only)
+#   Bind write:  cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com / Provision1!
+#                (IIQ app bind when PROVISIONING enabled — single connector bind does both)
+#
+# IIQ from Docker network: host=openldap port=389
+# IIQ / ldapsearch from host: host=localhost port=389
+#
+# Correlation: employeeNumber ↔ HR userId (MNB000xx). Native identity: uid.
 
 dn: ou=people,dc=meridiannb,dc=com
 objectClass: organizationalUnit
 ou: people
+description: End-user accounts (inetOrgPerson)
 
 dn: ou=groups,dc=meridiannb,dc=com
 objectClass: organizationalUnit
 ou: groups
+description: Application and network entitlement groups (groupOfNames)
+
+dn: ou=service,dc=meridiannb,dc=com
+objectClass: organizationalUnit
+ou: service
+description: Connector service binds (provision account lives here; read-only bind is at the suffix)
+
+dn: cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: svc-iiq-provision
+userPassword: Provision1!
+description: IdentityIQ provision+aggregate bind — write on ou=people and ou=groups (lab)
 
 dn: uid=helen.ross,ou=people,dc=meridiannb,dc=com
 objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: helen.ross
 cn: Helen Ross
 sn: Ross
-uid: helen.ross
+givenName: Helen
 mail: helen.ross@meridiannb.com
 employeeNumber: MNB00001
+employeeType: Employee
+title: Head of Identity & Access
+departmentNumber: SEC
+o: Meridian National Bank
+l: New York
+userPassword: LabUser1!
+description: Active
+
+dn: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: christopher.hayes
+cn: Christopher Hayes
+sn: Hayes
+givenName: Christopher
+mail: christopher.hayes@meridiannb.com
+employeeNumber: MNB00002
+employeeType: Employee
+title: Director of Technology
+departmentNumber: ITP
+o: Meridian National Bank
+l: Charlotte
+userPassword: LabUser1!
+description: Active
+
+dn: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: rachel.evans
+cn: Rachel Evans
+sn: Evans
+givenName: Rachel
+mail: rachel.evans@meridiannb.com
+employeeNumber: MNB00005
+employeeType: Employee
+title: Payments Operations Manager
+departmentNumber: TRS
+o: Meridian National Bank
+l: Bengaluru
+userPassword: LabUser1!
+description: Active
+
+dn: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: sanjay.kapoor
+cn: Sanjay Kapoor
+sn: Kapoor
+givenName: Sanjay
+mail: sanjay.kapoor@meridiannb.com
+employeeNumber: MNB00006
+employeeType: Employee
+title: Commercial Banking Manager
+departmentNumber: CML
+o: Meridian National Bank
+l: London
+userPassword: LabUser1!
+description: Active
+
+dn: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: meera.torres
+cn: Meera Torres
+sn: Torres
+givenName: Meera
+mail: meera.torres@meridiannb.com
+employeeNumber: MNB00012
+employeeType: Employee
+title: Directory Administrator
+departmentNumber: ITP
+o: Meridian National Bank
+l: New York
+manager: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+userPassword: LabUser1!
+description: Active
+
+dn: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: michael.ross
+cn: Michael Ross
+sn: Ross
+givenName: Michael
+mail: michael.ross@meridiannb.com
+employeeNumber: MNB00015
+employeeType: Employee
+title: Wire Specialist
+departmentNumber: TRS
+o: Meridian National Bank
+l: Charlotte
+manager: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+userPassword: LabUser1!
+description: Active
+
+dn: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: noah.ibrahim
+cn: Noah Ibrahim
+sn: Ibrahim
+givenName: Noah
+mail: noah.ibrahim@meridiannb.com
+employeeNumber: MNB00021
+employeeType: Employee
+title: Wire Specialist
+departmentNumber: TRS
+o: Meridian National Bank
+l: New York
+manager: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+userPassword: LabUser1!
+description: Active
 
 dn: uid=priya.wire,ou=people,dc=meridiannb,dc=com
 objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: priya.wire
 cn: Priya Mehta
 sn: Mehta
-uid: priya.wire
+givenName: Priya
 mail: priya.wire@meridiannb.com
 employeeNumber: MNB00090
+employeeType: Employee
+title: Wire Specialist
+departmentNumber: TRS
+o: Meridian National Bank
+l: New York
+manager: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+userPassword: LabUser1!
+description: Active
+
+dn: uid=raj.external,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: raj.external
+cn: Raj External
+sn: External
+givenName: Raj
+mail: raj.contractor@vendor-mail.invalid
+employeeNumber: MNB00093
+employeeType: Contractor
+title: Cloud Platform Engineer
+departmentNumber: ITP
+o: Meridian National Bank
+l: Bengaluru
+manager: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+userPassword: LabUser1!
+description: Active
+
+dn: uid=samir.hassan,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: samir.hassan
+cn: Samir Hassan
+sn: Hassan
+givenName: Samir
+mail: samir.hassan@meridiannb.com
+employeeNumber: MNB00094
+employeeType: Employee
+title: Application Developer
+departmentNumber: ITP
+o: Meridian National Bank
+l: Kathmandu
+manager: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+userPassword: LabUser1!
+description: Inactive
 
 dn: cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
 objectClass: groupOfNames
+objectClass: top
 cn: wire-initiators
+description: Authorizes wire transfer initiation on the vendor wire platform (high risk)
+member: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+member: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+member: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+
+dn: cn=wire-approvers,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: wire-approvers
+description: Dual-control approval for wire transfers (SoD vs wire-initiators)
+member: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+member: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
+
+dn: cn=vpn-network-admins,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: vpn-network-admins
+description: Network gear / VPN concentrator admin auth (blast-radius directory)
+member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+member: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+
+dn: cn=app-ldap-admins,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: app-ldap-admins
+description: Local directory administrators for this OpenLDAP instance
+member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+member: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+
+dn: cn=dept-treasury,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: dept-treasury
+description: Treasury & Payments departmental access
+member: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+member: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+member: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+member: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+
+dn: cn=dept-security,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: dept-security
+description: Identity & Access / Security departmental access
+member: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+
+dn: cn=dept-technology,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: dept-technology
+description: Technology Platforms departmental access
+member: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+member: uid=raj.external,ou=people,dc=meridiannb,dc=com
+
+dn: cn=all-employees,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+objectClass: top
+cn: all-employees
+description: Baseline employee population (excludes contractors and leavers)
+member: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+member: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+member: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+member: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
+member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+member: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+member: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
 member: uid=priya.wire,ou=people,dc=meridiannb,dc=com

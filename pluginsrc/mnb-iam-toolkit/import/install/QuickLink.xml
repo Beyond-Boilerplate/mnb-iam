@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <QuickLink action="pluginPage" category="Access" messageKey="Meridian Toolkit Ping"
+      name="MNB-QL-Toolkit-Ping" ordering="100">
+    <Attributes>
+      <Map>
+        <entry key="pluginName" value="mnb_iam_toolkit"/>
+        <entry key="rightRequired" value="MNBToolkitAccess"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+</sailpoint>

@@ -1,0 +1,33 @@
+{
+  "id": "classify-plugin-work-toolkit",
+  "skill": "classify",
+  "work_type": "plugin-work",
+  "keywords": [
+    "plugin",
+    "toolkit",
+    "toolkit_ping",
+    "install zip",
+    "Custom API"
+  ],
+  "summary": "Verify toolkit plugin health / install",
+  "approach": "Classify as plugin-work; route to toolkit_ping + list_iiq_plugins before any install_plugin_zip",
+  "solution": {
+    "work_type": "plugin-work",
+    "signals": [
+      "plugin",
+      "toolkit_ping",
+      "Custom API"
+    ],
+    "next_tools": [
+      "toolkit_ping",
+      "list_iiq_plugins"
+    ]
+  },
+  "gotchas": [
+    "Empty MCP resources are normal; check healthz and toolkit_ping"
+  ],
+  "source_issue": "MNB-123",
+  "confidence": 0.95,
+  "created_at": "2026-07-29T20:22:39Z",
+  "updated_at": "2026-07-29T20:22:39Z"
+}

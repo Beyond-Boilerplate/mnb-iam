@@ -39,10 +39,10 @@ export SPTARGET=sandbox
 ./build.sh importdynamic   # smoke Rule only until you export your own objects
 ```
 
-6. Optional live connector backends (OpenLDAP + Postgres):
+6. Live OpenLDAP is included in `./tools/lab/docker/up.sh`. Optional sample JDBC (host :5434):
 
 ```bash
-docker compose -f docker-compose.connectors.yml up -d
+docker compose -f docker-compose.connectors.yml up -d jdbc-pg
 ```
 
 7. Keep a CHANGELOG of `MNB-*` objects you **create**, optional `config/` exports, and evidence screenshots.

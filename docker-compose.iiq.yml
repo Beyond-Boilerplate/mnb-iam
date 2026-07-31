@@ -1,18 +1,70 @@
-# Meridian local stack: Postgres + IdentityIQ + Academy (lessons + Verify now)
+# Meridian local stack: Postgres + OpenLDAP + IdentityIQ + Academy + MCP + OpenAPI + Teller
 #
 # One command:
 #   ./tools/lab/docker/up.sh
 #   # or: docker compose -f docker-compose.iiq.yml up -d --build
 #
 # URLs:
-#   Academy  http://localhost:4173/
-#   IIQ      http://localhost:8080/identityiq  (spadmin / admin)
+#   Academy   http://localhost:4173/
+#   IIQ       http://localhost:8080/identityiq  (spadmin / admin)
+#   OpenAPI   http://localhost:8765/swagger/
+#   MCP       http://127.0.0.1:8766/mcp  (Bearer ${MCP_API_KEY:-mnb-lab-mcp-key})
+#   Teller    http://localhost:4180/  (chatbot; set OPENROUTER_API_KEY for free-text)
+#   OpenLDAP  ldap://localhost:389  (cn=admin,dc=meridiannb,dc=com / admin)
 #
 # Tear down: ./tools/lab/docker/down.sh [-v]
+#
+# Extra JDBC sample DB (optional): docker compose -f docker-compose.connectors.yml up -d jdbc-pg
+# OpenLDAP is part of this stack (see openldap service).
 
 name: mnb-iiq-lab
 
 services:
+  openldap:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.openldap
+    image: ${OPENLDAP_IMAGE:-mnb-openldap:local}
+    container_name: mnb-openldap
+    environment:
+      LDAP_ORGANISATION: "Meridian National Bank"
+      LDAP_DOMAIN: "meridiannb.com"
+      LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_CONFIG_PASSWORD: "config"
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_USERNAME: "svc-iiq-read"
+      LDAP_READONLY_USER_PASSWORD: "Readonly1!"
+    ports:
+      - "${LDAP_PORT:-389}:389"
+      - "${LDAPS_PORT:-636}:636"
+    volumes:
+      - mnb-openldap-data:/var/lib/ldap
+      - mnb-openldap-config:/etc/ldap/slapd.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "ldapsearch -x -H ldap://127.0.0.1:389 -b dc=meridiannb,dc=com -D cn=admin,dc=meridiannb,dc=com -w admin '(uid=helen.ross)' dn | grep -q 'uid=helen.ross'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+
+  openldap-provision-acl:
+    image: ${OPENLDAP_IMAGE:-mnb-openldap:local}
+    container_name: mnb-openldap-acl-init
+    depends_on:
+      openldap:
+        condition: service_healthy
+    environment:
+      LDAP_HOST: openldap
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_CONFIG_PASSWORD: config
+      LDAP_PROVISION_PASSWORD: Provision1!
+    entrypoint: ["/opt/mnb/apply-provision-acl.sh"]
+    restart: "no"
+
   postgres:
     image: postgres:16-alpine
     environment:
@@ -52,6 +104,10 @@ services:
     container_name: mnb-identityiq
     depends_on:
       schema-init:
+        condition: service_completed_successfully
+      openldap:
+        condition: service_healthy
+      openldap-provision-acl:
         condition: service_completed_successfully
     ports:
       - "${IIQ_HTTP_PORT:-8080}:8080"
@@ -112,5 +168,107 @@ services:
       retries: 10
       start_period: 20s
 
+  iiq-mcp:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mcp
+    image: ${MCP_IMAGE:-mnb-iiq-mcp:local}
+    container_name: mnb-iiq-mcp
+    depends_on:
+      identityiq:
+        condition: service_healthy
+    ports:
+      - "${MCP_PORT:-8766}:8766"
+    environment:
+      IIQ_BASE_URL: http://identityiq:8080/identityiq
+      IIQ_USER: ${IIQ_USER:-spadmin}
+      IIQ_PASSWORD: ${IIQ_PASSWORD:-admin}
+      MCP_HOST: "0.0.0.0"
+      MCP_PORT: "8766"
+      MCP_PATH: /mcp
+      # Required when binding non-loopback inside the container
+      MCP_API_KEY: ${MCP_API_KEY:-mnb-lab-mcp-key}
+      IIQ_MCP_ENABLED_PHASES: ${IIQ_MCP_ENABLED_PHASES:-1,2,3,4}
+      IIQ_MCP_MAX_RPS: ${IIQ_MCP_MAX_RPS:-5}
+      IIQ_MCP_MAX_CONCURRENT: ${IIQ_MCP_MAX_CONCURRENT:-4}
+      IIQ_MCP_AUDIT_LOG: /var/mcp/mcp-write-audit.jsonl
+      IIQ_MCP_IDEMPOTENCY_DB: /var/mcp/mcp-idempotency.sqlite
+      IIQ_MCP_HTTP_TIMEOUT_SECONDS: ${IIQ_MCP_HTTP_TIMEOUT_SECONDS:-60}
+    volumes:
+      - mnb-mcp-data:/var/mcp
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8766/healthz')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  api-docs:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api-docs
+    image: ${API_DOCS_IMAGE:-mnb-api-docs:local}
+    container_name: mnb-api-docs
+    depends_on:
+      identityiq:
+        condition: service_healthy
+    ports:
+      - "${API_DOCS_PORT:-8765}:8765"
+    environment:
+      IIQ_BASE: http://identityiq:8080
+      API_DOCS_BIND: "0.0.0.0"
+      API_DOCS_PORT: "8765"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/swagger/')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  iiq-chat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.chat
+    image: ${CHAT_IMAGE:-mnb-iiq-chat:local}
+    container_name: mnb-iiq-chat
+    depends_on:
+      iiq-mcp:
+        condition: service_healthy
+    ports:
+      - "${CHAT_PORT:-4180}:4180"
+    env_file:
+      - path: tools/iiq-chat/.env
+        required: false
+    environment:
+      CHAT_HOST: "0.0.0.0"
+      CHAT_PORT: "4180"
+      IIQ_MCP_URL: http://iiq-mcp:8766/mcp
+      MCP_API_KEY: ${MCP_API_KEY:-mnb-lab-mcp-key}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
+      OPENROUTER_FALLBACK_MODELS: ${OPENROUTER_FALLBACK_MODELS:-openrouter/free,meta-llama/llama-3.3-70b-instruct:free,google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free}
+      OPENROUTER_REFERER: ${OPENROUTER_REFERER:-http://localhost:4180}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:4180/api/config')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
 volumes:
   mnb-iiq-pg:
+  mnb-mcp-data:
+  mnb-openldap-data:
+  mnb-openldap-config:

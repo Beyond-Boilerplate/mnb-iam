@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: IdentityIQ 8.5 API Bundle Index
+  version: 8.5-mined
+  description: Index of categorized OpenAPI documents for this SSD lab. Open individual YAML files in Swagger UI. See docs/api/README.md.
+  x-generated-at: "2026-07-29T18:48:38.658570+00:00"
+  x-summary:
+    endpoint_count: 670
+    by_surface:
+      external-rest: 1
+      oauth2: 11
+      ootb-rest: 266
+      plugins: 74
+      scim-v2: 36
+      ui-rest: 282
+    by_category:
+      identities: 109
+      certifications: 66
+      platform: 63
+      uncategorized: 51
+      applications: 50
+      work-items: 44
+      meridian-toolkit: 38
+      "plugin:SWECertificationsAddins": 34
+      accounts: 32
+      tasks: 31
+      roles: 19
+      forms: 16
+      entitlements: 15
+      security: 15
+      policies: 13
+      reporting: 13
+      workflows: 12
+      alerts: 11
+      oauth: 10
+      plugins: 8
+      authorization: 6
+      provisioning: 5
+      scim-discovery: 4
+      integrations: 3
+      "plugin:AccessRequestApprovalAddins": 2
+    by_http_method:
+      DELETE: 11
+      GET: 406
+      PATCH: 9
+      POST: 216
+      PUT: 28
+    gap_counts:
+      response-schema-unknown: 596
+      produces-unspecified: 552
+      request-schema-unknown: 202
+      consumes-unspecified: 185
+      missing-path-annotation: 119
+      subresource-locator-path-synthetic: 119
+      response-schema-partial: 74
+      request-schema-partial: 51
+    unique_full_paths: 646
+servers:
+  - url: "http://localhost:8080/identityiq"
+paths: {}
+x-iiq-openapi-files:
+  - surface: meridian-custom-apis
+    file: openapi-meridian-agent.yaml
+    title: Meridian Custom APIs
+    basePath: /identityiq/plugin/rest
+  - surface: external-rest
+    file: openapi-external-rest.yaml
+    title: IdentityIQ External REST API
+    basePath: /identityiq/external/rest
+  - surface: oauth2
+    file: openapi-oauth2.yaml
+    title: IdentityIQ OAuth2 API
+    basePath: /identityiq/oauth2
+  - surface: ootb-rest
+    file: openapi-ootb-rest.yaml
+    title: IdentityIQ OOTB REST API
+    basePath: /identityiq/rest
+  - surface: plugins
+    file: openapi-plugins.yaml
+    title: IdentityIQ Plugin REST APIs (Meridian + study)
+    basePath: /identityiq/plugin/rest
+  - surface: scim-v2
+    file: openapi-scim-v2.yaml
+    title: IdentityIQ SCIM 2.0 Server API
+    basePath: /identityiq/scim/v2
+  - surface: ui-rest
+    file: openapi-ui-rest.yaml
+    title: IdentityIQ UI REST API
+    basePath: /identityiq/ui/rest
+components:
+  schemas: {}

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "jml-joiner-dry-run-new",
+    "tier": "core",
+    "tags": ["jml", "joiner", "write", "regression"],
+    "mutate": true,
+    "query": "Dry-run a joiner for a new identity named joiner.temp",
+    "xfail": true,
+    "xfail_reason": "run_jml_event requires an existing identity; agent should create/seed identity first OR dry-run should accept pending joiner payload without cube.",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["run_jml_event"],
+        "steps_contain_any": ["dry"],
+        "reply_contains_any": ["dry", "preview", "would", "joiner", "joiner.temp"],
+        "reply_not_contains_any": [
+          "doesn't exist yet",
+          "need to create the identity first",
+          "You'll need to create"
+        ],
+        "no_tool_errors": true
+      },
+      {
+        "tools_all_of": ["run_jml_event"],
+        "tools_any_of": ["run_jml_event"],
+        "min_tools": 2,
+        "reply_contains_any": ["joiner", "dry"],
+        "no_tool_errors": true
+      }
+    ]
+  },
+  {
+    "id": "jml-joiner-dry-run-existing",
+    "tier": "core",
+    "tags": ["jml", "joiner", "write"],
+    "mutate": true,
+    "query": "Dry-run a joiner lifecycle event for Helen Ross.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["run_jml_event"],
+      "reply_contains_any": ["Helen", "joiner", "dry", "workflow", "event", "RapidSetup", "lifecycle"],
+      "reply_not_contains_any": ["doesn't exist yet", "Invalid filter"],
+      "no_tool_errors": true,
+      "allow_step_substrings": ["method not allowed"]
+    }
+  },
+  {
+    "id": "jml-mover-manager",
+    "tier": "core",
+    "tags": ["jml", "mover", "manager", "write", "regression"],
+    "mutate": true,
+    "query": "Process a mover: set Helen Ross's manager to Christopher Hayes",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["run_jml_event", "update_identity", "patch_identity", "set_identity_manager", "rebuild_manager_hierarchy"],
+        "reply_contains_any": ["Helen", "Christopher", "Hayes", "manager", "updated", "mover"],
+        "reply_not_contains_any": ["failed to update", "could not set manager"],
+        "no_tool_errors": true,
+        "forbidden_step_substrings": ["invalid filter", "attribute not found"],
+        "allow_step_substrings": ["method not allowed", "405"]
+      }
+    ]
+  },
+  {
+    "id": "jml-leaver-dry-run",
+    "tier": "full",
+    "tags": ["jml", "leaver", "write"],
+    "mutate": true,
+    "query": "Dry-run a leaver event for Priya Mehta — do not terminate for real.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["run_jml_event"],
+      "reply_contains_any": ["Priya", "leaver", "dry", "terminate", "disable", "lifecycle"],
+      "reply_not_contains_any": ["doesn't exist yet"],
+      "no_tool_errors": true
+    }
+  }
+]

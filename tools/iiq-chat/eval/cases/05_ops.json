@@ -1,0 +1,89 @@
+[
+  {
+    "id": "ops-refresh-identity-cube",
+    "tier": "core",
+    "tags": ["ops", "tasks", "write"],
+    "mutate": true,
+    "query": "Run the Refresh Identity Cube task now (async is fine).",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["run_task_now", "list_allowed_toolkit_tasks"],
+      "reply_contains_any": ["Refresh", "task", "accepted", "running", "launched", "queued", "success"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "ops-list-allowed-tasks",
+    "tier": "core",
+    "tags": ["ops", "tasks", "read"],
+    "query": "Which toolkit tasks am I allowed to run?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_allowed_toolkit_tasks"],
+      "reply_contains_any": ["Refresh", "Aggregation", "task"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "ops-executive-digest",
+    "tier": "smoke",
+    "tags": ["ops", "read"],
+    "query": "Give me the executive digest for this lab.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["get_executive_digest"],
+      "require_ok_tools_any_of": ["get_executive_digest"],
+      "reply_contains_any": ["identit", "application", "digest", "MNB", "count", "80", "81"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "ops-aggregate-hr",
+    "tier": "full",
+    "tags": ["ops", "apps", "write"],
+    "mutate": true,
+    "query": "Trigger a full account aggregation for MNB-HR.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["trigger_aggregation", "run_task_now"],
+      "reply_contains_any": ["aggregat", "MNB-HR", "task", "accepted", "running", "launched"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "ops-test-ldap-connection",
+    "tier": "core",
+    "tags": ["ops", "apps", "read"],
+    "query": "Test the connection for MNB-OpenLDAP.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["test_application_connection", "get_application_health", "get_application_config"],
+      "reply_contains_any": ["success", "ok", "connected", "pass", "OpenLDAP", "healthy", "true"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "ops-audit-search",
+    "tier": "full",
+    "tags": ["ops", "audit", "read"],
+    "query": "Search recent audit events related to Helen Ross.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["search_audit_events"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "ops-rebuild-managers",
+    "tier": "full",
+    "tags": ["ops", "manager", "write"],
+    "mutate": true,
+    "query": "Rebuild the manager hierarchy from MNB-HR link attributes.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["rebuild_manager_hierarchy"],
+      "reply_contains_any": ["manager", "rebuild", "set", "linked", "MNB-HR"],
+      "no_tool_errors": true
+    }
+  }
+]

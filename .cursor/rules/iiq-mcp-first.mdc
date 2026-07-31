@@ -1,0 +1,10 @@
+---
+description: Prefer identityiq MCP tools (not resources) for live IIQ app/identity/ops
+alwaysApply: true
+---
+
+# MCP tools for live IIQ
+
+- Use MCP **tools** on `identityiq`. Resources will be empty — ignore that.
+- Do not Plan or run lab/`importdynamic` for live create/list/run requests unless MCP fails or user asks for config-as-code.
+- Tool map: `docs/api/MCP-TOOLS.md`

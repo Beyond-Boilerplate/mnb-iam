@@ -1,0 +1,30 @@
+# Permanent exclusions only — all other catalog tools are registered in Python modules.
+# Fields: name, phase, risk, implemented, requires_confirmation, gap_id, module, description
+#
+# Note: update_system_config and capability assign are implemented as gated Custom API tools
+# (advancedOpsEnabled / mutateGovernanceEnabled). Rule source + scopes stay excluded.
+
+tools:
+  - name: update_rule_source
+    phase: 99
+    risk: excluded
+    implemented: false
+    requires_confirmation: true
+    module: rules
+    description: Permanently excluded — rule edits are code changes to the IIQ runtime.
+
+  - name: grant_capability
+    phase: 99
+    risk: excluded
+    implemented: false
+    requires_confirmation: true
+    module: admin
+    description: Permanently excluded name — use assign_identity_capability (Custom APIs, mutateGovernanceEnabled).
+
+  - name: update_scope
+    phase: 99
+    risk: excluded
+    implemented: false
+    requires_confirmation: true
+    module: admin
+    description: Permanently excluded — manage via normal admin channels.

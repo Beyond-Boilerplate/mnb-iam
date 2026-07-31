@@ -1,0 +1,23 @@
+{
+  "id": "implement-ui-branding-web-overlays",
+  "skill": "implement",
+  "work_type": "ui-branding",
+  "keywords": [
+    "web/",
+    "loginLogo",
+    "TopLogo1",
+    "favicon",
+    "build.sh"
+  ],
+  "summary": "Drop Meridian assets into web/ and rebuild WAR",
+  "approach": "Add loginLogo.png TopLogo1.png favicon.ico (+ optional ui-custom.css); SPTARGET=sandbox ./build.sh clean war; never edit build/extract",
+  "solution": {
+    "mode": "SSD_CONFIG",
+    "docs": "docs/lessons/103-ui-customization-branding.md"
+  },
+  "gotchas": [],
+  "source_issue": "KAN-6",
+  "confidence": 0.95,
+  "created_at": "2026-07-29T21:06:33Z",
+  "updated_at": "2026-07-29T21:06:33Z"
+}

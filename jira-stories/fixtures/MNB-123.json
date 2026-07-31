@@ -1,0 +1,11 @@
+{
+  "key": "MNB-123",
+  "id": "12301",
+  "fields": {
+    "summary": "Install/enable study plugin zip; verify toolkit_ping",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["plugin-work"],
+    "description": "Ensure Meridian IAM toolkit / study plugin is installed or enabled in the lab. Verify with toolkit_ping and list_iiq_plugins. Do not deploy to non-lab without CAB."
+  }
+}

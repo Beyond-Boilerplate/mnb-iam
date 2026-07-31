@@ -4,12 +4,15 @@ SailPoint **Services Standard Deployment (SSD)** project for IdentityIQ **8.5**,
 
 Day-to-day customization uses **SSB** (Services Standard Build) — do not reinvent Ant packaging; use `./build.sh`.
 
-## Quick start (Docker — IIQ + Academy)
+## Quick start (Docker — IIQ + Academy + MCP + OpenAPI)
 
 ```bash
 ./tools/lab/docker/up.sh
 # Academy → http://localhost:4173/
 # IIQ     → http://localhost:8080/identityiq  (spadmin / admin)
+# OpenAPI → http://localhost:8765/swagger/
+# MCP     → http://127.0.0.1:8766/mcp  (Bearer mnb-lab-mcp-key)
+# Teller  → http://localhost:4180/  (chatbot; OPENROUTER_API_KEY for free-text)
 ```
 
 Tomcat host path (one command):
@@ -18,8 +21,10 @@ Tomcat host path (one command):
 ./tools/lab/up.sh
 # Academy → http://localhost:4173/
 # IIQ     → http://localhost:8080/identityiq  (spadmin / admin)
+# OpenAPI → http://localhost:8765/swagger/
+# MCP     → http://127.0.0.1:8766/mcp
+# Teller  → http://localhost:4180/
 ```
-
 ---
 
 ## Quick links
@@ -35,7 +40,7 @@ Tomcat host path (one command):
 | [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) | Beginner architecture |
 | [docs/lessons/README.md](docs/lessons/README.md) | Progressive Meridian lessons |
 | [tools/lab/README.md](tools/lab/README.md) | Tomcat laptop bootstrap |
-| [tools/lab/docker/README.md](tools/lab/docker/README.md) | **One-command** Docker: IIQ + Academy |
+| [tools/lab/docker/README.md](tools/lab/docker/README.md) | **One-command** Docker: IIQ + Academy + MCP + OpenAPI |
 
 ---
 

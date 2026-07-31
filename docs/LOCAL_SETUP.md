@@ -9,12 +9,15 @@ This guide walks you through standing up a **local IdentityIQ 8.5** lab. **Two s
 
 Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.md](LESSON_VERIFY.md)). Homelab CD remains the shared site option.
 
-### Path A — Docker (IIQ + Academy, one command)
+### Path A — Docker (IIQ + Academy + MCP + OpenAPI, one command)
 
 ```bash
 ./tools/lab/docker/up.sh
 # Academy: http://localhost:4173/   (lessons + Verify now)
 # IIQ:     http://localhost:8080/identityiq  (spadmin / admin)
+# OpenAPI: http://localhost:8765/swagger/
+# MCP:     http://127.0.0.1:8766/mcp  (Bearer mnb-lab-mcp-key)
+# Teller:  http://localhost:4180/  (chatbot; OPENROUTER_API_KEY for free-text)
 ```
 
 See [`tools/lab/docker/README.md`](../tools/lab/docker/README.md).
@@ -25,6 +28,9 @@ See [`tools/lab/docker/README.md`](../tools/lab/docker/README.md).
 ./tools/lab/up.sh
 # Academy: http://localhost:4173/   (lessons + Verify now)
 # IIQ:     http://localhost:8080/identityiq  (spadmin / admin)
+# OpenAPI: http://localhost:8765/swagger/
+# MCP:     http://127.0.0.1:8766/mcp
+# Teller:  http://localhost:4180/
 ```
 
 First run installs JDK/MySQL/Tomcat + init; later runs start MySQL/Tomcat if needed, then Academy.

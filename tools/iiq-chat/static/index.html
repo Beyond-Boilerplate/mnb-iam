@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Meridian Teller — IdentityIQ operator console over MCP" />
+  <meta name="theme-color" content="#0c2340" />
+  <title>Meridian Teller — IIQ Console</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c2340'/%3E%3Cpath d='M7 22 L16 8 L25 22 Z' fill='%23c4a35a'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <a class="skip-link" href="#message">Skip to ask box</a>
+
+  <header class="mast">
+    <div class="mast-brand">
+      <button type="button" class="rail-toggle" id="rail-toggle" aria-expanded="false" aria-controls="rail" title="Toggle tools">
+        <span class="rail-toggle-bars" aria-hidden="true"></span>
+        <span class="sr-only">Toggle tool rail</span>
+      </button>
+      <span class="mark" aria-hidden="true"></span>
+      <div>
+        <p class="eyebrow">Meridian National Bank</p>
+        <h1>Teller</h1>
+      </div>
+    </div>
+    <div class="mast-actions">
+      <div class="mast-status" id="status" title="MCP connectivity">
+        <span class="dot" data-state="pending"></span>
+        <span class="status-text">Checking MCP…</span>
+      </div>
+      <button type="button" class="ghost-btn" id="clear-chat" title="Clear conversation">Clear</button>
+    </div>
+  </header>
+
+  <div class="rail-backdrop" id="rail-backdrop" hidden></div>
+
+  <main class="desk">
+    <aside class="rail" id="rail" aria-label="Pre-baked MCP actions">
+      <div class="rail-head">
+        <div class="rail-head-row">
+          <div>
+            <h2>Tools</h2>
+            <p>Instant MCP calls — no model needed.</p>
+          </div>
+          <button type="button" class="ghost-btn rail-close" id="rail-close" hidden>Close</button>
+        </div>
+        <label class="sr-only" for="action-filter">Filter tools</label>
+        <div class="filter-wrap">
+          <input id="action-filter" type="search" placeholder="Search tools…  (/)" autocomplete="off" enterkeyhint="search" />
+          <kbd class="filter-kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="group-tabs" id="group-tabs" role="tablist" aria-label="Tool groups"></div>
+        <div class="rail-meta">
+          <span id="match-count"></span>
+          <button type="button" class="text-btn" id="expand-all" hidden>Expand all</button>
+        </div>
+      </div>
+      <div class="favorites" id="favorites" hidden>
+        <h3 class="group-title">Pinned</h3>
+        <div class="chips" id="favorite-chips"></div>
+      </div>
+      <div class="rail-groups" id="actions"></div>
+    </aside>
+
+    <section class="pane" aria-label="Conversation">
+      <div class="pane-brass" aria-hidden="true"></div>
+      <div class="transcript" id="transcript" role="log" aria-live="polite" aria-relevant="additions"></div>
+      <form class="composer" id="composer">
+        <div class="suggest" id="suggest" aria-label="Suggested questions">
+          <button type="button" class="suggest-chip" data-q="Who is Anita Rao?">Who is Anita Rao?</button>
+          <button type="button" class="suggest-chip" data-q="Do I have anyone named Anita?">Anyone named Anita?</button>
+          <button type="button" class="suggest-chip" data-q="Find me all employees in Paris">Employees in Paris</button>
+          <button type="button" class="suggest-chip" data-q="How many open SoD violations are there?">Open SoD count</button>
+        </div>
+        <label class="sr-only" for="message">Ask IdentityIQ</label>
+        <textarea id="message" rows="2" placeholder="Ask in plain language… (Enter to send, Shift+Enter for newline)" required></textarea>
+        <div class="composer-row">
+          <p class="hint" id="llm-hint">LLM chat needs OPENROUTER_API_KEY</p>
+          <button type="submit" class="send" id="send">
+            <span class="send-label">Send</span>
+            <span class="send-busy" hidden>Working…</span>
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

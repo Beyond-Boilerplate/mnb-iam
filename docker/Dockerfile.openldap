@@ -1,0 +1,7 @@
+# Bake bootstrap LDIF + ACL helper into the image.
+# Do not bind-mount custom/ — osixia rewrites/deletes it at first start.
+FROM osixia/openldap:1.5.0
+COPY lab-data/connectors/ldap/mnb-openldap.ldif \
+  /container/service/slapd/assets/config/bootstrap/ldif/custom/mnb-openldap.ldif
+COPY docker/openldap/apply-provision-acl.sh /opt/mnb/apply-provision-acl.sh
+RUN chmod +x /opt/mnb/apply-provision-acl.sh

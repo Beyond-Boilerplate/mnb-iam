@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# One command: host Tomcat IdentityIQ + Academy (lessons + Verify now).
+# One command: host Tomcat IdentityIQ + OpenAPI + MCP + Academy.
 #
-# First run: full setup-local.sh (MySQL + Tomcat + init), then Academy.
-# Later: start lab MySQL/Tomcat if needed, then Academy.
+# First run: full setup-local.sh (MySQL + Tomcat + init), then sidecars + Academy.
+# Later: start lab MySQL/Tomcat if needed, then sidecars + Academy.
 #
 # Usage:
 #   ./tools/lab/up.sh
 #   ./tools/lab/up.sh --force-db     # rebuild DB via setup-local, then Academy
 #   ./tools/lab/up.sh --check        # preflight only (setup-local --check)
 #   ./tools/lab/up.sh --academy-only # Academy only (IIQ must already be up)
+#   ./tools/lab/up.sh --sidecars-only # OpenAPI + MCP only (IIQ must be up)
 #
 set -euo pipefail
 
@@ -19,21 +20,25 @@ PORT="${IIQ_HTTP_PORT:-8080}"
 LOGIN_URL="http://127.0.0.1:${PORT}/identityiq/login.jsf"
 
 ACADEMY_ONLY=0
+SIDECARS_ONLY=0
 SETUP_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --academy-only) ACADEMY_ONLY=1 ;;
+    --sidecars-only) SIDECARS_ONLY=1 ;;
     -h|--help)
       cat <<'EOF'
-One command: host Tomcat IdentityIQ + Academy (lessons + Verify now).
+One command: host Tomcat IdentityIQ + Academy + OpenAPI + MCP.
 
-  ./tools/lab/up.sh                 # ensure IIQ + Academy
-  ./tools/lab/up.sh --force-db      # rebuild DB, then Academy
+  ./tools/lab/up.sh                 # ensure IIQ + sidecars + Academy
+  ./tools/lab/up.sh --force-db      # rebuild DB, then sidecars + Academy
   ./tools/lab/up.sh --check         # preflight only
   ./tools/lab/up.sh --academy-only  # Academy only (IIQ must be up)
+  ./tools/lab/up.sh --sidecars-only # OpenAPI (:8765) + MCP (:8766) only
 
 Install-only (no Academy): ./tools/lab/setup-local.sh
+Docker path:               ./tools/lab/docker/up.sh
 EOF
       exit 0
       ;;
@@ -93,6 +98,12 @@ ensure_iiq() {
   wait_iiq
 }
 
+start_sidecars() {
+  # shellcheck disable=SC1091
+  source "$LAB/start-sidecars.sh"
+  ensure_lab_sidecars
+}
+
 start_academy() {
   export IIQ_BASE_URL="${IIQ_BASE_URL:-http://localhost:${PORT}/identityiq}"
   export IIQ_USER="${IIQ_USER:-spadmin}"
@@ -108,15 +119,28 @@ start_academy() {
   echo "Ready."
   echo "  Academy:  http://localhost:${ACADEMY_PORT}/"
   echo "  IIQ:      http://localhost:${PORT}/identityiq  (spadmin / admin)"
+  echo "  OpenAPI:  http://localhost:${API_DOCS_PORT:-8765}/swagger/"
+  echo "  MCP:      http://127.0.0.1:${MCP_PORT:-8766}/mcp"
+  echo "  Teller:   http://localhost:${CHAT_PORT:-4180}/"
   echo
   echo "Open Academy → Lesson 01 → Lesson verify → Verify now"
-  echo "==> Starting academy (Ctrl+C to stop Academy; IIQ keeps running)"
+  echo "==> Starting academy (Ctrl+C to stop Academy; IIQ + sidecars keep running)"
   exec python3 "$ROOT/tools/academy/serve.py"
 }
 
 # --check: setup preflight only
 if [[ ${#SETUP_ARGS[@]} -gt 0 && "${SETUP_ARGS[0]}" == "--check" ]]; then
   exec "$LAB/setup-local.sh" --check
+fi
+
+if [[ "$SIDECARS_ONLY" -eq 1 ]]; then
+  if ! iiq_login_up; then
+    echo "ERROR: --sidecars-only requires IdentityIQ at $LOGIN_URL" >&2
+    echo "Run: ./tools/lab/up.sh" >&2
+    exit 1
+  fi
+  start_sidecars
+  exit 0
 fi
 
 if [[ "$ACADEMY_ONLY" -eq 0 ]]; then
@@ -129,4 +153,5 @@ else
   fi
 fi
 
+start_sidecars
 start_academy

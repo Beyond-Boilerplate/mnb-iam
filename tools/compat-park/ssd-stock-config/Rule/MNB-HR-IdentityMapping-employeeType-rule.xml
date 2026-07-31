@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB HR IdentityMapping employeeType Rule" type="IdentityAttribute">
+  <Description>MNB HR Identity Mapping rule for employeeType attribute. Maps HR employeeType/userType to identity warehouse employment type attribute.</Description>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="environment" type="Map">
+        <Description>
+           Arguments passed to the aggregation or refresh task.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+           The Identity object that represents the user
+           that is being aggregated.
+        </Description>
+      </Argument>
+      <Argument name="attributeDefinition">
+        <Description>
+           The AttributeDefinition object for this attribute.
+        </Description>
+      </Argument>
+      <Argument name="link">
+        <Description>
+           The Link object from the Identity, if this is an application
+           mapping rule.  For global mapping rules this will be void.
+        </Description>
+      </Argument>
+      <Argument name="attributeSource">
+        <Description>
+          The AttributeSource object.
+        </Description>
+      </Argument>
+      <Argument name="oldValue">
+        <Description>
+          The original value of the application account attribute.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="attributeValue">
+        <Description>
+          The value of the attribute that should be populated.
+          The rule should return this value.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+// MNB HR Identity Mapping for employeeType
+// Maps HR employeeType/userType to identity warehouse employment type with validation
+
+String employeeType = (String)link.getAttribute("employeeType");
+String userType = (String)link.getAttribute("userType");
+
+// Use employeeType if available, otherwise fall back to userType
+String employmentType = employeeType != null ? employeeType : userType;
+
+if (employmentType != null && !employmentType.isEmpty()) {
+    employmentType = employmentType.trim();
+
+    // Validate against allowed employment types
+    if (employmentType.equals("Employee") || employmentType.equals("Contractor")) {
+        return employmentType;
+    }
+
+    // Normalize variations of "Employee"
+    if (employmentType.equalsIgnoreCase("Staff") || employmentType.equalsIgnoreCase("Worker") ||
+        employmentType.equalsIgnoreCase("Worker Bee")) {
+        return "Employee";
+    }
+
+    // Normalize variations of "Contractor"
+    if (employmentType.equalsIgnoreCase("Contract") || employmentType.equalsIgnoreCase("Temp") ||
+        employmentType.equalsIgnoreCase("Temporary")) {
+        return "Contractor";
+    }
+
+    // Log unrecognized employment types for investigation
+    log.warn("Unrecognized employment type "; " from MNB-HR for identity " + identity.getName() + ": " + employmentType);
+
+    // Default to "Employee" for unrecognized types
+    return "Employee";
+}
+
+return null;
+  </Source>
+</Rule>

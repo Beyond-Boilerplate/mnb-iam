@@ -1,0 +1,54 @@
+[
+  {
+    "id": "smoke-toolkit-ping",
+    "tier": "smoke",
+    "tags": ["smoke", "ops", "read"],
+    "query": "Ping the Meridian toolkit and tell me if the agent API is ready.",
+    "expect": {
+      "http_ok": true,
+      "min_tools": 1,
+      "tools_any_of": ["toolkit_ping", "list_uiapi_gaps", "get_executive_digest"],
+      "reply_contains_any": ["ok", "ready", "MNB", "toolkit", "agent", "true", "enabled"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "smoke-who-anita",
+    "tier": "smoke",
+    "tags": ["smoke", "identity", "read"],
+    "query": "Who is Anita Rao?",
+    "expect": {
+      "http_ok": true,
+      "min_tools": 1,
+      "tools_any_of": ["search_identities", "get_identity", "search_profiles"],
+      "reply_contains_any": ["Anita", "Rao", "anita"],
+      "reply_not_contains_any": ["doesn't exist", "not found anyone", "Invalid filter"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "smoke-sod-count",
+    "tier": "smoke",
+    "tags": ["smoke", "governance", "read"],
+    "query": "How many open SoD violations are there?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["count_open_sod_violations", "list_open_sod_violations"],
+      "reply_regex": "\\d+",
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "smoke-manager-hierarchy",
+    "tier": "smoke",
+    "tags": ["smoke", "identity", "manager", "read"],
+    "query": "Who reports to Christopher Hayes?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["get_manager_hierarchy", "search_identities", "get_identity"],
+      "reply_not_contains_any": ["0 reports", "no direct reports", "isn't a manager", "is not a manager"],
+      "reply_contains_any": ["Meera", "Anita", "report", "direct", "13", "Torres", "Rao"],
+      "no_tool_errors": true
+    }
+  }
+]

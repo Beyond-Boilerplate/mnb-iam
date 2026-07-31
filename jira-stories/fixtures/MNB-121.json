@@ -1,0 +1,11 @@
+{
+  "key": "MNB-121",
+  "id": "12101",
+  "fields": {
+    "summary": "Run Identity Refresh now; triage last TaskResult failure",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["task-ops"],
+    "description": "Ops desk request: run Identity Refresh via Meridian toolkit (run_task_now), then document the most recent TaskResult failure if any. Save evidence under .ai-delivery/MNB-121/."
+  }
+}

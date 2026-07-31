@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1.6
+# OpenAPI / Swagger UI + same-origin IIQ reverse proxy (docs/api/serve.py).
+FROM python:3.12-slim-bookworm
+
+WORKDIR /app
+COPY docs/api /app/docs/api
+
+ENV PYTHONUNBUFFERED=1 \
+    API_DOCS_BIND=0.0.0.0 \
+    API_DOCS_PORT=8765 \
+    IIQ_BASE=http://identityiq:8080
+
+EXPOSE 8765
+HEALTHCHECK --interval=15s --timeout=5s --retries=10 --start-period=10s \
+  CMD python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/swagger/')" || exit 1
+
+WORKDIR /app/docs/api
+CMD ["python3", "serve.py", "--bind", "0.0.0.0", "--port", "8765"]

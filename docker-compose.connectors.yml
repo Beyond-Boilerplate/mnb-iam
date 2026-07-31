@@ -1,23 +1,73 @@
-# Optional connector backends for Meridian labs
+# Optional connector backends when not using the main Meridian stack.
+#
+# Prefer the main stack (includes OpenLDAP with seed baked in):
+#   ./tools/lab/docker/up.sh
+#
+# Standalone:
+#   docker compose -f docker-compose.connectors.yml up -d --build
+#
+# Note: main stack Postgres already binds host :5433 — jdbc-pg uses :5434 here.
+
 services:
   openldap:
-    image: osixia/openldap:1.5.0
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.openldap
+    image: ${OPENLDAP_IMAGE:-mnb-openldap:local}
+    container_name: mnb-openldap
     environment:
       LDAP_ORGANISATION: "Meridian National Bank"
       LDAP_DOMAIN: "meridiannb.com"
       LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_CONFIG_PASSWORD: "config"
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_USERNAME: "svc-iiq-read"
+      LDAP_READONLY_USER_PASSWORD: "Readonly1!"
     ports:
-      - "389:389"
+      - "${LDAP_PORT:-389}:389"
+      - "${LDAPS_PORT:-636}:636"
     volumes:
-      - ./lab-data/connectors/ldap/mnb-openldap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/mnb.ldif
+      - mnb-connectors-openldap-data:/var/lib/ldap
+      - mnb-connectors-openldap-config:/etc/ldap/slapd.d
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "ldapsearch -x -H ldap://127.0.0.1:389 -b dc=meridiannb,dc=com -D cn=admin,dc=meridiannb,dc=com -w admin '(uid=helen.ross)' dn | grep -q 'uid=helen.ross'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+
+  openldap-provision-acl:
+    image: ${OPENLDAP_IMAGE:-mnb-openldap:local}
+    container_name: mnb-openldap-acl-init
+    depends_on:
+      openldap:
+        condition: service_healthy
+    environment:
+      LDAP_HOST: openldap
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_CONFIG_PASSWORD: config
+      LDAP_PROVISION_PASSWORD: Provision1!
+    entrypoint: ["/opt/mnb/apply-provision-acl.sh"]
+    restart: "no"
 
   jdbc-pg:
     image: postgres:16-alpine
+    container_name: mnb-jdbc-sample
     environment:
       POSTGRES_USER: mnb
       POSTGRES_PASSWORD: mnb
       POSTGRES_DB: mnb_apps
     ports:
-      - "5433:5432"
+      - "${JDBC_PG_PORT:-5434}:5432"
     volumes:
-      - ./lab-data/connectors/jdbc/mnb_core_accounts.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./lab-data/connectors/jdbc/mnb_core_accounts.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - mnb-connectors-jdbc-pg:/var/lib/postgresql/data
+
+volumes:
+  mnb-connectors-openldap-data:
+  mnb-connectors-openldap-config:
+  mnb-connectors-jdbc-pg:

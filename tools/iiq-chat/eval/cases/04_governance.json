@@ -1,0 +1,76 @@
+[
+  {
+    "id": "cert-create-from-template",
+    "tier": "core",
+    "tags": ["cert", "governance", "write", "regression"],
+    "mutate": true,
+    "query": "Create a certification campaign called MNB-Lab-Manager-Cert from a template",
+    "xfail": true,
+    "xfail_reason": "Agent asked for template name instead of listing templates / using create_certification_campaign with a default OOTB template.",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["create_certification_campaign", "launch_certification_campaign", "create_cert_from_template"],
+        "reply_contains_any": ["MNB-Lab-Manager-Cert", "campaign", "created", "Certification"],
+        "reply_not_contains_any": [
+          "provide the template name",
+          "which template",
+          "Could you please provide the template"
+        ],
+        "no_tool_errors": true
+      },
+      {
+        "min_tools": 2,
+        "tools_any_of": ["create_certification_campaign", "list_certifications", "list_report_definitions"],
+        "reply_contains_any": ["MNB-Lab-Manager-Cert", "campaign", "template"],
+        "reply_not_contains_any": ["provide the template name", "Could you please provide"]
+      }
+    ]
+  },
+  {
+    "id": "cert-list",
+    "tier": "core",
+    "tags": ["cert", "governance", "read"],
+    "query": "List certifications I can decide or that are currently open.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_certifications", "list_agent_work_items"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "sod-list-open",
+    "tier": "core",
+    "tags": ["sod", "governance", "read"],
+    "query": "List open SoD policy violations.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_open_sod_violations", "count_open_sod_violations"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "sod-create-policy-dry",
+    "tier": "full",
+    "tags": ["sod", "governance", "write"],
+    "mutate": true,
+    "query": "Create an SoD policy named MNB-Eval-Wire-SoD that conflicts Wire Initiator with Wire Approver. If something already exists, just report it.",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["create_sod_policy", "list_open_sod_violations"],
+        "reply_contains_any": ["SoD", "policy", "Wire", "created", "already", "exist"],
+        "no_tool_errors": true
+      }
+    ]
+  },
+  {
+    "id": "work-items-list",
+    "tier": "core",
+    "tags": ["governance", "read"],
+    "query": "Show my open work items.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_agent_work_items", "list_work_items"],
+      "no_tool_errors": true
+    }
+  }
+]

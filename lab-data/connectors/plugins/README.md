@@ -6,6 +6,7 @@ Repo examples (study structure):
 
 - `pluginsrc/AccessRequestApprovalAddins/`
 - `pluginsrc/SWECertificationsAddins/`
+- `pluginsrc/mnb-iam-toolkit/` — Meridian health ping (`GET /plugin/rest/mnbToolkit/ping`), closes GAP-PLUGIN-001; see `docs/api/`
 
 Enterprise checklist:
 

@@ -16,6 +16,9 @@ The installer is intended for developers who want to learn and use Claude Code w
 | --- | --- |
 | `setup-cc-free.sh` | Real installer (bash) |
 | `setup-claude-code-openrouter-free-macos.sh` | Thin wrapper that calls `setup-cc-free.sh` |
+| [`lessons/`](lessons/README.md) | **30-day Agentic IAM curriculum** — master skills, agents, hooks, and MCPs on the Meridian IdentityIQ SSB lab |
+
+After install, start the learning track at [`lessons/README.md`](lessons/README.md) and track checkboxes in [`lessons/progress.md`](lessons/progress.md).
 
 ---
 

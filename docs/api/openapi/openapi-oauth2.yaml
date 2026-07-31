@@ -1,0 +1,496 @@
+openapi: 3.0.3
+info:
+  title: IdentityIQ OAuth2 API
+  version: 8.5-mined
+  description: "OAuth2 client and token endpoints at `/identityiq/oauth2/*`.\n\nGenerated at `2026-07-29T18:48:38.658570+00:00` by `tools/iiq-api-mine`. Regenerate with `./tools/iiq-api-mine/run.sh`."
+  x-iiq-surface: oauth2
+  x-generated-by: tools/iiq-api-mine
+servers:
+  - url: /identityiq/oauth2
+    description: Via docs/api/serve.py proxy (same origin — use in Swagger)
+  - url: "http://localhost:8080/identityiq/oauth2"
+    description: Direct local IIQ (curl; browser CORS from other origins)
+  - url: "https://sailpoint.lmsapp.us/identityiq/oauth2"
+    description: Homelab academy IIQ
+tags:
+  - name: identities
+    description: "Category `identities` / subcategory `identity-lifecycle`."
+  - name: oauth
+    description: "Category `oauth` / subcategory `authentication`."
+paths:
+  /oauth2/clients:
+    get:
+      tags:
+        - oauth
+        - authentication
+      summary: GET /oauth2/clients (list)
+      description: "Class `sailpoint.rest.oauth.OAuthClientListResource` method `list`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_oauth2_oauth2_clients_list_OAuthClientListResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientListResource
+      x-iiq-method: list
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    post:
+      tags:
+        - oauth
+        - authentication
+      summary: POST /oauth2/clients (create)
+      description: "Class `sailpoint.rest.oauth.OAuthClientListResource` method `create`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_oauth2_oauth2_clients_create_OAuthClientListResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientListResource
+      x-iiq-method: create
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /oauth2/configuration:
+    get:
+      tags:
+        - oauth
+        - authentication
+      summary: GET /oauth2/configuration (get)
+      description: "Class `sailpoint.rest.oauth.OAuthConfigurationResource` method `get`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_oauth2_oauth2_configuration_get_OAuthConfigurationResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthConfigurationResource
+      x-iiq-method: get
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    put:
+      tags:
+        - oauth
+        - authentication
+      summary: PUT /oauth2/configuration (update)
+      description: "Class `sailpoint.rest.oauth.OAuthConfigurationResource` method `update`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: put_oauth2_oauth2_configuration_update_OAuthConfigurationResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthConfigurationResource
+      x-iiq-method: update
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /regenerateKeys:
+    post:
+      tags:
+        - oauth
+        - authentication
+      summary: POST /regenerateKeys (regenerateKeys)
+      description: "Class `sailpoint.rest.oauth.OAuthClientResource` method `regenerateKeys`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: produces-unspecified, consumes-unspecified, response-schema-unknown, request-schema-unknown."
+      operationId: post_oauth2_regeneratekeys_regeneratekeys_OAuthClientResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientResource
+      x-iiq-method: regenerateKeys
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - produces-unspecified
+        - consumes-unspecified
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /secret:
+    get:
+      tags:
+        - oauth
+        - authentication
+      summary: GET /secret (getSecret)
+      description: "Class `sailpoint.rest.oauth.OAuthClientResource` method `getSecret`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: produces-unspecified, response-schema-unknown."
+      operationId: get_oauth2_secret_getsecret_OAuthClientResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientResource
+      x-iiq-method: getSecret
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - produces-unspecified
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /token:
+    post:
+      tags:
+        - oauth
+        - authentication
+      summary: POST /token (token)
+      description: "Class `sailpoint.rest.oauth.OAuthAccessTokenResource` method `token`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_oauth2_token_token_OAuthAccessTokenResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthAccessTokenResource
+      x-iiq-method: token
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /token/user:
+    post:
+      tags:
+        - identities
+        - identity-lifecycle
+      summary: POST /token/user (token)
+      description: "Class `sailpoint.rest.oauth.OAuthAccessTokenResource` method `token`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_oauth2_token_user_token_OAuthAccessTokenResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthAccessTokenResource
+      x-iiq-method: token
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/{locator:OAuthClientResource}":
+    delete:
+      tags:
+        - oauth
+        - authentication
+      summary: "DELETE /{locator:OAuthClientResource} (delete)"
+      description: "Class `sailpoint.rest.oauth.OAuthClientResource` method `delete`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, produces-unspecified, response-schema-unknown."
+      operationId: delete_oauth2_locator_oauthclientresource_delete_OAuthClientResource
+      parameters:
+        - name: "locator:OAuthClientResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:OAuthClientResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientResource
+      x-iiq-method: delete
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - produces-unspecified
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    get:
+      tags:
+        - oauth
+        - authentication
+      summary: "GET /{locator:OAuthClientResource} (get)"
+      description: "Class `sailpoint.rest.oauth.OAuthClientResource` method `get`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, produces-unspecified, response-schema-unknown."
+      operationId: get_oauth2_locator_oauthclientresource_get_OAuthClientResource
+      parameters:
+        - name: "locator:OAuthClientResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:OAuthClientResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientResource
+      x-iiq-method: get
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - produces-unspecified
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    put:
+      tags:
+        - oauth
+        - authentication
+      summary: "PUT /{locator:OAuthClientResource} (update)"
+      description: "Class `sailpoint.rest.oauth.OAuthClientResource` method `update`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, produces-unspecified, consumes-unspecified, response-schema-unknown, request-schema-unknown."
+      operationId: put_oauth2_locator_oauthclientresource_update_OAuthClientResource
+      parameters:
+        - name: "locator:OAuthClientResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:OAuthClientResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.oauth.OAuthClientResource
+      x-iiq-method: update
+      x-iiq-surface: oauth2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - produces-unspecified
+        - consumes-unspecified
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: Browser session cookie after UI login.
+    oAuth2ClientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "http://localhost:8080/identityiq/oauth2/token"
+          scopes: {}
+  schemas:
+    UnknownJson:
+      type: object
+      additionalProperties: true
+      description: Placeholder. Exact schema not present in bytecode annotations. Capture via live probing / SailPoint product docs. Tracked in GAPS.md.
+    Problemish:
+      type: object
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+    MnbToolkitPingResponse:
+      type: object
+      required:
+        - status
+        - bank
+      properties:
+        status:
+          type: string
+          example: ok
+        bank:
+          type: string
+          example: MNB
+        plugin:
+          type: string
+          example: mnb-iam-toolkit
+        version:
+          type: string
+          example: 1.1.0
+    MnbTaskRunRequest:
+      type: object
+      required:
+        - taskName
+      properties:
+        taskName:
+          type: string
+          description: Exact TaskDefinition name (must match allowedTaskNames).
+          example: Refresh Identity Cube
+        sync:
+          type: boolean
+          default: false
+          description: Prefer false for aggregations; true blocks HTTP until complete.
+        args:
+          type: object
+          additionalProperties: true
+          description: Task arguments (e.g. applications filter).
+    MnbTaskRunResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - accepted
+            - running
+            - success
+            - failed
+        taskName:
+          type: string
+        taskResultId:
+          type: string
+        taskResultName:
+          type: string
+        sync:
+          type: boolean
+        complete:
+          type: boolean
+        success:
+          type: boolean
+        percentComplete:
+          type: integer
+        bank:
+          type: string
+          example: MNB
+security:
+  - basicAuth: []
+  - sessionCookie: []

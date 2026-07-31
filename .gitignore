@@ -15,6 +15,8 @@
 # (sandbox.iiq.properties may contain lab secrets; prefer encrypted values)
 local.iiq.properties
 *.local.properties
+tools/iiq-chat/.env
+tools/iiq-mcp/.env
 
 # Node / misc
 node_modules/
@@ -45,6 +47,11 @@ deploy/helm/values/*.secrets.yaml
 # Build output
 /build/
 /learn/dist/
+
+# Claude Code delivery bus (runtime state + per-ticket evidence)
+.ai-delivery/_state/*.sqlite
+.ai-delivery/_state/*.db
+.ai-delivery/[A-Z]*-[0-9]*/
 
 # Local lab DB dumps / archives (not for CD)
 /IIQDBDump/

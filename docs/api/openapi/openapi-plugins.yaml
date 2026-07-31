@@ -1,0 +1,2789 @@
+openapi: 3.0.3
+info:
+  title: IdentityIQ Plugin REST APIs (Meridian + study)
+  version: 8.5-mined
+  description: "Custom plugin endpoints at `/identityiq/plugin/rest/*`, mined from pluginsrc. Includes Meridian IAM Toolkit ping (sample closing GAP-PLUGIN-001).\n\nGenerated at `2026-07-29T18:48:38.658570+00:00` by `tools/iiq-api-mine`. Regenerate with `./tools/iiq-api-mine/run.sh`."
+  x-iiq-surface: plugins
+  x-generated-by: tools/iiq-api-mine
+servers:
+  - url: /identityiq/plugin/rest
+    description: Via docs/api/serve.py proxy (same origin — use in Swagger)
+  - url: "http://localhost:8080/identityiq/plugin/rest"
+    description: Direct local IIQ (curl; browser CORS from other origins)
+  - url: "https://sailpoint.lmsapp.us/identityiq/plugin/rest"
+    description: Homelab academy IIQ
+tags:
+  - name: meridian-toolkit
+    description: "Category `meridian-toolkit` / subcategory `custom-plugin`."
+  - name: "plugin:AccessRequestApprovalAddins"
+    description: "Category `plugin:AccessRequestApprovalAddins` / subcategory `approvals`."
+  - name: "plugin:SWECertificationsAddins"
+    description: "Category `plugin:SWECertificationsAddins` / subcategory `access-review`."
+paths:
+  /AccessRequestApprovalAddinsUI/getIdentityById:
+    get:
+      tags:
+        - "plugin:AccessRequestApprovalAddins"
+        - identity-lifecycle
+      summary: GET /AccessRequestApprovalAddinsUI/getIdentityById (getIdentityById)
+      description: "Class `AccessRequestApprovalAddins.swe.plugin.rest.AccessRequestApprovalAddinsUI` method `getIdentityById`.\n\nSource: `pluginsrc/AccessRequestApprovalAddins/src/AccessRequestApprovalAddins/swe/plugin/rest/AccessRequestApprovalAddinsUI.java`.\nAuth hints: AllowAll.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_accessrequestapprovaladdinsui_getidentitybyid_getidentitybyid_AccessRequestApprovalA
+      parameters:
+        - name: searchKey
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `searchKey` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: AccessRequestApprovalAddins.swe.plugin.rest.AccessRequestApprovalAddinsUI
+      x-iiq-method: getIdentityById
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - AllowAll
+  /AccessRequestApprovalAddinsUI/getWorkitemDetails:
+    get:
+      tags:
+        - "plugin:AccessRequestApprovalAddins"
+        - approvals
+      summary: GET /AccessRequestApprovalAddinsUI/getWorkitemDetails (getWorkitemDetails)
+      description: "Class `AccessRequestApprovalAddins.swe.plugin.rest.AccessRequestApprovalAddinsUI` method `getWorkitemDetails`.\n\nSource: `pluginsrc/AccessRequestApprovalAddins/src/AccessRequestApprovalAddins/swe/plugin/rest/AccessRequestApprovalAddinsUI.java`.\nAuth hints: AllowAll.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_accessrequestapprovaladdinsui_getworkitemdetails_getworkitemdetails_AccessRequestApp
+      parameters:
+        - name: searchKey
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `searchKey` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: AccessRequestApprovalAddins.swe.plugin.rest.AccessRequestApprovalAddinsUI
+      x-iiq-method: getWorkitemDetails
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - AllowAll
+  /mnbToolkit/agent/accessHistory/status:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/accessHistory/status (accessHistoryStatus)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `accessHistoryStatus`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_accesshistory_status_accesshistorystatus_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: accessHistoryStatus
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/accessRequests:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/accessRequests (submitAccessRequest)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `submitAccessRequest`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_accessrequests_submitaccessrequest_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: submitAccessRequest
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/applications/stubs:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/applications/stubs (appStub)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `appStub`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_applications_stubs_appstub_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: appStub
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/applications/wizard:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/applications/wizard (appWizard)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `appWizard`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_applications_wizard_appwizard_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: appWizard
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/mnbToolkit/agent/applications/{name}/config":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/applications/{name}/config (appConfig)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `appConfig`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_applications_name_config_appconfig_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: appConfig
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/audit/events:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/audit/events (auditEvents)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `auditEvents`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_audit_events_auditevents_MnbAgentResource
+      parameters:
+        - name: action
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `action` (mined)."
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: auditEvents
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/batchRequests:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/batchRequests (batchRequest)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `batchRequest`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_batchrequests_batchrequest_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: batchRequest
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/certifications:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/certifications (listCerts)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listCerts`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_certifications_listcerts_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listCerts
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/certifications/items/{id}/decide":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/certifications/items/{id}/decide (decideCertItem)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `decideCertItem`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_certifications_items_id_decide_decidecertitem_MnbAgentResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `id` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: decideCertItem
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/mnbToolkit/agent/certifications/{id}/sign":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/certifications/{id}/sign (signCert)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `signCert`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_certifications_id_sign_signcert_MnbAgentResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `id` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: signCert
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/connectors/testConnection:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/connectors/testConnection (testConnection)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `testConnection`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_connectors_testconnection_testconnection_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: testConnection
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/emailTemplates:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/emailTemplates (listEmailTemplates)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listEmailTemplates`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_emailtemplates_listemailtemplates_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listEmailTemplates
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/emailTemplates/{name}":
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "GET /mnbToolkit/agent/emailTemplates/{name} (getEmailTemplate)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `getEmailTemplate`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_emailtemplates_name_getemailtemplate_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: getEmailTemplate
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/forms:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/forms (listForms)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listForms`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_forms_listforms_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listForms
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/forms/{name}":
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "GET /mnbToolkit/agent/forms/{name} (getForm)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `getForm`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_forms_name_getform_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: getForm
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/gaps:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/gaps (gaps)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `gaps`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_gaps_gaps_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: gaps
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/identities/{name}/capabilities":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/identities/{name}/capabilities (identityCapabilities)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `identityCapabilities`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_identities_name_capabilities_identitycapabilities_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: identityCapabilities
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/mnbToolkit/agent/identities/{name}/password":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/identities/{name}/password (identityPassword)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `identityPassword`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_identities_name_password_identitypassword_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: identityPassword
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/populations:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/populations (listPopulations)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listPopulations`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_populations_listpopulations_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listPopulations
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/populations (createPopulation)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `createPopulation`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_populations_createpopulation_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: createPopulation
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/mnbToolkit/agent/populations/{name}":
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "GET /mnbToolkit/agent/populations/{name} (getPopulation)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `getPopulation`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_populations_name_getpopulation_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: getPopulation
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/quicklinks:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/quicklinks (listQuicklinks)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listQuicklinks`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_quicklinks_listquicklinks_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listQuicklinks
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/reports/run:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/reports/run (runReport)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `runReport`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_reports_run_runreport_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: runReport
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/schedules:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/schedules (listSchedules)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listSchedules`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_schedules_listschedules_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listSchedules
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/schedules (createSchedule)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `createSchedule`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_schedules_createschedule_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: createSchedule
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/sod/openCount:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/sod/openCount (sodOpenCount)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `sodOpenCount`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_sod_opencount_sodopencount_MnbAgentResource
+      parameters:
+        - name: policyPrefix
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `policyPrefix` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: sodOpenCount
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  /mnbToolkit/agent/sod/violations:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/sod/violations (sodList)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `sodList`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_sod_violations_sodlist_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: sodList
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/sod/violations/{id}/mitigate":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/sod/violations/{id}/mitigate (sodMitigate)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `sodMitigate`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_sod_violations_id_mitigate_sodmitigate_MnbAgentResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `id` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: sodMitigate
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/system/config:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/agent/system/config (systemConfig)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `systemConfig`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_system_config_systemconfig_MnbAgentResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: systemConfig
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/workItems:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/workItems (listWorkItems)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listWorkItems`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_workitems_listworkitems_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listWorkItems
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/workItems/{id}":
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "GET /mnbToolkit/agent/workItems/{id} (getWorkItem)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `getWorkItem`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_workitems_id_getworkitem_MnbAgentResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `id` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: getWorkItem
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/workItems/{id}/decide":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/workItems/{id}/decide (decideWorkItem)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `decideWorkItem`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_workitems_id_decide_decideworkitem_MnbAgentResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `id` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: decideWorkItem
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/agent/workgroups:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/agent/workgroups (listWorkgroups)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `listWorkgroups`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_agent_workgroups_listworkgroups_MnbAgentResource
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `limit` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: listWorkgroups
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+  "/mnbToolkit/agent/workgroups/{name}/members":
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "POST /mnbToolkit/agent/workgroups/{name}/members (workgroupMembers)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbAgentResource` method `workgroupMembers`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbAgentResource.java`.\nAuth hints: RequiredRight:MNBToolkitAgent.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_agent_workgroups_name_members_workgroupmembers_MnbAgentResource
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `name` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbAgentResource
+      x-iiq-method: workgroupMembers
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAgent"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /mnbToolkit/ping:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/ping (ping)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbToolkitPingResource` method `ping`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbToolkitPingResource.java`.\nAuth hints: RequiredRight:MNBToolkitAccess.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_ping_ping_MnbToolkitPingResource
+      parameters: []
+      responses:
+        "200":
+          description: Toolkit ping OK.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MnbToolkitPingResponse"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbToolkitPingResource
+      x-iiq-method: ping
+      x-iiq-surface: plugins
+      x-iiq-gaps: []
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitAccess"
+  /mnbToolkit/tasks/allowed:
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: GET /mnbToolkit/tasks/allowed (listAllowed)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource` method `listAllowed`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbToolkitTaskResource.java`.\nAuth hints: RequiredRight:MNBToolkitTaskRun.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_tasks_allowed_listallowed_MnbToolkitTaskResource
+      parameters: []
+      responses:
+        "200":
+          description: Task launch or status (Meridian schema).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MnbTaskRunResponse"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource
+      x-iiq-method: listAllowed
+      x-iiq-surface: plugins
+      x-iiq-gaps: []
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitTaskRun"
+  "/mnbToolkit/tasks/results/{id}":
+    get:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: "GET /mnbToolkit/tasks/results/{id} (getResult)"
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource` method `getResult`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbToolkitTaskResource.java`.\nAuth hints: RequiredRight:MNBToolkitTaskRun.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_mnbtoolkit_tasks_results_id_getresult_MnbToolkitTaskResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `id` (mined)."
+      responses:
+        "200":
+          description: Task launch or status (Meridian schema).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MnbTaskRunResponse"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource
+      x-iiq-method: getResult
+      x-iiq-surface: plugins
+      x-iiq-gaps: []
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitTaskRun"
+  /mnbToolkit/tasks/run:
+    post:
+      tags:
+        - meridian-toolkit
+        - custom-plugin
+      summary: POST /mnbToolkit/tasks/run (run)
+      description: "Class `com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource` method `run`.\n\nSource: `pluginsrc/mnb-iam-toolkit/src/com/meridianbank/iiq/plugin/rest/MnbToolkitTaskResource.java`.\nAuth hints: RequiredRight:MNBToolkitTaskRun.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_mnbtoolkit_tasks_run_run_MnbToolkitTaskResource
+      parameters: []
+      responses:
+        "200":
+          description: Task launch or status (Meridian schema).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MnbTaskRunResponse"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource
+      x-iiq-method: run
+      x-iiq-surface: plugins
+      x-iiq-gaps: []
+      x-iiq-auth-hints:
+        - "RequiredRight:MNBToolkitTaskRun"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MnbTaskRunRequest"
+  /sweCertificationsPluginAddins/certDownloadtoFile:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/certDownloadtoFile (certDownloadtoFile)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `certDownloadtoFile`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_certdownloadtofile_certdownloadtofile_sweCustomCertif
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: certDownloadtoFile
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/certsImportDecisions:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/certsImportDecisions (certsImportDecisions)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `certsImportDecisions`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_certsimportdecisions_certsimportdecisions_sweCustomCe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: certsImportDecisions
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/certsPluginCheckConfig:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/certsPluginCheckConfig (certsPluginCheckConfig)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `certsPluginCheckConfig`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_certsplugincheckconfig_certsplugincheckconfig_sweCust
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: certsPluginCheckConfig
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/checkCertRevokesorSignoff:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/checkCertRevokesorSignoff (checkCertRevokesorSignoff)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `checkCertRevokesorSignoff`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_checkcertrevokesorsignoff_checkcertrevokesorsignoff_s
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: checkCertRevokesorSignoff
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/clearExistingAccessDescFeedback:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/clearExistingAccessDescFeedback (clearExistingAccessDescFeedback)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `clearExistingAccessDescFeedback`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_clearexistingaccessdescfeedback_clearexistingaccessde
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: clearExistingAccessDescFeedback
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/customCertSaveDecisions:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/customCertSaveDecisions (customCertSaveDecisions)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `customCertSaveDecisions`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_customcertsavedecisions_customcertsavedecisions_sweCu
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: customCertSaveDecisions
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/customSignoffCertification:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/customSignoffCertification (customSignoffCertification)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `customSignoffCertification`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_customsignoffcertification_customsignoffcertification
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: customSignoffCertification
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/downloadEntOwnerAccessDescFeedbackResults:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/downloadEntOwnerAccessDescFeedbackResults (downloadEntOwnerAccessDescFeedbackResults)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `downloadEntOwnerAccessDescFeedbackResults`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_downloadentowneraccessdescfeedbackresults_downloadent
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: downloadEntOwnerAccessDescFeedbackResults
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/entOwnerApproveCertDecisions:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/entOwnerApproveCertDecisions (entOwnerApproveCertDecisions)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `entOwnerApproveCertDecisions`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_entownerapprovecertdecisions_entownerapprovecertdecis
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: entOwnerApproveCertDecisions
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/entOwnerCertDownloadtoFile:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/entOwnerCertDownloadtoFile (entOwnerCertDownloadtoFile)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `entOwnerCertDownloadtoFile`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_entownercertdownloadtofile_entownercertdownloadtofile
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: entOwnerCertDownloadtoFile
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/entOwnerCertRevokesorSignoff:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/entOwnerCertRevokesorSignoff (entOwnerCertRevokesorSignoff)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `entOwnerCertRevokesorSignoff`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_entownercertrevokesorsignoff_entownercertrevokesorsig
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: entOwnerCertRevokesorSignoff
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/entOwnerCertinvokeRoleWizardWF:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/entOwnerCertinvokeRoleWizardWF (entOwnerCertinvokeRoleWizardWF)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `entOwnerCertinvokeRoleWizardWF`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_entownercertinvokerolewizardwf_entownercertinvokerole
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: entOwnerCertinvokeRoleWizardWF
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getAccessStatusOtherInfo:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getAccessStatusOtherInfo (getAccessStatusOtherInfo)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getAccessStatusOtherInfo`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getaccessstatusotherinfo_getaccessstatusotherinfo_swe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getAccessStatusOtherInfo
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getAccessSunsetDateInfo:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getAccessSunsetDateInfo (getAccessSunsetDateInfo)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getAccessSunsetDateInfo`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getaccesssunsetdateinfo_getaccesssunsetdateinfo_sweCu
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getAccessSunsetDateInfo
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getCertificationTargetUsersEIDs:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - identity-lifecycle
+      summary: POST /sweCertificationsPluginAddins/getCertificationTargetUsersEIDs (getCertificationTargetUsersEIDs)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getCertificationTargetUsersEIDs`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getcertificationtargetuserseids_getcertificationtarge
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getCertificationTargetUsersEIDs
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getEntGrantedByRoleinfo:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getEntGrantedByRoleinfo (getEntGrantedByRoleinfo)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getEntGrantedByRoleinfo`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getentgrantedbyroleinfo_getentgrantedbyroleinfo_sweCu
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getEntGrantedByRoleinfo
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getEntOwnerAccessDescFeedbackResults:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getEntOwnerAccessDescFeedbackResults (getEntOwnerAccessDescFeedbackResults)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getEntOwnerAccessDescFeedbackResults`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getentowneraccessdescfeedbackresults_getentowneracces
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getEntOwnerAccessDescFeedbackResults
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getExistingAccessDescFeedback:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getExistingAccessDescFeedback (getExistingAccessDescFeedback)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getExistingAccessDescFeedback`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getexistingaccessdescfeedback_getexistingaccessdescfe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getExistingAccessDescFeedback
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getExistingAccessDescFeedbackRating:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getExistingAccessDescFeedbackRating (getExistingAccessDescFeedbackRating)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getExistingAccessDescFeedbackRating`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getexistingaccessdescfeedbackrating_getexistingaccess
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getExistingAccessDescFeedbackRating
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getGrantedinPriorJob:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getGrantedinPriorJob (getGrantedinPriorJob)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getGrantedinPriorJob`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getgrantedinpriorjob_getgrantedinpriorjob_sweCustomCe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getGrantedinPriorJob
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getLastLoginInfo:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getLastLoginInfo (getLastLoginInfo)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getLastLoginInfo`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getlastlogininfo_getlastlogininfo_sweCustomCertificat
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getLastLoginInfo
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getOtherData:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getOtherData (getOtherData)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getOtherData`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getotherdata_getotherdata_sweCustomCertificationsPlug
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getOtherData
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getPrevScoresBearerToken:
+    get:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: GET /sweCertificationsPluginAddins/getPrevScoresBearerToken (getPrevScoresBearerToken)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getPrevScoresBearerToken`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial."
+      operationId: get_plugin_rest_swecertificationspluginaddins_getprevscoresbearertoken_getprevscoresbearertoken_sweC
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getPrevScoresBearerToken
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+      x-iiq-auth-hints: []
+  /sweCertificationsPluginAddins/getRoleDetails:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getRoleDetails (getRoleDetails)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getRoleDetails`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getroledetails_getroledetails_sweCustomCertifications
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getRoleDetails
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getSharedMailBoxInfo:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getSharedMailBoxInfo (getSharedMailBoxInfo)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getSharedMailBoxInfo`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getsharedmailboxinfo_getsharedmailboxinfo_sweCustomCe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getSharedMailBoxInfo
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/getprevalenceScoresData:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/getprevalenceScoresData (getPrevalenceScoresPerAccessfromCacheorAPI)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `getPrevalenceScoresPerAccessfromCacheorAPI`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_getprevalencescoresdata_getprevalencescoresperaccessf
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: getPrevalenceScoresPerAccessfromCacheorAPI
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/insertAccessDescFeedback:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/insertAccessDescFeedback (insertAccessDescFeedback)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `insertAccessDescFeedback`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_insertaccessdescfeedback_insertaccessdescfeedback_swe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: insertAccessDescFeedback
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/isThisHighRiskAccess:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/isThisHighRiskAccess (isThisHighRiskAccess)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `isThisHighRiskAccess`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_isthishighriskaccess_isthishighriskaccess_sweCustomCe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: isThisHighRiskAccess
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/isUserCompletedFeedback:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - identity-lifecycle
+      summary: POST /sweCertificationsPluginAddins/isUserCompletedFeedback (isUserCompletedFeedback)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `isUserCompletedFeedback`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_isusercompletedfeedback_isusercompletedfeedback_sweCu
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: isUserCompletedFeedback
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/postFeedback:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/postFeedback (postFeedback)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `postFeedback`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_postfeedback_postfeedback_sweCustomCertificationsPlug
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: postFeedback
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/refreshPrevalenceScoresCachePerUser:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - identity-lifecycle
+      summary: POST /sweCertificationsPluginAddins/refreshPrevalenceScoresCachePerUser (refreshPrevalenceScoresCachePerUser)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `refreshPrevalenceScoresCachePerUser`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_refreshprevalencescorescacheperuser_refreshprevalence
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: refreshPrevalenceScoresCachePerUser
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/revertCertSaveDecisions:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/revertCertSaveDecisions (revertCertSaveDecisions)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `revertCertSaveDecisions`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_revertcertsavedecisions_revertcertsavedecisions_sweCu
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: revertCertSaveDecisions
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/sysIdCompleteCertSaveDecisions:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/sysIdCompleteCertSaveDecisions (sysIdCompleteCertSaveDecisions)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `sysIdCompleteCertSaveDecisions`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_sysidcompletecertsavedecisions_sysidcompletecertsaved
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: sysIdCompleteCertSaveDecisions
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /sweCertificationsPluginAddins/updateAccessDescFeedback:
+    post:
+      tags:
+        - "plugin:SWECertificationsAddins"
+        - access-review
+      summary: POST /sweCertificationsPluginAddins/updateAccessDescFeedback (updateAccessDescFeedback)
+      description: "Class `swe.plugin.rest.sweCustomCertificationsPluginAddins` method `updateAccessDescFeedback`.\n\nSource: `pluginsrc/SWECertificationsAddins/src/swe/plugin/rest/sweCustomCertificationsPluginAddins.java`.\nAuth hints: none mined.\nGaps: response-schema-partial, request-schema-partial."
+      operationId: post_plugin_rest_swecertificationspluginaddins_updateaccessdescfeedback_updateaccessdescfeedback_swe
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: swe.plugin.rest.sweCustomCertificationsPluginAddins
+      x-iiq-method: updateAccessDescFeedback
+      x-iiq-surface: plugins
+      x-iiq-gaps:
+        - response-schema-partial
+        - request-schema-partial
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: Browser session cookie after UI login.
+    oAuth2ClientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "http://localhost:8080/identityiq/oauth2/token"
+          scopes: {}
+  schemas:
+    UnknownJson:
+      type: object
+      additionalProperties: true
+      description: Placeholder. Exact schema not present in bytecode annotations. Capture via live probing / SailPoint product docs. Tracked in GAPS.md.
+    Problemish:
+      type: object
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+    MnbToolkitPingResponse:
+      type: object
+      required:
+        - status
+        - bank
+      properties:
+        status:
+          type: string
+          example: ok
+        bank:
+          type: string
+          example: MNB
+        plugin:
+          type: string
+          example: mnb-iam-toolkit
+        version:
+          type: string
+          example: 1.1.0
+    MnbTaskRunRequest:
+      type: object
+      required:
+        - taskName
+      properties:
+        taskName:
+          type: string
+          description: Exact TaskDefinition name (must match allowedTaskNames).
+          example: Refresh Identity Cube
+        sync:
+          type: boolean
+          default: false
+          description: Prefer false for aggregations; true blocks HTTP until complete.
+        args:
+          type: object
+          additionalProperties: true
+          description: Task arguments (e.g. applications filter).
+    MnbTaskRunResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - accepted
+            - running
+            - success
+            - failed
+        taskName:
+          type: string
+        taskResultId:
+          type: string
+        taskResultName:
+          type: string
+        sync:
+          type: boolean
+        complete:
+          type: boolean
+        success:
+          type: boolean
+        percentComplete:
+          type: integer
+        bank:
+          type: string
+          example: MNB
+security:
+  - basicAuth: []
+  - sessionCookie: []

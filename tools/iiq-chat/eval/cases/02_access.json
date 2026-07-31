@@ -1,0 +1,88 @@
+[
+  {
+    "id": "access-grant-wire-initiator",
+    "tier": "core",
+    "tags": ["access", "write", "regression"],
+    "mutate": true,
+    "query": "Give Helen Ross access to Wire Initiator.",
+    "xfail": true,
+    "xfail_reason": "search_entitlements used displayName SCIM filter → Invalid filter (attribute not found:displayName). Prefer grant_access / get_requestable_items / list_agent_roles.",
+    "expect": {
+      "http_ok": true,
+      "min_tools": 1,
+      "tools_any_of": [
+        "grant_access",
+        "create_access_request",
+        "get_requestable_items",
+        "list_agent_roles",
+        "search_entitlements",
+        "preview_access_request"
+      ],
+      "reply_contains_any": [
+        "Wire Initiator",
+        "granted",
+        "access request",
+        "submitted",
+        "request",
+        "Helen"
+      ],
+      "reply_not_contains_any": [
+        "Invalid filter",
+        "attribute not found",
+        "displayName",
+        "failed"
+      ],
+      "no_tool_errors": true,
+      "forbidden_step_substrings": [
+        "invalid filter",
+        "attribute not found:displayname",
+        "attribute not found:displayName"
+      ]
+    }
+  },
+  {
+    "id": "access-preview-wire",
+    "tier": "core",
+    "tags": ["access", "read"],
+    "query": "Preview an access request giving Helen Ross the Wire Initiator role.",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["preview_access_request", "get_requestable_items", "list_agent_roles", "grant_access"],
+        "reply_not_contains_any": ["Invalid filter", "attribute not found"],
+        "no_tool_errors": true
+      },
+      {
+        "tools_any_of": ["preview_access_request", "get_requestable_items", "list_agent_roles"],
+        "reply_contains_any": ["Wire", "preview", "Helen", "role", "requestable"]
+      }
+    ]
+  },
+  {
+    "id": "access-list-requestable",
+    "tier": "core",
+    "tags": ["access", "read"],
+    "query": "What requestable access items are available for Helen Ross?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["get_requestable_items", "list_agent_roles", "list_managed_entitlements"],
+      "reply_not_contains_any": ["Invalid filter", "attribute not found"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "access-revoke-safe-read",
+    "tier": "full",
+    "tags": ["access", "read"],
+    "query": "How would I revoke Wire Initiator from Helen Ross? Don't actually revoke it — just explain the tool you'd use.",
+    "pass_if_any": [
+      {
+        "max_tools": 3,
+        "reply_contains_any": ["revoke_access", "revoke", "RemoveAccess", "access request"]
+      },
+      {
+        "tools_any_of": ["revoke_access", "get_requestable_items", "search_identities"],
+        "reply_contains_any": ["revoke"]
+      }
+    ]
+  }
+]

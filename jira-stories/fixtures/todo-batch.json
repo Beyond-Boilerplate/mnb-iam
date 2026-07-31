@@ -1,0 +1,28 @@
+{
+  "issues": [
+    {
+      "key": "MNB-101",
+      "fields": {
+        "summary": "Onboard WirePortal delimited feed for Bengaluru wire initiators",
+        "status": { "name": "To Do" },
+        "labels": ["app-onboarding"]
+      }
+    },
+    {
+      "key": "MNB-113",
+      "fields": {
+        "summary": "Retail CSR InternetBanking entitlement (manager approval)",
+        "status": { "name": "To Do" },
+        "labels": ["access-request"]
+      }
+    },
+    {
+      "key": "MNB-119",
+      "fields": {
+        "summary": "Create population Kathmandu Hub risk reviewers",
+        "status": { "name": "To Do" },
+        "labels": ["governance-admin"]
+      }
+    }
+  ]
+}

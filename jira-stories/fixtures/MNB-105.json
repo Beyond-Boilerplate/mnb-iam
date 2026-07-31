@@ -1,0 +1,14 @@
+{
+  "key": "MNB-105",
+  "id": "10501",
+  "self": "https://example.atlassian.net/rest/api/3/issue/10501",
+  "fields": {
+    "summary": "Unlock Meera Torres (MNB00012) after AD lock cascade",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["identity-admin"],
+    "description": "Directory Administrator Meera Torres (MNB00012, meera.torres@meridiannb.com) is locked in IIQ after an AD lock cascade. Unlock the IIQ identity and verify linked accounts. Manager: Christopher Hayes (MNB00002).",
+    "customfield_persona": "MNB00012",
+    "customfield_work_type": "identity-admin"
+  }
+}

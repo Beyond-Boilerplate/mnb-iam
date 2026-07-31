@@ -1,0 +1,29 @@
+{
+  "id": "classify-ui-branding-web-overlays",
+  "skill": "classify",
+  "work_type": "ui-branding",
+  "keywords": [
+    "branding",
+    "logo",
+    "favicon",
+    "theme",
+    "login",
+    "ui-custom"
+  ],
+  "summary": "Company logo theme favicon login branding",
+  "approach": "SSD web/ overlays loginLogo TopLogo1 favicon ui-custom.css \u2014 not MCP create_application",
+  "solution": {
+    "work_type": "ui-branding",
+    "paths": [
+      "web/ui/images/",
+      "web/ui/css/ui-custom.css"
+    ]
+  },
+  "gotchas": [
+    "Do not classify as app-onboarding just because summary says Application"
+  ],
+  "source_issue": "KAN-6",
+  "confidence": 0.96,
+  "created_at": "2026-07-29T21:06:33Z",
+  "updated_at": "2026-07-29T21:06:33Z"
+}

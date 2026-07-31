@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <SPRight displayName="Meridian Toolkit Access" name="MNBToolkitAccess">
+    <Description>Access Meridian Custom APIs ping and read-only helpers</Description>
+  </SPRight>
+  <SPRight displayName="Meridian Toolkit Task Run" name="MNBToolkitTaskRun">
+    <Description>Launch allowlisted TaskDefinitions via Meridian Custom APIs REST</Description>
+  </SPRight>
+  <SPRight displayName="Meridian Custom APIs" name="MNBToolkitAgent">
+    <Description>Custom orchestration APIs under /mnbToolkit/agent (UI-VS-API gap closures)</Description>
+  </SPRight>
+</sailpoint>

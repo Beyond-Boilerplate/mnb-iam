@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(base/ga/**)",
+      "Write(base/ga/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 scripts/jira/session_intake_hint.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/block-base-ga.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

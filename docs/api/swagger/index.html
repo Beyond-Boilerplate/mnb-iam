@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Meridian IIQ API Explorer</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; background: #f6f3ee; }
+    .topbar {
+      display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;
+      padding: 0.85rem 1.25rem; background: #1a2b3c; color: #f6f3ee;
+    }
+    .topbar strong { letter-spacing: 0.02em; }
+    .topbar select, .topbar a, .topbar button {
+      font: inherit; padding: 0.35rem 0.6rem; border-radius: 4px; border: 0;
+    }
+    .topbar a, .topbar button { color: #1a2b3c; background: #e8c547; text-decoration: none; font-weight: 600; cursor: pointer; }
+    .hint { padding: 0.75rem 1.25rem; background: #e8dfd0; color: #1a2b3c; font-size: 0.95rem; line-height: 1.45; }
+    .hint code { background: #fff8; padding: 0.05rem 0.3rem; border-radius: 3px; }
+    .warn { color: #7a2e0b; font-weight: 600; }
+    #swagger-ui { background: #fff; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <strong>Meridian IIQ API Explorer</strong>
+    <label>
+      Spec
+      <select id="spec-select" aria-label="OpenAPI specification"></select>
+    </label>
+    <a href="../README.md">docs/api README</a>
+    <a href="../UI-VS-API-GAPS.md">UI gaps</a>
+  </header>
+  <p class="hint">
+    <span class="warn">New Custom APIs:</span> select <strong>Meridian Custom APIs</strong> in the Spec dropdown
+    (default). Mined product surfaces are separate entries.
+    Use <code>./docs/api/serve.py</code> so Try-it-out proxies <code>/identityiq/*</code> → <code>:8080</code>.
+    <strong>Authorize</strong> with Basic (<code>spadmin</code> / lab password) before Execute.
+  </p>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js" crossorigin></script>
+  <script>
+    // Cache-bust so browser does not keep a stale dropdown list or YAML after regenerations.
+    const bust = String(Date.now());
+    const SPECS = [
+      {
+        name: "Meridian Custom APIs (default)",
+        url: "../openapi/openapi-meridian-agent.json?v=" + bust,
+        mount: "/identityiq/plugin/rest",
+        format: "json"
+      },
+      { name: "Plugins (mined Meridian + study)", url: "../openapi/openapi-plugins.yaml?v=" + bust, mount: "/identityiq/plugin/rest", format: "yaml" },
+      { name: "SCIM 2.0 /scim/v2", url: "../openapi/openapi-scim-v2.yaml?v=" + bust, mount: "/identityiq/scim/v2", format: "yaml" },
+      { name: "OOTB REST /rest", url: "../openapi/openapi-ootb-rest.yaml?v=" + bust, mount: "/identityiq/rest", format: "yaml" },
+      { name: "UI REST /ui/rest", url: "../openapi/openapi-ui-rest.yaml?v=" + bust, mount: "/identityiq/ui/rest", format: "yaml" },
+      { name: "OAuth2 /oauth2", url: "../openapi/openapi-oauth2.yaml?v=" + bust, mount: "/identityiq/oauth2", format: "yaml" },
+      { name: "External REST", url: "../openapi/openapi-external-rest.yaml?v=" + bust, mount: "/identityiq/external/rest", format: "yaml" },
+      { name: "Bundle index", url: "../openapi/openapi-iiq-bundle.yaml?v=" + bust, mount: "/identityiq", format: "yaml" }
+    ];
+    const select = document.getElementById("spec-select");
+    SPECS.forEach((s, i) => {
+      const opt = document.createElement("option");
+      opt.value = String(i);
+      opt.textContent = s.name;
+      if (i === 0) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    function rewriteServers(spec, mount) {
+      spec.servers = [
+        { url: mount, description: "Via docs/api serve.py proxy (same origin — use this in Swagger)" },
+        { url: "http://localhost:8080" + mount, description: "Direct IIQ (curl only)" },
+        { url: "https://sailpoint.lmsapp.us" + mount, description: "Homelab academy IIQ" }
+      ];
+      return spec;
+    }
+
+    let ui = null;
+
+    async function load(index) {
+      const entry = SPECS[Number(index)];
+      const res = await fetch(entry.url, { cache: "no-store" });
+      if (!res.ok) {
+        alert("Failed to load spec " + entry.url + " HTTP " + res.status);
+        return;
+      }
+      const text = await res.text();
+      let spec;
+      try {
+        if (entry.format === "json" || entry.url.includes(".json")) {
+          spec = JSON.parse(text);
+        } else {
+          spec = jsyaml.load(text);
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Failed to parse OpenAPI: " + e);
+        return;
+      }
+      rewriteServers(spec, entry.mount);
+      // Replace Swagger root so switching specs does not stack old DOM.
+      const host = document.getElementById("swagger-ui");
+      host.innerHTML = "";
+      ui = SwaggerUIBundle({
+        spec,
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        persistAuthorization: true,
+        tryItOutEnabled: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: "BaseLayout",
+        requestInterceptor: (req) => {
+          if (req.url && req.url.startsWith("http://localhost:8080/")) {
+            req.url = req.url.replace("http://localhost:8080", "");
+          }
+          return req;
+        }
+      });
+    }
+    select.addEventListener("change", () => load(select.value));
+    load(select.value);
+  </script>
+</body>
+</html>

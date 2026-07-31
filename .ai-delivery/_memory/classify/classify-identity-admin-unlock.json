@@ -1,0 +1,38 @@
+{
+  "id": "classify-identity-admin-unlock",
+  "skill": "classify",
+  "work_type": "identity-admin",
+  "keywords": [
+    "unlock",
+    "lock",
+    "AD",
+    "cascade",
+    "password lock",
+    "identity-admin"
+  ],
+  "summary": "Unlock IIQ identity after AD lock cascade",
+  "approach": "Classify as identity-admin; require persona/userId; dor_gaps if SCIM miss; next unlock_iiq_identity",
+  "solution": {
+    "work_type": "identity-admin",
+    "signals": [
+      "unlock",
+      "locked",
+      "AD lock"
+    ],
+    "dor": [
+      "persona or userName"
+    ],
+    "next_tools": [
+      "search_identities",
+      "unlock_iiq_identity",
+      "get_identity_accounts"
+    ]
+  },
+  "gotchas": [
+    "Persona MNB000xx may be absent until HR agg; do not unlock wrong Meera*"
+  ],
+  "source_issue": "MNB-105",
+  "confidence": 0.9,
+  "created_at": "2026-07-29T20:22:39Z",
+  "updated_at": "2026-07-29T20:22:39Z"
+}

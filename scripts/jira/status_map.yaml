@@ -1,0 +1,29 @@
+# Meridian / mnbiam Jira board — source of truth for intake
+
+site: https://mnbiam.atlassian.net
+project_key: KAN
+board_url: https://mnbiam.atlassian.net/jira/software/projects/KAN/list
+
+# Prefer statusCategory for Kanban "To Do" column (name spelling varies)
+poll:
+  jql: 'project = KAN AND statusCategory = "To Do" ORDER BY created ASC'
+  # Fallback if category query empty:
+  jql_status_name: 'project = KAN AND status = "To Do" ORDER BY created ASC'
+
+columns:
+  backlog: Backlog
+  todo: To Do
+  in_progress: In Progress
+  in_review: In Review
+  done: Done
+
+transitions:
+  start_work: In Progress
+  ready_for_pm: In Review
+  complete: Done
+
+intake:
+  # Order of preference for /intake
+  primary: atlassian_mcp
+  secondary: rest_poller   # requires JIRA_* env
+  tertiary: fixtures       # explicit --fixture only — never silent

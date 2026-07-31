@@ -1,0 +1,76 @@
+[
+  {
+    "id": "identity-search-helen",
+    "tier": "core",
+    "tags": ["identity", "read"],
+    "query": "Find Helen Ross and summarize her title and department.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["search_identities", "get_identity", "search_profiles"],
+      "reply_contains_any": ["Helen", "Ross", "Identity", "Access", "Head"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "identity-search-fuzzy-anita",
+    "tier": "core",
+    "tags": ["identity", "read"],
+    "query": "Do I have anyone named Anita?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["search_identities"],
+      "reply_contains_any": ["Anita", "Rao"],
+      "min_tools": 1,
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "identity-location-paris",
+    "tier": "core",
+    "tags": ["identity", "read"],
+    "query": "Find me all employees in Paris",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["search_profiles", "search_identities"],
+        "reply_contains_any": ["Paris", "no employee", "none", "0", "didn't find", "no one"],
+        "no_tool_errors": true
+      }
+    ]
+  },
+  {
+    "id": "identity-meera-detail",
+    "tier": "core",
+    "tags": ["identity", "read"],
+    "query": "Show me Meera Torres's identity details and who her manager is.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["search_identities", "get_identity", "get_manager_hierarchy"],
+      "reply_contains_any": ["Meera", "Christopher", "Hayes", "manager"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "identity-list-apps",
+    "tier": "core",
+    "tags": ["apps", "read"],
+    "query": "What applications are configured in this lab?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_applications", "get_executive_digest", "search_applications"],
+      "reply_contains_any": ["MNB-HR", "OpenLDAP", "MNB-", "application"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "identity-accounts-helen",
+    "tier": "full",
+    "tags": ["identity", "accounts", "read"],
+    "query": "What accounts does Helen Ross have?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["get_identity_accounts", "get_identity", "search_identities", "list_accounts"],
+      "reply_contains_any": ["Helen", "account", "MNB", "HR", "LDAP"],
+      "no_tool_errors": true
+    }
+  }
+]

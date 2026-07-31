@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Configuration PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Configuration name="MNB-HR-IdentityConfiguration">
+  <Description>MNB-HR Identity Warehouse Configuration - Enables warehouse connectivity for HR identity mappings</Description>
+
+  <Attributes>
+    <Map>
+
+      <!-- Warehouse Connection Settings -->
+      <entry key="warehouseIdentityEnabled" value="true"/>
+      <entry key="warehouseAttributeVisibility" value="true"/>
+      <entry key="warehouseSyncMode" value="incremental"/>
+
+      <!-- Identity Attribute Mappings -->
+      <entry key="identityWarehouseMapping">
+        <value>
+          <Map>
+            <entry key="userId" value="userId"/>
+            <entry key="email" value="email"/>
+            <entry key="name" value="displayName"/>
+            <entry key="manager" value="manager.displayName"/>
+            <entry key="departmentName" value="departmentName"/>
+            <entry key="employeeType" value="employeeType"/>
+            <entry key="division" value="division"/>
+            <entry key="location" value="location"/>
+            <entry key="costCenter" value="costCenter"/>
+            <entry key="JobCode" value="title"/>
+            <entry key="managersAssociateID" value="manager.id"/>
+            <entry key="isManager" value="managerStatus"/>
+            <entry key="inactive" value="status"/>
+            <entry key="hireDate" value="hireDate"/>
+            <entry key="terminationDate" value="terminationDate"/>
+          </Map>
+        </value>
+      </entry>
+
+      <!-- Source Attribute Validation -->
+      <entry key="sourceAttributeValidation">
+        <value>
+          <Map>
+            <entry key="email">
+              <value>
+                <Validation>
+                  <Rule>validateEmailFormat</Rule>
+                  <Required>true</Required>
+                </Validation>
+              </value>
+            </entry>
+            <entry key="userId">
+              <value>
+                <Validation>
+                  <Required>true</Required>
+                  <Pattern>^[A-Za-z0-9]+\@[A-Za-z0-9]+\.\w+$</Pattern>
+                </Validation>
+              </value>
+            </entry>
+            <entry key="firstname">
+              <value>
+                <Validation>
+                  <Required>false</Required>
+                </Validation>
+              </value>
+            </entry>
+            <entry key="lastname">
+              <value>
+                <Validation>
+                  <Required>false</Required>
+                </Validation>
+              </value>
+            </entry>
+            <entry key="departmentName">
+              <value>
+                <Validation>
+                  <Required>false</Required>
+                </Validation>
+              </value>
+            </entry>
+            <entry key="employeeType">
+              <value>
+                <Validation>
+                  <Required>false</Required>
+                  <AllowedValues>
+                    <String>Employee</String>
+                    <String>Contractor</String>
+                  </AllowedValues>
+                </Validation>
+              </value>
+            </entry>
+          </Map>
+        </value>
+      </entry>
+
+      <!-- Warehouse Attribute Visibility Rules -->
+      <entry key="warehouseAttributeVisibilityRules">
+        <value>
+          <Map>
+            <entry key="publicAttributes">
+              <value>
+                <List>
+                  <String>name</String>
+                  <String>email</String>
+                  <String>employeeType</String>
+                  <String>departmentName</String>
+                  <String>division</String>
+                  <String>location</String>
+                </List>
+              </value>
+            </entry>
+            <entry key="restrictedAttributes">
+              <value>
+                <List>
+                  <String>costCenter</String>
+                  <String>managersAssociateID</String>
+                  <String>terminationDate</String>
+                </List>
+              </value>
+            </entry>
+            <entry key="securityAttributes">
+              <value>
+                <List>
+                  <String>isManager</String>
+                  <String>inactive</String>
+                  <String>hireDate</String>
+                </List>
+              </value>
+            </entry>
+          </Map>
+        </value>
+      </entry>
+
+      <!-- MNB-HR Specific Configuration -->
+      <entry key="mnB-HR-Specific">
+        <value>
+          <Map>
+            <entry key="applicationName" value="MNB-HR"/>
+            <entry key="sourceSystem" value="HRIS"/>
+            <entry key="dataSourceFile" value="/Users/alishaghatane/iiq-lab-data/HRApplications.txt"/>
+            <entry key="delimiter" value=","/>
+            <entry key="hasHeader" value="true"/>
+            <entry key="identityAttribute" value="userId"/>
+            <entry key="identityType" value="Employee"/>
+            <entry key="sourceSystemVersion" value="Academy HR Data Feed"/>
+            <entry key="lastUpdated" value="2026-07-29"/>
+          </Map>
+        </value>
+      </entry>
+
+      <!-- Error Handling and Logging -->
+      <entry key="errorHandling">
+        <value>
+          <Map>
+            <entry key="missingRequiredAttributes">
+              <value>
+                <List>
+                  <String>userId</String>
+                  <String>email</String>
+                </List>
+              </value>
+            </entry>
+            <entry key="logMappingErrors" value="true"/>
+            <entry key="skipInvalidRecords" value="true"/>
+            <entry key="continueOnValidationErrors" value="false"/>
+          </Map>
+        </value>
+      </entry>
+
+      <!-- Sync Configuration -->
+      <entry key="syncConfiguration">
+        <value>
+          <Map>
+            <entry key="syncFrequency" value="hourly"/>
+            <entry key="syncWindowStart" value="00:00"/>
+            <entry key="syncWindowEnd" value="06:00"/>
+            <entry key="conflictResolution" value="sourceSystemWins"/>
+            <entry key="backoutStrategy" value="restoreLastGoodState"/>
+            <entry key="enableDeltaSync" value="true"/>
+            <entry key="deltaSyncMaxAge" value="24"/>
+          </Map>
+        </value>
+      </entry>
+
+      <!-- Notification Configuration -->
+      <entry key="notificationConfiguration">
+        <value>
+          <Map>
+            <entry key="enableWarehouseNotifications" value="true"/>
+            <entry key="notificationEmailTemplate" value="Identity Warehouse Update"/>
+            <entry key="criticalChangesAlert" value="true"/>
+            <entry key="changeNotificationFrequency" value="daily"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Configuration>

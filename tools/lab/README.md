@@ -4,6 +4,18 @@ Automation for the local IdentityIQ 8.5 lab.
 
 **Prefer Docker instead?** See [`docker/README.md`](docker/README.md) (`docker-compose.iiq.yml`). Both paths stay supported.
 
+## Seed lab data (Docker stack)
+
+After IIQ + MCP + OpenLDAP are up and Meridian Custom APIs flags are enabled:
+
+```bash
+export MCP_API_KEY=mnb-lab-mcp-key
+./tools/lab/scripts/seed-mnb-lab-data.sh
+```
+
+Creates/aggregates **MNB-HR** (authoritative) and **MNB-OpenLDAP**, refreshes cubes, then probes identities.
+Details: `lab-data/connectors/ldap/README.md`.
+
 ## Platform support (Tomcat + MySQL host install)
 
 | OS | Entry point | Notes |
@@ -63,10 +75,12 @@ Your existing system MySQL on **:3306** (if any) is left alone.
 
 ```bash
 ./tools/lab/up.sh --check              # preflight only
-./tools/lab/up.sh                      # IIQ (setup or start) + Academy
+./tools/lab/up.sh                      # IIQ (setup or start) + OpenAPI + MCP + Academy
 # Academy → http://localhost:4173/  |  IIQ → http://localhost:8080/identityiq
+# OpenAPI → http://localhost:8765/swagger/  |  MCP → http://127.0.0.1:8766/mcp
 
-./tools/lab/up.sh --force-db           # rebuild schemas + re-import, then Academy
+./tools/lab/up.sh --force-db           # rebuild schemas + re-import, then sidecars + Academy
+./tools/lab/up.sh --sidecars-only      # OpenAPI + MCP only
 ./tools/lab/setup-local.sh             # install-only (no Academy)
 source ~/.zshrc   # or ~/.bashrc
 iiq-help
@@ -93,7 +107,8 @@ iiq-help
 
 | File | Purpose |
 | --- | --- |
-| `up.sh` | **One command:** ensure IIQ + start Academy |
+| `up.sh` | **One command:** ensure IIQ + OpenAPI + MCP + start Academy |
+| `start-sidecars.sh` | OpenAPI (:8765) + MCP (:8766) only |
 | `setup-local.sh` / `teardown-local.sh` | Install-only / teardown (Unix / WSL) |
 | `start-academy.sh` | Wrapper → `up.sh --academy-only` |
 | `setup-local.ps1` / `teardown-local.ps1` | Windows native |

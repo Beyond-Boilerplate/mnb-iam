@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: IdentityIQ External REST API
+  version: 8.5-mined
+  description: "Limited external surface at `/identityiq/external/rest/*` (forms, MFA helpers).\n\nGenerated at `2026-07-29T18:48:38.658570+00:00` by `tools/iiq-api-mine`. Regenerate with `./tools/iiq-api-mine/run.sh`."
+  x-iiq-surface: external-rest
+  x-generated-by: tools/iiq-api-mine
+servers:
+  - url: /identityiq/external/rest
+    description: Via docs/api/serve.py proxy (same origin — use in Swagger)
+  - url: "http://localhost:8080/identityiq/external/rest"
+    description: Direct local IIQ (curl; browser CORS from other origins)
+  - url: "https://sailpoint.lmsapp.us/identityiq/external/rest"
+    description: Homelab academy IIQ
+tags:
+  - name: security
+    description: "Category `security` / subcategory `authn-authz`."
+paths:
+  /mfa/configuration:
+    get:
+      tags:
+        - security
+        - authn-authz
+      summary: GET /mfa/configuration (getMFAConfig)
+      description: "Class `sailpoint.rest.external.MFAResource` method `getMFAConfig`.\n\nSource: `identityiq.jar`.\nAuth hints: none mined.\nGaps: produces-unspecified, response-schema-unknown."
+      operationId: get_external_rest_mfa_configuration_getmfaconfig_MFAResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.external.MFAResource
+      x-iiq-method: getMFAConfig
+      x-iiq-surface: external-rest
+      x-iiq-gaps:
+        - produces-unspecified
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: Browser session cookie after UI login.
+    oAuth2ClientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "http://localhost:8080/identityiq/oauth2/token"
+          scopes: {}
+  schemas:
+    UnknownJson:
+      type: object
+      additionalProperties: true
+      description: Placeholder. Exact schema not present in bytecode annotations. Capture via live probing / SailPoint product docs. Tracked in GAPS.md.
+    Problemish:
+      type: object
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+    MnbToolkitPingResponse:
+      type: object
+      required:
+        - status
+        - bank
+      properties:
+        status:
+          type: string
+          example: ok
+        bank:
+          type: string
+          example: MNB
+        plugin:
+          type: string
+          example: mnb-iam-toolkit
+        version:
+          type: string
+          example: 1.1.0
+    MnbTaskRunRequest:
+      type: object
+      required:
+        - taskName
+      properties:
+        taskName:
+          type: string
+          description: Exact TaskDefinition name (must match allowedTaskNames).
+          example: Refresh Identity Cube
+        sync:
+          type: boolean
+          default: false
+          description: Prefer false for aggregations; true blocks HTTP until complete.
+        args:
+          type: object
+          additionalProperties: true
+          description: Task arguments (e.g. applications filter).
+    MnbTaskRunResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - accepted
+            - running
+            - success
+            - failed
+        taskName:
+          type: string
+        taskResultId:
+          type: string
+        taskResultName:
+          type: string
+        sync:
+          type: boolean
+        complete:
+          type: boolean
+        success:
+          type: boolean
+        percentComplete:
+          type: integer
+        bank:
+          type: string
+          example: MNB
+security:
+  - basicAuth: []
+  - sessionCookie: []

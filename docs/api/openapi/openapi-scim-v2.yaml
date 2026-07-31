@@ -1,0 +1,2149 @@
+openapi: 3.0.3
+info:
+  title: IdentityIQ SCIM 2.0 Server API
+  version: 8.5-mined
+  description: "SCIM 2.0 server mounted at `/identityiq/scim/v2/*` (scim-server.jar). Schemas map via Configuration-SCIMConfiguration. RFC 7643/7644 shaped.\n\nGenerated at `2026-07-29T18:48:38.658570+00:00` by `tools/iiq-api-mine`. Regenerate with `./tools/iiq-api-mine/run.sh`."
+  x-iiq-surface: scim-v2
+  x-generated-by: tools/iiq-api-mine
+servers:
+  - url: /identityiq/scim/v2
+    description: Via docs/api/serve.py proxy (same origin — use in Swagger)
+  - url: "http://localhost:8080/identityiq/scim/v2"
+    description: Direct local IIQ (curl; browser CORS from other origins)
+  - url: "https://sailpoint.lmsapp.us/identityiq/scim/v2"
+    description: Homelab academy IIQ
+tags:
+  - name: accounts
+    description: "Category `accounts` / subcategory `account-links`."
+  - name: alerts
+    description: "Category `alerts` / subcategory `monitoring`."
+  - name: applications
+    description: "Category `applications` / subcategory `connectors`."
+  - name: entitlements
+    description: "Category `entitlements` / subcategory `managed-attributes`."
+  - name: identities
+    description: "Category `identities` / subcategory `identity-lifecycle`."
+  - name: platform
+    description: "Category `platform` / subcategory `configuration`."
+  - name: policies
+    description: "Category `policies` / subcategory `governance`."
+  - name: roles
+    description: "Category `roles` / subcategory `role-model`."
+  - name: scim-discovery
+    description: "Category `scim-discovery` / subcategory `meta`."
+  - name: tasks
+    description: "Category `tasks` / subcategory `operations`."
+  - name: workflows
+    description: "Category `workflows` / subcategory `orchestration`."
+paths:
+  /Accounts:
+    get:
+      tags:
+        - accounts
+        - account-links
+      summary: GET /Accounts (list)
+      description: "Class `sailpoint.rest.scim.AccountListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_accounts_list_AccountListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AccountListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    post:
+      tags:
+        - accounts
+        - account-links
+      summary: POST /Accounts (createAccount)
+      description: "Class `sailpoint.rest.scim.AccountListResource` method `createAccount`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_scim_v2_accounts_createaccount_AccountListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AccountListResource
+      x-iiq-method: createAccount
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /Alerts:
+    get:
+      tags:
+        - alerts
+        - monitoring
+      summary: GET /Alerts (list)
+      description: "Class `sailpoint.rest.scim.AlertListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_alerts_list_AlertListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AlertListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    post:
+      tags:
+        - alerts
+        - monitoring
+      summary: POST /Alerts (createAlert)
+      description: "Class `sailpoint.rest.scim.AlertListResource` method `createAlert`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_scim_v2_alerts_createalert_AlertListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AlertListResource
+      x-iiq-method: createAlert
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /Applications:
+    get:
+      tags:
+        - applications
+        - connectors
+      summary: GET /Applications (list)
+      description: "Class `sailpoint.rest.scim.ApplicationListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_applications_list_ApplicationListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ApplicationListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /CheckedPolicyViolations:
+    post:
+      tags:
+        - policies
+        - governance
+      summary: POST /CheckedPolicyViolations (checkPolicyViolations)
+      description: "Class `sailpoint.rest.scim.CheckedPolicyViolationListResource` method `checkPolicyViolations`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_scim_v2_checkedpolicyviolations_checkpolicyviolations_CheckedPolicyViolationListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.CheckedPolicyViolationListResource
+      x-iiq-method: checkPolicyViolations
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /Entitlements:
+    get:
+      tags:
+        - entitlements
+        - managed-attributes
+      summary: GET /Entitlements (list)
+      description: "Class `sailpoint.rest.scim.EntitlementListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_entitlements_list_EntitlementListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.EntitlementListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /LaunchedWorkflows:
+    get:
+      tags:
+        - workflows
+        - orchestration
+      summary: GET /LaunchedWorkflows (list)
+      description: "Class `sailpoint.rest.scim.LaunchedWorkflowListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_launchedworkflows_list_LaunchedWorkflowListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.LaunchedWorkflowListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    post:
+      tags:
+        - workflows
+        - orchestration
+      summary: POST /LaunchedWorkflows (launch)
+      description: "Class `sailpoint.rest.scim.LaunchedWorkflowListResource` method `launch`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_scim_v2_launchedworkflows_launch_LaunchedWorkflowListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.LaunchedWorkflowListResource
+      x-iiq-method: launch
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /ObjectConfigs:
+    get:
+      tags:
+        - platform
+        - configuration
+      summary: GET /ObjectConfigs (list)
+      description: "Class `sailpoint.rest.scim.ObjectConfigListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_objectconfigs_list_ObjectConfigListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ObjectConfigListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /PolicyViolations:
+    get:
+      tags:
+        - policies
+        - governance
+      summary: GET /PolicyViolations (list)
+      description: "Class `sailpoint.rest.scim.PolicyViolationListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_policyviolations_list_PolicyViolationListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.PolicyViolationListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /ResourceTypes:
+    get:
+      tags:
+        - scim-discovery
+        - meta
+      summary: GET /ResourceTypes (getList)
+      description: "Class `sailpoint.rest.scim.ResourceTypeListResource` method `getList`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_resourcetypes_getlist_ResourceTypeListResource
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ResourceTypeListResource
+      x-iiq-method: getList
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /Roles:
+    get:
+      tags:
+        - roles
+        - role-model
+      summary: GET /Roles (list)
+      description: "Class `sailpoint.rest.scim.RoleListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_roles_list_RoleListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.RoleListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /Schemas:
+    get:
+      tags:
+        - scim-discovery
+        - meta
+      summary: GET /Schemas (getList)
+      description: "Class `sailpoint.rest.scim.SchemaListResource` method `getList`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_schemas_getlist_SchemaListResource
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.SchemaListResource
+      x-iiq-method: getList
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /ServiceProviderConfig:
+    get:
+      tags:
+        - platform
+        - configuration
+      summary: GET /ServiceProviderConfig (getServiceProviderConfig)
+      description: "Class `sailpoint.rest.scim.ServiceProviderConfigResource` method `getServiceProviderConfig`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_serviceproviderconfig_getserviceproviderconfig_ServiceProviderConfigResource
+      parameters: []
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ServiceProviderConfigResource
+      x-iiq-method: getServiceProviderConfig
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /TaskResults:
+    get:
+      tags:
+        - tasks
+        - operations
+      summary: GET /TaskResults (list)
+      description: "Class `sailpoint.rest.scim.TaskResultListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_taskresults_list_TaskResultListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.TaskResultListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  /Users:
+    get:
+      tags:
+        - identities
+        - identity-lifecycle
+      summary: GET /Users (list)
+      description: "Class `sailpoint.rest.scim.UserListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_users_list_UserListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.UserListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    post:
+      tags:
+        - identities
+        - identity-lifecycle
+      summary: POST /Users (createUser)
+      description: "Class `sailpoint.rest.scim.UserListResource` method `createUser`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown, request-schema-unknown."
+      operationId: post_scim_v2_users_createuser_UserListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.UserListResource
+      x-iiq-method: createUser
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  /Workflows:
+    get:
+      tags:
+        - workflows
+        - orchestration
+      summary: GET /Workflows (list)
+      description: "Class `sailpoint.rest.scim.WorkflowListResource` method `list`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: response-schema-unknown."
+      operationId: get_scim_v2_workflows_list_WorkflowListResource
+      parameters:
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `count` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `filter` (mined)."
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortBy` (mined)."
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `sortOrder` (mined)."
+        - name: startIndex
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `startIndex` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.WorkflowListResource
+      x-iiq-method: list
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:AccountResource}":
+    delete:
+      tags:
+        - accounts
+        - account-links
+      summary: "DELETE /{locator:AccountResource} (deleteAccount)"
+      description: "Class `sailpoint.rest.scim.AccountResource` method `deleteAccount`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: delete_scim_v2_locator_accountresource_deleteaccount_AccountResource
+      parameters:
+        - name: "locator:AccountResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:AccountResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AccountResource
+      x-iiq-method: deleteAccount
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    get:
+      tags:
+        - accounts
+        - account-links
+      summary: "GET /{locator:AccountResource} (getAccount)"
+      description: "Class `sailpoint.rest.scim.AccountResource` method `getAccount`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_accountresource_getaccount_AccountResource
+      parameters:
+        - name: "locator:AccountResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:AccountResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AccountResource
+      x-iiq-method: getAccount
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    put:
+      tags:
+        - accounts
+        - account-links
+      summary: "PUT /{locator:AccountResource} (updateAccount)"
+      description: "Class `sailpoint.rest.scim.AccountResource` method `updateAccount`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown, request-schema-unknown."
+      operationId: put_scim_v2_locator_accountresource_updateaccount_AccountResource
+      parameters:
+        - name: "locator:AccountResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:AccountResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AccountResource
+      x-iiq-method: updateAccount
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/{locator:AlertResource}":
+    get:
+      tags:
+        - alerts
+        - monitoring
+      summary: "GET /{locator:AlertResource} (getAlert)"
+      description: "Class `sailpoint.rest.scim.AlertResource` method `getAlert`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_alertresource_getalert_AlertResource
+      parameters:
+        - name: "locator:AlertResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:AlertResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.AlertResource
+      x-iiq-method: getAlert
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:ApplicationResource}":
+    get:
+      tags:
+        - applications
+        - connectors
+      summary: "GET /{locator:ApplicationResource} (getApplication)"
+      description: "Class `sailpoint.rest.scim.ApplicationResource` method `getApplication`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_applicationresource_getapplication_ApplicationResource
+      parameters:
+        - name: "locator:ApplicationResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:ApplicationResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ApplicationResource
+      x-iiq-method: getApplication
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:EntitlementResource}":
+    get:
+      tags:
+        - entitlements
+        - managed-attributes
+      summary: "GET /{locator:EntitlementResource} (getEntitlement)"
+      description: "Class `sailpoint.rest.scim.EntitlementResource` method `getEntitlement`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_entitlementresource_getentitlement_EntitlementResource
+      parameters:
+        - name: "locator:EntitlementResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:EntitlementResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.EntitlementResource
+      x-iiq-method: getEntitlement
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:LaunchedWorkflowResource}":
+    get:
+      tags:
+        - workflows
+        - orchestration
+      summary: "GET /{locator:LaunchedWorkflowResource} (getResource)"
+      description: "Class `sailpoint.rest.scim.LaunchedWorkflowResource` method `getResource`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_launchedworkflowresource_getresource_LaunchedWorkflowResource
+      parameters:
+        - name: "locator:LaunchedWorkflowResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:LaunchedWorkflowResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.LaunchedWorkflowResource
+      x-iiq-method: getResource
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:ObjectConfigResource}":
+    get:
+      tags:
+        - platform
+        - configuration
+      summary: "GET /{locator:ObjectConfigResource} (getObjectConfig)"
+      description: "Class `sailpoint.rest.scim.ObjectConfigResource` method `getObjectConfig`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_objectconfigresource_getobjectconfig_ObjectConfigResource
+      parameters:
+        - name: "locator:ObjectConfigResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:ObjectConfigResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ObjectConfigResource
+      x-iiq-method: getObjectConfig
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:PolicyViolationResource}":
+    get:
+      tags:
+        - policies
+        - governance
+      summary: "GET /{locator:PolicyViolationResource} (getPolicyViolation)"
+      description: "Class `sailpoint.rest.scim.PolicyViolationResource` method `getPolicyViolation`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_policyviolationresource_getpolicyviolation_PolicyViolationResource
+      parameters:
+        - name: "locator:PolicyViolationResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:PolicyViolationResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.PolicyViolationResource
+      x-iiq-method: getPolicyViolation
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:ResourceTypeResource}":
+    get:
+      tags:
+        - scim-discovery
+        - meta
+      summary: "GET /{locator:ResourceTypeResource} (getResourceType)"
+      description: "Class `sailpoint.rest.scim.ResourceTypeResource` method `getResourceType`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_resourcetyperesource_getresourcetype_ResourceTypeResource
+      parameters:
+        - name: "locator:ResourceTypeResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:ResourceTypeResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.ResourceTypeResource
+      x-iiq-method: getResourceType
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:RoleResource}":
+    get:
+      tags:
+        - roles
+        - role-model
+      summary: "GET /{locator:RoleResource} (getRole)"
+      description: "Class `sailpoint.rest.scim.RoleResource` method `getRole`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_roleresource_getrole_RoleResource
+      parameters:
+        - name: "locator:RoleResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:RoleResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.RoleResource
+      x-iiq-method: getRole
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:SchemaResource}":
+    get:
+      tags:
+        - scim-discovery
+        - meta
+      summary: "GET /{locator:SchemaResource} (getSchema)"
+      description: "Class `sailpoint.rest.scim.SchemaResource` method `getSchema`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_schemaresource_getschema_SchemaResource
+      parameters:
+        - name: "locator:SchemaResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:SchemaResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.SchemaResource
+      x-iiq-method: getSchema
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:TaskResultResource}":
+    get:
+      tags:
+        - tasks
+        - operations
+      summary: "GET /{locator:TaskResultResource} (getTaskResult)"
+      description: "Class `sailpoint.rest.scim.TaskResultResource` method `getTaskResult`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_taskresultresource_gettaskresult_TaskResultResource
+      parameters:
+        - name: "locator:TaskResultResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:TaskResultResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.TaskResultResource
+      x-iiq-method: getTaskResult
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+  "/{locator:UserResource}":
+    delete:
+      tags:
+        - identities
+        - identity-lifecycle
+      summary: "DELETE /{locator:UserResource} (deleteUser)"
+      description: "Class `sailpoint.rest.scim.UserResource` method `deleteUser`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: delete_scim_v2_locator_userresource_deleteuser_UserResource
+      parameters:
+        - name: "locator:UserResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:UserResource` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.UserResource
+      x-iiq-method: deleteUser
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    get:
+      tags:
+        - identities
+        - identity-lifecycle
+      summary: "GET /{locator:UserResource} (getUser)"
+      description: "Class `sailpoint.rest.scim.UserResource` method `getUser`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_userresource_getuser_UserResource
+      parameters:
+        - name: "locator:UserResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:UserResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.UserResource
+      x-iiq-method: getUser
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+    put:
+      tags:
+        - identities
+        - identity-lifecycle
+      summary: "PUT /{locator:UserResource} (updateUser)"
+      description: "Class `sailpoint.rest.scim.UserResource` method `updateUser`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown, request-schema-unknown."
+      operationId: put_scim_v2_locator_userresource_updateuser_UserResource
+      parameters:
+        - name: "locator:UserResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:UserResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.UserResource
+      x-iiq-method: updateUser
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+        - request-schema-unknown
+      x-iiq-auth-hints: []
+      requestBody:
+        required: false
+        content:
+          application/scim+json:
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+          "*/*":
+            schema:
+              $ref: "#/components/schemas/UnknownJson"
+            description: Request body schema not recoverable from bytecode (see GAPS.md).
+  "/{locator:WorkflowResource}":
+    get:
+      tags:
+        - workflows
+        - orchestration
+      summary: "GET /{locator:WorkflowResource} (getWorkflow)"
+      description: "Class `sailpoint.rest.scim.WorkflowResource` method `getWorkflow`.\n\nSource: `scim-server.jar`.\nAuth hints: none mined.\nGaps: missing-path-annotation, subresource-locator-path-synthetic, response-schema-unknown."
+      operationId: get_scim_v2_locator_workflowresource_getworkflow_WorkflowResource
+      parameters:
+        - name: "locator:WorkflowResource"
+          in: path
+          required: true
+          schema:
+            type: string
+          description: "Path parameter `locator:WorkflowResource` (mined)."
+        - name: attributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `attributes` (mined)."
+        - name: excludedAttributes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: "Query parameter `excludedAttributes` (mined)."
+      responses:
+        "200":
+          description: Success (schema not fully recoverable from bytecode).
+          content:
+            application/scim+json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnknownJson"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Authenticated but not authorized (capability/right).
+        "404":
+          description: Resource not found
+      x-iiq-class: sailpoint.rest.scim.WorkflowResource
+      x-iiq-method: getWorkflow
+      x-iiq-surface: scim-v2
+      x-iiq-gaps:
+        - missing-path-annotation
+        - subresource-locator-path-synthetic
+        - response-schema-unknown
+      x-iiq-auth-hints: []
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: Browser session cookie after UI login.
+    oAuth2ClientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "http://localhost:8080/identityiq/oauth2/token"
+          scopes: {}
+  schemas:
+    UnknownJson:
+      type: object
+      additionalProperties: true
+      description: Placeholder. Exact schema not present in bytecode annotations. Capture via live probing / SailPoint product docs. Tracked in GAPS.md.
+    Problemish:
+      type: object
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+    MnbToolkitPingResponse:
+      type: object
+      required:
+        - status
+        - bank
+      properties:
+        status:
+          type: string
+          example: ok
+        bank:
+          type: string
+          example: MNB
+        plugin:
+          type: string
+          example: mnb-iam-toolkit
+        version:
+          type: string
+          example: 1.1.0
+    MnbTaskRunRequest:
+      type: object
+      required:
+        - taskName
+      properties:
+        taskName:
+          type: string
+          description: Exact TaskDefinition name (must match allowedTaskNames).
+          example: Refresh Identity Cube
+        sync:
+          type: boolean
+          default: false
+          description: Prefer false for aggregations; true blocks HTTP until complete.
+        args:
+          type: object
+          additionalProperties: true
+          description: Task arguments (e.g. applications filter).
+    MnbTaskRunResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - accepted
+            - running
+            - success
+            - failed
+        taskName:
+          type: string
+        taskResultId:
+          type: string
+        taskResultName:
+          type: string
+        sync:
+          type: boolean
+        complete:
+          type: boolean
+        success:
+          type: boolean
+        percentComplete:
+          type: integer
+        bank:
+          type: string
+          example: MNB
+security:
+  - basicAuth: []
+  - sessionCookie: []

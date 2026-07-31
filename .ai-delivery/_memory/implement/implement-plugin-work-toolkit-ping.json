@@ -1,0 +1,31 @@
+{
+  "id": "implement-plugin-work-toolkit-ping",
+  "skill": "implement",
+  "work_type": "plugin-work",
+  "keywords": [
+    "toolkit_ping",
+    "list_iiq_plugins",
+    "mnb_iam_toolkit"
+  ],
+  "summary": "Confirm Meridian toolkit already enabled",
+  "approach": "MCP_LIVE read-only: toolkit_ping then list_iiq_plugins; skip install if disabled=false; redact evidence via redact_json.py",
+  "solution": {
+    "mode": "MCP_LIVE",
+    "tool_sequence": [
+      {
+        "tool": "toolkit_ping"
+      },
+      {
+        "tool": "list_iiq_plugins"
+      }
+    ],
+    "requires_confirmation": false
+  },
+  "gotchas": [
+    "install_plugin_zip only if ping fails and user confirms"
+  ],
+  "source_issue": "MNB-123",
+  "confidence": 0.95,
+  "created_at": "2026-07-29T20:22:39Z",
+  "updated_at": "2026-07-29T20:22:39Z"
+}

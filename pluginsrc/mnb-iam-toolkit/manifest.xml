@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin certificationLevel="None" displayName="Meridian Custom APIs"
+	minSystemVersion="8.0" name="mnb_iam_toolkit" version="1.3.6"
+	rightRequired="MNBToolkitAccess">
+	<Attributes>
+		<Map>
+			<entry key="minUpgradableVersion" value="1.0.0" />
+			<entry key="fullPage">
+				<value>
+					<FullPage title="Meridian Custom APIs" />
+				</value>
+			</entry>
+			<entry key="restResources">
+				<value>
+					<List>
+						<String>com.meridianbank.iiq.plugin.rest.MnbToolkitPingResource</String>
+						<String>com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource</String>
+						<String>com.meridianbank.iiq.plugin.rest.MnbAgentResource</String>
+						<String>com.meridianbank.iiq.plugin.rest.MnbAgentCoverageResource</String>
+					</List>
+				</value>
+			</entry>
+			<entry key="settings">
+				<value>
+					<List>
+						<Setting dataType="string"
+							helpText="Non-secret banner text for toolkit operators"
+							label="Toolkit Banner" name="toolkitBanner"
+							defaultValue="Meridian Custom APIs" />
+						<Setting dataType="boolean"
+							helpText="Kill switch for POST /mnbToolkit/tasks/run (default off)"
+							label="Enable task run API" name="taskRunEnabled"
+							defaultValue="false" />
+						<Setting dataType="string"
+							helpText="Comma-separated TaskDefinition names (trailing * allowed). Empty = deny all."
+							label="Allowed task names" name="allowedTaskNames"
+							defaultValue="" />
+						<Setting dataType="boolean"
+							helpText="Master kill switch for /mnbToolkit/agent/* Custom APIs"
+							label="Enable Custom APIs" name="agentApiEnabled"
+							defaultValue="false" />
+						<Setting dataType="boolean"
+							helpText="Allow work-item decide, cert decide/sign, SoD mitigate, capability assign, access-request launch"
+							label="Enable governance mutate" name="mutateGovernanceEnabled"
+							defaultValue="false" />
+						<Setting dataType="boolean"
+							helpText="Allow admin password set/reset and unlock via Custom APIs"
+							label="Enable password reset API" name="passwordResetEnabled"
+							defaultValue="false" />
+						<Setting dataType="boolean"
+							helpText="Allow app config mutate, native change detection, system config write, object import, plugin enable/install"
+							label="Enable advanced ops" name="advancedOpsEnabled"
+							defaultValue="false" />
+					</List>
+				</value>
+			</entry>
+			<entry key="snippets">
+				<value>
+					<List />
+				</value>
+			</entry>
+			<entry key="serviceExecutors">
+				<value>
+					<List />
+				</value>
+			</entry>
+		</Map>
+	</Attributes>
+</Plugin>

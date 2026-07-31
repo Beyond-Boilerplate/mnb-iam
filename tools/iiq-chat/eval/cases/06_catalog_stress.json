@@ -1,0 +1,140 @@
+[
+  {
+    "id": "roles-list",
+    "tier": "core",
+    "tags": ["roles", "read"],
+    "query": "List business roles available in the lab.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_agent_roles", "list_roles", "get_requestable_items"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "populations-list",
+    "tier": "core",
+    "tags": ["populations", "read"],
+    "query": "What populations are defined?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_populations"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "workgroups-list",
+    "tier": "core",
+    "tags": ["workgroups", "read"],
+    "query": "List workgroups.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_workgroups"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "plugins-list",
+    "tier": "core",
+    "tags": ["plugins", "read"],
+    "query": "Which IIQ plugins are installed?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_iiq_plugins"],
+      "reply_contains_any": ["mnb", "toolkit", "plugin"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "forms-list",
+    "tier": "full",
+    "tags": ["forms", "read"],
+    "query": "List forms in IdentityIQ.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_forms"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "quicklinks-list",
+    "tier": "full",
+    "tags": ["quicklinks", "read"],
+    "query": "What QuickLinks are available?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_quicklinks"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "email-templates-list",
+    "tier": "full",
+    "tags": ["email", "read"],
+    "query": "List email templates.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_email_templates"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "schedules-list",
+    "tier": "full",
+    "tags": ["schedules", "read"],
+    "query": "Show task schedules.",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_agent_schedules", "list_schedules"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "capabilities-list",
+    "tier": "full",
+    "tags": ["capabilities", "read"],
+    "query": "What capabilities can be assigned to identities?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_agent_capabilities", "list_capabilities"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "reports-list",
+    "tier": "full",
+    "tags": ["reports", "read"],
+    "query": "What report definitions can I run?",
+    "expect": {
+      "http_ok": true,
+      "tools_any_of": ["list_report_definitions", "run_report"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "stress-multi-hop-manager-access",
+    "tier": "stress",
+    "tags": ["stress", "identity", "access", "read"],
+    "query": "For each direct report of Christopher Hayes, say whether they look active and name one application account if visible. Keep it brief.",
+    "expect": {
+      "http_ok": true,
+      "min_tools": 1,
+      "tools_any_of": ["get_manager_hierarchy", "search_identities", "get_identity", "get_identity_accounts"],
+      "reply_contains_any": ["Christopher", "report", "Meera", "Anita", "active"],
+      "no_tool_errors": true
+    }
+  },
+  {
+    "id": "stress-clarify-not-ask-back-cert",
+    "tier": "stress",
+    "tags": ["stress", "cert", "write", "regression"],
+    "mutate": true,
+    "query": "Create certification campaign MNB-Eval-Stress-Cert using any reasonable manager template you can find; don't ask me clarifying questions — just do it or report the tool error.",
+    "pass_if_any": [
+      {
+        "tools_any_of": ["create_certification_campaign", "list_certifications"],
+        "reply_not_contains_any": ["please provide", "which template", "could you"],
+        "min_tools": 1
+      }
+    ]
+  }
+]

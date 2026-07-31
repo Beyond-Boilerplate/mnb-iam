@@ -1,0 +1,40 @@
+{
+  "id": "implement-identity-admin-unlock",
+  "skill": "implement",
+  "work_type": "identity-admin",
+  "keywords": [
+    "unlock",
+    "unlock_iiq_identity",
+    "search_identities"
+  ],
+  "summary": "Unlock path with search-first gate",
+  "approach": "toolkit_ping \u2192 search_identities (exact persona) \u2192 unlock only if totalResults>=1 and user confirms \u2192 get_identity_accounts",
+  "solution": {
+    "mode": "MCP_LIVE",
+    "tool_sequence": [
+      {
+        "tool": "toolkit_ping"
+      },
+      {
+        "tool": "search_identities"
+      },
+      {
+        "tool": "unlock_iiq_identity",
+        "requires_confirmation": true
+      },
+      {
+        "tool": "get_identity_accounts"
+      }
+    ],
+    "excluded": [
+      "grant_capability"
+    ]
+  },
+  "gotchas": [
+    "If search empty: NEEDS_USER_INPUT; never guess identity id"
+  ],
+  "source_issue": "MNB-105",
+  "confidence": 0.9,
+  "created_at": "2026-07-29T20:22:39Z",
+  "updated_at": "2026-07-29T20:22:39Z"
+}

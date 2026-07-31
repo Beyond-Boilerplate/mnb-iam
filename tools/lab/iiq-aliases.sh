@@ -226,7 +226,10 @@ IdentityIQ lab aliases
   iiq-help         This help
 
 Setup / teardown (from repo):
-  ./tools/lab/up.sh              # IIQ + Academy
+  ./tools/lab/up.sh              # IIQ + OpenAPI + MCP + Academy
+  ./tools/lab/up.sh --sidecars-only
+  ./tools/lab/start-sidecars.sh  # start|stop|status
+  ./tools/lab/docker/up.sh       # Docker stack (+ MCP + OpenAPI)
   ./tools/lab/setup-local.sh     # install-only
   ./tools/lab/teardown-local.sh --yes
 EOF

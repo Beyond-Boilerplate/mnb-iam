@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <!--
+    Grant these Capabilities to MNB-WG-IAM-Ops (or narrower).
+    MNBToolkitAccess  — ping
+    MNBToolkitTaskRun — task launch / result poll (UIAPI-01/02)
+    MNBToolkitAgent   — agent orchestration surface (UIAPI-03+)
+  -->
+  <Capability displayName="Meridian Toolkit Access" name="MNB-Capability-Toolkit">
+    <Description>Health ping for Meridian IAM Toolkit</Description>
+    <RightRefs>
+      <Reference class="sailpoint.object.SPRight" name="MNBToolkitAccess"/>
+    </RightRefs>
+  </Capability>
+  <Capability displayName="Meridian Toolkit Task Run" name="MNB-Capability-Toolkit-TaskRun">
+    <Description>Allowlisted TaskDefinition launch via toolkit plugin REST</Description>
+    <RightRefs>
+      <Reference class="sailpoint.object.SPRight" name="MNBToolkitTaskRun"/>
+    </RightRefs>
+  </Capability>
+  <Capability displayName="Meridian Toolkit Agent" name="MNB-Capability-Toolkit-Agent">
+    <Description>MCP / ITSM agent orchestration verbs under /mnbToolkit/agent</Description>
+    <RightRefs>
+      <Reference class="sailpoint.object.SPRight" name="MNBToolkitAgent"/>
+    </RightRefs>
+  </Capability>
+</sailpoint>
