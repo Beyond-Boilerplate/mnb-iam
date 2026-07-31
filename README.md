@@ -13,6 +13,7 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 # OpenAPI → http://localhost:8765/swagger/
 # MCP     → http://127.0.0.1:8766/mcp  (Bearer mnb-lab-mcp-key)
 # Teller  → http://localhost:4180/  (chatbot; OPENROUTER_API_KEY for free-text)
+# LDAP UI → http://localhost:8090/  (phpLDAPadmin; cn=admin,dc=meridiannb,dc=com / admin)
 ```
 
 Tomcat host path (one command):

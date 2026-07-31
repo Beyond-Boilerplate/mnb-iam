@@ -27,6 +27,7 @@ Startup **fails fast** if required host ports are taken by something other than 
 | http://127.0.0.1:8766/mcp | IdentityIQ MCP (Bearer `mnb-lab-mcp-key`) |
 | http://127.0.0.1:8766/healthz | MCP health |
 | http://localhost:4180/ | **Teller** chatbot (pre-baked MCP + OpenRouter) |
+| http://localhost:8090/ | **phpLDAPadmin** (browse OpenLDAP; `cn=admin,dc=meridiannb,dc=com` / `admin`) |
 | ldap://localhost:389 | **OpenLDAP** (`cn=admin,dc=meridiannb,dc=com` / `admin`) |
 
 Lab CSV files are mounted at `/opt/iiq-lab-data` inside IIQ (from repo `lab-data/`).

@@ -71,6 +71,18 @@ The OpenLDAP connector stores **one** bind DN/password. That account is used for
 
 `svc-iiq-read` **cannot** create accounts or change `member` — provisioning plans will fail with insufficient access. Use **`svc-iiq-provision`** once you enable PROVISIONING on `MNB-OpenLDAP`.
 
+## GUI (phpLDAPadmin)
+
+Started with the Docker lab stack:
+
+```text
+http://localhost:8090/
+Login DN: cn=admin,dc=meridiannb,dc=com
+Password: admin
+```
+
+Or CLI / desktop tools (Apache Directory Studio, etc.) against `localhost:389` with the same bind.
+
 ## Connection sheet (IIQ)
 
 | Field | Docker IIQ → LDAP | Host / ldapsearch |

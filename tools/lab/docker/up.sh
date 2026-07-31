@@ -56,6 +56,7 @@ CHAT_PORT="${CHAT_PORT:-4180}"
 ACADEMY_PORT="${ACADEMY_PORT:-4173}"
 LDAP_PORT="${LDAP_PORT:-389}"
 LDAPS_PORT="${LDAPS_PORT:-636}"
+PHPLDAPADMIN_PORT="${PHPLDAPADMIN_PORT:-8090}"
 PG_PORT="${PG_PORT:-5433}"
 
 PORTS=(
@@ -64,6 +65,7 @@ PORTS=(
   "OpenAPI:${API_DOCS_PORT}"
   "Teller:${CHAT_PORT}"
   "Academy:${ACADEMY_PORT}"
+  "phpLDAPadmin:${PHPLDAPADMIN_PORT}"
   "OpenLDAP:${LDAP_PORT}"
   "LDAPS:${LDAPS_PORT}"
   "Postgres:${PG_PORT}"
@@ -312,6 +314,7 @@ post_ready_checks() {
     "http://127.0.0.1:${API_DOCS_PORT}/swagger/" "OpenAPI" 40 2 \
     "http://127.0.0.1:${CHAT_PORT}/api/config" "Teller" 40 2 \
     "http://127.0.0.1:${ACADEMY_PORT}/" "Academy" 40 2 \
+    "http://127.0.0.1:${PHPLDAPADMIN_PORT}/" "phpLDAPadmin" 30 2 \
     || failed=1
 
   # LDAP + MCP DNS probes in parallel
@@ -435,6 +438,8 @@ print_ready() {
   fi
   echo "  OpenLDAP: ldap://localhost:${LDAP_PORT}"
   echo "            bind cn=admin,dc=meridiannb,dc=com / admin"
+  echo "  LDAP UI:  http://localhost:${PHPLDAPADMIN_PORT}/  (phpLDAPadmin)"
+  echo "            login DN cn=admin,dc=meridiannb,dc=com / admin"
   if [[ "$DO_SEED" -eq 1 ]]; then
     echo "  Seed:     MNB-HR + MNB-OpenLDAP (ran during up)"
   else

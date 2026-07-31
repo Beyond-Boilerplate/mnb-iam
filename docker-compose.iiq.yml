@@ -11,6 +11,7 @@
 #   MCP       http://127.0.0.1:8766/mcp  (Bearer ${MCP_API_KEY:-mnb-lab-mcp-key})
 #   Teller    http://localhost:4180/  (chatbot; set OPENROUTER_API_KEY for free-text)
 #   OpenLDAP  ldap://localhost:389  (cn=admin,dc=meridiannb,dc=com / admin)
+#   LDAP UI   http://localhost:8090/  (phpLDAPadmin; same admin bind)
 #
 # Tear down: ./tools/lab/docker/down.sh [-v]
 #
@@ -64,6 +65,30 @@ services:
       LDAP_PROVISION_PASSWORD: Provision1!
     entrypoint: ["/opt/mnb/apply-provision-acl.sh"]
     restart: "no"
+
+  # Free web LDAP browser (osixia companion to OpenLDAP)
+  phpldapadmin:
+    image: ${PHPLDAPADMIN_IMAGE:-osixia/phpldapadmin:0.9.0}
+    container_name: mnb-phpldapadmin
+    depends_on:
+      openldap:
+        condition: service_healthy
+    environment:
+      PHPLDAPADMIN_HTTPS: "false"
+      # Prefill Meridian admin bind; disable TLS to plain :389 inside the compose network
+      PHPLDAPADMIN_LDAP_HOSTS: "#PYTHON2BASH:[{'openldap': [{'server': [{'tls': False, 'port': 389}]}, {'login': [{'bind_id': 'cn=admin,dc=meridiannb,dc=com'}]}]}]"
+    ports:
+      - "${PHPLDAPADMIN_PORT:-8090}:80"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf -o /dev/null http://127.0.0.1:80/ || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 20s
 
   postgres:
     image: postgres:16-alpine
