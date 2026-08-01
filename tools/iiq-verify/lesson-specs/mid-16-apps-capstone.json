@@ -1,0 +1,52 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "mid-16",
+  "stem": "mid-16-apps-capstone",
+  "title": "Mid-capstone — Apps track checkpoint",
+  "description": "Core Path checkpoint after Lesson 16: inventory apps + workforce floor.",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "id": "app-it",
+      "message": "Application 'MNB-IT-Access' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-CoreBanking",
+      "id": "app-core",
+      "message": "Application 'MNB-CoreBanking' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Attributes",
+      "id": "task-refresh",
+      "message": "TaskDefinition 'Refresh MNB Attributes' exists",
+      "softFail": true,
+      "hint": "Name may vary if you combined refresh tasks — document equivalent."
+    },
+    {
+      "type": "identity.countMin",
+      "min": 50,
+      "id": "idents-min",
+      "message": "At least 50 identity cubes present"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "mid-46",
+  "stem": "mid-46-certs-capstone",
+  "title": "Mid-capstone — Certifications track checkpoint",
+  "description": "Core Path checkpoint after Lesson 46: SoD + cert campaign objects.",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Policy",
+      "name": "MNB-SOD-Wire-DualControl",
+      "id": "pol-wire",
+      "message": "Policy 'MNB-SOD-Wire-DualControl' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "CertificationDefinition",
+      "name": "MNB-Q-Lab-Manager-Cert",
+      "alternateClasses": ["TaskDefinition"],
+      "id": "cert-mgr",
+      "message": "Manager certification definition/campaign exists",
+      "softFail": true,
+      "hint": "Name may vary — Lesson 43 object; soft if renamed."
+    },
+    {
+      "type": "identity.exists",
+      "name": "nina.joiner",
+      "id": "id-nina",
+      "message": "nina.joiner still present for residual-risk stories",
+      "softFail": true,
+      "hint": "Re-run apply-joiner.sh if wiped."
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "bundle-birthright",
+      "message": "Bundle 'MNB-Birthright-Employee' exists"
+    }
+  ]
+}

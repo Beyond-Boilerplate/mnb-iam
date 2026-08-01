@@ -3,7 +3,7 @@
   "lesson": "04",
   "stem": "04-authoritative-hr-source",
   "title": "Authoritative HR Source",
-  "description": "Learner-built MNB-HR + Aggregate MNB-HR with cubes.",
+  "description": "Learner-built MNB-HR + Aggregate MNB-HR with cubes for helen.ross, priya.wire, samir.hassan.",
   "checks": [
     {
       "id": "app-mnb-hr",
@@ -17,19 +17,33 @@
       "type": "object.exists",
       "objectClass": "TaskDefinition",
       "name": "Aggregate MNB-HR",
-      "message": "Task Aggregate MNB-HR exists"
+      "alternateNames": ["MNB-Acct-Aggregation"],
+      "message": "Task Aggregate MNB-HR exists",
+      "hint": "Lesson 04 creates Aggregate MNB-HR; Docker seed may ship MNB-Acct-Aggregation instead."
     },
     {
       "id": "identity-helen",
       "type": "identity.exists",
       "name": "helen.ross",
-      "message": "Identity helen.ross created from HR aggregate"
+      "alternateNames": ["MNB00001", "Helen Ross"],
+      "message": "Identity helen.ross created from HR aggregate",
+      "hint": "Cube may be named helen.ross, MNB00001 (userId native identity), or Helen Ross — verify resolves all via HR aliases."
     },
     {
       "id": "identity-priya",
       "type": "identity.exists",
       "name": "priya.wire",
-      "message": "Identity priya.wire exists"
+      "alternateNames": ["MNB00090", "Priya Mehta"],
+      "message": "Identity priya.wire exists",
+      "hint": "Cube may be named priya.wire, MNB00090, or Priya Mehta — verify resolves all via HR aliases."
+    },
+    {
+      "id": "identity-samir",
+      "type": "identity.exists",
+      "name": "samir.hassan",
+      "alternateNames": ["MNB00094", "Samir Hassan"],
+      "message": "Identity samir.hassan exists (terminated worker)",
+      "hint": "Lesson 04 Task 6 / acceptance: verify samir.hassan (MNB00094)."
     },
     {
       "id": "identity-count",

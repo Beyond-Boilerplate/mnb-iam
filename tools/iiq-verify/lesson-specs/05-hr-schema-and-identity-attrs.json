@@ -16,6 +16,7 @@
       "id": "helen-email",
       "type": "identity.attr",
       "name": "helen.ross",
+      "alternateNames": ["MNB00001", "Helen Ross"],
       "attr": "email",
       "contains": "@",
       "message": "helen.ross has promoted email (Identity attr, not only Link)"
@@ -24,6 +25,7 @@
       "id": "helen-firstname",
       "type": "identity.attr",
       "name": "helen.ross",
+      "alternateNames": ["MNB00001", "Helen Ross"],
       "attr": "firstname",
       "equalsIgnoreCase": "Helen",
       "message": "helen.ross firstname promoted to Identity"

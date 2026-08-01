@@ -23,7 +23,9 @@
       "id": "priya-exists",
       "type": "identity.exists",
       "name": "priya.wire",
-      "message": "priya.wire cube present for refresh drills"
+      "alternateNames": ["MNB00090", "Priya Mehta"],
+      "message": "priya.wire cube present for refresh drills",
+      "hint": "Cube may be named priya.wire or MNB00090 when identityAttribute=userId."
     }
   ]
 }

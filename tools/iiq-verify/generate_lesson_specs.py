@@ -5,6 +5,10 @@ Derives object.exists / task / identity checks from acceptance criteria and a
 curated map. Paper-heavy lessons still require IIQ reachable + prerequisite
 Meridian objects so Verify now cannot be skipped with empty checks.
 
+Identity checks may keep persona logins (``helen.ross``); ``verify_lesson.py``
+adaptively resolves HR ``userId`` / displayName / email aliases at runtime, so
+generated specs do not need a full ``alternateNames`` list.
+
 Usage:
   python3 tools/iiq-verify/generate_lesson_specs.py
   python3 tools/iiq-verify/generate_lesson_specs.py --overwrite
@@ -110,6 +114,13 @@ CURATED: dict[int, list[dict]] = {
     29: [
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {
+            "type": "identity.exists",
+            "name": "nina.joiner",
+            "softFail": True,
+            "hint": "Run ./tools/lab/scripts/scenarios/apply-joiner.sh then Aggregate MNB-HR + Refresh.",
+        },
+        {"type": "host.file.exists", "path": "lab-data/scenarios/joiner/hr-delta-new-hire.csv"},
     ],
     30: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},

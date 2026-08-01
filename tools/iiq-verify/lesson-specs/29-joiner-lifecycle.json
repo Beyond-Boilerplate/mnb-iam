@@ -3,7 +3,8 @@
   "lesson": "29",
   "stem": "29-joiner-lifecycle",
   "title": "Joiner Lifecycle",
-  "description": "Auto-generated verify checks for Lesson 29. Live IIQ only \u2014 no JSON paste.",
+  "description": "Joiner delta for nina.joiner + birthright role. Prefer apply-joiner.sh.",
+  "path": "core",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,20 @@
       "name": "MNB-HR",
       "id": "object-exists-3",
       "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "nina.joiner",
+      "id": "id-nina",
+      "message": "Joiner persona nina.joiner exists",
+      "softFail": true,
+      "hint": "Run ./tools/lab/scripts/scenarios/apply-joiner.sh then Aggregate MNB-HR + Refresh."
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/scenarios/joiner/hr-delta-new-hire.csv",
+      "id": "file-joiner",
+      "message": "Joiner scenario delta present"
     }
   ]
 }

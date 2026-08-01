@@ -60,13 +60,36 @@ Progress on the learn site updates only via **Verify now** against a running Aca
 | **iiq console** | Authoritative fallback for Applications, TaskDefinitions, Populations, counts |
 | Host files | Repo / `~/iiq-lab-data` fixtures when the lesson is paper + lab-data |
 
+### Adaptive identity names
+
+Specs keep Meridian persona logins (`helen.ross`, `priya.wire`, …). At verify time the runner also accepts cubes named by HR **`userId`** (`MNB00001`), **displayName** (`Helen Ross`), or **email**, using aliases from `lab-data/HRApplications.txt` (or `~/iiq-lab-data`). Specs may still list `alternateNames`; they are optional when the HR file is present.
+
 Transports used are listed in the report (`transport: ["scim","console-local",…]`).
 
 ## Specs
 
-Per-lesson JSON under [`tools/iiq-verify/lesson-specs/`](../tools/iiq-verify/lesson-specs/) for **all 110 lessons**.
+Per-lesson JSON under [`tools/iiq-verify/lesson-specs/`](../tools/iiq-verify/lesson-specs/) for **all 110 lessons**, plus Core Path mid-capstones:
+
+| Spec stem | When |
+| --- | --- |
+| `mid-16-apps-capstone` | After Lesson 16 |
+| `mid-34-jml-capstone` | After Lesson 34 (persona checks: Nina / Priya / Jordan / Sofia) |
+| `mid-46-certs-capstone` | After Lesson 46 |
+
+```bash
+./tools/iiq-verify/verify-lesson.sh mid-34-jml-capstone
+```
 
 Check types: `http.ok`, `host.file.exists`, `object.exists` (optional `softFail`), `object.absent`, `identity.exists`, `identity.countMin`, `identity.attr`.
+
+JML HR deltas — prefer runners over hand edits:
+
+```bash
+./tools/lab/scripts/scenarios/apply-joiner.sh
+./tools/lab/scripts/scenarios/apply-mover.sh
+./tools/lab/scripts/scenarios/apply-leaver.sh
+./tools/lab/scripts/scenarios/apply-loa.sh
+```
 
 Regenerate curated specs (does not overwrite 01–10 unless `--all`):
 

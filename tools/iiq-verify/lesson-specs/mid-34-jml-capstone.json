@@ -1,0 +1,82 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "mid-34",
+  "stem": "mid-34-jml-capstone",
+  "title": "Mid-capstone — JML track checkpoint",
+  "description": "Core Path checkpoint after Lesson 34: joiner/mover/leaver/LoA personas + birthright.",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "bundle-birthright",
+      "message": "Bundle 'MNB-Birthright-Employee' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "nina.joiner",
+      "id": "id-nina",
+      "message": "Joiner persona nina.joiner exists (apply-joiner.sh + Aggregate MNB-HR)",
+      "softFail": true,
+      "hint": "Run ./tools/lab/scripts/scenarios/apply-joiner.sh then Aggregate MNB-HR + Refresh."
+    },
+    {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "id-priya",
+      "message": "Mover persona priya.wire exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "jordan.reed",
+      "id": "id-jordan",
+      "message": "Leaver persona jordan.reed exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "sofia.torres",
+      "id": "id-sofia",
+      "message": "LoA persona sofia.torres exists"
+    },
+    {
+      "type": "identity.attr",
+      "name": "sofia.torres",
+      "attr": "exceptions",
+      "contains": "LOA",
+      "id": "sofia-loa",
+      "message": "sofia.torres exceptions contains LOA",
+      "softFail": true,
+      "hint": "Promote exceptions from HR (Lesson 05) and Refresh MNB Attributes; apply-loa.sh if needed."
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "GroupDefinition",
+      "name": "MNB-On-Leave",
+      "alternateClasses": ["Population"],
+      "id": "pop-loa",
+      "message": "Population 'MNB-On-Leave' exists",
+      "softFail": true,
+      "hint": "Create in Lesson 33 if missing."
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/scenarios/joiner/hr-delta-new-hire.csv",
+      "id": "file-joiner",
+      "message": "Joiner scenario delta present"
+    }
+  ]
+}
