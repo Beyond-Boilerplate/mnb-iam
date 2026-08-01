@@ -53,7 +53,11 @@ onboard_application
     user: cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com
     password: Provision1!
     searchDN: dc=meridiannb,dc=com
+    # Seed also sets group.searchDNs → ou=groups (objectType=group / groupOfUniqueNames)
 ```
+
+Durable UI exports (re-imported by seed): `config/Application/MNB-Application-OpenLDAP.xml`,
+`config/Application/MNB-Application-HR.xml`, and `config/TaskDefinition/MNB-TaskDefinition-*.xml`.
 
 Or stepwise: `create_application` → `test_application_connection` → `trigger_aggregation`.
 
@@ -94,10 +98,10 @@ Or CLI / desktop tools (Apache Directory Studio, etc.) against `localhost:389` w
 | Bind password | `Provision1!` | same |
 | Base DN | `dc=meridiannb,dc=com` | same |
 | People search | `ou=people,dc=meridiannb,dc=com` | `(objectClass=inetOrgPerson)` |
-| Group search | `ou=groups,dc=meridiannb,dc=com` | `(objectClass=groupOfNames)` |
+| Group search | `ou=groups,dc=meridiannb,dc=com` | `(objectClass=groupOfUniqueNames)` |
 | Account native id | `uid` | |
 | Correlation | `employeeNumber` ↔ HR `userId` | |
-| Group member attr | `member` | |
+| Group member attr | `uniqueMember` | Matches OOTB OpenLDAP - Direct group schema |
 
 ## Verify
 
@@ -127,7 +131,7 @@ docker compose -f docker-compose.iiq.yml up -d openldap openldap-provision-acl
 | Kind | Count | Notes |
 | --- | --- | --- |
 | People | 10 | Aligned to `MNB-HR` (`helen.ross` … `samir.hassan`) |
-| Groups | 8 | `wire-initiators`, `wire-approvers`, VPN/app admins, dept + `all-employees` |
+| Groups | 8 | `wire-initiators`, `wire-approvers`, VPN/app admins, dept + `all-employees` (`groupOfUniqueNames` / `uniqueMember`) |
 | Service | 2 | `svc-iiq-read` (suffix) + `svc-iiq-provision` (`ou=service`) |
 | Leaver | `samir.hassan` | `description: Inactive`, not in groups |
 | Contractor | `raj.external` | In `dept-technology` only |

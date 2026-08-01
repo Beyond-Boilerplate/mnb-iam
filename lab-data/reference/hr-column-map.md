@@ -15,6 +15,8 @@
 
 IT dumps (`EmployeeData.txt`) still carry `employeeId` — that value **equals** HR `userId` for correlation.
 
+**Correlation standard:** account/IT `employeeId` → identity **`userId`**, then email. Do not invent an HR `employeeId` column.
+
 ## Lifecycle signals
 
 | Governance concept | Bank column(s) | Lab convention |

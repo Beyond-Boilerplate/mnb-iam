@@ -10,7 +10,7 @@
 - [ ] Exchange / mailbox provisioning required? (yes/no)
 - [ ] Password interception in scope? (Password Interceptor)
 - [ ] Provisioning policies: create, enable, disable, move OU on leaver
-- [ ] Correlation: `sAMAccountName` ↔ `userName`, `employeeID` ↔ `employeeId`
+- [ ] Correlation: `sAMAccountName` ↔ `name`/`userName`, `employeeID` ↔ `userId`
 - [ ] Test plan: aggregate → correlate → create → disable → delete (lab only)
 
 Lab-without-live-AD: complete Application shell, schema maps, provisioning policy forms, and IQService network design worksheet even if DC is unavailable.

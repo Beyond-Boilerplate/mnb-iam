@@ -24,7 +24,7 @@ description: End-user accounts (inetOrgPerson)
 dn: ou=groups,dc=meridiannb,dc=com
 objectClass: organizationalUnit
 ou: groups
-description: Application and network entitlement groups (groupOfNames)
+description: Application and network entitlement groups (groupOfUniqueNames)
 
 dn: ou=service,dc=meridiannb,dc=com
 objectClass: organizationalUnit
@@ -235,74 +235,74 @@ userPassword: LabUser1!
 description: Inactive
 
 dn: cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: wire-initiators
 description: Authorizes wire transfer initiation on the vendor wire platform (high risk)
-member: uid=priya.wire,ou=people,dc=meridiannb,dc=com
-member: uid=michael.ross,ou=people,dc=meridiannb,dc=com
-member: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
 
 dn: cn=wire-approvers,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: wire-approvers
 description: Dual-control approval for wire transfers (SoD vs wire-initiators)
-member: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
-member: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
 
 dn: cn=vpn-network-admins,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: vpn-network-admins
 description: Network gear / VPN concentrator admin auth (blast-radius directory)
-member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
-member: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
 
 dn: cn=app-ldap-admins,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: app-ldap-admins
 description: Local directory administrators for this OpenLDAP instance
-member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
-member: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=helen.ross,ou=people,dc=meridiannb,dc=com
 
 dn: cn=dept-treasury,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: dept-treasury
 description: Treasury & Payments departmental access
-member: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
-member: uid=priya.wire,ou=people,dc=meridiannb,dc=com
-member: uid=michael.ross,ou=people,dc=meridiannb,dc=com
-member: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
 
 dn: cn=dept-security,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: dept-security
 description: Identity & Access / Security departmental access
-member: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=helen.ross,ou=people,dc=meridiannb,dc=com
 
 dn: cn=dept-technology,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: dept-technology
 description: Technology Platforms departmental access
-member: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
-member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
-member: uid=raj.external,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=raj.external,ou=people,dc=meridiannb,dc=com
 
 dn: cn=all-employees,ou=groups,dc=meridiannb,dc=com
-objectClass: groupOfNames
+objectClass: groupOfUniqueNames
 objectClass: top
 cn: all-employees
 description: Baseline employee population (excludes contractors and leavers)
-member: uid=helen.ross,ou=people,dc=meridiannb,dc=com
-member: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
-member: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
-member: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
-member: uid=meera.torres,ou=people,dc=meridiannb,dc=com
-member: uid=michael.ross,ou=people,dc=meridiannb,dc=com
-member: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
-member: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+uniqueMember: uid=priya.wire,ou=people,dc=meridiannb,dc=com
