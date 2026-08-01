@@ -3,6 +3,9 @@
 
 Uses live MCP tools only (no hardcoded Teller routing). Idempotent with --overwrite.
 
+Prefers durable XML under config/Application and config/TaskDefinition (UI exports)
+via import_sailpoint_object (scrub_ids). Falls back to create/onboard when XML is missing.
+
 After MNB-HR aggregation, runs rebuild_manager_hierarchy (Link.manager → Identity.manager)
 because OOTB managerCorrelationMapping alone often leaves Identity.manager unset in this lab.
 
@@ -50,6 +53,20 @@ DEFAULT_LDAP_BIND = os.environ.get(
 )
 DEFAULT_LDAP_PASSWORD = os.environ.get("MNB_LDAP_PASSWORD", "Provision1!")
 DEFAULT_LDAP_SEARCH_DN = os.environ.get("MNB_LDAP_SEARCH_DN", "dc=meridiannb,dc=com")
+DEFAULT_LDAP_GROUP_SEARCH_DN = os.environ.get(
+    "MNB_LDAP_GROUP_SEARCH_DN", "ou=groups,dc=meridiannb,dc=com"
+)
+
+CONFIG_HR_APP = REPO / "config" / "Application" / "MNB-Application-HR.xml"
+CONFIG_LDAP_APP = REPO / "config" / "Application" / "MNB-Application-OpenLDAP.xml"
+CONFIG_TASKS = (
+    REPO / "config" / "TaskDefinition" / "MNB-TaskDefinition-Acct-Aggregation.xml",
+    REPO / "config" / "TaskDefinition" / "MNB-TaskDefinition-Daily-Aggr.xml",
+    REPO
+    / "config"
+    / "TaskDefinition"
+    / "MNB-TaskDefinition-OpenLDAP-Group-Aggregation.xml",
+)
 
 PROBE_IDENTITIES = (
     "Christopher Hayes",
@@ -115,6 +132,47 @@ def _completion_status(payload: Any) -> str | None:
     return None
 
 
+def _read_xml(path: Path) -> str:
+    if not path.is_file():
+        raise FileNotFoundError(str(path))
+    return path.read_text(encoding="utf-8")
+
+
+def import_xml(
+    mcp: McpClient,
+    path: Path,
+    *,
+    dry_run: bool,
+    justification: str,
+) -> Any:
+    xml = _read_xml(path) if not dry_run else f"<!-- dry-run {path} -->"
+    return call(
+        mcp,
+        "import_sailpoint_object",
+        {
+            "xml": xml,
+            "scrub_ids": True,
+            "justification": justification,
+        },
+        dry_run=dry_run,
+    )
+
+
+def import_task_definitions(mcp: McpClient, *, dry_run: bool) -> None:
+    _log("\n=== TaskDefinitions (durable config/) ===")
+    for path in CONFIG_TASKS:
+        if not path.is_file():
+            _log(f"  skip missing {path.relative_to(REPO)}")
+            continue
+        imported = import_xml(
+            mcp,
+            path,
+            dry_run=dry_run,
+            justification=f"seed_mnb_lab_data import {path.name}",
+        )
+        _log(f"  import {path.name}: {json.dumps(imported, default=str)[:300]}")
+
+
 def call(mcp: McpClient, tool: str, args: dict[str, Any], *, dry_run: bool) -> Any:
     _log(f"→ {tool}({json.dumps(args, default=str)[:240]})")
     if dry_run:
@@ -141,7 +199,12 @@ def poll_task(
     deadline = time.time() + timeout_s
     last: Any = None
     while time.time() < deadline:
-        last = call(mcp, "get_task_result", {"task_id": task_result_id}, dry_run=False)
+        last = call(
+            mcp,
+            "get_task_result",
+            {"task_result_id": task_result_id},
+            dry_run=False,
+        )
         status = (_completion_status(last) or "").lower()
         _log(f"  poll {label}: status={status or '?'}")
         if status in {"success", "complete", "completed", "ok"}:
@@ -154,33 +217,60 @@ def poll_task(
 
 def seed_hr(mcp: McpClient, args: argparse.Namespace) -> None:
     _log("\n=== MNB-HR (authoritative DelimitedFile) ===")
-    created = call(
-        mcp,
-        "create_application",
-        {
-            "name": "MNB-HR",
-            "type": "DelimitedFile",
-            "description": "Meridian authoritative HR feed (lab seed)",
-            "overwrite": args.overwrite,
-            "authoritative": True,
-            "attributes": {
-                "file": args.hr_file,
-                "delimiter": ",",
-                "hasHeader": True,
-                # Cubes end up named by displayName in this lab; manager column uses display names.
-                "identityAttribute": "name",
-                "displayAttribute": "displayName",
-                "managerAttribute": "manager",
-                "managerCorrelationMapping": {
-                    "managerAttribute": "manager",
-                    "identityAttribute": "name",
+    if CONFIG_HR_APP.is_file() and not args.force_wizard:
+        _log(f"  importing {CONFIG_HR_APP.relative_to(REPO)}")
+        imported = import_xml(
+            mcp,
+            CONFIG_HR_APP,
+            dry_run=args.dry_run,
+            justification="seed_mnb_lab_data import MNB-Application-HR.xml",
+        )
+        _log(f"  import: {json.dumps(imported, default=str)[:400]}")
+        # Ensure container path wins over any host path left in XML.
+        call(
+            mcp,
+            "update_application_config",
+            {
+                "app_id": "MNB-HR",
+                "config_patch": {
+                    "attributes": {
+                        "file": args.hr_file,
+                        "delimiter": ",",
+                        "hasHeader": True,
+                    }
                 },
+                "justification": "seed_mnb_lab_data ensure HR file path",
             },
-            "justification": "seed_mnb_lab_data",
-        },
-        dry_run=args.dry_run,
-    )
-    _log(f"  create: {json.dumps(created, default=str)[:400]}")
+            dry_run=args.dry_run,
+        )
+    else:
+        created = call(
+            mcp,
+            "create_application",
+            {
+                "name": "MNB-HR",
+                "type": "DelimitedFile",
+                "description": "Meridian authoritative HR feed (lab seed)",
+                "overwrite": args.overwrite,
+                "authoritative": True,
+                "attributes": {
+                    "file": args.hr_file,
+                    "delimiter": ",",
+                    "hasHeader": True,
+                    # Cubes end up named by displayName in this lab; manager column uses display names.
+                    "identityAttribute": "name",
+                    "displayAttribute": "displayName",
+                    "managerAttribute": "manager",
+                    "managerCorrelationMapping": {
+                        "managerAttribute": "manager",
+                        "identityAttribute": "name",
+                    },
+                },
+                "justification": "seed_mnb_lab_data",
+            },
+            dry_run=args.dry_run,
+        )
+        _log(f"  create: {json.dumps(created, default=str)[:400]}")
 
     tested = call(
         mcp,
@@ -252,37 +342,117 @@ def seed_hr(mcp: McpClient, args: argparse.Namespace) -> None:
 
 def seed_ldap(mcp: McpClient, args: argparse.Namespace) -> None:
     _log("\n=== MNB-OpenLDAP ===")
-    attrs = {
-        "host": args.ldap_host,
-        "port": str(args.ldap_port),
-        "user": args.ldap_bind,
-        "password": args.ldap_password,
-        "searchDN": args.ldap_search_dn,
-    }
-    onboard = call(
-        mcp,
-        "onboard_application",
-        {
-            "name": "MNB-OpenLDAP",
-            "type": "OpenLDAP - Direct",
-            "description": "Meridian lab OpenLDAP directory",
-            "overwrite": args.overwrite,
-            "run_aggregate": True,
-            "full_or_delta": "full",
-            "attributes": attrs,
-            "justification": "seed_mnb_lab_data",
-        },
-        dry_run=args.dry_run,
-    )
-    _log(f"  onboard: {json.dumps(onboard, default=str)[:500]}")
-    poll_task(
-        mcp,
-        _task_result_id(onboard),
-        dry_run=args.dry_run,
-        timeout_s=args.task_timeout,
-        interval_s=args.poll_interval,
-        label="MNB-OpenLDAP aggregation",
-    )
+    if CONFIG_LDAP_APP.is_file() and not args.force_wizard:
+        _log(f"  importing {CONFIG_LDAP_APP.relative_to(REPO)}")
+        imported = import_xml(
+            mcp,
+            CONFIG_LDAP_APP,
+            dry_run=args.dry_run,
+            justification="seed_mnb_lab_data import MNB-Application-OpenLDAP.xml",
+        )
+        _log(f"  import: {json.dumps(imported, default=str)[:400]}")
+        # Overlay live bind / host (XML has lab defaults; env can override).
+        call(
+            mcp,
+            "update_application_config",
+            {
+                "app_id": "MNB-OpenLDAP",
+                "config_patch": {
+                    "attributes": {
+                        "host": args.ldap_host,
+                        "port": str(args.ldap_port),
+                        "user": args.ldap_bind,
+                        "password": args.ldap_password,
+                        "searchDNs": [
+                            {
+                                "searchDN": args.ldap_people_search_dn,
+                                "searchScope": "SUBTREE",
+                            }
+                        ],
+                        "group.searchDNs": [
+                            {
+                                "searchDN": args.ldap_group_search_dn,
+                                "searchScope": "SUBTREE",
+                                "objectType": "group",
+                                "iterateSearchFilter": "(objectClass=groupOfUniqueNames)",
+                            }
+                        ],
+                    }
+                },
+                "justification": "seed_mnb_lab_data ensure LDAP bind + group.searchDNs",
+            },
+            dry_run=args.dry_run,
+        )
+        tested = call(
+            mcp,
+            "test_application_connection",
+            {"application": "MNB-OpenLDAP"},
+            dry_run=args.dry_run,
+        )
+        _log(f"  test: {json.dumps(tested, default=str)[:400]}")
+        agg = call(
+            mcp,
+            "trigger_aggregation",
+            {
+                "app_id": "MNB-OpenLDAP",
+                "full_or_delta": "full",
+                "justification": "seed_mnb_lab_data after XML import",
+            },
+            dry_run=args.dry_run,
+        )
+        poll_task(
+            mcp,
+            _task_result_id(agg),
+            dry_run=args.dry_run,
+            timeout_s=args.task_timeout,
+            interval_s=args.poll_interval,
+            label="MNB-OpenLDAP aggregation",
+        )
+    else:
+        attrs = {
+            "host": args.ldap_host,
+            "port": str(args.ldap_port),
+            "user": args.ldap_bind,
+            "password": args.ldap_password,
+            "searchDNs": [
+                {
+                    "searchDN": args.ldap_people_search_dn,
+                    "searchScope": "SUBTREE",
+                }
+            ],
+            "group.searchDNs": [
+                {
+                    "searchDN": args.ldap_group_search_dn,
+                    "searchScope": "SUBTREE",
+                    "objectType": "group",
+                    "iterateSearchFilter": "(objectClass=groupOfUniqueNames)",
+                }
+            ],
+        }
+        onboard = call(
+            mcp,
+            "onboard_application",
+            {
+                "name": "MNB-OpenLDAP",
+                "type": "OpenLDAP - Direct",
+                "description": "Meridian lab OpenLDAP directory",
+                "overwrite": args.overwrite,
+                "run_aggregate": True,
+                "full_or_delta": "full",
+                "attributes": attrs,
+                "justification": "seed_mnb_lab_data",
+            },
+            dry_run=args.dry_run,
+        )
+        _log(f"  onboard: {json.dumps(onboard, default=str)[:500]}")
+        poll_task(
+            mcp,
+            _task_result_id(onboard),
+            dry_run=args.dry_run,
+            timeout_s=args.task_timeout,
+            interval_s=args.poll_interval,
+            label="MNB-OpenLDAP aggregation",
+        )
 
     if not args.skip_group_agg:
         gagg = call(
@@ -364,12 +534,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--skip-group-agg", action="store_true", help="Skip Account Group Aggregation")
     p.add_argument("--skip-refresh", action="store_true", help="Skip Refresh Identity Cube")
     p.add_argument("--skip-verify", action="store_true")
+    p.add_argument(
+        "--skip-tasks",
+        action="store_true",
+        help="Skip importing TaskDefinitions from config/",
+    )
+    p.add_argument(
+        "--force-wizard",
+        action="store_true",
+        help="Ignore config/Application XML; use create/onboard wizard path",
+    )
     p.add_argument("--hr-file", default=DEFAULT_HR_FILE, help="Path inside IIQ container")
     p.add_argument("--ldap-host", default=DEFAULT_LDAP_HOST)
     p.add_argument("--ldap-port", type=int, default=int(os.environ.get("MNB_LDAP_PORT", "389")))
     p.add_argument("--ldap-bind", default=DEFAULT_LDAP_BIND)
     p.add_argument("--ldap-password", default=DEFAULT_LDAP_PASSWORD)
     p.add_argument("--ldap-search-dn", default=DEFAULT_LDAP_SEARCH_DN)
+    p.add_argument(
+        "--ldap-people-search-dn",
+        default=os.environ.get("MNB_LDAP_PEOPLE_SEARCH_DN", "ou=people,dc=meridiannb,dc=com"),
+    )
+    p.add_argument(
+        "--ldap-group-search-dn",
+        default=DEFAULT_LDAP_GROUP_SEARCH_DN,
+    )
     p.add_argument("--task-timeout", type=float, default=300.0)
     p.add_argument("--poll-interval", type=float, default=5.0)
     p.add_argument(
@@ -408,8 +596,28 @@ def main(argv: list[str] | None = None) -> int:
             seed_hr(mcp, args)
         if not args.skip_ldap:
             seed_ldap(mcp, args)
+        if not args.skip_tasks:
+            import_task_definitions(mcp, dry_run=args.dry_run)
         if not args.skip_verify:
             verify(mcp, dry_run=args.dry_run)
+            if not args.dry_run and not args.skip_ldap:
+                ents = call(
+                    mcp,
+                    "list_managed_entitlements",
+                    {"application": "MNB-OpenLDAP", "limit": 50},
+                    dry_run=False,
+                )
+                data = ents.get("data") if isinstance(ents, dict) else {}
+                items = (data or {}).get("items") or []
+                n = (data or {}).get("returned") or len(items)
+                _log(f"  MNB-OpenLDAP managed group entitlements → {n}")
+                if isinstance(items, list) and items:
+                    sample = [i.get("displayName") or i.get("value") for i in items[:5]]
+                    _log(f"    sample: {sample}")
+                if int(n) < 8:
+                    raise SystemExit(
+                        f"FAIL expected >=8 OpenLDAP group entitlements, got {n}"
+                    )
     except McpError as exc:
         _log(f"FAIL MCP: {exc}")
         return 1
