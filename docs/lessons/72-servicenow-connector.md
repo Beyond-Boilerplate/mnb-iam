@@ -177,7 +177,7 @@ The schema must keep groups and roles as *separate* entitlement attributes, and 
 1. Account schema: `user_name` (native identity), `email`, `employee_number`, `active`, multi-valued `groups` (entitlement), multi-valued `roles` (entitlement). If your connector version exposes role inheritance, carry `rolesDirect` separately; if not, document that direct-vs-inherited analysis happens via the `sys_user_has_role` table's inheritance column and note it as a follow-up report.
 2. Group schema: `name` (native identity), `description`, `manager`.
 3. Dictionary risk tiers: `SN_ADMIN` critical / non-requestable; `SN_ITIL` high; `SN_CAB` high; `SN_HR_FULFILLER` medium.
-4. Correlation: `employee_number` ↔ identity `employeeId` primary; `email` fallback. **Create identities: OFF** — ServiceNow is a target; `MNB-HR` stays the only authoritative source.
+4. Correlation: `employee_number` ↔ identity `userId` primary; `email` fallback. **Create identities: OFF** — ServiceNow is a target; `MNB-HR` stays the only authoritative source.
 
 **Expected result:** Schema with two entitlement families; four dictionary rows with risk tiers; create-identities disabled.
 

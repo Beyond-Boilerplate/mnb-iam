@@ -111,7 +111,7 @@ Confirm the CORE entitlement and holder set before modeling the app—ownership 
 3. Count data rows (expect **7**). Confirm every `entitlement` value is `CORE` and every `accountStatus` is `active`.
 4. Note `daniel.griffin` / `MNB00008` — Operations Manager and a sensible business owner later.
 
-**Expected result:** Seven CORE operators, all `@meridiannb.com`, all with Meridian `employeeId` values.
+**Expected result:** Seven CORE operators, all `@meridiannb.com`, all with Meridian associate keys (`employeeId` matching HR `userId`).
 
 **If it fails:** Re-copy `lab-data/apps` into `~/iiq-lab-data/apps` per [README](README.md).
 

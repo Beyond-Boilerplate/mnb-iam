@@ -227,7 +227,7 @@ The schema must carry lifecycle state and groups, or the leaver evidence and the
 
 1. Account schema: `login` (native identity), `email`, `userId` (from the Okta profile), `status`, multi-valued `groups` as the **entitlement attribute**; `appAssignments` too if your version exposes it.
 2. Group schema: `name` (native identity), `description`, `type` (Okta distinguishes native groups from app-mastered ones — aggregate both or document why not).
-3. Correlation, in documented order: `employeeId` ↔ identity `employeeId` primary; `login`/`email` ↔ identity `email` fallback. Note the fallback's weakness: emails get rewritten on name changes; employeeId doesn't.
+3. Correlation, in documented order: Okta `employeeId` ↔ identity `userId` primary; `login`/`email` ↔ identity `email` fallback. Note the fallback's weakness: emails get rewritten on name changes; associate id doesn't.
 4. **Create identities: OFF.** The Task 1 statement, enforced in configuration.
 
 **Expected result:** Schema with `status` and `groups` entitlement; correlation order documented; create-identities disabled.

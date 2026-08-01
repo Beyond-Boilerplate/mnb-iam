@@ -75,20 +75,31 @@ See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and 
 
 ## Tracks
 
-### Part I — Governance core (01–50)
+### Core Path — entry-level (default in Academy TOC)
 
 - **Foundations:** 01–08
-- **Applications:** 09–16
+- **Applications:** 09–16 → **[mid-16 Apps checkpoint](mid-16-apps-capstone.md)**
 - **Correlation:** 17–22
 - **Roles:** 23–28
-- **Lifecycle:** 29–34
+- **Lifecycle:** 29–34 → **[mid-34 JML checkpoint](mid-34-jml-capstone.md)**
 - **Requests:** 35–38
 - **Policies:** 39–42
-- **Certifications:** 43–46
+- **Certifications:** 43–46 → **[mid-46 Certs checkpoint](mid-46-certs-capstone.md)**
 - **Ops:** 47–49
-- **Capstone:** 50–50
+- **Capstone I:** 50
 
-### Part II — Connectors & enterprise customization (51–110)
+**Start here:** [First 90 days as an IIQ engineer](first-90-days.md) · remaining work plan: [_CORE_PATH_ROADMAP.md](_CORE_PATH_ROADMAP.md)
+
+JML scenario runners (upsert by `userId`):
+
+```bash
+./tools/lab/scripts/scenarios/apply-joiner.sh
+./tools/lab/scripts/scenarios/apply-mover.sh
+./tools/lab/scripts/scenarios/apply-leaver.sh
+./tools/lab/scripts/scenarios/apply-loa.sh
+```
+
+### Part II — Specialist tracks (opt-in after Capstone 50; hidden by default in Academy)
 
 - **Connectors:** 51–55
 - **Connectors — Directory:** 56–62
@@ -238,19 +249,25 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 
 ---
 
-## Suggested pace
+## Suggested pace (Core Path first)
 
 | Block | Lessons | Focus |
 | --- | --- | --- |
-| Weeks 1–2 | 01–16 | Foundations + file apps |
-| Weeks 3–4 | 17–34 | Correlation, roles, JML |
-| Weeks 5–6 | 35–50 | Requests, SoD, certs, ops, capstone I |
+| Weeks 1–2 | 01–16 + mid-16 | Foundations + file apps + Apps checkpoint |
+| Weeks 3–4 | 17–34 + mid-34 | Correlation, roles, JML + JML checkpoint |
+| Weeks 5–6 | 35–50 + mid-46 | Requests, SoD, certs, ops, Capstone I |
+| Weeks 7+ | Specialist opt-in | Pick Directory/JDBC or SaaS/ERP after Capstone 50 |
+
+Full catalog (if you unlock specialist tracks):
+
+| Block | Lessons | Focus |
+| --- | --- | --- |
 | Weeks 7–9 | 51–76 | Connector architecture → SaaS |
 | Weeks 10–11 | 77–88 | ERP, mainframe, PAM |
 | Weeks 12–13 | 89–103 | Rules, plugins, SSD |
 | Week 14 | 104–110 | Hardening + ultimate blueprint |
 
-Self-paced: ~90–120 lab hours for the full 110.
+Self-paced: ~45–60 lab hours for Core Path; ~90–120 for the full 110.
 
 ---
 

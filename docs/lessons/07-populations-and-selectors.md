@@ -61,7 +61,7 @@ Population / selector definition (MNB-*)
 
 | Population | Typical filter | Control use |
 | --- | --- | --- |
-| `MNB-Active-Employees` | Active / status=1 | Default refresh & broad certs |
+| `MNB-Active-Employees` | Active (`inactive=false` / `status=Active`) | Default refresh & broad certs |
 | `MNB-Contractors` | employeeType=Contractor | Short-cycle reviews |
 | `MNB-Treasury` | Treasury / Payments dept | Wire/payments campaigns |
 
@@ -69,9 +69,35 @@ Population / selector definition (MNB-*)
 
 ## Before you start
 
-- [ ] Identities exist from `MNB-HR`
-- [ ] Refresh has promoted `inactive`, `employeeType`, `departmentName` / `JobCode` (verify on a few cubes)
-- [ ] You know UI path for Populations / Identity Selector / Advanced Analytics (version-dependent)
+- [ ] Identities exist from `MNB-HR` (real cubes are `MNB…` User Names — see Lesson 05 naming note)
+- [ ] Refresh has promoted `inactive`, **`employeeType`** (custom attr — not stock Type), `departmentName` / `JobCode` — verify on a few **`MNB…`** cubes
+- [ ] Custom filter attributes are **Searchable** in Identity Mappings
+- [ ] You can reach Advanced Analytics or Setup → Populations (paths below)
+
+### Where to create populations (IIQ 8.x lab UI)
+
+Populations are **not** under Identities → Identity Warehouse. Use one of these:
+
+| Path | Steps |
+| --- | --- |
+| **A — Setup (if present)** | Top nav **Setup → Populations** → New / Add |
+| **B — Advanced Analytics (always works)** | **Intelligence → Advanced Analytics** → search **Identities** → set filters → run → **Save As** / **Save Population** |
+| **C — Debug (last resort)** | Object Browser → `GroupDefinition` → New |
+
+If **Setup** has no Populations entry, use path **B**.
+
+### Filter rules for beginners (read before Task 2)
+
+Filters are **AND**ed. Extra fields with wrong or empty values → **zero results**.
+
+| Do | Do not |
+| --- | --- |
+| Filter **Is Inactive = False** for active workers | Also require **Type = Employee** (stock Type is usually blank in this lab) |
+| Filter custom **`employeeType` = `Contractor`** for contractors | Use stock **Type** dropdown for HR Employee/Contractor |
+| Filter **`departmentName`** / **`JobCode`** only after they are promoted + Searchable | Add **Is Manager = True** unless you truly want managers only |
+| Clear unused filter rows (including empty Software Version) | Leave blank criteria that still participate in the query |
+
+**Stock Type ≠ HR employeeType.** Lesson 05 creates a custom identity attribute `employeeType`. Populations for contractors must use that field.
 
 ## Lab procedure
 
@@ -79,46 +105,47 @@ Population / selector definition (MNB-*)
 
 Populations only work if the attributes you filter on are present and promoted on cubes—spot-check personas before building selectors.
 
-1. Open `amelia.brooks` — confirm active status and a Retail-related `departmentName` / `division` / `JobCode`.
-2. Open `raj.external` — confirm `employeeType=Contractor`.
-3. Open `priya.wire` — confirm `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury.
-4. Open `samir.hassan` — confirm inactive/terminated.
+1. Open **`MNB00097`** (`amelia.brooks`) — confirm active (`Is Inactive` false / not terminated) and a Retail-related `departmentName` / `division` / `JobCode` on the **Identity** (Attributes or Debug), not only on the Link.
+2. Open **`MNB00093`** (`raj.external`) — confirm identity attribute **`employeeType=Contractor`** (if you only see blank stock **Type**, fix Lesson 05 mapping).
+3. Open **`MNB00090`** (`priya.wire`) — confirm `departmentName` contains Payments/Treasury (or JobCode/division for Treasury).
+4. Open **`MNB00094`** (`samir.hassan`) — confirm inactive/terminated.
 
 **Expected result:** You trust the attributes populations will filter on.
 
-**If it fails:** Return to Lessons 05–06 mappings/refresh before building populations.
+**If it fails:** Return to Lessons 05–06 mappings/refresh (and UIConfig visibility if the Attributes tab hides custom fields) before building populations.
 
 ### Task 2 — Create MNB-Active-Employees
 
-1. Navigate to **Populations** / **Identity Selectors** / Advanced search save-as (or equivalent).
-2. Name: `MNB-Active-Employees`.
-3. Filter: identities whose HR-driven status indicates active (e.g. `status=1` or inactive=false—match how your mapping stored it).
-4. Optionally exclude `employeeType=Contractor` if you want employees-only; document your choice.
-5. Save and preview membership count.
+1. Open **Intelligence → Advanced Analytics** (or Setup → Populations).
+2. Choose **Identities**. Clear any leftover filters.
+3. Set **only**: **Is Inactive** = **False** (label may be `inactive` / “Is Inactive”).
+4. Run the search — you should see a large list (~70+). If empty, you still have extra filters (Type, Is Manager, Software Version, …); remove them and retry.
+5. **Save As Population** (wording varies). Name: `MNB-Active-Employees`.
+6. Optionally add a second criterion later to exclude `employeeType=Contractor` if you want employees-only; document your choice. Do **not** use stock Type for that.
 
 **Expected result:** Population saved; member count roughly matches active HR rows (lab ~70+ active depending on exclusions).
 
 ### Task 3 — Create MNB-Contractors
 
-1. Create population `MNB-Contractors`.
-2. Filter: `employeeType=Contractor`.
-3. Preview; confirm `raj.external` appears.
+1. New Advanced Analytics search (or new population).
+2. Filter: **`employeeType`** equals **`Contractor`** (custom attribute — must appear in the attribute list; if missing, enable Searchable on `employeeType` in Identity Mappings).
+3. Preview; confirm **`MNB00093`** / Raj External appears.
 
-**Expected result:** Non-zero contractor membership including `raj.external`.
+**Expected result:** Non-zero contractor membership including Raj (`MNB00093`).
 
 ### Task 4 — Create MNB-Treasury
 
 1. Create population `MNB-Treasury`.
-2. Filter: `departmentName` contains Payments/Treasury OR `JobCode`/`division` for Treasury.
-3. Confirm `rachel.evans`, `priya.wire`, `marcus.approve` appear (and other TRS workers).
+2. Filter: `departmentName` contains `Treasury` or `Payments` (or `JobCode` / `division` for Treasury — match what you promoted).
+3. Confirm Rachel (`MNB00005`), Priya (`MNB00090`), Marcus (`MNB00091`) appear (and other TRS workers).
 
 **Expected result:** Treasury-scoped list suitable for future wire-focused certifications.
 
 ### Task 5 — Terminated with residual risk (approximate)
 
-1. Using Advanced Search or a population attempt: inactive/terminated identities.
+1. Using Advanced Search or a population attempt: **Is Inactive = True** (and/or `status=Terminated` if you promoted `status`).
 2. Note: proving “still has IT accounts” may be approximate until `MNB-IT-Access` exists (Lesson 09) and correlation matures (Lessons 17–20).
-3. For now, search terminated identities (include `samir.hassan`) and write the control intent: “Leaver population feeds residual-access hunting.”
+3. For now, search terminated identities (include **`MNB00094`** / samir.hassan) and write the control intent: “Leaver population feeds residual-access hunting.”
 
 **Expected result:** Written query/population attempt + note that IT residual proof comes after IT app onboarding.
 
@@ -155,9 +182,9 @@ In the binder, for each population write:
 
 ### Task 9 — Negative test
 
-1. Confirm `amelia.brooks` (RET teller) is **not** in `MNB-Treasury`.
-2. Confirm `raj.external` is **not** in `MNB-Active-Employees` if you excluded contractors—or document if you included all actives.
-3. Confirm `samir.hassan` is **not** in active employees.
+1. Confirm Amelia (`MNB00097`, RET teller) is **not** in `MNB-Treasury`.
+2. Confirm Raj (`MNB00093`) is **not** in `MNB-Active-Employees` if you excluded contractors—or document if you included all actives.
+3. Confirm Samir (`MNB00094`) is **not** in active employees.
 
 **Expected result:** Negative membership checks written; filter logic trusted.
 
@@ -175,11 +202,16 @@ In the binder, for each population write:
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Empty population | Attribute not on identity / wrong value type | Fix maps; refresh; compare cube attrs |
+| Empty population / empty search | Extra AND filters (Type=Employee, Is Manager, blank Software Version) | Clear all but the one intended criterion; re-run |
+| Empty after Type = Employee | Stock `type` blank on cubes | Do not use Type; use `inactive` / custom `employeeType` |
+| `employeeType` missing from filter dropdown | Not Searchable / not created | Identity Mappings → `employeeType` → Searchable ON; refresh |
+| `employeeType` blank on everyone | Mapped to stock `type` or never refreshed | Custom attr + `Refresh MNB Attributes` |
+| Empty population | Attribute only on Link, not Identity | Lesson 05 map + Lesson 06 attribute refresh |
 | String `"1"` vs number | Type mismatch in filter | Match stored type; test with known user |
-| Cannot find Populations UI | Version/menu difference | Use Advanced Analytics saved query; note equivalent |
+| Cannot find Populations UI | Under Setup or missing from menu | **Intelligence → Advanced Analytics → Save Population** |
 | Refresh ignores filter | Filter not saved on task | Re-open task; confirm population attached |
-| Contractors include employees | Wrong attribute / typo | Verify `employeeType` exact value `Contractor` |
+| Contractors include employees | Wrong attribute / typo | Verify identity `employeeType` exact value `Contractor` |
+| Looking for `raj.external` as User Name | Cube is `MNB00093` | Search display name / email / `MNB…` |
 
 ## Training binder evidence
 
@@ -223,8 +255,9 @@ In the binder, for each population write:
 
 ## Summary
 
-- Populations are reusable scopes for refresh, certs, and reports.
-- Meridian baselines: Active Employees, Contractors, Treasury.
+- Populations are reusable scopes for refresh, certs, and reports — create them via **Setup → Populations** or **Advanced Analytics → Save Population**.
+- Meridian baselines: Active Employees (`inactive=false` only), Contractors (custom `employeeType`), Treasury (`departmentName` / job signals).
+- Never confuse stock **Type** with HR **`employeeType`**; keep filters minimal so AND logic does not zero out results.
 - Membership logic belongs in the training binder as control documentation.
 
 ---

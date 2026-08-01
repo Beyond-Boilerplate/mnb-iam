@@ -8,7 +8,7 @@
 **Lab data:**
 - Repo: `lab-data/connectors/connector-selection-matrix.csv` (Workday row)
 - Repo: `lab-data/connectors/features-string-glossary.md`
-- Contrast: DelimitedFile `MNB-HR` from foundations (`lab-data/hr/MNB-HR-Employees.csv`)
+- Contrast: DelimitedFile `MNB-HR` from foundations (`lab-data/HRApplications.txt`)
 
 ---
 
@@ -52,7 +52,7 @@ The naive cutover says "employees only — contractors stay in a spreadsheet." T
 
 ### Leave is not termination
 
-`sofia.torres` is active (`status=1`) but `exceptions=LOA` in the HR file. Workday surfaces similar leave states. Mapping leave to "inactive identity" would fire the leaver workflow and destroy her accounts — wrong. Leave is an **identity attribute** that may drive temporary entitlement suspension; termination is the leaver event. Confusing them is a classic HR-connector defect under exam.
+`sofia.torres` is active (`inactive=false` / `status=Active`) but `exceptions=LOA` in the HR file. Workday surfaces similar leave states. Mapping leave to "inactive identity" would fire the leaver workflow and destroy her accounts — wrong. Leave is an **identity attribute** that may drive temporary entitlement suspension; termination is the leaver event. Confusing them is a classic HR-connector defect under exam.
 
 ### Authoritative means "creates people"
 
@@ -179,7 +179,7 @@ In production this consumes the ISU, tenant URL, and security-group outcomes fro
 
 The schema decides whether leave, manager, and contingent flags become usable governance signals.
 
-1. Map Worker / Employee ID → identity `employeeId` (`MNB#####` style where possible).
+1. Map Worker / Employee ID → identity `userId` (`MNB#####` style where possible).
 2. Map email → `email`; legal/preferred name → display attributes.
 3. Map supervisory manager Worker ID → manager correlation (resolve to identity, not raw ID forever).
 4. Map active/terminated (+ termination date) → IIQ inactive semantics for *future* authoritative use.

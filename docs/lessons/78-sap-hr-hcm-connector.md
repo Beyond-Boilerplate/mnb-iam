@@ -8,7 +8,7 @@
 **Lab data:**
 - Repo: `lab-data/connectors/connector-selection-matrix.csv` (SAP HR row)
 - Repo: `lab-data/apps/MNB-SAP-Finance.csv` (finance **security extract** — wrong object for this lesson)
-- Repo: `lab-data/hr/MNB-HR-Employees.csv` (CSV HR contrast from Lesson 04)
+- Repo: `lab-data/HRApplications.txt` (CSV/TXT HR contrast from Lesson 04)
 - Repo: `lab-data/connectors/features-string-glossary.md`
 
 ---
@@ -20,7 +20,7 @@ You will be able to:
 - Distinguish **SAP HR/HCM** (who people are) from **SAP Direct** (what they can do in SAP) and from the Lesson 12 finance CSV
 - Explain SAP HR building blocks — infotypes, personnel number (PERNR), org assignment — in IAM language
 - Perform the real-world RFC/BAPI connectivity setup: least-privilege RFC user, gateway reachability, and what *not* to grant (`SAP_ALL`)
-- Create **MNB-SAP-HR** with a defensible PERNR↔`employeeId` bridge and run a safe non-authoritative aggregation
+- Create **MNB-SAP-HR** with a defensible PERNR↔`userId` bridge and run a safe non-authoritative aggregation
 - Document coexistence with `MNB-HR`, Workday, and SAP security apps without creating a second authoritative source by accident
 - Complete the lesson with or without a live SAP HCM system (mock fallback provided)
 
@@ -38,7 +38,7 @@ You will be able to:
 
 ### Infotypes — SAP's way of storing people facts
 
-SAP HCM does not store a single flat "employee row" the way `MNB-HR-Employees.csv` does. It stores **infotypes**: numbered slices of HR data maintained with effective dates. The ones IAM cares about most:
+SAP HCM does not store a single flat "employee row" the way `HRApplications.txt` does. It stores **infotypes**: numbered slices of HR data maintained with effective dates. The ones IAM cares about most:
 
 | Infotype (common) | What it holds | IAM use |
 | --- | --- | --- |
@@ -50,9 +50,9 @@ SAP HCM does not store a single flat "employee row" the way `MNB-HR-Employees.cs
 
 You do not need to become an HR configurator. You need to know that **the connector reads these slices** (via BAPIs / function modules), and a missing infotype authorization on the RFC user looks like "SAP has no email" when the data is actually there.
 
-### Personnel number (PERNR) is not Meridian employeeId
+### Personnel number (PERNR) is not Meridian `userId`
 
-Every SAP employee has a **personnel number (PERNR)** — the native key in HCM. Meridian cubes key on `employeeId` (`MNB#####`). Those numbers are rarely identical. Without an explicit **bridge** (`employeeId` ↔ `sapPernr`), correlation fails and you get uncorrelated Workers or — if someone panics and enables create-identities — a second identity for the same human.
+Every SAP employee has a **personnel number (PERNR)** — the native key in HCM. Meridian cubes key on `userId` (`MNB#####`). Those numbers are rarely identical. Without an explicit **bridge** (`userId` ↔ `sapPernr`), correlation fails and you get uncorrelated Workers or — if someone panics and enables create-identities — a second identity for the same human.
 
 Real-life anchor: `sofia.torres` is `MNB00095` in HR. In a subsidiary SAP HCM client she might be PERNR `00001234`. The bridge is a control, not a convenience.
 
@@ -66,7 +66,7 @@ Lesson 04 taught governance mechanics on a flat file. That file is still Meridia
 
 | Source | Shape | What it can feed | What it cannot |
 | --- | --- | --- | --- |
-| `MNB-HR` (Lesson 04) | Flat CSV | Corporate `employeeId`, manager, leave | Live SAP org events |
+| `MNB-HR` (Lesson 04) | Flat CSV | Corporate `userId`, manager, leave | Live SAP org events |
 | `MNB-SAP-HR` (this lesson) | Infotype-backed RFC | PERNR, org assignment, SAP status | ECC posting roles |
 | `MNB-SAP-Finance` (Lesson 12) | Entitlement extract | Coarse `SAP_FI` label | Hire date, org, leave, PERNR |
 
@@ -111,7 +111,7 @@ SAP HCM (ABAP)
 | Operation | SAP behavior | IIQ behavior |
 | --- | --- | --- |
 | Aggregation | RFC reads personnel + selected infotypes | One account (or identity row) per PERNR in scope |
-| Correlation | Bridge PERNR ↔ `employeeId` | Match to existing `MNB-HR` / Workday cubes |
+| Correlation | Bridge PERNR ↔ `userId` | Match to existing `MNB-HR` / Workday cubes |
 | Status | Actions / employment status | Inactive flag when mapped correctly |
 | Manager | Org / chief relationships | Manager link after PERNR resolution |
 
@@ -141,7 +141,7 @@ Read this even if you use the mock fallback — the knowledge check and the exam
 ### Step 3 — Scope filters and field contract with HR
 
 1. Agree which personnel areas / employee groups / subsidiaries are in scope for `MNB-SAP-HR`.
-2. Agree the PERNR↔`employeeId` bridge source of truth (HRIS table, IdM attribute, or controlled CSV maintained by `sofia.torres`'s team).
+2. Agree the PERNR↔`userId` bridge source of truth (HRIS table, IdM attribute, or controlled CSV maintained by `sofia.torres`'s team).
 3. Align field list with Lesson 05 HR schema naming where possible (`department`, `title`, `exceptions` (LOA), `employeeType`).
 
 ### Step 4 — Governance records
@@ -153,7 +153,7 @@ Document: SID/client, RFC user (no password), role name, SNC flag, population sc
 ## Before you start
 
 - [ ] IIQ up at `http://localhost:8080/identityiq` as `spadmin`; Lessons 04, 12, and 77 concepts reviewed
-- [ ] `lab-data/apps/MNB-SAP-Finance.csv` and `lab-data/hr/MNB-HR-Employees.csv` readable for contrast
+- [ ] `lab-data/apps/MNB-SAP-Finance.csv` and `lab-data/HRApplications.txt` readable for contrast
 - [ ] Decide path: live SAP HCM sandbox or mock fallback
 - [ ] Know PERNR may differ from `MNB#####` — bridge is mandatory
 - [ ] Personas: `sofia.torres`, `samir.hassan`, `amelia.brooks`; IAM owner `helen.ross`
@@ -167,7 +167,7 @@ Document: SID/client, RFC user (no password), role name, SNC flag, population sc
 Ground the architecture in writing before clicking Create Application.
 
 1. Write and paste into the binder: *SAP HR feeds who people are; SAP Direct feeds what they can do in SAP; Lesson 12 `MNB-SAP-Finance` is a legacy entitlement extract, not an HR system.*
-2. Open `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or repo copy). Note flat columns: `employeeId`, `managersAssociateID`, `exceptions` (LOA), `employeeType` — the shape IIQ already understands from Lesson 04.
+2. Open `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`). Note flat columns: `userId`, `managersAssociateID`, `exceptions` (LOA), `employeeType` — the shape IIQ already understands from Lesson 04.
 3. Open `~/iiq-lab-data/apps/MNB-SAP-Finance.csv`. Note it only has `userName`, `email`, `employeeId`, `entitlement` (`SAP_FI`), `accountStatus` — **no org assignment, no PERNR, no hire date**.
 4. Write one sentence: why neither file replaces a live SAP HCM feed for a subsidiary — and why the finance file must never become authoritative HR.
 
@@ -191,7 +191,7 @@ In production this consumes the RFC destination and least-privilege role from St
 The bridge decides whether SAP Workers attach to Meridian cubes or become orphan noise.
 
 1. Map SAP personnel number → secondary identity attribute `sapPernr` (always retain native key).
-2. Design bridge table/file: `employeeId,sapPernr` maintained by HRIS — example rows for lab personas.
+2. Design bridge table/file: `userId,sapPernr` maintained by HRIS — example rows for lab personas.
 3. Map email / system user (infotype 0105 style) → `email` / `userName` correlation fallbacks.
 4. Map employment status / actions → inactive semantics.
 5. Map org unit / department; manager PERNR → resolution plan *after* bridge load.
@@ -207,14 +207,14 @@ If you have no SAP system, simulate what personnel aggregation *would* return. T
 1. Create `~/iiq-lab-data/connectors/sap/MNB-SAP-HR-mock.csv`:
 
 ```csv
-sapPernr,employeeId,userName,email,status,orgUnit,managerPernr,exceptions (LOA)
+sapPernr,userId,userName,email,status,orgUnit,managerPernr,exceptions
 00001001,MNB00095,sofia.torres,sofia.torres@meridiannb.com,active,CML,00001000,true
 00001002,MNB00094,samir.hassan,samir.hassan@meridiannb.com,inactive,IT,00001000,false
 00001003,MNB00098,amelia.brooks,amelia.brooks@meridiannb.com,active,CML,00001000,false
 00001000,MNB00006,mgr.commercial,mgr.commercial@meridiannb.com,active,CML,,false
 ```
 
-2. Create companion bridge stub `~/iiq-lab-data/connectors/sap/MNB-SAP-PERNR-bridge.csv` with the same `employeeId,sapPernr` pairs.
+2. Create companion bridge stub `~/iiq-lab-data/connectors/sap/MNB-SAP-PERNR-bridge.csv` with the same `userId,sapPernr` pairs.
 3. Shadow-aggregate via DelimitedFile labeled **non-authoritative training**. Read the stories: Sofia on leave but active; Samir inactive (leaver residual); Amelia active RM.
 
 **Expected result:** Mock + bridge files; three persona stories understood.
@@ -258,7 +258,7 @@ Answer: `MNB-SAP-HR` carries personnel/org attributes only; finance posting acce
 
 ### Task 8 — Residual risk
 
-Record `RR-SAP-PERNR-01`: *PERNR↔employeeId bridge errors cause uncorrelated SAP Workers or duplicate identities if create-identities is enabled. Compensating controls: bridge owned by sofia.torres, create-identities off, weekly uncorrelated account review (Lesson 19 pattern).* Owner: `sofia.torres`.
+Record `RR-SAP-PERNR-01`: *PERNR↔userId bridge errors cause uncorrelated SAP Workers or duplicate identities if create-identities is enabled. Compensating controls: bridge owned by sofia.torres, create-identities off, weekly uncorrelated account review (Lesson 19 pattern).* Owner: `sofia.torres`.
 
 **Expected result:** RR with owner.
 
@@ -307,7 +307,7 @@ Assemble `MNB-SAP-HR-Binder-YYYY-MM-DD` with: separation statement, contrast par
 ## Knowledge check
 
 1. What does `MNB-SAP-HR` govern versus `MNB-SAP-Direct`?
-2. Why maintain an `employeeId`↔PERNR bridge?
+2. Why maintain a `userId`↔PERNR bridge?
 3. Why is Lesson 12's `MNB-SAP-Finance` CSV the wrong stand-in for SAP HR?
 4. What matrix preferred connector applies to SAP HR, and what is the alternate?
 5. Why is granting `SAP_ALL` to the RFC user unacceptable?

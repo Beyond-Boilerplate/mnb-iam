@@ -8,7 +8,7 @@
 **Lab data:**
 - `lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv` → `~/iiq-lab-data/scenarios/leaver/`
 - Residual access context: `lab-data/apps/MNB-SAP-Finance.csv`, `lab-data/apps/MNB-AWS-Cloud.csv`, `lab-data/apps/MNB-IT-Access.csv`
-- HR baseline: `lab-data/hr/MNB-HR-Employees.csv` (or your mapped `HRApplications.txt` / employee feed)
+- HR baseline: `lab-data/HRApplications.txt` (or `~/iiq-lab-data/HRApplications.txt`)
 
 ---
 
@@ -71,7 +71,7 @@ The wrong way: mark HR inactive, skip residual hunt, tell Audit “leavers are a
 ## How it works
 
 ```text
-HR delta (status=0, terminationDate)
+HR delta (inactive=true / status=Terminated, terminationDate)
         │
         ▼
 Account Aggregation task (MNB-HR)
@@ -123,8 +123,8 @@ Notify manager (deepa.nair) + evidence pack
 Read the delta like a change ticket. Mixing Sofia’s leave flags with Jordan’s terminate columns is the classic lab mistake.
 
 1. Open `~/iiq-lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv` (or repo `lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv`).
-2. Confirm the row: `employeeId=MNB00092`, `userName=jordan.reed`, `inactive=true`, `exceptions empty (not LOA)`, `terminationDate=2026-07-26`, manager `MNB00003`.
-3. Open the live HR feed your connector reads (often `~/iiq-lab-data/HRApplications.txt` or mapped CSV). Locate Jordan’s current row and note `status=1` before change.
+2. Confirm the row: `userId=MNB00092`, `name=jordan.reed`, `inactive=true`, `exceptions` empty (not LOA), `terminationDate=2026-07-26`, manager `MNB00003`.
+3. Open the live HR feed your connector reads (often `~/iiq-lab-data/HRApplications.txt`). Locate Jordan’s current row and note `inactive=false` / `status=Active` before change.
 
 **Expected result:** Delta clearly shows inactive employee with termination date; current HR still shows Jordan active. You know exactly which columns will flip.
 
@@ -132,15 +132,19 @@ Read the delta like a change ticket. Mixing Sofia’s leave flags with Jordan’
 
 ### Task 2 — Apply the terminate delta into the authoritative HR file
 
-Only Jordan’s row changes. Leave Sofia (`exceptions=LOA`) and Samir (already `inactive=true`) alone.
+Only Jordan’s row changes. Leave Sofia (`exceptions=LOA`) and Samir (already `inactive=true`) alone. Prefer the scenario runner:
 
-1. Update Jordan’s HR row to match the leaver CSV (do not invent columns). Preferred approach: replace the `MNB00092` line with the delta line, preserving header column order.
-2. Validate column count matches the header (comma count / CSV lint).
+```bash
+./tools/lab/scripts/scenarios/apply-leaver.sh
+```
+
+1. Runner (or hand-edit) updates Jordan’s HR row to match the leaver CSV (do not invent columns). Upsert key is `userId=MNB00092`.
+2. Validate column count matches the header (comma count / CSV lint) if editing by hand.
 3. Leave other employees unchanged — especially `sofia.torres` (`exceptions=LOA`) and `samir.hassan` (already `inactive=true`).
 
-**Expected result:** Only Jordan’s authoritative row shows `inactive=true` and `terminationDate=2026-07-26`. `exceptions` remains `false`.
+**Expected result:** Only Jordan’s authoritative row shows `inactive=true` and `terminationDate=2026-07-26`. `exceptions` stays empty (not LOA).
 
-**If it fails:** Restore from `lab-data/hr/MNB-HR-Employees.csv` and re-apply a single-line edit.
+**If it fails:** Restore from the runner `.bak-*` or `lab-data/HRApplications.txt` and re-apply.
 
 ### Task 3 — Aggregate HR and refresh identities
 

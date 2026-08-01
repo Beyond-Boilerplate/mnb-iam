@@ -115,8 +115,8 @@ No match → uncorrelated (ticket / Lesson 19)
 
 You cannot harden what you have not observed. Start by putting Raj’s HR attributes next to his AWS account attributes — side by side is the training artifact.
 
-1. Open HR identity `raj.external`. Note email and employeeId; confirm Contractor.
-2. Open `MNB-AWS-Cloud` account `raj.external`. Note email and employeeId; note `AWS_ADMIN`.
+1. Open HR identity `raj.external`. Note email and `userId`; confirm Contractor.
+2. Open `MNB-AWS-Cloud` account `raj.external`. Note email and `employeeId`; note `AWS_ADMIN`.
 3. Open `MNB-IT-Access` account for Raj if present.
 4. Observe current link state on each app (correlated vs uncorrelated).
 5. Binder: screenshot identity header + AWS account side by side.
@@ -160,7 +160,7 @@ Stretch experiments from Lesson 17 sometimes leave name-based mappings behind. R
 Privileged platforms are where false orphans hurt most. Configure AWS to the same hierarchy — and leave create-identities off even if the uncorrelated list looks ugly.
 
 1. Open `MNB-AWS-Cloud` → Correlation.
-2. Map `employeeId` → identity `employeeId`.
+2. Map account `employeeId` → identity `userId`.
 3. Map `email` → identity `email` (exact).
 4. Create-identities: **OFF** (critical for AWS_ADMIN).
 5. Save. Run `Aggregate MNB-AWS-Cloud` + Refresh.
@@ -188,7 +188,7 @@ Mature shops eventually encode the hierarchy in a rule. Practice describing it s
 
 ```text
 if account.employeeId is not blank:
-    return identity where employeeId == account.employeeId
+    return identity where userId == account.employeeId
 else if account.email endsWith @meridiannb.com:
     return identity where email == account.email
 else:
@@ -234,7 +234,7 @@ Ops needs a living list of known exceptions so every residual is not rediscovere
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Raj still uncorrelated | employeeId missing on account or identity | Fix source data; do not fuzzy match |
+| Raj still uncorrelated | `employeeId` missing on account or `userId` missing on identity | Fix source data; do not fuzzy match |
 | Raj linked to wrong person | Bad secondary rule | Remove rule; re-aggregate; verify MNB00093 |
 | New contractor identities spawned | Create-identities on AWS | Disable; delete erroneous cubes |
 | Email domain allowlist blocks Raj | Secondary email policy too strict | Rely on employeeId primary |
@@ -266,7 +266,7 @@ Examiner question: *“Would you correlate on email local-part to catch vendors?
 
 1. Linking an account to the wrong identity.
 2. Vendor email domain stresses email-centric matching while employeeId remains valid.
-3. Exact `employeeId` = `MNB00093`.
+3. Exact associate key: IT `employeeId` = HR `userId` = `MNB00093`.
 4. Examples: name-only, local-part-only email, lastName+department, auto-create on privileged apps.
 5. Unmatched privileged accounts would mint unmanaged privileged identities instead of entering uncorrelated remediation.
 

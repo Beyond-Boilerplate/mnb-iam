@@ -191,7 +191,7 @@ Aggregation loads HR accounts onto Links (and creates cubes because the **app** 
 
 1. **Identities** → search `helen.ross` (MNB00001). Open cube; confirm HR account from `MNB-HR`.
 2. Search `priya.wire` (MNB00090)—active wire specialist, manager should resolve toward `rachel.evans` / MNB00005 after refresh (Lesson 06 may complete manager link).
-3. Search `samir.hassan` (MNB00094)—terminated (`status=0`); note how inactive appears today.
+3. Search `samir.hassan` (MNB00094)—terminated (`inactive=true` / `status=Terminated`); note how inactive appears today.
 4. Spot-check `amelia.brooks` (new teller) and `raj.external` (contractor, vendor email).
 
 **Expected result:** At least four cubes found with `MNB-HR` accounts. Terminated vs active difference visible on status/inactive attributes (exact UI label varies).

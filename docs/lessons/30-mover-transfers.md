@@ -33,7 +33,7 @@ You will be able to:
 
 ### What a mover is (and is not)
 
-A **mover** is an identity whose job context changes while employment continues: department, jobCode, manager, cost center. It is not a leaver (`status=0`) and not a joiner (new employeeId). Meridian’s trigger is HR attribute change on an existing row — here `MNB00090`.
+A **mover** is an identity whose job context changes while employment continues: department, jobCode, manager, cost center. It is not a leaver (`inactive=true` / `status=Terminated`) and not a joiner (new `userId`). Meridian’s trigger is HR attribute change on an existing row — here `MNB00090`.
 
 **Role assignment** re-evaluates which business roles match the new attributes. **Residual entitlements** are account-level rights (e.g. `WIRE_INIT` on Wire Portal) that may survive after the role is gone if provisioning did not revoke them.
 
@@ -142,15 +142,19 @@ Read the change ticket before editing authoritative HR — same discipline as jo
 
 ### Task 3 — Apply HR change
 
-Update in place — never insert a second `MNB00090` or you create a correlation nightmare.
+Update in place — never insert a second `MNB00090` or you create a correlation nightmare. Prefer the scenario runner (upsert by `userId`, automatic `.bak-*`):
 
-1. Update Priya’s existing row in `HRApplications.txt` to match the delta (do not add a duplicate `MNB00090`).
-2. Prefer search-and-replace of the single line; validate field count.
-3. Save file.
+```bash
+./tools/lab/scripts/scenarios/apply-mover.sh
+```
+
+1. Runner (or hand-edit) updates Priya’s existing row in `HRApplications.txt` to match the delta (do not add a duplicate `MNB00090`).
+2. If editing by hand, prefer search-and-replace of the single line; validate field count.
+3. Confirm exactly one `MNB00090` row.
 
 **Expected result:** Exactly one `MNB00090` row with CML/RM01/MNB00006.
 
-**If it fails:** Restore backup; re-apply; avoid duplicating employeeId.
+**If it fails:** Restore from the runner backup (`.bak-*`) or repo seed; re-apply; avoid duplicating `userId`.
 
 ### Task 4 — Pipeline: aggregate + refresh
 

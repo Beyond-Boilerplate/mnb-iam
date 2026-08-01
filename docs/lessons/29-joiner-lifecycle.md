@@ -41,13 +41,13 @@ A **birthright role** (`MNB-Birthright-Employee`) is the automatic package every
 
 | Field (Nina) | Value | Why it matters |
 | --- | --- | --- |
-| employeeId | `MNB00120` | Correlation / native key into HR |
+| userId | `MNB00120` | Native key into HR (account id / cube associate key) |
 | userName | `nina.joiner` | Cube name; email local-part |
 | email | `nina.joiner@meridiannb.com` | Target correlation for SaaS later |
 | managersAssociateID | `MNB00007` (`emily.bennett`) | Approvals and manager certs route here |
-| status | `1` (active) | Joiner signal — inactive would skip birthright |
+| inactive / status | `false` / `Active` | Joiner signal — terminated would skip birthright |
 | departmentName / division | `RET` | Retail branch context |
-| jobCode | `TEL01` | Teller — not wire, not cloud |
+| JobCode | `TEL01` | Teller — not wire, not cloud |
 | employeeType | `Employee` | Birthright rule includes Employees; contractors differ (Lesson 32) |
 | hireDate | `2026-07-26` | SLA clock starts when HR marks active |
 
@@ -117,11 +117,18 @@ Before you merge anything into production HR (or the lab feed that stands in for
 
 ### Task 2 — Apply delta to HR file
 
-This is the lab equivalent of HR marking Nina “Active” in the HCM. Treat the file as authoritative: one row per employeeId, never a second header mid-file.
+This is the lab equivalent of HR marking Nina “Active” in the HCM. Prefer the scenario runner (upsert by `userId`, automatic backup) over hand-editing:
 
-1. Backup HR file: copy to `HRApplications.txt.bak-joiner`.
-2. Append Nina’s data row to `~/iiq-lab-data/HRApplications.txt` (data only — do not duplicate header).
-3. Confirm one new line for `MNB00120` / `nina.joiner`.
+```bash
+./tools/lab/scripts/scenarios/apply-joiner.sh
+# optional: HR_FILE=~/iiq-lab-data/HRApplications.txt ./tools/lab/scripts/scenarios/apply-joiner.sh
+```
+
+If you must edit by hand: treat the file as authoritative — one row per `userId`, never a second header mid-file.
+
+1. Backup HR file (the runner does this automatically as `HRApplications.txt.bak-<timestamp>`).
+2. Append or upsert Nina’s data row into `~/iiq-lab-data/HRApplications.txt` (data only — do not duplicate header).
+3. Confirm one row for `MNB00120` / `nina.joiner`.
 4. Confirm no accidental truncation of prior rows.
 
 **Expected result:** HR file contains Nina exactly once with valid CSV/TXT field counts.

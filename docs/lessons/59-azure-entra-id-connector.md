@@ -203,7 +203,7 @@ Correlation design is where Entra deployments quietly rot. UPN↔email works on 
 1. Account schema: `userPrincipalName`, `displayName`, `mail`, `accountEnabled`, `id` (objectId), `department`, and `employeeId` (also readable via `onPremisesExtensionAttributes` for synced accounts). Native identity: document your choice — UPN is human-readable; objectId is immutable. Record which you chose and why.
 2. Entitlements: Entra **security groups** as the entitlement attribute; note which groups Meridian certifies (resource-gating groups yes; dynamic groups → certify the rule instead, per Concepts).
 3. Correlation, in order:
-   - **Production answer:** `employeeId` (Graph `employeeId` / extension attribute) ↔ identity `employeeId` — survives renames because HR owns both ends.
+   - **Production answer:** Graph `employeeId` / extension attribute ↔ identity `userId` — survives renames because HR owns both ends.
    - **Bootstrap fallback:** UPN ↔ identity `email`, explicitly labeled temporary with a follow-up to populate `employeeId` tenant-wide.
 4. Worked example in the note: `kai.nguyen@meridiannb.com` correlates by employeeId even after a hypothetical rename to `kai.win@meridiannb.com`; the UPN-only design would orphan the renamed account.
 

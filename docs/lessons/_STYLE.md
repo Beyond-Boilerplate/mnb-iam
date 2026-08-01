@@ -70,6 +70,10 @@ CD ships **HelloWorld smoke only**. Learners **build** Meridian objects in IIQ t
 - **Never** assume CD pre-created `MNB-HR`, roles, workflows, or SoD — the lesson that introduces them is where they are created.
 - Purpose-built refresh tasks stay split: `Refresh MNB Attributes`, `Refresh MNB Managers`, `Refresh MNB Roles`, `Refresh MNB Policies`.
 - HR attributes follow the **bank column map** ([`lab-data/reference/hr-column-map.md`](../../lab-data/reference/hr-column-map.md)): `userId`, `managersAssociateID`, `inactive`/`status`, `exceptions=LOA`, `employeeType`, `departmentName`/`JobCode` — not legacy `employeeId`/`onLeave`/`workerType`/`departmentCode` on the HR feed.
+- **Correlation standard:** account/IT `employeeId` → identity **`userId`** (same `MNB#####` values); then email. Never invent an HR `employeeId` column.
+- **Lifecycle status language:** Active = `inactive=false` / `status=Active`; Terminated = `inactive=true` / `status=Terminated` (+ `terminationDate`). Do not write `status=0/1` in new content.
+- **Core Path packaging:** entry-level TOC is Lessons **01–50** + mid-capstones (`mid-16`, `mid-34`, `mid-46`) + [`first-90-days.md`](first-90-days.md). Specialist = 51–110. Roadmap for remaining work: [`_CORE_PATH_ROADMAP.md`](_CORE_PATH_ROADMAP.md).
+- **JML deltas:** prefer `./tools/lab/scripts/scenarios/apply-*.sh` over hand surgery on `HRApplications.txt`.
 - Env-specific paths use `%%TOKENS%%` from `*.target.properties` when you export Applications.
 
 See [`config/PACKS.md`](../../config/PACKS.md).

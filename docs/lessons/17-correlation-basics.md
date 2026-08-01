@@ -52,18 +52,18 @@ An **uncorrelated account** exists on the application but is not linked to any i
 At Meridian, the stable bridge from any target to HR is the employee number:
 
 ```
-Strongest ──► employeeId (account) = employeeId (identity from HR)
+Strongest ──► employeeId (account) = userId (identity from HR)
 Next      ──► email (account) = email (identity)
 Avoid     ──► display name / fuzzy / first+last alone (false merges)
 ```
 
 | Account attr (`MNB-IT-Access`) | Identity attr (`MNB-HR`) | Notes |
 | --- | --- | --- |
-| `employeeId` | `employeeId` | Primary — survives mailbox changes |
+| `employeeId` | `userId` | Primary — IT dump key equals HR `userId`; survives mailbox changes |
 | `email` | `email` | Secondary; fails for `raj.external` vendor mail |
 | `userName` | `name` / uid | Useful if aligned; confirm before relying |
 
-**Real-life Meridian example.** `priya.wire` (MNB00090) has matching `employeeId` and corporate email on HR and on the IT inventory row. Correlation attaches her ELDAP / WIRE_INIT / ACH_OPS inventory to her cube so `rachel.evans` can see and certify it. Contrast `raj.external`: his mailbox is `raj.contractor@vendor-mail.invalid`. Email-only correlation leaves him orphaned even when `employeeId=MNB00093` is perfect — which is why employeeId must be first.
+**Real-life Meridian example.** `priya.wire` (MNB00090) has matching associate key (`userId` on HR / `employeeId` on IT) and corporate email on both sides. Correlation attaches her ELDAP / WIRE_INIT / ACH_OPS inventory to her cube so `rachel.evans` can see and certify it. Contrast `raj.external`: his mailbox is `raj.contractor@vendor-mail.invalid`. Email-only correlation leaves him orphaned even when IT `employeeId=MNB00093` matches HR `userId` — which is why associate-id must be first.
 
 ### Wrong way vs bank-ready way
 
@@ -135,7 +135,7 @@ Before changing configuration, capture the “before” state. Auditors and your
 
 Enterprises that skip this step end up with silent UI experiments and no standard. Write the hierarchy first; configure second.
 
-1. Confirm HR identities expose `employeeId` and `email` (Lesson 05 schema).
+1. Confirm HR identities expose `userId` and `email` (Lesson 05 schema).
 2. Confirm IT Access schema exposes `employeeId` and `email`.
 3. Write Meridian standard:
 
@@ -155,13 +155,13 @@ This is the control configuration examiners will ask to see screenshots of. Keep
 
 1. Open `MNB-IT-Access` application configuration → **Correlation** (or Account Correlation / equivalent menu path).
 2. Add attribute assignment(s):
-   - `employeeId` (application) to `employeeId` (identity)
+   - `employeeId` (application) to `userId` (identity)
    - `email` (application) to `email` (identity)
 3. If the UI supports ordered attempts, put **employeeId first**.
 4. Ensure “create new identities from unmatched accounts” remains **disabled**.
 5. Save.
 
-**Expected result:** Correlation config saved on `MNB-IT-Access` with employeeId + email mappings.
+**Expected result:** Correlation config saved on `MNB-IT-Access` with `employeeId`→`userId` + email mappings.
 
 **If it fails:** Attribute names must match schema exactly—fix typos like `EmployeeId` vs `employeeId`.
 
@@ -176,7 +176,7 @@ Correlation mappings alone do not rewrite existing Links. You must re-ingest acc
 
 **Expected result:** Tasks succeed; many previously uncorrelated accounts now link to HR cubes.
 
-**If it fails:** Re-check correlation mappings; confirm HR has `employeeId` populated on identities.
+**If it fails:** Re-check correlation mappings; confirm HR has `userId` populated on identities.
 
 ### Task 5 — Verify priya.wire linkage
 
@@ -189,7 +189,7 @@ Priya is the happy-path proof: corporate email, clean employeeId, wire-relevant 
 
 **Expected result:** Priya’s IT inventory account is on her cube—manager-visible access.
 
-**If it fails:** Check her `employeeId`/`email` on both HR and the IT account; fix data mismatch only if you introduced one—do not invent HR rows.
+**If it fails:** Check her `userId` (HR) / `employeeId` (IT) and `email` on both sides; fix data mismatch only if you introduced one—do not invent HR rows.
 
 ### Task 6 — Spot-check jordan.reed
 

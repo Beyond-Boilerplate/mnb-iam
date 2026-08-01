@@ -6,7 +6,7 @@
 **Prereq:** Lesson 31 (leaver disablement); populations from Lesson 07; AWS app from Lesson 13  
 
 **Lab data:**
-- `lab-data/hr/MNB-HR-Employees.csv` — filter `employeeType=Contractor`
+- `lab-data/HRApplications.txt` — filter `employeeType=Contractor`
 - Spotlight identity: `raj.external` (`MNB00093`) — `lab-data/apps/MNB-AWS-Cloud.csv`
 - Related: `lab-data/reference/entitlement-dictionary.csv` (`AWS_ADMIN` critical)
 - Birthright exclusion: Lesson 24 `MNB-Birthright-Employee` requires `employeeType=Employee`
@@ -83,7 +83,7 @@ SOW start ──► HR row (employeeType=Contractor, end date)
          Monthly manager attestation
          (weekly if AWS_ADMIN)
                     │
-         SOW end / status=0
+         SOW end / inactive=true / status=Terminated
                     ▼
          Same-day privileged disable (Lesson 31 rigor)
 ```
@@ -116,7 +116,7 @@ SOW start ──► HR row (employeeType=Contractor, end date)
 
 You cannot control what you cannot list. Start with a roster.
 
-1. Open `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or your live HR feed).
+1. Open `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`).
 2. Filter / search `Contractor` in the `employeeType` column.
 3. List at least: `raj.external`, plus other contractors (e.g. `rachel.khatri`, `james.nguyen`, `priya.torres`, `grace.howard`, `rohan.price` if present).
 4. In IIQ, open population `MNB-Contractors` (or Advanced Search on identity attribute `employeeType` = `Contractor`) and compare counts.

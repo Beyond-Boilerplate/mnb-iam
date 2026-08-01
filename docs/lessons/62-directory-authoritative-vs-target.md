@@ -55,7 +55,7 @@ An **authoritative application** is allowed to **create and own the lifecycle of
   ────────                        ──────────────────
   HR hire                         AD aggregate with create ON
     → cube                        → cube named after sAMAccountName
-    → provision AD                  (no HR employeeId, no term feed)
+    → provision AD                  (no HR `userId`, no term feed)
     → AD aggregate correlates     → HR later creates SECOND cube
     → one person, one cube        → certifications review ghosts
 ```

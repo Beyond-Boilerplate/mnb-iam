@@ -17,7 +17,7 @@ You will be able to:
 
 - Explain LDAP as a protocol (versus Active Directory as a product) and read a Directory Information Tree, DN, and objectClass without guessing
 - Start Meridian's live OpenLDAP container, verify it with `ldapsearch`, and predict aggregation results from the bootstrap LDIF before IIQ ever connects
-- Create and configure **MNB-OpenLDAP** against the live directory: bind DN, base DN, account objectClass `inetOrgPerson`, and group entitlements from `groupOfNames`
+- Create and configure **MNB-OpenLDAP** against the live directory: bind DN, base DN, account objectClass `inetOrgPerson`, and group entitlements from `groupOfUniqueNames`
 - Run a real Test Connection and a real Account Aggregation, and reconcile the counts against the LDIF line by line
 - Correlate LDAP accounts to HR identity cubes using `employeeNumber` with create-identities off
 - Diagnose the four classic LDAP failures: `err=49`, `err=32`, connection refused, and size limit exceeded
@@ -44,7 +44,8 @@ LDAP (Lightweight Directory Access Protocol) is a wire protocol — a standardiz
 | Account objectClass | `user` (Microsoft schema) | `inetOrgPerson` (RFC 2798 standard) |
 | Login attribute | `sAMAccountName` / `userPrincipalName` | `uid` |
 | Enable/disable | `userAccountControl` bit flags | No standard flag — often `pwdAccountLockedTime` or app-specific |
-| Group objectClass | `group` | `groupOfNames` or `groupOfUniqueNames` |
+| Group objectClass | `group` | `groupOfUniqueNames` (OOTB OpenLDAP - Direct; lab LDIF matches) |
+| Group member attr | `member` | `uniqueMember` |
 | Typical role at Meridian | Corporate workstation/app directory | Embedded app directories, network gear auth |
 
 The practical consequence: when you sit down in front of an unfamiliar directory, your first questions are always *what objectClass are the accounts?* and *what attribute is the login name?* — never assumptions carried over from AD.
@@ -61,7 +62,7 @@ dc=meridiannb,dc=com                         ← suffix (the tree root)
 │   ├── uid=helen.ross … uid=priya.wire …
 │   ├── uid=raj.external (contractor)
 │   └── uid=samir.hassan (Inactive / leaver)
-├── ou=groups,…                              ← groupOfNames entitlements (8)
+├── ou=groups,…                              ← groupOfUniqueNames entitlements (8)
 │   ├── cn=wire-initiators, cn=wire-approvers
 │   ├── cn=vpn-network-admins, cn=app-ldap-admins
 │   └── cn=dept-*, cn=all-employees
@@ -77,8 +78,8 @@ A **bind DN** is the account IIQ authenticates *as* when it connects — LDAP's 
 An **objectClass** declares what kind of entry something is and which attributes it may carry. Three matter here:
 
 - **`inetOrgPerson`** — the standard "person" class. Carries `uid`, `cn`, `sn`, `mail`, `employeeNumber`. This is Meridian's account objectClass.
-- **`groupOfNames`** — a group whose members are listed as full DNs in the `member` attribute. This is what the lab LDIF uses for `wire-initiators`.
-- **`groupOfUniqueNames`** — a near-identical sibling that uses `uniqueMember` instead of `member`. Directories vary; if your group aggregation returns groups with zero members, the wrong member attribute name is the first suspect.
+- **`groupOfUniqueNames`** — members listed as full DNs in the `uniqueMember` attribute. This is what the lab LDIF uses (matches OOTB OpenLDAP - Direct group schema).
+- **`groupOfNames`** — near-identical sibling that uses `member` instead of `uniqueMember`. If aggregation returns groups with zero members, the wrong member attribute name is the first suspect.
 
 ### Search base, scope, and filter
 
@@ -114,9 +115,9 @@ LDAP simple bind over TCP 389 (lab) / LDAPS 636 (production)
 OpenLDAP (osixia container, suffix dc=meridiannb,dc=com)
         ├── search base ou=people,  filter (objectClass=inetOrgPerson)
         │        → account aggregation (10 entries in the lab)
-        ├── search base ou=groups,  filter (objectClass=groupOfNames)
-        │        → group / entitlement aggregation (8 groups)
-        └── member DNs on groups → membership resolution back to accounts
+        ├── search base ou=groups,  filter (objectClass=groupOfUniqueNames)
+        │        → group / entitlement aggregation (8 groups); use group.searchDNs
+        └── uniqueMember DNs on groups → membership resolution back to accounts
 ```
 
 | Operation | LDAP behavior | IIQ behavior |
@@ -162,7 +163,7 @@ ldapsearch -x -H ldap://localhost:389 \
   -D cn=admin,dc=meridiannb,dc=com -w admin
 ```
 
-Flag by flag: `-x` simple bind (no SASL), `-H` the directory URL, `-b` search base, `-D` bind DN, `-w` bind password. Expect the suffix, three OUs (`people`, `groups`, `service`), ten `inetOrgPerson` entries, two service binds, and eight `groupOfNames` — see `lab-data/connectors/ldap/README.md` for the inventory.
+Flag by flag: `-x` simple bind (no SASL), `-H` the directory URL, `-b` search base, `-D` bind DN, `-w` bind password. Expect the suffix, three OUs (`people`, `groups`, `service`), ten `inetOrgPerson` entries, two service binds, and eight `groupOfUniqueNames` — see `lab-data/connectors/ldap/README.md` for the inventory.
 
 ### Step 3 — Read the LDIF and predict the aggregation
 
@@ -204,7 +205,7 @@ Everything downstream depends on a directory that actually answers, so prove tha
 2. Run the Step 2 `ldapsearch` and count the entries returned.
 3. Confirm you can name the shape: suffix, three OUs, ten people, two service binds, eight groups — including `wire-initiators` with Priya, Michael, and Noah as members.
 
-**Expected result:** `ldapsearch` returns Success; `priya.wire`'s DN appears as a `member` of `wire-initiators`.
+**Expected result:** `ldapsearch` returns Success; `priya.wire`'s DN appears as a `uniqueMember` of `wire-initiators`.
 
 **If it fails:** `Can't contact LDAP server` → container not running or port 389 not mapped (`docker compose ps`); `err=49` → bind DN/password typo (lab password is exactly `admin`).
 
@@ -220,10 +221,10 @@ Auditable aggregation starts with a written prediction — if you cannot say in 
 | `uid` | Account native identity |
 | `cn`, `sn` | Display name / identity sync candidates |
 | `mail` | Email; secondary correlation quality check |
-| `employeeNumber` | Correlation to identity `employeeId` |
-| `member` on `groupOfNames` | Group membership → entitlement |
+| `employeeNumber` | Correlation to identity `userId` |
+| `uniqueMember` on `groupOfUniqueNames` | Group membership → entitlement |
 
-3. Record the correlation decision: primary `employeeNumber` ↔ `employeeId`; documented fallback `uid` ↔ `userName`. Create-identities: **No** — `MNB-HR` remains the only authoritative source.
+3. Record the correlation decision: primary `employeeNumber` ↔ `userId`; documented fallback `uid` ↔ `name`/`userName`. Create-identities: **No** — `MNB-HR` remains the only authoritative source.
 
 **Expected result:** Prediction card and schema map saved before the application exists.
 
@@ -260,11 +261,11 @@ Test Connection is a real bind against a real directory here — it proves host,
 The schema decides what governance can see; the objectClass filter decides what the schema even receives. This is where AD reflexes break non-AD directories.
 
 1. Open the account schema. Confirm the account objectClass is `inetOrgPerson` (not `user`); native identity `uid`; attributes `cn`, `sn`, `mail`, `employeeNumber` present.
-2. Open the group schema. Group objectClass `groupOfNames`, native identity `cn` (or DN per build), membership read from `member`. Mark group membership as the **entitlement attribute** so each group becomes a certifiable ManagedAttribute.
-3. Correlation config: `employeeNumber` ↔ `employeeId` primary; `uid` ↔ `userName` fallback, both recorded in the schema file.
+2. Open the group schema. Group objectClass `groupOfUniqueNames`, native identity `dn`, membership read from `uniqueMember`. Confirm **group.searchDNs** (objectType `group`) points at `ou=groups,…` — not a misnamed `groupOfNames.searchDNs` key. Mark group membership as the **entitlement attribute** so each group becomes a certifiable ManagedAttribute.
+3. Correlation config: `employeeNumber` ↔ `userId` primary; `uid` ↔ `name`/`userName` fallback, both recorded in the schema file.
 4. Confirm **create identities is OFF** — LDAP accounts that fail correlation must surface as uncorrelated accounts (Lesson 19 remediation), not spawn phantom cubes.
 
-**Expected result:** Schema shows `inetOrgPerson` accounts keyed by `uid`, `groupOfNames` entitlements, create-identities disabled.
+**Expected result:** Schema shows `inetOrgPerson` accounts keyed by `uid`, `groupOfUniqueNames` entitlements, create-identities disabled.
 
 ### Task 6 — Account Aggregation with predicted counts
 
@@ -286,7 +287,7 @@ Now run the inventory and hold it against your Task 2 prediction. A green task r
 Connect the plumbing to the control story — this paragraph of narrative is what the examiner actually buys.
 
 1. In the Entitlement Catalog, find `wire-initiators` on `MNB-OpenLDAP`. Set/describe it: *authorizes wire transfer initiation on the vendor wire platform*; flag as high-risk per Lesson 22 patterns.
-2. Write the leaver expectation in the schema file: when Priya leaves wire operations, the provisioning plan (or the vendor admin, with an IIQ-verified deadline) removes her `member` value; the next `Aggregate MNB-OpenLDAP` shows the entitlement gone — the before/after Task Results are the revocation evidence.
+2. Write the leaver expectation in the schema file: when Priya leaves wire operations, the provisioning plan (or the vendor admin, with an IIQ-verified deadline) removes her `uniqueMember` value; the next `Aggregate MNB-OpenLDAP` shows the entitlement gone — the before/after Task Results are the revocation evidence.
 3. Note the OpenLDAP gap honestly: no standard disable flag, so "account disabled" is not an available control here — group removal and entry deletion are.
 
 **Expected result:** Entitlement described and risk-flagged; leaver evidence chain written down, including the no-disable-flag caveat.
@@ -315,7 +316,7 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 - [ ] OpenLDAP container running; `ldapsearch` returns Success with the seeded DIT
 - [ ] Prediction card written *before* aggregation (10 accounts / 8 groups / Priya in wire-initiators)
 - [ ] `MNB-OpenLDAP` created with live values; Test Connection passed
-- [ ] Schema: `inetOrgPerson` accounts on `uid`, `groupOfNames` entitlements, create-identities off
+- [ ] Schema: `inetOrgPerson` accounts on `uid`, `groupOfUniqueNames` entitlements, create-identities off
 - [ ] Aggregation Task Result matches the prediction exactly; accounts correlated by `employeeNumber`
 - [ ] `wire-initiators` described and risk-flagged; leaver evidence chain written
 - [ ] Hardening notes: read-only bind, LDAPS, paged results (fallback path: deferred note instead of live results)
@@ -331,7 +332,8 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 | `Can't contact LDAP server` / connection refused | Container down, or port 389 not mapped to the host | `docker compose -f docker-compose.connectors.yml ps`; re-run `up -d openldap` |
 | `Size limit exceeded (4)` mid-aggregation | Result set exceeds the server limit (OpenLDAP default 500) | Enable the paged-results control in the connector; never raise the server limit as the "fix" |
 | Aggregation returns 0 accounts, task green | objectClass filter or people base wrong (AD habits) | Filter on `inetOrgPerson`, base `ou=people,dc=meridiannb,dc=com` |
-| Group found but has no members | Directory uses `uniqueMember` (`groupOfUniqueNames`), schema maps `member` | Match the member attribute to the group objectClass actually in the directory |
+| Group found but has no members | Directory uses `member` (`groupOfNames`), schema maps `uniqueMember` | Match the member attribute to the group objectClass actually in the directory |
+| Zero groups aggregated | Search DN key is `groupOfNames.searchDNs` but schema objectType is `group` | Use `group.searchDNs` with `objectType=group` |
 
 ---
 

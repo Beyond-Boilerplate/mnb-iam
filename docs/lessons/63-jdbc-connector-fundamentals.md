@@ -44,7 +44,7 @@ The connector selection matrix prefers **JDBC** for Core banking DB (alternate: 
 | --- | --- |
 | `mnb_app_accounts.account_id` | Native account key |
 | `username` | Login-style name; secondary correlation |
-| `employee_id` | Preferred correlation to identity `employeeId` |
+| `employee_id` | Preferred correlation to identity `userId` |
 | `status` | `ACTIVE` / `DISABLED` → enable semantics |
 | `entitlement` | Entitlement attribute (certifiable) |
 | `mnb_app_entitlements` | Dictionary of codes / risk tiers |

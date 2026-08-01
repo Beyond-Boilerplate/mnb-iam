@@ -20,7 +20,7 @@ You will be able to:
 - Select **PeopleSoft HCM Database** vs **PeopleSoft Direct** using Meridian's connector matrix and defend the choice
 - Explain PeopleSoft HCM building blocks — EMPLID, job data, effective dating — and how Component Interfaces / Integration Broker fit connectivity
 - Create **MNB-PeopleSoft-HCM** as an authoritative **candidate** (same discipline as Workday: do not flip both authoritative)
-- Map EMPLID, job, status, and department into IIQ identity attributes with a bridge to Meridian `employeeId`
+- Map EMPLID, job, status, and department into IIQ identity attributes with a bridge to Meridian `userId`
 - Complete the lesson with mock/JDBC fallback when no PeopleSoft environment is available, and hand off cleanly to Lesson 81 (Oracle EBS)
 
 ---
@@ -35,9 +35,9 @@ You will be able to:
 
 ## Concepts
 
-### EMPLID is the person key — not Meridian employeeId
+### EMPLID is the person key — not Meridian `userId`
 
-PeopleSoft identifies a person with **EMPLID**. Meridian cubes key on `employeeId` (`MNB#####`). Same bridge problem as SAP PERNR (Lesson 78): without `employeeId` ↔ `psEmplId`, correlation fails. Keep the native EMPLID on the identity forever; do not overwrite Meridian IDs with raw EMPLIDs.
+PeopleSoft identifies a person with **EMPLID**. Meridian cubes key on `userId` (`MNB#####`). Same bridge problem as SAP PERNR (Lesson 78): without `userId` ↔ `psEmplId`, correlation fails. Keep the native EMPLID on the identity forever; do not overwrite Meridian IDs with raw EMPLIDs.
 
 | PeopleSoft concept | What it is | IAM use |
 | --- | --- | --- |
@@ -104,7 +104,7 @@ Existing cubes (MNB-HR / future Workday) — create-identities OFF in lab
 | Operation | PeopleSoft behavior | IIQ behavior |
 | --- | --- | --- |
 | Aggregation | Current effective-dated worker query or CI read | One row per EMPLID in scope |
-| Correlation | Bridge EMPLID ↔ `employeeId` | Match corporate cubes |
+| Correlation | Bridge EMPLID ↔ `userId` | Match corporate cubes |
 | Status map | HR_STATUS / EMPL_STATUS (+ leave) | Active/inactive; leave as attribute |
 | Manager | Supervisor ID on JOB | Resolve via EMPLID → identity after bridge |
 
@@ -172,7 +172,7 @@ Every connector choice becomes tribal knowledge unless written down.
 ### Task 3 — Schema map and bridge
 
 1. `emplId` → `psEmplId` (always retain).
-2. Bridge design: `employeeId,psEmplId` — same discipline as Workday Worker ID and SAP PERNR.
+2. Bridge design: `userId,psEmplId` — same discipline as Workday Worker ID and SAP PERNR.
 3. `userName` / OPRID strategy: document whether OPRID is correlated as an HCM attribute or deferred to a future PS **security** application (recommended: do not overload this HCM app with PS roles).
 4. `hrStatus` / `emplStatus` → active/inactive; separate leave indicator if present.
 5. `deptId`, `jobCode`, `managersAssociateID` (supervisor EMPLID) → identity attrs + manager resolution plan.
@@ -185,7 +185,7 @@ Every connector choice becomes tribal knowledge unless written down.
 1. Create `~/iiq-lab-data/connectors/peoplesoft/MNB-PeopleSoft-HCM-mock.csv`:
 
 ```csv
-emplId,employeeId,userName,email,hrStatus,exceptions (LOA),deptId,jobCode,managersAssociateID
+emplId,userId,userName,email,hrStatus,exceptions (LOA),deptId,jobCode,managersAssociateID
 PS10095,MNB00095,sofia.torres,sofia.torres@meridiannb.com,A,true,CML,RM01,PS10006
 PS10096,MNB00096,kai.nguyen,kai.nguyen@meridiannb.com,A,false,IT,ENG01,PS10003
 PS10120,MNB00120,nina.joiner,nina.joiner@meridiannb.com,A,false,RET,TEL01,PS10007
@@ -219,7 +219,7 @@ Extend the Lesson 78 coexistence matrix:
 | `MNB-SAP-HR` | SAP HCM entities | Segmented / candidate |
 | `MNB-PeopleSoft-HCM` | PeopleSoft legal entity | **Candidate — this lesson** |
 
-1. Dual-run sample: reconcile 5 EMPLID/`employeeId` pairs vs `MNB-HR` (include `nina.joiner`, `sofia.torres`).
+1. Dual-run sample: reconcile 5 EMPLID/`userId` pairs vs `MNB-HR` (include `nina.joiner`, `sofia.torres`).
 2. Cutover stub: Phase 1 parallel → Phase 2 fix deltas → Phase 3 flip **only** the PeopleSoft population's authoritative flag with rollback (disable PS auth; revert to CSV/HR).
 3. Explicit warning: **do not flip PeopleSoft and Workday authoritative for overlapping people.**
 
@@ -288,7 +288,7 @@ Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Wo
 
 1. What preferred PeopleSoft connector does the Meridian matrix list?
 2. What is the Meridian PeopleSoft HCM application name?
-3. Why bridge EMPLID to `employeeId`?
+3. Why bridge EMPLID to `userId`?
 4. Should PeopleSoft security roles live on the HCM application?
 5. Why must you not flip PeopleSoft and Workday authoritative together for the same people?
 6. What lesson follows for Oracle E-Business Suite?
@@ -297,7 +297,7 @@ Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Wo
 
 1. PeopleSoft HCM Database (alternate PeopleSoft Direct).
 2. `MNB-PeopleSoft-HCM`.
-3. IIQ cubes and Meridian HR keys use `MNB#####` / `employeeId`; EMPLID is the PeopleSoft native key and must be bridged.
+3. IIQ cubes and Meridian HR keys use `MNB#####` / `userId`; EMPLID is the PeopleSoft native key and must be bridged.
 4. No — keep HCM worker data separate from PS application security (future separate app).
 5. Two authoritative sources for one population create duplicate cubes and unexplained churn — use dual-run and population segmentation (Workday pattern).
 6. Lesson 81 — Oracle EBS Connector.
@@ -317,7 +317,7 @@ Record `RR-PS-AUTH-01`: *Enabling authoritative on PeopleSoft while MNB-HR or Wo
 
 ## Stretch lab
 
-Design a JDBC view SQL sketch (do **not** run against production PS) selecting current effective-dated JOB and PERSONAL_DATA-style fields aligned to Meridian lab schema naming (`employeeId`, `psEmplId`, `hrStatus`, `exceptions` (LOA), `deptId`, `jobCode`, `managersAssociateID`). Then add a SETID/company column to the coexistence matrix and propose the population rule that would allow PeopleSoft to become authoritative *only* for that entity while Workday owns corporate.
+Design a JDBC view SQL sketch (do **not** run against production PS) selecting current effective-dated JOB and PERSONAL_DATA-style fields aligned to Meridian lab schema naming (`userId`, `psEmplId`, `hrStatus`, `exceptions` (LOA), `deptId`, `jobCode`, `managersAssociateID`). Then add a SETID/company column to the coexistence matrix and propose the population rule that would allow PeopleSoft to become authoritative *only* for that entity while Workday owns corporate.
 
 ---
 

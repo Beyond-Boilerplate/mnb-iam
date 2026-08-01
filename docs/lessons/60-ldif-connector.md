@@ -104,7 +104,7 @@ LDIF parser iterates dn: blocks
 | LDIF attribute | Schema use (same as Lesson 58) |
 | --- | --- |
 | `uid` | Account native identity |
-| `employeeNumber` | Correlation to identity `employeeId` |
+| `employeeNumber` | Correlation to identity `userId` |
 | `mail` | Email quality check |
 | `member` on groups | Entitlement membership |
 

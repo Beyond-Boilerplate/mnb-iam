@@ -95,9 +95,19 @@ Refresh MNB Managers (optional same night / after hierarchy edits)
 ## Before you start
 
 - [ ] `Aggregate MNB-HR` succeeds
-- [ ] Attribute maps from Lesson 05 saved
+- [ ] Attribute maps from Lesson 05 saved (including Searchable custom attrs; **no** `manager`←display-name source)
 - [ ] Evidence folder ready
 - [ ] Backup of `HRApplications.txt` before change-detect drill
+
+### Beginner note — open the right cube
+
+With native identity = `userId`, search **`MNB00002`** (Christopher Hayes), not `christopher.hayes`.
+
+| If you see… | It means… | What to do |
+| --- | --- | --- |
+| User Name `MNB00090`, Accounts tab has `MNB-HR` | Real HR cube | Use this for proofs |
+| User Name `Priya Mehta` / `Aisha Hughes`, **no** accounts, First/Last/Email empty | Orphan stub (often from bad manager mapping) | Ignore/delete; open the `MNB…` identity instead |
+| Attributes tab missing `employeeType` but Debug shows it | UIConfig whitelist | Lesson 05 step 2c-extra — append to `identityViewAttributes` |
 
 ## Lab procedure
 
@@ -105,12 +115,13 @@ Refresh MNB Managers (optional same night / after hierarchy edits)
 
 A cube is the examiner-facing unit of a person. Inventory one leadership cube end-to-end so you know which tabs prove attributes, accounts, and workflow state.
 
-1. Open identity `christopher.hayes` (MNB00002, Director of Technology).
-2. Inventory tabs: attributes, accounts, roles/bundles, work items, risk/history (as present).
-3. Note which attributes already show HR-sourced values vs still empty (expected gaps before attribute refresh).
-4. Optionally open `helen.ross` for a second leadership cube.
+1. Open identity **`MNB00002`** (Christopher Hayes, Director of Technology) — search by display name or `MNB00002`.
+2. Inventory tabs: **Attributes**, **Application Accounts**, roles/bundles, work items, risk/history (as present).
+3. On **Application Accounts → MNB-HR**, confirm Link has rich HR columns (`departmentName`, `JobCode`, …) even if Attributes is still thin.
+4. On **Attributes**, note which fields already show values vs still empty (expected gaps before attribute refresh). Stock fields (First/Last/Email) may fill before custom ones appear in the UI list.
+5. Optionally open **`MNB00001`** (Helen Ross) for a second leadership cube.
 
-**Expected result:** Notebook checklist of cube tabs + which HR fields are visible pre-refresh.
+**Expected result:** Notebook checklist of cube tabs + which HR fields are visible on Link vs Identity pre-refresh.
 
 ### Task 2 — Option study (write before you click)
 
@@ -169,14 +180,21 @@ CD does not ship these. Create them now so every HR aggregate has a clear promot
 This is the control sequence after any HR feed change.
 
 1. Run `Aggregate MNB-HR` → wait for Success.
-2. Run **`Refresh MNB Attributes`** → wait for Success. This is the task that **promotes/updates identity attributes from the HR Link**.
-3. Run **`Refresh MNB Managers`** → wait for Success.
+2. Run **`Refresh MNB Attributes`** → wait for Success. This is the task that **promotes/updates identity attributes from the HR Link**. Confirm the task option **Refresh identity attributes** / promote from accounts is ON.
+3. Run **`Refresh MNB Managers`** → wait for Success (manager correlation option ON; attribute promote can stay OFF on this task).
 4. Screenshot all three task results into `~/iiq-lab-evidence/YYYY-MM-DD/`.
-5. Re-open `priya.wire` and confirm department/job/`exceptions` (LOA) (as mapped) and manager toward `rachel.evans`.
+5. Re-open **`MNB00090`** (Priya) and confirm:
+   - Attributes / Debug: promoted fields you mapped (`email`, `firstname`, `employeeType`, `departmentName`, … as applicable)
+   - Manager resolves toward **`MNB00005`** (Rachel Evans)
+6. Spot-check **`MNB00093`** (Raj): `employeeType=Contractor` on the Identity (not only on the Link).
 
-**Expected result:** Three successful task results; at least one identity shows promoted attributes and a resolved manager.
+**Expected result:** Three successful task results; at least one identity shows promoted attributes and a resolved manager on the **`MNB…`** cube.
 
 **If it fails:** Read the failing task’s errors first (rule exceptions, missing manager targets). Fix data/maps; do not blindly re-run in a loop without reading results.
+
+**Watch the logs for:** `Identity type value [Employee] not found in IdentityConfig` — you mapped onto stock **`type`**. Fix maps to custom `employeeType` (Lesson 05) and re-run attribute refresh.
+
+**After refresh, Identity Warehouse grew with many “First Last” empty cubes?** You still have Identity Mapping `manager` ← account `manager` (display name). Remove that source (Lesson 05), delete orphan identities if needed, keep only `MNB…` cubes, re-run managers refresh.
 
 ### Task 6 — Change-detect drill
 
@@ -206,13 +224,13 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 
 1. Compare three cubes side by side in notes:
 
-| Identity | Focus after refresh |
-| --- | --- |
-| priya.wire | manager → rachel.evans; dept TRS |
-| samir.hassan | inactive/terminated signals |
-| sofia.torres | exceptions=LOA promoted |
+| Identity (User Name) | Persona | Focus after refresh |
+| --- | --- | --- |
+| `MNB00090` | priya.wire | manager → `MNB00005` / Rachel; dept TRS |
+| `MNB00094` | samir.hassan | inactive/terminated signals |
+| `MNB00095` | sofia.torres | exceptions=LOA promoted |
 
-2. Confirm leadership cubes (`helen.ross`, `christopher.hayes`) still look healthy (no accidental inactivation).
+2. Confirm leadership cubes (`MNB00001` Helen, `MNB00002` Christopher) still look healthy (no accidental inactivation).
 3. File a one-line SLA note: “After any HR file edit in lab, always Aggregate MNB-HR → Refresh MNB Attributes (→ Refresh MNB Managers when hierarchy matters) before trusting cube state.”
 
 **Expected result:** Comparison table complete; no unexpected identity corruption; SLA note in CHANGELOG.
@@ -232,11 +250,15 @@ cp ~/iiq-lab-data/HRApplications.txt ~/iiq-lab-data/HRApplications.txt.bak
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Refresh success but attrs stale | Attribute option off / wrong task | Run `Refresh MNB Attributes` with promote-attrs enabled |
-| Manager still blank | Ran attrs-only; manager task not run | Run `Refresh MNB Managers`; confirm managersAssociateID exists as userId |
+| Manager still blank | Ran attrs-only; manager task not run | Run `Refresh MNB Managers`; confirm `managersAssociateID` → Searchable `userId` |
 | Refresh very slow | Too many options on one task | Split tasks; disable policy check for early labs |
 | Change not visible | Edited wrong file copy | Confirm IIQ path matches edited absolute path |
 | Restore forgotten | Skipped bak restore | Restore `.bak` immediately; re-aggregate + attrs refresh |
 | Mystery checkbox enabled | Skipped Task 2 | Disable unknown options; re-document |
+| Opened “Priya Mehta” / display-name cube — attrs empty | Wrong (orphan) identity | Open `MNB00090`; fix Lesson 05 manager mapping |
+| `employeeType` in Debug but not Attributes tab | UIConfig whitelist | Append to `identityViewAttributes` (Lesson 05) |
+| Log: type value Employee not in IdentityConfig | Mapped HR onto stock `type` | Use custom `employeeType`; re-refresh |
+| Academy verify looks for `helen.ross` | Persona vs `MNB…` name | Verifier resolves aliases via HR file; ensure `MNB00001` exists |
 
 ## Training binder evidence
 

@@ -7,7 +7,7 @@
 
 **Lab data:**
 - Repo: `lab-data/connectors/rules/README.md`
-- Repo: `lab-data/hr/MNB-HR-Employees.csv`
+- Repo: `lab-data/HRApplications.txt`
 - Runtime: `~/iiq-lab-data/connectors/rules/`, `~/iiq-lab-data/hr/`
 
 ---
@@ -155,7 +155,7 @@ Performance: IdentityAttribute runs **broadly** (often every identity in a refre
 
 ## Before you start
 
-- [ ] IIQ up; identities aggregated from HR (`MNB-HR` / `MNB-HR-Employees.csv`)
+- [ ] IIQ up; identities aggregated from HR (`MNB-HR` / `HRApplications.txt`)
 - [ ] Stub `MNB-Rule-IdentityAttribute-DisplayName` exists (Lesson 89)
 - [ ] Know Global Settings → Identity Mappings (or equivalent) path
 - [ ] Binder: `rules/identity-attribute/`

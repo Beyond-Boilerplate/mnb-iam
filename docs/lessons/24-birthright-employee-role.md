@@ -51,7 +51,7 @@ THEN assign MNB-Birthright-Employee
 | --- | --- |
 | Active Employee | Contractor (`raj.external` and peers) |
 | ELDAP only | WIRE_*, AWS_ADMIN, SAP_FI, PRIV_BREAK |
-| Tellers, analysts, specialists | Terminated / status=0 (`samir.hassan`) |
+| Tellers, analysts, specialists | Terminated (`inactive=true` / `status=Terminated`, e.g. `samir.hassan`) |
 
 ### Why ELDAP alone
 

@@ -5,7 +5,7 @@
 **Time:** 45–60  
 **Prereq:** Lesson 44 — Application Owner Certifications  
 
-**Lab data:** `scenarios/leaver/hr-delta-terminate-jordan.csv`, `apps/MNB-AWS-Cloud.csv`, `hr/MNB-HR-Employees.csv`
+**Lab data:** `scenarios/leaver/hr-delta-terminate-jordan.csv`, `apps/MNB-AWS-Cloud.csv`, `HRApplications.txt`
 
 ---
 

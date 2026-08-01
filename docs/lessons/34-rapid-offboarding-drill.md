@@ -41,7 +41,7 @@ Lesson 31 starts from HR. This drill **disables first**, then aligns HR — oppo
 
 | Aspect | Planned leaver (L31) | Rapid offboard (this lesson) |
 | --- | --- | --- |
-| Trigger | HR `status=0` | Security/HR/Legal urgent call |
+| Trigger | HR `inactive=true` / `status=Terminated` | Security/HR/Legal urgent call |
 | Order | HR → Aggregate → Refresh → residuals | **Disable first**, HR reconcile after |
 | SLA | Same day / 1 hour directory | Minutes for directory + payments |
 | Evidence | Lifecycle pack | Incident timeline + INC ticket |
@@ -95,7 +95,7 @@ Disable ELDAP ──► Disable WIRE_APPR / WIRE_INIT
 Notify manager (rachel.evans) + Legal + HR
         │
         ▼
-HR reconcile ticket (status=0 when confirmed)
+HR reconcile ticket (inactive=true / status=Terminated when confirmed)
         │
         ▼
 Next-day residual hunt + restore if drill-only
@@ -199,7 +199,7 @@ T+0:20  HR reconcile ticket filed
 
 Emergency disable without HR reconcile is “shadow HR” — overnight aggregates can resurrect access or leave two truths.
 
-1. Create fictional HR ticket: “Set `marcus.approve` status=0 / terminationDate when involuntary exit confirmed; until then keep emergency disable.”
+1. Create fictional HR ticket: “Set `marcus.approve` inactive=true / status=Terminated + terminationDate when involuntary exit confirmed; until then keep emergency disable.”
 2. Schedule residual review next business day: orphan hunt, AWS/SAP check (Marcus may not have them — still run the checklist).
 3. If this was a pure drill, **restore** Marcus’s lab access and note restore time in timeline (avoid leaving shared lab broken).
 

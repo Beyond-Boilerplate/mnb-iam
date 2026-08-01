@@ -188,7 +188,7 @@ This is where the Real-world setup outputs (consumer key, cert or secret, integr
 The schema decides what governance can see. If `profile` isn't an entitlement here, Jordan's sysadmin never becomes a certifiable line item.
 
 1. Account schema: `Username` (native identity), `Email`, `FederationIdentifier`, `IsActive`, `Profile` as a **single-valued entitlement attribute**, `permissionSets` as a **multi-valued entitlement attribute**, `UserRole` as a plain attribute, `LastLoginDate` for dormancy hunting.
-2. Correlation, in documented order: `FederationIdentifier` ↔ identity `employeeId` (Meridian stamps the HR id into FederationIdentifier for SSO — the robust key), falling back to `Username`/`Email` ↔ identity `email`. Note the fallback risk: usernames must be unique across *all* Salesforce orgs globally, so some orgs suffix them (`amelia.brooks@meridiannb.com.prod`) — email correlation breaks there; FederationIdentifier doesn't.
+2. Correlation, in documented order: `FederationIdentifier` ↔ identity `userId` (Meridian stamps the HR id into FederationIdentifier for SSO — the robust key), falling back to `Username`/`Email` ↔ identity `email`. Note the fallback risk: usernames must be unique across *all* Salesforce orgs globally, so some orgs suffix them (`amelia.brooks@meridiannb.com.prod`) — email correlation breaks there; FederationIdentifier doesn't.
 3. **Create identities: OFF.** Salesforce is a target; `MNB-HR` remains the only authoritative source. An unknown Salesforce user must surface as an uncorrelated account (Lesson 19), not become a person.
 
 **Expected result:** Schema shows two entitlement attributes (one single-, one multi-valued), correlation order written down, create-identities disabled.

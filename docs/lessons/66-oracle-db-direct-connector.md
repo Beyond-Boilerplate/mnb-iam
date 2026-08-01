@@ -181,7 +181,7 @@ raj.external,raj.external@meridiannb.com,MNB00093,ACTIVE,ORA_GL_POST
 ```
 
 3. Optional Shadow DelimitedFile `MNB-Oracle-GL-Shadow` pointing at the CSV — training only.
-4. Correlation: `employeeId` → Identity `employeeId`; fallback email `@meridiannb.com`.
+4. Correlation: account/DB `employeeId` → Identity `userId`; fallback email `@meridiannb.com`.
 
 **Expected result:** Mock file + schema map; clear “shadow for training only” note.
 

@@ -6,9 +6,9 @@
 **Prereq:** Lesson 32 (contractor lifecycle); HR `exceptions` (LOA) mapped (Lesson 05); CRM/directory apps onboarded  
 
 **Lab data:**
-- HR row: `sofia.torres` (`MNB00095`) — `exceptions=LOA`, `status=1`
+- HR row: `sofia.torres` (`MNB00095`) — `exceptions=LOA`, `inactive=false` / `status=Active`
 - Access context: `lab-data/apps/MNB-Salesforce-CRM.csv`, `lab-data/apps/MNB-ActiveDirectory.csv`, `lab-data/apps/MNB-IT-Access.csv`
-- Contrast: Lesson 31 leaver `jordan.reed` (`status=0`)
+- Contrast: Lesson 31 leaver `jordan.reed` (`inactive=true` / `status=Terminated`)
 - Manager: `sanjay.kapoor` (`MNB00006`)
 
 ---
@@ -28,9 +28,9 @@ You will be able to:
 
 ## Why this matters
 
-**Business.** People on leave still have credentials. `sofia.torres` is a Relationship Manager (`RM01`) with `exceptions=LOA` but `status=1`—employment continues; interactive access should not. Quiet misuse of CRM or residual privilege during parental/medical leave creates fraud and privacy incidents without the “clean” story of a termination.
+**Business.** People on leave still have credentials. `sofia.torres` is a Relationship Manager (`RM01`) with `exceptions=LOA` but `status=Active`—employment continues; interactive access should not. Quiet misuse of CRM or residual privilege during parental/medical leave creates fraud and privacy incidents without the “clean” story of a termination.
 
-**Control / audit.** Examiners ask whether leave is monitored separately from termination. Control owner: IAM + HR Business Partner; manager `sanjay.kapoor` owns Sofia’s commercial banking access decisions. Leaving leave active with wire or cloud rights is unacceptable. Do not “simulate” leave by setting `status=0`.
+**Control / audit.** Examiners ask whether leave is monitored separately from termination. Control owner: IAM + HR Business Partner; manager `sanjay.kapoor` owns Sofia’s commercial banking access decisions. Leaving leave active with wire or cloud rights is unacceptable. Do not “simulate” leave by setting `inactive=true` / `status=Terminated`.
 
 ---
 
@@ -40,7 +40,7 @@ You will be able to:
 
 | Dimension | Freeze (LoA) | Terminate (Leaver) |
 | --- | --- | --- |
-| HR signal | `exceptions=LOA`, usually `status=1` | `status=0` + `terminationDate` |
+| HR signal | `exceptions=LOA`, usually `inactive=false` / `status=Active` | `inactive=true` / `status=Terminated` + `terminationDate` |
 | Identity cube | Remains; expected return | Inactive; end of employment |
 | Directory | Disable interactive login | Disable + long-term deprovision |
 | Privileged ents | Suspend / revoke for duration | Revoke / disable same day |
@@ -52,11 +52,11 @@ You will be able to:
 | Field | Value |
 | --- | --- |
 | userName | `sofia.torres` |
-| employeeId | `MNB00095` |
+| userId | `MNB00095` |
 | email | `sofia.torres@meridiannb.com` |
 | manager | `sanjay.kapoor` (`MNB00006`) |
 | dept / job | `CML` / `RM01` Relationship Manager |
-| exceptions (LOA) | `true` |
+| exceptions | `LOA` |
 | Typical access | `ELDAP`, `CRM`, `ODS` |
 
 ### Job roles vs freeze
@@ -65,7 +65,7 @@ Sofia may still match `MNB-Role-RelationshipManager` by `jobCode` (Lesson 25). F
 
 ### The wrong way
 
-Running Lesson 31 leaver destruction (mailbox wipe, full deprovision, status=0) because “she is out for months.” That destroys CRM ownership context and forces a rehire-shaped recovery when she returns. Freeze keeps the cube; pause the keys.
+Running Lesson 31 leaver destruction (mailbox wipe, full deprovision, `inactive=true` / `status=Terminated`) because “she is out for months.” That destroys CRM ownership context and forces a rehire-shaped recovery when she returns. Freeze keeps the cube; pause the keys.
 
 ---
 
@@ -88,7 +88,7 @@ Detect LoA population / lifecycle event (optional LCM)
       └──► Work item → manager within 24h
       │
       ▼
-Return: exceptions (LOA)=false → staged re-enable → mini cert
+Return: exceptions cleared (empty) → staged re-enable → mini cert
          (privileged: new request only)
 ```
 
@@ -118,14 +118,14 @@ Return: exceptions (LOA)=false → staged re-enable → mini cert
 
 Prove Sofia is leave, not leaver, before touching accounts.
 
-1. In `~/iiq-lab-data/hr/MNB-HR-Employees.csv` (or live HR file), filter `exceptions` (LOA) = `true`.
-2. Confirm Sofia’s row: `MNB00095`, `status=1`, `exceptions=LOA`, manager `MNB00006`.
+1. In `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`), filter `exceptions=LOA`.
+2. Confirm Sofia’s row: `MNB00095`, `inactive=false`, `status=Active`, `exceptions=LOA`, manager `MNB00006`.
 3. Note other on-leave rows if present (e.g. `chloe.joshi`, `samir.hughes`, `amelia.foster`, `deepa.khatri`, `rohan.price`) for population sizing.
-4. In IIQ, search identity `sofia.torres` and confirm `exceptions` (LOA) attribute is true after Aggregate + Refresh if you just remapped schema.
+4. In IIQ, search identity `sofia.torres` and confirm `exceptions=LOA` after Aggregate + Refresh if you just remapped schema.
 
 **Expected result:** List of on-leave identities with Sofia highlighted; clear proof she is **not** a leaver (`status` still active).
 
-**If it fails:** Remap `exceptions` (LOA) boolean on HR app; Aggregate MNB-HR; Refresh MNB Identities.
+**If it fails:** Remap `exceptions` on HR app (string `LOA`); Aggregate MNB-HR; Refresh MNB Attributes.
 
 ### Task 2 — Write the Meridian freeze policy
 
@@ -144,7 +144,7 @@ MNB Leave-of-Absence Freeze (RM example)
 6. Do NOT run full leaver account destruction or mailbox wipe solely for LoA.
 ```
 
-2. Explicitly write one anti-pattern: “Do not set `status=0` to ‘simulate’ leave.”
+2. Explicitly write one anti-pattern: “Do not set `inactive=true` / `status=Terminated` to ‘simulate’ leave.”
 3. Contrast one sentence with `jordan.reed` (true leaver).
 
 **Expected result:** Freeze policy page distinguishing Sofia’s case from Jordan’s leaver case.
@@ -198,7 +198,7 @@ Return-to-work (exceptions (LOA) cleared)
 5. Evidence: HR delta, re-enable timestamps, mini-cert id.
 ```
 
-2. Optionally flip Sofia’s `exceptions` (LOA) to `false` in a **sandbox copy** of the HR file, aggregate/refresh, then restore `true` so shared labs stay consistent.
+2. Optionally clear Sofia’s `exceptions` in a **sandbox copy** of the HR file, aggregate/refresh, then restore `LOA` so shared labs stay consistent.
 
 **Expected result:** Written return control that forbids silent full restore of privilege.
 
@@ -207,7 +207,7 @@ Return-to-work (exceptions (LOA) cleared)
 ### Task 6 — Optional LCM hook (if available)
 
 1. If `init-lcm.xml` was imported, inspect Lifecycle Manager events / business processes for attribute change triggers (or equivalent menu).
-2. Design (do not break prod): event on `exceptions` (LOA) changing to `true` → workflow that creates manager work item + disable plan.
+2. Design (do not break prod): event on `exceptions` changing to `LOA` → workflow that creates manager work item + disable plan.
 3. Screenshot or note object names for the binder.
 
 **Expected result:** Either a config note “LCM event designed” or “LCM not active—manual freeze SOP applies.”
@@ -216,7 +216,7 @@ Return-to-work (exceptions (LOA) cleared)
 
 *”Show me how leave differs from termination for sofia.torres, and prove privileged access would freeze.”*
 
-Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=1`, (2) freeze policy vs Jordan leaver policy, (3) ELDAP/CRM disable evidence + privileged rule for WIRE_*/AWS_ADMIN.
+Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=Active` / `inactive=false`, (2) freeze policy vs Jordan leaver policy, (3) ELDAP/CRM disable evidence + privileged rule for WIRE_*/AWS_ADMIN.
 
 **Expected result:** Written proof steps in the binder.
 
@@ -224,7 +224,7 @@ Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=1`
 
 ## Acceptance criteria
 
-- [ ] On-leave users identified; Sofia confirmed `exceptions=LOA`, `status=1`
+- [ ] On-leave users identified; Sofia confirmed `exceptions=LOA`, `inactive=false` / `status=Active`
 - [ ] Freeze vs terminate comparison written
 - [ ] Freeze actions for ELDAP/CRM practiced or ticketed
 - [ ] Manager 24h notification artifact created
@@ -237,8 +237,8 @@ Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=1`
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Sofia looks terminated | Wrong lesson applied / status flipped | Restore `status=1`, `exceptions=LOA` |
-| exceptions (LOA) not on cube | Schema mapping missing | Map boolean; Aggregate; Refresh |
+| Sofia looks terminated | Wrong lesson applied / status flipped | Restore `inactive=false`, `status=Active`, `exceptions=LOA` |
+| `exceptions` not on cube | Schema mapping missing | Map `exceptions`; Aggregate; Refresh MNB Attributes |
 | Tempted to delete CRM | Over-applying leaver SOP | Freeze retains ownership notes |
 | Manager unclear | Hierarchy not refreshed | Lesson 21 manager mapping |
 | Privileged still live on other LoA user | No LoA+priv detection | Add population/policy in Stretch |
@@ -270,7 +270,7 @@ Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=1`
 
 ### Answers
 
-1. Leave: `exceptions=LOA` with employment usually still active (`status=1`). Terminate: `status=0` and `terminationDate` set.
+1. Leave: `exceptions=LOA` with employment still active (`inactive=false` / `status=Active`). Terminate: `inactive=true` / `status=Terminated` and `terminationDate` set.
 2. Suspend or revoke immediately—do not leave WIRE_*, AWS_ADMIN, CORE, etc. usable during leave.
 3. Manager work item / notification within 24 hours (faster for privileged).
 4. No—privileged access requires a new request; only approved baseline may return after mini cert.
@@ -291,7 +291,7 @@ Write the three-artifact answer: (1) HR attributes `exceptions=LOA` / `status=1`
 
 ## Stretch lab
 
-1. Create population `MNB-OnLeave` (`exceptions (LOA) == true`) and a policy or report flagging on-leave + (`WIRE_*` OR `AWS_ADMIN`).
+1. Create population `MNB-On-Leave` (`exceptions == LOA`) and a policy or report flagging on-leave + (`WIRE_*` OR `AWS_ADMIN`).
 2. Configure LCM lifecycle event on `exceptions` (LOA) if licensed/imported.
 3. Write Legal/HR communications snippet for privacy-sensitive leave without disclosing reason in IAM tickets.
 

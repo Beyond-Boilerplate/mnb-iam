@@ -177,7 +177,7 @@ The schema decides what governance can see. Missing status / end-date here means
 
 1. Open the account schema. Confirm/set: `USER_NAME` (native identity), `EMPLOYEE_NUMBER` (or equivalent), `EMAIL_ADDRESS`, `START_DATE`, `END_DATE` / status, and multi-valued **responsibilities** marked as the **entitlement attribute**.
 2. Responsibility schema (if separate): responsibility key/name + description.
-3. Correlation: `EMPLOYEE_NUMBER` ↔ identity `employeeId`, fallback `USER_NAME` ↔ `userName` (document case conventions — EBS often uppercases).
+3. Correlation: `EMPLOYEE_NUMBER` ↔ identity `userId`, fallback `USER_NAME` ↔ `name`/`userName` (document case conventions — EBS often uppercases).
 4. **Create identities: OFF.** EBS is a target; `MNB-HR` remains authoritative.
 
 **Expected result:** Schema shows responsibilities as entitlement; employee number correlation documented; create-identities disabled.

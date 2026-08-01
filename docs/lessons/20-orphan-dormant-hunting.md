@@ -6,7 +6,7 @@
 **Prereq:** Lesson 19; HR contains terminated workers; platform apps aggregated  
 
 **Lab data:**
-- Primary persona: **`samir.hassan`** (`MNB00094`) — HR `status=0`, terminationDate populated
+- Primary persona: **`samir.hassan`** (`MNB00094`) — HR `inactive=true` / `status=Terminated`, terminationDate populated
 - Residual access in extracts: `MNB-SAP-Finance` (SAP_FI disabled), `MNB-ActiveDirectory` (ELDAP disabled), IT dump (`DWRP`, `ODS`, `SAP_FI`, …)
 - Contrast: active toxic user `jordan.reed` (not a leaver yet)
 
@@ -66,7 +66,7 @@ Full joiner/mover/leaver workflows arrive later. Until then, Meridian still owes
 Authoritative HR status drives the hunt. Target aggregations supply residual evidence. Correlation must largely work so residuals appear on the cube; otherwise hunt on application account lists by `userId` / userName.
 
 ```
-HR status=0 (samir.hassan) + terminationDate
+HR inactive=true / status=Terminated (samir.hassan) + terminationDate
         │
         ▼
 Identity cube (inactive) ──► Accounts / Entitlements tabs
@@ -82,7 +82,7 @@ Daily control: MNB-Terminated-With-Access after pipeline
 
 | Signal | Meaning |
 | --- | --- |
-| HR `status=0` + `terminationDate` | Authoritative leaver |
+| HR `inactive=true` / `status=Terminated` + `terminationDate` | Authoritative leaver |
 | Target `accountStatus=active` on leaver | **Urgent** live residual |
 | Target `accountStatus=disabled` on leaver | Residual membership / incomplete cleanup |
 | Uncorrelated privileged | Orphan path (Lesson 19); may also be ex-worker |
@@ -184,7 +184,7 @@ Directory: within 4 hours (login path)
 Detection hunt: daily report MNB-Terminated-With-Access
 ```
 
-2. Propose trigger: *When HR aggregation sets status=0, lifecycle leaver event disables target accounts* (implemented in later lifecycle lessons)—for now, detection + ticket is mandatory.
+2. Propose trigger: *When HR aggregation sets inactive=true / status=Terminated, lifecycle leaver event disables target accounts* (implemented in later lifecycle lessons)—for now, detection + ticket is mandatory.
 3. Ticket draft `MNB-LAB-LEAVER-001` for Samir residuals assigned to app owners (Finance `deepa.nair`, Technology `christopher.hayes`, IAM `helen.ross` oversight).
 
 **Expected result:** SLA + trigger + ticket language captured—not only a screenshot.

@@ -52,7 +52,7 @@ Resources[] → User resources (core:2.0:User)
 | `id` | `scim-90`, `scim-91` | Optional native / secondary key |
 | `userName` | `priya.wire`, `marcus.approve` | Preferred account native identity |
 | `emails[primary].value` | `*@meridiannb.com` | Mail / fallback correlation |
-| `externalId` | `MNB00090`, `MNB00091` | **Preferred** HR link → `employeeId` |
+| `externalId` | `MNB00090`, `MNB00091` | **Preferred** HR link → identity `userId` |
 | `active` | `true` | ENABLE / disable |
 | `name.givenName` / `familyName` | Priya / Mehta | Display attributes |
 
@@ -130,7 +130,7 @@ Confirm `featuresString` (`PROVISIONING`, `ENABLE`, …) via glossary/registry b
 
 ### Step 3 — Attribute contract
 
-1. Require vendor to populate `externalId` with Meridian `employeeId`.
+1. Require vendor to populate `externalId` with Meridian `userId` (`MNB#####`).
 2. Document which core attributes are authoritative on the SaaS vs HR.
 3. Create-identities **OFF** — SaaS is a target.
 
@@ -196,7 +196,7 @@ python3 -m json.tool ~/iiq-lab-data/connectors/scim/Users.json >/dev/null
 ### Task 4 — Schema and correlation map
 
 1. Native identity: `userName` (document if you prefer `id` — pick one).
-2. Correlate `externalId` → Identity `employeeId` (primary).
+2. Correlate `externalId` → Identity `userId` (primary).
 3. Map primary email; map `active` → disable/inactive semantics per your build’s SCIM ENABLE behavior.
 4. featuresString expectations: PROVISIONING, ENABLE — note in binder.
 
@@ -322,7 +322,7 @@ Add a Groups ListResponse stub JSON and document how group entitlements would ap
 ## Summary
 
 - SCIM 2.0 standardizes SaaS user aggregation and enable/disable for Meridian; `Users.json` is the golden contract when no tenant exists.
-- Correlate on `externalId` → `employeeId`; treat Wire Portal as Web Services, not faux-SCIM.
+- Correlate on `externalId` → `userId`; treat Wire Portal as Web Services, not faux-SCIM.
 - Paging reconcile and disable storyboards are examiner-facing controls.
 
 ---

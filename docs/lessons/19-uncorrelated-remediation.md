@@ -53,7 +53,7 @@ Not all uncorrelated accounts are equal. Meridian treats uncorrelated `AWS_ADMIN
 
 ### Manual correlation is dual-control territory
 
-IIQ UIs often allow linking an account to an identity when attribute correlation cannot. In production that is a high-risk action — wrong manual correlate *is* a false merge (Lesson 18). Lab rule: document why the link is correct (`employeeId` proof or dual review note) before clicking. Never use create-identities as a shortcut to empty the uncorrelated list.
+IIQ UIs often allow linking an account to an identity when attribute correlation cannot. In production that is a high-risk action — wrong manual correlate *is* a false merge (Lesson 18). Lab rule: document why the link is correct (associate-key proof: `employeeId`↔`userId`, or dual review note) before clicking. Never use create-identities as a shortcut to empty the uncorrelated list.
 
 ### Wrong way vs bank-ready way
 
@@ -77,7 +77,7 @@ Uncorrelated account discovered (post-aggregation)
 Privileged? (AWS_ADMIN / WIRE_* / SAP_FI / CORE)
         │ yes → Sev-1 SLA (24h triage / 5d close)
         ▼
-HR person match via employeeId / email / manual proof?
+HR person match via `userId` / IT `employeeId` / email / manual proof?
    │ yes                         │ no
    ▼                             ▼
 Correlate + evidence          Disable OR Exception ticket
@@ -100,7 +100,7 @@ Outside IIQ, production remediation depends on people and tickets — not only c
 
 1. **IAM ops** owns the daily/weekly uncorrelated extract after the aggregation pipeline (Lesson 16).
 2. **App owners** (`christopher.hayes` for AWS, platform owners for Wire/SAP/Core) own disable confirmation in the target system.
-3. **HR / contractor desk** owns employeeId corrections when the person exists but keys drifted.
+3. **HR / contractor desk** owns associate-key corrections (`userId` / IT `employeeId`) when the person exists but keys drifted.
 4. **Security / Helen Ross** reviews Sev-1 aging and exception renewals.
 5. Tickets use a shared prefix (`MNB-UNC-####` in prod; `MNB-LAB-UNC-###` in lab) so examiners can sample by ID.
 
@@ -159,7 +159,7 @@ Classification before action prevents the classic mistake: disabling someone who
 
 Prefer fixing data or configuration and re-aggregating. Manual correlate is the exception path when attributes already match but the Link never formed.
 
-1. Pick one uncorrelated account that clearly matches an HR identity (same employeeId).
+1. Pick one uncorrelated account that clearly matches an HR identity (same associate key: account `employeeId` = identity `userId`).
 2. Prefer fixing configuration/data and re-aggregating (Lessons 17–18).
 3. If attributes already match but UI still shows uncorrelated, use **manual correlate** to the correct identity (or equivalent menu path).
 4. Record ticket `MNB-LAB-UNC-001`: before screenshot, action, after screenshot.

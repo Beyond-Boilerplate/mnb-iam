@@ -35,7 +35,7 @@ You will be able to:
 
 ### How IIQ gets a manager
 
-IdentityIQ resolves **manager** from an identity attribute typically populated from MNB-HR `managersAssociateID` (the employeeId of the manager). During aggregation and refresh, that value is correlated to another identity cube. Certifications and many approval schemas use that link for routing work items.
+IdentityIQ resolves **manager** from an identity attribute typically populated from MNB-HR `managersAssociateID` (the manager’s `userId`). During aggregation and refresh, that value is correlated to another identity cube. Certifications and many approval schemas use that link for routing work items.
 
 **Real-life Meridian example.** Priya’s HR row carries `managersAssociateID=MNB00005`. After Aggregate MNB-HR + Refresh, her cube’s Manager field resolves to `rachel.evans`. Wire Portal access reviews and many approval schemas therefore land with Rachel — the Payments Ops manager who actually owns Priya’s line of work.
 
@@ -83,7 +83,7 @@ priya.wire   marcus.approve  (examples; both managersAssociateID=MNB00005)
 
 | Term | Meaning at Meridian |
 | --- | --- |
-| `managersAssociateID` | HR employeeId of the person’s manager (authoritative) |
+| `managersAssociateID` | HR `userId` of the person’s manager (authoritative) |
 | Manager link | IIQ identity attribute pointing at another Identity |
 | Broken chain | Non-empty managersAssociateID that does not resolve, or mid-level empty when not an exec |
 | Fallback certifier | Named role/person (e.g. Security queue or successor) when chain fails |
@@ -111,7 +111,7 @@ Start in the authoritative file, not the cube. If HR and IIQ disagree later, you
 
 1. Open `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`).
 2. Find the row for `priya.wire` / `MNB00090`.
-3. Record: `employeeId`, `managersAssociateID`, `departmentName`, `jobCode`, `jobTitle`.
+3. Record: `userId`, `managersAssociateID`, `departmentName`, `JobCode`, `title`.
 
 **Expected result:** Baseline row shows `managersAssociateID=MNB00005`, `departmentName=TRS`, `jobCode=WIR01`, title Wire Specialist.
 
@@ -119,7 +119,7 @@ Start in the authoritative file, not the cube. If HR and IIQ disagree later, you
 
 ### Task 2 — Resolve the manager identity in IIQ
 
-Prove the promotion path worked: HR employeeId of the manager became a live Manager link on the cube.
+Prove the promotion path worked: HR `userId` of the manager became a live Manager link on the cube.
 
 1. Open **Identities → Identity Warehouse** (or equivalent).
 2. Search `priya.wire` and open the cube.
@@ -216,7 +216,7 @@ Close with the non-negotiable production rule. Temporary cube edits create Lesso
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Manager blank on Priya | Attribute not promoted / refresh skipped | Map managersAssociateID → identity manager; re-aggregate; refresh |
-| Manager shows employeeId string only | Correlation to Identity failed | Ensure manager identities exist from HR; check type/format of managersAssociateID |
+| Manager shows `userId` string only | Correlation to Identity failed | Ensure manager identities exist from HR; check type/format of managersAssociateID |
 | Wrong manager after restore | Stale HR file or wrong copy path | Confirm IIQ app file path points at `~/iiq-lab-data/` |
 | Peer has different manager than HR | Manual cube edit or dual sources | Re-aggregate HR; remove non-authoritative manager sources (Lesson 22) |
 | Cert preview shows “no certifier” | Broken chain | Apply fallback population/owner policy before launch |
