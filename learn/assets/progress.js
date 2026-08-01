@@ -15,7 +15,7 @@
   const save = (data) => localStorage.setItem(KEY, JSON.stringify(data));
 
   const stemFromPath = () => {
-    const m = location.pathname.match(/\/(\d{2,3}-[^/]+)\.html$/);
+    const m = location.pathname.match(/\/((?:\d{2,3}|mid-\d+|first-90-days)[^/]*)\.html$/);
     return m ? m[1] : null;
   };
 
@@ -34,10 +34,30 @@
     });
     const bar = document.getElementById("progressBar");
     if (bar) {
-      const total = document.querySelectorAll(".toc-item").length || 1;
-      const passed = Object.values(data).filter((e) => e && e.verdict === "PASS").length;
+      const mode = (() => {
+        try {
+          return localStorage.getItem("mnb-academy-path-v1") || "core";
+        } catch {
+          return "core";
+        }
+      })();
+      const items = [...document.querySelectorAll(".toc-item")].filter((el) => {
+        if (mode === "all") return true;
+        return (el.getAttribute("data-path") || "core") === "core";
+      });
+      const total = items.length || 1;
+      const stems = new Set(
+        items.map((el) => (el.getAttribute("href") || "").replace(/\.html$/, ""))
+      );
+      const passed = Object.entries(data).filter(
+        ([stem, e]) => stems.has(stem) && e && e.verdict === "PASS"
+      ).length;
       bar.textContent = `${passed} / ${total} verified`;
       bar.style.setProperty("--pct", `${Math.min(100, Math.round((passed / total) * 100))}%`);
+      bar.title =
+        mode === "core"
+          ? "Core Path lessons with a live PASS verify in this browser"
+          : "All lessons with a live PASS verify in this browser";
     }
   };
 
@@ -180,7 +200,8 @@
   };
 
   const ensurePanel = () => {
-    if (!stemFromPath()) return;
+    const stem = stemFromPath();
+    if (!stem || stem === "first-90-days") return;
     if (document.getElementById("verifyPanel")) return;
     const main = document.getElementById("main");
     const pager = main?.querySelector(".pager");
@@ -188,7 +209,7 @@
     const panel = document.createElement("section");
     panel.id = "verifyPanel";
     panel.className = "verify-panel";
-    panel.dataset.stem = stemFromPath();
+    panel.dataset.stem = stem;
     main.insertBefore(panel, pager);
   };
 

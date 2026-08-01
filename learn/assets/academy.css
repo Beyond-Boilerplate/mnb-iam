@@ -631,6 +631,50 @@ body.rail-open::before {
 }
 .toc-item.is-passed .toc-num { color: #1a7a4c; }
 .toc-item.is-failed .toc-num { color: #a33b2b; }
+.toc-item.is-hidden,
+.toc-track.is-hidden,
+.card.is-hidden,
+.specialist-grid.is-hidden,
+h2.is-hidden,
+.lede-sm.is-hidden {
+  display: none !important;
+}
+
+.path-toggle {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0 0.85rem 0.35rem;
+}
+.path-btn {
+  flex: 1;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.4rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid #2a3344;
+  background: #161c27;
+  color: var(--rail-muted);
+  cursor: pointer;
+}
+.path-btn.is-active {
+  background: #1f6f6c;
+  border-color: #2a8f8b;
+  color: #f2f7f6;
+}
+.path-hint {
+  margin: 0 0.85rem 0.75rem;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--rail-muted);
+}
+.lede-sm {
+  color: var(--ink-soft);
+  max-width: 42rem;
+  margin-top: -0.25rem;
+}
+
 .verify-panel {
   margin: 2.5rem 0 1rem;
   padding: 1.25rem 1.35rem;

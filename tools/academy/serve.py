@@ -72,10 +72,15 @@ class AcademyHandler(SimpleHTTPRequestHandler):
         env["IIQ_HOME"] = IIQ_HOME
         env["IIQ_VERIFY_MODE"] = IIQ_VERIFY_MODE
 
-        specs = list(SPECS.glob(f"{lesson}-*.json"))
+        exact = SPECS / f"{lesson}.json"
+        specs = [exact] if exact.exists() else []
+        specs += list(SPECS.glob(f"{lesson}-*.json"))
         if lesson.isdigit():
             n = int(lesson)
             specs = list(SPECS.glob(f"{n:02d}-*.json")) + list(SPECS.glob(f"{n}-*.json")) + specs
+        # de-dupe while preserving order
+        seen = set()
+        specs = [p for p in specs if not (p in seen or seen.add(p))]
         if not specs:
             return self._json(404, {
                 "schema": "mnb-lesson-verify-report/v1",
@@ -116,7 +121,9 @@ class AcademyHandler(SimpleHTTPRequestHandler):
             return self._json(500, {"schema": "mnb-lesson-verify-report/v1", "verdict": "FAIL", "error": str(e)})
 
     def _load_report(self, lesson: str):
-        specs = list(SPECS.glob(f"{lesson}-*.json"))
+        exact = SPECS / f"{lesson}.json"
+        specs = [exact] if exact.exists() else []
+        specs += list(SPECS.glob(f"{lesson}-*.json"))
         if lesson.isdigit():
             specs = list(SPECS.glob(f"{int(lesson):02d}-*.json")) + specs
         if specs:

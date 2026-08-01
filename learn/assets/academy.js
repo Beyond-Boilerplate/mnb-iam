@@ -3,6 +3,7 @@
   const menuBtn = document.getElementById("menuBtn");
   const railClose = document.getElementById("railClose");
   const filter = document.getElementById("lessonFilter");
+  const PATH_KEY = "mnb-academy-path-v1";
 
   const close = () => {
     rail?.classList.remove("is-open");
@@ -21,13 +22,76 @@
     close();
   });
 
-  filter?.addEventListener("input", () => {
-    const q = filter.value.trim().toLowerCase();
-    document.querySelectorAll(".toc-item").forEach((el) => {
-      const hay = el.getAttribute("data-title") || el.textContent || "";
-      el.classList.toggle("is-hidden", Boolean(q) && !hay.includes(q));
+  const getPathMode = () => {
+    try {
+      return localStorage.getItem(PATH_KEY) || "core";
+    } catch {
+      return "core";
+    }
+  };
+
+  const setPathMode = (mode) => {
+    try {
+      localStorage.setItem(PATH_KEY, mode);
+    } catch {
+      /* ignore */
+    }
+    applyPathMode(mode);
+  };
+
+  const applyPathMode = (mode) => {
+    const showAll = mode === "all";
+    document.body.classList.toggle("path-all", showAll);
+    document.body.classList.toggle("path-core", !showAll);
+    document.querySelectorAll(".path-btn").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.getAttribute("data-path") === mode);
     });
+    const hint = document.getElementById("pathHint");
+    if (hint) {
+      hint.textContent = showAll
+        ? "Showing Core Path + specialist tracks (51–110)."
+        : "Entry-level: Lessons 01–50 + mid-capstones. Specialist tracks stay hidden until you opt in.";
+    }
+    // Re-apply text filter on top of path filter
+    applyFilters();
+  };
+
+  const applyFilters = () => {
+    const q = (filter?.value || "").trim().toLowerCase();
+    const mode = getPathMode();
+    const showAll = mode === "all";
+    document.querySelectorAll(".toc-item, .toc-track").forEach((el) => {
+      const path = el.getAttribute("data-path") || "core";
+      const pathHide = !showAll && path === "specialist";
+      const hay = el.getAttribute("data-title") || el.textContent || "";
+      const textHide = Boolean(q) && el.classList.contains("toc-item") && !hay.includes(q);
+      el.classList.toggle("is-hidden", pathHide || textHide);
+    });
+    document.querySelectorAll(".card[data-path], .specialist-grid, #specialist").forEach((el) => {
+      if (el.id === "specialist" || el.classList.contains("specialist-grid")) {
+        el.classList.toggle("is-hidden", !showAll);
+        return;
+      }
+      const path = el.getAttribute("data-path") || "core";
+      el.classList.toggle("is-hidden", !showAll && path === "specialist");
+    });
+    // Hide specialist heading's following lede
+    const specH2 = document.getElementById("specialist");
+    if (specH2) {
+      const lede = specH2.nextElementSibling;
+      if (lede && lede.classList.contains("lede-sm")) {
+        lede.classList.toggle("is-hidden", !showAll);
+      }
+    }
+  };
+
+  document.querySelectorAll(".path-btn").forEach((btn) => {
+    btn.addEventListener("click", () => setPathMode(btn.getAttribute("data-path") || "core"));
   });
+
+  filter?.addEventListener("input", applyFilters);
+
+  applyPathMode(getPathMode());
 
   // Soft entrance for lesson content
   const main = document.getElementById("main");

@@ -207,6 +207,11 @@ SHELL = """<!DOCTYPE html>
         <span class="sr-only">Filter lessons</span>
         <input type="search" id="lessonFilter" placeholder="Filter lessons…" autocomplete="off" />
       </label>
+      <div class="path-toggle" role="group" aria-label="Learning path">
+        <button type="button" class="path-btn is-active" data-path="core" id="pathCore">Core Path</button>
+        <button type="button" class="path-btn" data-path="all" id="pathAll">Show specialist</button>
+      </div>
+      <p class="path-hint" id="pathHint">Entry-level: Lessons 01–50 + mid-capstones. Specialist tracks stay hidden until you opt in.</p>
       <nav class="toc" id="toc" aria-label="Lessons">
         {toc}
       </nav>
@@ -253,6 +258,38 @@ def parse_lesson_meta(path: Path) -> dict:
     return {"title": title, "track": track, "level": level, "why": why, "text": text, "stem": path.stem}
 
 
+def lesson_path_kind(stem: str) -> str:
+    """core = entry path (01–50 + mid-caps + guides); specialist = 51–110."""
+    if stem.startswith("mid-") or stem in {"first-90-days"}:
+        return "core"
+    m = re.match(r"^(\d{2,3})-", stem)
+    if not m:
+        return "core"
+    n = int(m.group(1))
+    return "core" if n <= 50 else "specialist"
+
+
+def lesson_sort_key(stem: str) -> tuple:
+    if stem == "first-90-days":
+        return (-1, 0, stem)
+    m = re.match(r"^mid-(\d+)-", stem)
+    if m:
+        return (int(m.group(1)), 1, stem)  # after the lesson number it checkpoints
+    m = re.match(r"^(\d{2,3})-", stem)
+    if m:
+        return (int(m.group(1)), 0, stem)
+    return (9999, 0, stem)
+
+
+def lesson_num(stem: str) -> str:
+    if stem == "first-90-days":
+        return "90d"
+    m = re.match(r"^mid-(\d+)-", stem)
+    if m:
+        return f"✓{m.group(1)}"
+    return stem.split("-", 1)[0].zfill(2)
+
+
 def build() -> None:
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -261,14 +298,23 @@ def build() -> None:
     assets_out.mkdir()
     shutil.copytree(ASSETS_SRC, assets_out, dirs_exist_ok=True)
 
+    numbered = [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2,3}-", p.name)]
+    extras = [
+        LESSONS / "first-90-days.md",
+        LESSONS / "mid-16-apps-capstone.md",
+        LESSONS / "mid-34-jml-capstone.md",
+        LESSONS / "mid-46-certs-capstone.md",
+    ]
     lesson_files = sorted(
-        [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2,3}-", p.name)],
-        key=lambda p: int(p.name.split("-", 1)[0]),
+        [p for p in numbered + [e for e in extras if e.exists()]],
+        key=lambda p: lesson_sort_key(p.stem),
     )
     metas = [parse_lesson_meta(p) for p in lesson_files]
+    for meta in metas:
+        meta["path"] = lesson_path_kind(meta["stem"])
 
-    def lesson_num(stem: str) -> str:
-        return stem.split("-", 1)[0].zfill(2)
+    core_count = sum(1 for m in metas if m["path"] == "core")
+    specialist_count = sum(1 for m in metas if m["path"] == "specialist")
 
     # Group TOC by track
     toc_parts: list[str] = []
@@ -276,52 +322,65 @@ def build() -> None:
     for meta in metas:
         if meta["track"] != current_track:
             current_track = meta["track"]
-            toc_parts.append(f'<p class="toc-track">{html.escape(current_track or "Lessons")}</p>')
+            track_path = meta["path"]
+            toc_parts.append(
+                f'<p class="toc-track" data-path="{track_path}">{html.escape(current_track or "Lessons")}</p>'
+            )
         num = lesson_num(meta["stem"])
         toc_parts.append(
-            f'<a class="toc-item" data-title="{html.escape(meta["title"].lower())}" href="{html.escape(meta["stem"])}.html">'
-            f'<span class="toc-num">{num}</span><span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}</span></a>'
+            f'<a class="toc-item" data-path="{meta["path"]}" data-title="{html.escape(meta["title"].lower())}" '
+            f'href="{html.escape(meta["stem"])}.html">'
+            f'<span class="toc-num">{num}</span>'
+            f'<span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}</span></a>'
         )
     toc = "\n".join(toc_parts)
 
-    # Index
-    cards = []
-    for meta in metas:
+    # Index — Core Path cards first
+    def card_html(meta: dict) -> str:
         num = lesson_num(meta["stem"])
-        cards.append(
-            f'<a class="card" href="{html.escape(meta["stem"])}.html">'
+        return (
+            f'<a class="card" data-path="{meta["path"]}" href="{html.escape(meta["stem"])}.html">'
             f'<span class="card-num">{num}</span>'
             f'<span class="card-body"><strong>{html.escape(meta["title"].split("—",1)[-1].strip())}</strong>'
             f'<span class="card-meta">{html.escape(meta["track"])} · {html.escape(meta["level"])}</span>'
             f'<span class="card-why">{html.escape(meta["why"][:160])}{"…" if len(meta["why"])>160 else ""}</span></span></a>'
         )
 
+    core_cards = "".join(card_html(m) for m in metas if m["path"] == "core")
+    specialist_cards = "".join(card_html(m) for m in metas if m["path"] == "specialist")
+    start = next(m for m in metas if m["stem"].startswith("01-"))
+
     index_body = f"""
-    <p class="eyebrow">SailPoint IdentityIQ 8.5 · {len(metas)} enterprise modules</p>
+    <p class="eyebrow">SailPoint IdentityIQ 8.5 · Core Path for new IIQ engineers</p>
     <h1 class="display">Govern access like a bank that expects an exam.</h1>
-    <p class="lede">Interactive technical tutorials for <strong>Meridian National Bank</strong>—from delimited HR through AD, JDBC, SCIM, Web Services, SAP, mainframe, rules, plugins, and production hardening—with expected results, troubleshooting, and training-binder evidence on every lesson.</p>
+    <p class="lede">Interactive tutorials for <strong>Meridian National Bank</strong>. Start with the <strong>Core Path</strong> (Lessons 01–50 + mid-capstones)—HR through JML, SoD, and certifications. Specialist connector and hardening tracks stay optional until Capstone 50.</p>
     <div class="hero-actions">
-      <a class="btn primary" href="{metas[0]['stem']}.html">Start lesson 01</a>
-      <a class="btn ghost" href="#path">View full path</a>
+      <a class="btn primary" href="{start['stem']}.html">Start lesson 01</a>
+      <a class="btn ghost" href="first-90-days.html">First 90 days map</a>
+      <a class="btn ghost" href="#path">Core learning path</a>
     </div>
     <section class="stats" aria-label="Curriculum snapshot">
-      <div><span>{len(metas)}</span> lessons</div>
-      <div><span>16+</span> tracks</div>
-      <div><span>~80</span> workers in HR file</div>
+      <div><span>{core_count}</span> Core Path modules</div>
+      <div><span>{specialist_count}</span> specialist (opt-in)</div>
+      <div><span>3</span> mid-capstone verifies</div>
       <div><span>@meridiannb.com</span> corp domain</div>
     </section>
-    <h2 id="path">Learning path</h2>
-    <div class="card-grid">{''.join(cards)}</div>
+    <h2 id="path">Core Path (entry-level)</h2>
+    <p class="lede-sm">Hide noise: the TOC defaults to Core. Use <em>Show specialist</em> only when you pick a post-50 track.</p>
+    <div class="card-grid" id="coreGrid">{core_cards}</div>
+    <h2 id="specialist">Specialist tracks (51–110)</h2>
+    <p class="lede-sm">Directory, JDBC, SaaS, ERP, rules, plugins, hardening — after Capstone 50.</p>
+    <div class="card-grid specialist-grid" id="specialistGrid">{specialist_cards}</div>
     """
 
     index_html = SHELL.format(
         title="Curriculum",
-        description=f"Meridian National Bank IdentityIQ {len(metas)}-lesson academy",
+        description=f"Meridian National Bank IdentityIQ Core Path + {specialist_count} specialist modules",
         root="",
         toc=toc,
         crumb="<span>Curriculum</span>",
         body=index_body,
-        pager='<a class="btn primary" href="' + metas[0]["stem"] + '.html">Begin with Lesson 01 →</a>',
+        pager='<a class="btn primary" href="' + start["stem"] + '.html">Begin with Lesson 01 →</a>',
     )
     (OUT / "index.html").write_text(index_html, encoding="utf-8")
 
@@ -329,12 +388,16 @@ def build() -> None:
         body = md_to_html(meta["text"])
         # Lesson-to-lesson markdown links → html
         body = re.sub(r'href="(\d{2,3}-[^"]+)\.md"', r'href="\1.html"', body)
+        body = re.sub(r'href="(mid-\d+-[^"]+)\.md"', r'href="\1.html"', body)
+        body = re.sub(r'href="(first-90-days)\.md"', r'href="\1.html"', body)
+        body = re.sub(r'href="(_CORE_PATH_ROADMAP)\.md"', r'href="#"', body)
         # Sibling docs in repo (not published on learn site)
         doc_map = {
             "../LOCAL_SETUP.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/LOCAL_SETUP.md",
             "../INFRASTRUCTURE.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/INFRASTRUCTURE.md",
             "../HOMELAB-CD.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/HOMELAB-CD.md",
             "../SSD.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/docs/SSD.md",
+            "../../lab-data/reference/hr-column-map.md": "https://github.com/Beyond-Boilerplate/mnb-iam/blob/main/lab-data/reference/hr-column-map.md",
         }
         for src, dst in doc_map.items():
             body = body.replace(f'href="{html.escape(src, quote=True)}"', f'href="{dst}"')
