@@ -6,6 +6,19 @@ This folder is the **source of truth** for IdentityIQ XML objects in the Service
 
 Homelab CD imports **only** the smoke Rule (`Rule/MNB-Rule-HelloWorld.xml`). Learners **build** Meridian applications, tasks, roles, workflows, and policies **in the lessons**, then **export** durable objects here for promotion practice.
 
+Lab seed (`./tools/lab/docker/up.sh` → `seed_mnb_lab_data.py`) also **imports** the committed Application / TaskDefinition XML below via MCP (`import_sailpoint_object`), so UI craft survives `down.sh` / `up.sh` volume wipes.
+
+## Sync UI → `config/` (after editing in IdentityIQ)
+
+```bash
+export MCP_API_KEY=mnb-lab-mcp-key
+# Preview diffs (exit 1 if drift)
+./tools/lab/scripts/sync-iiq-config.sh
+# Write scrubbed exports into config/
+./tools/lab/scripts/sync-iiq-config.sh --write
+git diff -- config/
+```
+
 See [PACKS.md](PACKS.md).
 
 ## How to add a feature (after you built it in IIQ)

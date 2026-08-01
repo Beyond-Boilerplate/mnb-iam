@@ -1,0 +1,254 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application authoritative="true" connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="MNB-HR" profileClass="" type="DelimitedFile">
+  <Attributes>
+    <Map>
+      <entry key="PassphraseForPrivateKey"/>
+      <entry key="PrivateKeyFilePath"/>      <entry key="afterProvisioningRule"/>
+      <entry key="aggregationPartitioned">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="aggregationType" value="account"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="delimiter" value=","/>
+      <entry key="file" value="/opt/iiq-lab-data/HRApplications.txt"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="ftpsAuthMethod" value="password"/>
+      <entry key="ftpsClientCertificateFilePath"/>
+      <entry key="ftpsClientCertificatePassphrase"/>
+      <entry key="group.filetransport" value="local"/>
+      <entry key="group.filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="group.partitionMode" value="auto"/>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="isCaseInsensitiveMerge">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="isSortedByIndexColumn">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="managerAttribute" value="manager"/>
+      <entry key="managerCorrelationMapping">
+        <value>
+          <Map>
+            <entry key="identityAttribute" value="name"/>
+            <entry key="managerAttribute" value="manager"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="parseType" value="delimited"/>
+      <entry key="partitionMode" value="auto"/>
+      <entry key="port"/>
+      <entry key="sftpAuthMethod" value="password"/>
+      <entry key="stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="displayName" identityAttribute="name" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="addressWork" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="city" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="company" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="companyNumber" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="contractEndDate" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="corporateTitle" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="costCenter" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="costCenterName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="departmentName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="desc" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="displayName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="distinguishedName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="division" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="domain" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="email" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="employeeType" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="exceptions" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="expirationDate" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="fax" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="firstname" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="fullName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="hireDate" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="inactive" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="isManager" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="JobCode" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="lastname" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="location" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="locationTypeDesc" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="manager" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="managersAssociateID" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="managerStatus" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="middleName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="mobilePhone" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="name" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="postalCode" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="previousJobTitle" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="projectID" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="rfFinancialManagerID" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="rfLocationName" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="rfSponser" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="RfSupervisoryOrganizationWID" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="state" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="status" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="statusFlag" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SupORG" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="telephoneNumber" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="terminationDate" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="title" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="type" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="userId" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="userType" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="wid_owner" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

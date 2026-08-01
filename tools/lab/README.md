@@ -16,6 +16,19 @@ export MCP_API_KEY=mnb-lab-mcp-key
 Creates/aggregates **MNB-HR** (authoritative) and **MNB-OpenLDAP**, refreshes cubes, then probes identities.
 Details: `lab-data/connectors/ldap/README.md`.
 
+## Sync UI changes back to `config/`
+
+After editing apps/tasks in the IIQ UI:
+
+```bash
+export MCP_API_KEY=mnb-lab-mcp-key
+./tools/lab/scripts/sync-iiq-config.sh           # diff only
+./tools/lab/scripts/sync-iiq-config.sh --write   # update config/
+git diff -- config/
+```
+
+Tracked objects are listed in `tools/lab/scripts/sync_iiq_config.py` (`MANIFEST`). Use `--discover` to pick up extra `MNB-*` Applications.
+
 ## Platform support (Tomcat + MySQL host install)
 
 | OS | Entry point | Notes |
