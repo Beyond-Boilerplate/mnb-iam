@@ -62,4 +62,4 @@ After Lesson 16 you have the bank’s *inventory layer*. Before correlation and 
 - Unlocks Core Path progression into correlation / roles / JML with confidence
 
 **Previous:** [Lesson 16 — Multi-App Aggregation Strategy](16-multi-app-aggregation-strategy.md)  
-**Next:** [Lesson 17 — Account Correlation Basics](17-correlation-basics.md)
+**Next:** [Lesson 16b — Reading Task Results](16b-reading-task-results.md) · [Lesson 17 — Account Correlation Basics](17-correlation-basics.md)

@@ -116,7 +116,13 @@ Return: exceptions cleared (empty) → staged re-enable → mini cert
 
 ### Task 1 — Find on-leave users in HR and IIQ
 
-Prove Sofia is leave, not leaver, before touching accounts.
+Prove Sofia is leave, not leaver, before touching accounts. Prefer the scenario runner (re-asserts `exceptions=LOA` by `userId`):
+
+```bash
+./tools/lab/scripts/scenarios/apply-loa.sh
+```
+
+Then Aggregate MNB-HR → Refresh MNB Attributes if you need the cube attribute refreshed.
 
 1. In `~/iiq-lab-data/HRApplications.txt` (or repo `lab-data/HRApplications.txt`), filter `exceptions=LOA`.
 2. Confirm Sofia’s row: `MNB00095`, `inactive=false`, `status=Active`, `exceptions=LOA`, manager `MNB00006`.

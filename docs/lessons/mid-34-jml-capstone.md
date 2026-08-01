@@ -41,9 +41,13 @@ JML is the control story Meridian sells to examiners. This checkpoint asks: *Can
 ./tools/lab/scripts/scenarios/apply-mover.sh
 ./tools/lab/scripts/scenarios/apply-leaver.sh
 ./tools/lab/scripts/scenarios/apply-loa.sh   # or apply-on-leave.sh
+# Optional stress (stretch):
+# ./tools/lab/scripts/scenarios/apply-batch-hire.sh
+# ./tools/lab/scripts/scenarios/apply-rehire.sh
+# ./tools/lab/scripts/scenarios/apply-contractor-end.sh
 ```
 
-Then Aggregate **MNB-HR** and run **Refresh MNB Attributes** / Managers / Roles as your lab split tasks require.
+Then Aggregate **MNB-HR** and run **Refresh MNB Attributes** / Managers / Roles as your lab split tasks require. See [`lab-data/scenarios/README.md`](../../lab-data/scenarios/README.md).
 
 ### Task 2 — Persona spot-check
 

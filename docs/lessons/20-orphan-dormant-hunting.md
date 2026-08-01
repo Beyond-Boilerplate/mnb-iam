@@ -310,5 +310,5 @@ Examiner question: *“Show a terminated user who still had finance access in yo
 
 ---
 
-**Previous:** [Lesson 19 — Uncorrelated Account Remediation](19-uncorrelated-remediation.md)  
+**Previous:** [Lesson 19b — Dirty Data War Room](19b-dirty-data-war-room.md) · [Lesson 19 — Uncorrelated Account Remediation](19-uncorrelated-remediation.md)  
 **Next:** [Lesson 21 — Manager Hierarchy & Reassignment](21-manager-hierarchy.md)

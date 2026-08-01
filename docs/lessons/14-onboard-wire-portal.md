@@ -176,14 +176,16 @@ Evidence: MNB-WirePortal aggregation + SoD policy (Lesson 40).
 
 ### Task 6 — Verify priya.wire and marcus.approve
 
-1. Open `priya.wire` → confirm Wire Portal account / `WIRE_INIT` (cube or app account list).
-2. Open `marcus.approve` → confirm `WIRE_APPR`.
+> **Pre-correlation.** Prefer **Applications → `MNB-WirePortal` → Accounts**. Missing Wire links on HR cubes is OK until Lessons 17–18. Create-identities must stay **OFF** (payment entitlements must never mint orphan cubes).
+
+1. Confirm `priya.wire` → `WIRE_INIT` on the **app** account list (required); cube link optional.
+2. Confirm `marcus.approve` → `WIRE_APPR` the same way.
 3. Confirm they are **different people**—dual control is people separation, not only entitlement labels.
 4. Spot-check `rachel.evans` as approver + future cert/app owner.
 
-**Expected result:** Initiate and approve demo personas correctly entitled.
+**Expected result:** Initiate and approve demo personas correctly entitled on `MNB-WirePortal`.
 
-**If it fails:** Correlation may still be incomplete—verify on application accounts first.
+**If it fails:** Correlation may still be incomplete—app Accounts first; do not enable create-identities.
 
 ---
 
@@ -221,7 +223,9 @@ A: Entitlements WIRE_INIT and WIRE_APPR on MNB-WirePortal; SoD policy
 | --- | --- | --- |
 | Only INIT or only APPR | Pointing at a split CSV by mistake | Use combined `MNB-WirePortal.csv` |
 | Duplicate apps for wire | Created split apps accidentally | Prefer one app this lesson; document if you keep splits |
-| Priya missing | HR not aggregated / wrong file | Fix HR first; re-aggregate Wire |
+| Priya/Marcus missing on **app** | HR not aggregated / wrong file / failed task | Fix path; re-aggregate Wire |
+| Wire missing on HR cube only | Correlation deferred | **Expected** — verify under Application → Accounts; Lessons 17–18 |
+| Login-named orphan cubes | Create-identities ON | Disable; leave for correlation/remediation lessons |
 | Both ents on one cube wrongly | Looking at denormalized IT dump | Distinguish inventory vs Wire Portal app |
 | Owner left bank later | Stale owner | Keep owners current (Lesson 10 tip) |
 

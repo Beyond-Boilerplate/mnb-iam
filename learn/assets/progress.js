@@ -15,7 +15,9 @@
   const save = (data) => localStorage.setItem(KEY, JSON.stringify(data));
 
   const stemFromPath = () => {
-    const m = location.pathname.match(/\/((?:\d{2,3}|mid-\d+|first-90-days)[^/]*)\.html$/);
+    const m = location.pathname.match(
+      /\/((?:\d{2,3}[a-z]?-|mid-\d+-|first-90-days)[^/]*)\.html$/
+    );
     return m ? m[1] : null;
   };
 

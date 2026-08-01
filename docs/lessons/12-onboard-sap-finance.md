@@ -174,14 +174,16 @@ Finance SoR access is an exam magnet—inventory who holds SAP_FI before you cre
 
 ### Task 6 — Verify jordan.reed and samir.hassan
 
-1. Search `jordan.reed`. Open Accounts / Entitlements.
-2. Confirm `MNB-SAP-Finance` account with `SAP_FI` when correlated; otherwise confirm on application account list with status **active**.
-3. Search `samir.hassan`. Confirm SAP account present with status **disabled** (not deleted).
+> **Same Lesson 11 gotcha.** HR and SAP use different account keys; full correlation is Lessons 17–18. Prefer **Applications → `MNB-SAP-Finance` → Accounts** as the Lesson 12 proof. Missing SAP on an HR cube’s Accounts tab is not a fail. Keep **create identities OFF** so you do not mint login-named orphan cubes.
+
+1. Search `jordan.reed` (or the HR display / `userId` form your lab uses). Open Accounts / Entitlements — SAP may or may not be linked yet.
+2. Confirm `MNB-SAP-Finance` + `SAP_FI` **on the application account list** with status **active** (required). Linked on the HR cube is optional until correlation lessons.
+3. Search `samir.hassan`. Confirm SAP account present with status **disabled** (not deleted)—again, application Accounts tab is authoritative for this lesson.
 4. Notebook: “Jordan = toxic SoD seed; Samir = terminated residual seed.”
 
-**Expected result:** Jordan shows live SAP_FI; Samir shows disabled SAP_FI still in inventory—both intentional.
+**Expected result:** Jordan shows live SAP_FI; Samir shows disabled SAP_FI still in inventory—both intentional (on the app if not yet on the cube).
 
-**If it fails:** Disabled rows skipped usually means a filter or “only aggregate active” option—disable that filter and re-aggregate.
+**If it fails:** Disabled rows skipped usually means a filter or “only aggregate active” option—disable that filter and re-aggregate. Cube missing SAP but app has the account → proceed (Lessons 17–18).
 
 ---
 
@@ -219,8 +221,8 @@ Leaver residual (lab): samir.hassan — SAP_FI disabled but still present
 | --- | --- | --- |
 | Only active accounts appear | Active-only aggregation option | Include disabled; re-aggregate |
 | Jordan missing | CSV not the lab file / wrong path | Verify `MNB00092` row in file IIQ reads |
-| Identities created for contractors | Authoritative flag on | Turn off; remediate stray cubes |
-| SAP_FI not on cube | Correlation gap | Check app account list; defer to Lesson 17 |
+| Identities created / login-named orphans | Authoritative / create-identities on | Turn off; leave or delete stray cubes; do not “fix” by creating identities |
+| SAP_FI not on HR cube | Correlation not taught yet | Check **app** account list; defer to Lessons 17–18 — still a Lesson 12 pass |
 | Confused with IT dump | Looking at `MNB-IT-Access` | Use platform app for ownership/certs |
 
 ---

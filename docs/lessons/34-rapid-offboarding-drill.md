@@ -199,7 +199,8 @@ T+0:20  HR reconcile ticket filed
 
 Emergency disable without HR reconcile is “shadow HR” — overnight aggregates can resurrect access or leave two truths.
 
-1. Create fictional HR ticket: “Set `marcus.approve` inactive=true / status=Terminated + terminationDate when involuntary exit confirmed; until then keep emergency disable.”
+1. Create fictional HR ticket: “Set `marcus.approve` inactive=true / status=Terminated + terminationDate when involuntary exit confirmed; until then keep emergency disable.”  
+   For a **planned** leaver reconcile pattern (Jordan), prefer `./tools/lab/scripts/scenarios/apply-leaver.sh` — do **not** apply that alias to Marcus unless you intentionally terminate him in HR.
 2. Schedule residual review next business day: orphan hunt, AWS/SAP check (Marcus may not have them — still run the checklist).
 3. If this was a pure drill, **restore** Marcus’s lab access and note restore time in timeline (avoid leaving shared lab broken).
 
@@ -304,4 +305,4 @@ Honest drills end with gaps, not victory slides.
 ---
 
 **Previous:** [Lesson 33 — Leave of Absence Controls](33-leave-of-absence.md)  
-**Next:** [Lesson 35 — Access Request Catalog](35-access-request-catalog.md)
+**Next:** [Mid-capstone — JML](mid-34-jml-capstone.md) · [Lesson 35 — Access Request Catalog](35-access-request-catalog.md)

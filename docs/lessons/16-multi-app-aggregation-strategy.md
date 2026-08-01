@@ -146,12 +146,14 @@ MNB Aggregation Runbook (lab)
 
 ### Task 4 — Execute Stages B–D (targets)
 
+> **Pipeline vs correlation.** Stage B–D success means each target Task Result is green and **Application → Accounts** counts look sane. HR cubes may still lack target links until Lessons 17–18—that is **not** a pipeline failure. Never enable create-identities on targets to “clear” uncorrelated lists or empty Accounts tabs on cubes.
+
 1. Run inventory, AD, then each platform Aggregate task in runbook order.
-2. After each task, jot duration (even if 1–2 seconds) and success/fail.
+2. After each task, jot duration (even if 1–2 seconds) and success/fail; spot-check that app’s Accounts count (not only persona cubes).
 3. If any **single** target fails: note it, continue the remaining targets, open a pretend ticket ID `MNB-LAB-AGG-###`.
 4. Do not enable create-identities on any target while “fixing” failures.
 
-**Expected result:** Full target suite attempted; any failures logged with ticket IDs; most succeed.
+**Expected result:** Full target suite attempted; any failures logged with ticket IDs; most succeed. Uncorrelated accounts and incomplete cube links are expected until correlation.
 
 **If it fails:** Use Lesson 11–15 troubleshooting tables per app.
 
@@ -209,10 +211,10 @@ No identity create changes made.
 ### Task 8 — Pipeline acceptance sign-off
 
 1. Checkmark the runbook steps you executed.
-2. List known gaps (uncorrelated accounts expected until Lessons 17–19).
+2. List known gaps (uncorrelated accounts, missing target links on HR cubes, login-named orphans from earlier create-identities mistakes—all expected or deferred until Lessons 17–19).
 3. Sign/date the binder page (lab training record).
 
-**Expected result:** One complete pipeline execution with documented outcomes.
+**Expected result:** One complete pipeline execution with documented outcomes—including what you are **not** fixing yet (correlation).
 
 ---
 
@@ -233,6 +235,8 @@ No identity create changes made.
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Targets “succeed” but cubes empty of people | HR skipped/failed | Re-run HR; restart pipeline |
+| Targets succeed; HR cubes missing app links | Correlation not configured | **Expected** — prove under Application → Accounts; Lessons 17–18 |
+| New orphan / login-named cubes after targets | Create-identities ON on a target | Disable on all non-HR apps; leave or clean (Lesson 19); do not re-enable |
 | Refresh takes forever | Full population + heavy options | Narrow filter; disable unneeded refresh options |
 | Task name chaos | Inconsistent naming | Rename to `Aggregate MNB-*` |
 | Two HR aggregates conflicting | Duplicate apps | One authoritative `MNB-HR` only |
@@ -296,4 +300,4 @@ Examiner question: *“What do you do if Wire aggregation fails at 06:40?”* �
 ---
 
 **Previous:** [Lesson 15 — Directory, CRM & Digital](15-onboard-directory-and-crm.md)  
-**Next:** [Lesson 17 — Account Correlation Basics](17-correlation-basics.md)
+**Next:** [Mid-capstone — Apps](mid-16-apps-capstone.md) · [Lesson 16b — Reading Task Results](16b-reading-task-results.md) · [Lesson 17 — Account Correlation Basics](17-correlation-basics.md)

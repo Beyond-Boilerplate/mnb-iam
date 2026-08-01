@@ -1,0 +1,45 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "36b",
+  "stem": "36b-be-the-approver",
+  "title": "Be the Approver",
+  "description": "Core Path N+1 verify for 36b-be-the-approver",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application MNB-HR exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "emily.bennett",
+      "id": "id-emily",
+      "message": "Manager emily.bennett exists",
+      "softFail": true
+    },
+    {
+      "type": "identity.exists",
+      "name": "rachel.evans",
+      "id": "id-rachel",
+      "message": "rachel.evans exists for escalation/wire ownership",
+      "softFail": true
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-WirePortal",
+      "id": "app-wire",
+      "message": "Wire portal app exists",
+      "softFail": true
+    }
+  ]
+}

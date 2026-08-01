@@ -27,7 +27,7 @@ If entitlements remain opaque codes, managers rubber-stamp certifications. “Ap
 
 ## Concepts
 
-**Managed attributes** (entitlement catalog entries) carry governance metadata on top of raw connector values. Account Aggregation with `itAccess` marked as an entitlement attribute normally **promotes** each distinct group/value into a `ManagedAttribute` object. When a code is missing from the catalog (schema not entitlement-typed, filter, or you need a dictionary entry before the next aggregate), you can **manually pull/create** it through the ManagedAttribute API surfaces below.
+**Managed attributes** (entitlement catalog entries) carry governance metadata on top of raw connector values. Account Aggregation with `itAccess` marked as both an **entitlement** and a **managed** attribute (and **Promote managed attributes** on the aggregate task) normally **promotes** each distinct group/value into a `ManagedAttribute` object. `entitlement` alone puts codes on Links/cubes; **`managed` is what fills the Entitlement Catalog** (Lesson 09 Task 3). When a code is missing from the catalog (schema not managed/entitlement-typed, promote off, filter, or you need a dictionary entry before the next aggregate), you can **manually pull/create** it through the ManagedAttribute API surfaces below.
 
 | Metadata | Purpose | Meridian example |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ If entitlements remain opaque codes, managers rubber-stamp certifications. “Ap
 
 | Path | When to use |
 | --- | --- |
-| Aggregation (preferred) | `itAccess` entitlement-typed; distinct values → catalog |
+| Aggregation (preferred) | `itAccess` entitlement **+ managed** (+ multi/merge); promote on; distinct values → catalog |
 | UI Entitlement Catalog | Enrich display/owner/requestable after objects exist |
 | **ManagedAttribute API / Debug / console** | Manually create or fetch a missing group; lab/repair; automation |
 
@@ -138,7 +138,7 @@ column -s, -t < ~/iiq-lab-data/reference/entitlement-dictionary.csv | less -S
 
 **Expected result:** You can open at least one managed attribute object for an `itAccess` value.
 
-**If it fails:** Re-aggregate; confirm `itAccess` is entitlement-typed on `MNB-IT-Access`; then use Task 2b (ManagedAttribute API) to pull the group in manually.
+**If it fails:** Confirm `itAccess` is **entitlement and managed** on `MNB-IT-Access` (Lesson 09); enable Promote managed attributes; re-aggregate. If cubes show codes but the catalog is still empty, the usual miss is `managed="true"` never set. Then use Task 2b (ManagedAttribute API) to pull the group in manually.
 
 ### Task 2b — Manually pull groups via ManagedAttribute API
 
@@ -229,11 +229,14 @@ For each of `WIRE_INIT`, `WIRE_APPR`, `SAP_FI`, `AWS_ADMIN`, `ELDAP`:
 
 ### Task 5 — Owner assignment
 
+> **Pending “Update Account Group” approvals.** Changing a ManagedAttribute owner can start an LCM workflow. Task Results may sit at **Approval** with work items owned by the **entitlement owner** (e.g. `MNB00003` / `rachel.evans`), **not** `spadmin`—so they will not appear in the spadmin inbox. Lab options: set a password on the owner identity and approve under **My Work**, or **Forward** the work item to `spadmin` then Approve. Do not treat a stuck Approval step as a failed aggregation.
+
 1. On wire entitlements, set owner to `rachel.evans` if the UI allows identity owners; otherwise record owners in the binder as the system of record until app-owner fields are wired.
 2. Assign conceptual owners: `deepa.nair` → SAP_FI; `christopher.hayes` → AWS_ADMIN.
 3. Note control: owners who leave the bank break certifications—keep owners current (tie to leaver process later).
+4. If Task Results show Pending Approval after saves, resolve via the owner’s work item (or forward to spadmin)—then continue.
 
-**Expected result:** Owner map recorded; at least one owner set in IIQ if supported.
+**Expected result:** Owner map recorded; at least one owner set in IIQ if supported; any owner-change approvals completed or documented.
 
 ### Task 6 — Manager readability test
 
@@ -270,10 +273,12 @@ Durable entitlement metadata belongs in git once your build exports ManagedAttri
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Entitlement not in catalog | Not aggregated / not marked entitlement | Fix schema; re-run Aggregate MNB-IT-Access; or Task 2b ManagedAttribute API |
+| Entitlement not in catalog | Not aggregated / not entitlement **or not managed** / promote off | Set `entitlement` + `managed` on `itAccess` (Lesson 09); Promote managed attributes on; re-run Aggregate MNB-IT-Access; or Task 2b ManagedAttribute API |
+| Codes on cubes, catalog empty | `entitlement` without `managed` | Add `managed="true"`; re-aggregate (do not assume a separate entitlement aggregation task) |
 | Cannot edit managed attribute | Missing capability | Use spadmin; check capabilities |
 | Names revert | Re-agg overwrites without promotion strategy | Re-apply; note connector refresh behavior for your version |
 | Owner field missing | Edition/UI difference | Keep binder as SoR; set at application level |
+| Task Result stuck at Approval after owner change | LCM work item assigned to entitlement owner, not spadmin | Login as owner (set password) → My Work → Approve; or Forward work item to spadmin then Approve |
 | Managers still see codes | Display name not set / wrong locale | Confirm display name field; re-open cert preview later |
 | Duplicate ManagedAttribute | Manual create when agg already promoted | Search first; delete duplicate carefully if lab-only |
 
@@ -324,7 +329,7 @@ Durable entitlement metadata belongs in git once your build exports ManagedAttri
 ## Summary
 
 - Managed attributes turn raw codes into reviewable, ownable access objects.
-- Meridian dictionary drives display names, risk, and requestability; aggregation usually creates the objects, and the ManagedAttribute API lets you pull groups in manually when needed.
+- Meridian dictionary drives display names, risk, and requestability; aggregation usually creates the objects when `itAccess` is entitlement **and** managed with promote on, and the ManagedAttribute API lets you pull groups in manually when needed.
 - Enriched entitlements are prerequisites for credible certifications and access requests.
 
 ---

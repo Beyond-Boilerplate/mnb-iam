@@ -1,44 +1,38 @@
-# Core Path — implementation roadmap (remaining work)
-
-This plan covers everything **after** the Academy packaging shipped in this iteration (naming drift fixes, Core Path filter, mid-capstones, scenario runners, Core verify asserts, First 90 Days map).
+# Core Path — implementation roadmap
 
 Owner posture: ship **Core Path (01–50)** as the entry-level product; specialist tracks (51–110) are opt-in.
 
 ---
 
-## Already shipped (this iteration)
+## Shipped
+
+### Packaging iteration
 
 | Item | Location |
 | --- | --- |
-| HR naming drift (`userId` / Active-Terminated / `exceptions=LOA`) | `docs/lessons/*`, `lab-data/connectors/ad/iqservice-checklist.md` |
-| Core Path TOC filter | `learn/build.py`, `learn/assets/academy.js` |
-| Mid-capstones 16 / 34 / 46 | `docs/lessons/mid-*-capstone.md` + `tools/iiq-verify/lesson-specs/mid-*.json` |
-| Scenario runners | `tools/lab/scripts/scenarios/apply-*.sh` |
-| Core persona verifies (incl. Lesson 29 / mid-34) | `tools/iiq-verify/lesson-specs/` + `generate_lesson_specs.py` |
+| HR naming drift (`userId` / Active-Terminated / `exceptions=LOA`) | `docs/lessons/*`, column map |
+| Core Path TOC filter | `learn/build.py`, `academy.js` |
+| Mid-capstones 16 / 34 / 46 | `docs/lessons/mid-*-capstone.md` + specs |
 | First 90 Days map | `docs/lessons/first-90-days.md` |
 
----
+### N+1 — Core realism (**done**)
 
-## Iteration N+1 — Core realism (highest ROI)
-
-**Goal:** One continuous Meridian story; ticket-shaped labs; fewer fragile file edits.
-
-| ID | Work item | Acceptance |
+| ID | Work item | Location |
 | --- | --- | --- |
-| C1 | Expand scenarios: rehire, bad HR row, batch hire day, contractor end-date | New CSVs under `lab-data/scenarios/` + runner aliases |
-| C2 | Teach runners inside Lessons 29–34 (replace hand-append prose) | Each JML lesson Task 2 calls `apply-*.sh` |
-| C3 | New early lesson: **Day in the life / ticket triage** (~08b) | Unlock, failed agg, “no access” diagnosis; verify soft checks |
-| C4 | New lesson: **Dirty data war room** (~19b) | Uncorrelated + orphan as one incident narrative |
-| C5 | New lesson: **Be the approver** (~36b) | Login as manager / workgroup; approve/reject/escalate |
-| C6 | Optional Rapid Setup / Lifecycle Event joiner (~29b) | File-insert remains primary; LCM as stretch with clear license note |
-| C7 | Move “read Task Result / ProvisioningPlan” skill earlier (slice of 47) | Short Core lesson or Lesson 16/17 appendix |
-| C8 | Mid-capstone UX: show checkpoints in Core TOC with badge | Already linked; polish card copy + progress counting |
+| C1 | Scenarios: rehire, bad-row, batch-hire, contractor-end | `lab-data/scenarios/*` + `apply-*.sh` |
+| C2 | Runners taught in JML lessons 29–34 | Joiner/mover/leaver/loa/contractor-end callouts |
+| C3 | Day in the life / ticket triage | `08b-day-in-the-life-ticket-triage.md` |
+| C4 | Dirty data war room | `19b-dirty-data-war-room.md` |
+| C5 | Be the approver | `36b-be-the-approver.md` |
+| C6 | Optional Rapid Setup / LCM joiner | `29b-lifecycle-events-rapid-setup.md` |
+| C7 | Early Task Result literacy | `16b-reading-task-results.md` |
+| C8 | Checkpoint badges + Core TOC polish | `learn/assets/*`, README tracks |
 
-**Exit:** New hire can demo Nina→Priya→Jordan→Sofia with runners + mid-34 PASS without editing CSV by hand.
+**Exit met:** Nina→Priya→Jordan→Sofia via runners + mid-34; bad-row diagnose refuses upsert; letter-suffix lessons in Academy Core Path.
 
 ---
 
-## Iteration N+2 — Live credibility
+## Iteration N+2 — Live credibility (**next**)
 
 **Goal:** Match Lesson 58 (OpenLDAP) quality for the connectors juniors actually touch first.
 
@@ -55,14 +49,12 @@ Owner posture: ship **Core Path (01–50)** as the entry-level product; speciali
 
 ## Iteration N+3 — Specialist polish (selective)
 
-**Goal:** Depth over catalog breadth.
-
 | ID | Work item | Acceptance |
 | --- | --- | --- |
-| S1 | Pick top 5 SaaS lessons (e.g. SFDC, SNOW, Okta, M365, AWS) for Lesson-71-grade depth | Real-world setup primary; fallback clearly secondary |
-| S2 | Do **not** expand niche industry connectors | README already routes Epic/etc. to WS/SCIM/JDBC/Logical |
-| S3 | Rules/workflows track only after Core grads exist | 89–96 prerequisites call out Capstone 50 |
-| S4 | Hardening 104–110 marked “production engineer,” not entry path | TOC specialist grouping |
+| S1 | Top 5 SaaS lessons to Lesson-71-grade depth | Real-world setup primary |
+| S2 | No niche industry connector expansion | Keep WS/SCIM/JDBC/Logical routing |
+| S3 | Rules/workflows after Core grads | 89–96 prereq Capstone 50 |
+| S4 | Hardening marked production-engineer | TOC specialist grouping |
 
 ---
 
@@ -70,29 +62,21 @@ Owner posture: ship **Core Path (01–50)** as the entry-level product; speciali
 
 | ID | Work item | Notes |
 | --- | --- | --- |
-| V1 | `identity.hasBundle` / entitlement absence checks | Needed for hard “Nina has birthright, no wire” (today: exists + soft notes) |
-| V2 | Progress chip counts Core-only when filter=Core | `progress.js` |
-| V3 | Public academy deploy picks up mid-* + first-90-days | `learn/build.py` already emits; CD rebuild |
-| V4 | Homelab shared-lab collision policy for scenarios | Document: runners + restore from `.bak-*` |
+| V1 | `identity.hasBundle` / entitlement absence checks | Hard “Nina has birthright, no wire” |
+| V2 | Progress chip Core-only | Shipped with path filter |
+| V3 | Public academy deploy rebuild | CD / `learn/build.py` |
+| V4 | Homelab collision policy | Documented in `lab-data/scenarios/README.md` |
 
 ---
 
-## Explicit non-goals (near term)
-
-- Inflating past 110 lessons without Core Path UX
-- Making Salesforce/Workday/SAP live-tenant mandatory for entry-level completion
-- Treating “finished 01–110” as the junior success metric
-
----
-
-## Suggested sequencing board
+## Sequencing board
 
 ```text
-Now (done)     → packaging + drift + runners + mid-caps + 90-day map
-N+1 (next)     → C1–C8 Core realism / missing Core lessons
-N+2            → L1–L4 live Directory/JDBC/API mocks + Capstone bridge
-N+3            → S1–S4 selective specialist depth
-Parallel       → V1–V4 verify/product
+Packaging  → done
+N+1        → done (Core realism / ticket-shaped labs)
+N+2 (next) → L1–L4 live Directory/JDBC/API mocks + Capstone bridge
+N+3        → S1–S4 selective specialist depth
+Parallel   → V1, V3–V4
 ```
 
 ---
@@ -101,5 +85,6 @@ Parallel       → V1–V4 verify/product
 
 - Style: [`_STYLE.md`](_STYLE.md)
 - Column map: [`../../lab-data/reference/hr-column-map.md`](../../lab-data/reference/hr-column-map.md)
+- Scenarios: [`../../lab-data/scenarios/README.md`](../../lab-data/scenarios/README.md)
 - Verify: [`../LESSON_VERIFY.md`](../LESSON_VERIFY.md)
-- Curriculum index: [`README.md`](README.md)
+- Curriculum: [`README.md`](README.md)

@@ -149,7 +149,13 @@ MNB Contractor Birthright Policy
 
 ### Task 3 — AWS contractor expiry for `raj.external`
 
-Raj is the poster child: critical entitlement + dirty identity data.
+Raj is the poster child: critical entitlement + dirty identity data. Apply the SOW end-date scenario first (upsert by `userId`):
+
+```bash
+./tools/lab/scripts/scenarios/apply-contractor-end.sh
+```
+
+Then Aggregate MNB-HR → Refresh MNB Attributes so `contractEndDate` is visible on the cube.
 
 1. Open identity `raj.external` in the Identity Warehouse.
 2. Confirm AWS / `AWS_ADMIN` linkage (or note uncorrelated account if email blocked correlation—Lesson 17/18).

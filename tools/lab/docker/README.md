@@ -30,7 +30,17 @@ Startup **fails fast** if required host ports are taken by something other than 
 | http://localhost:8090/ | **phpLDAPadmin** (browse OpenLDAP; `cn=admin,dc=meridiannb,dc=com` / `admin`) |
 | ldap://localhost:389 | **OpenLDAP** (`cn=admin,dc=meridiannb,dc=com` / `admin`) |
 
-Lab CSV files are mounted at `/opt/iiq-lab-data` inside IIQ (from repo `lab-data/`).
+### Lab file paths (Delimited File connectors)
+
+Repo `lab-data/` → container **`/opt/iiq-lab-data`** (read-only). Paste these into Application config — **not** Mac `/Users/...` paths:
+
+| File | Path inside IIQ |
+| --- | --- |
+| HR | `/opt/iiq-lab-data/HRApplications.txt` |
+| IT dump | `/opt/iiq-lab-data/EmployeeData.txt` |
+| App extracts | `/opt/iiq-lab-data/apps/MNB-….csv` |
+
+Full cheat sheet: [`lab-data/README.md`](../../../lab-data/README.md).
 
 From the IIQ container, LDAP host is **`openldap`** (not `localhost`). Connection sheet: [`lab-data/connectors/ldap/README.md`](../../../lab-data/connectors/ldap/README.md).
 

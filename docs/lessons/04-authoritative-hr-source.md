@@ -6,7 +6,7 @@
 | **Track** | Foundations |
 | **Time** | 75–90 minutes |
 | **Prereq** | Lesson 03 (lab data copied; absolute paths known) |
-| **Lab data** | `~/iiq-lab-data/HRApplications.txt` |
+| **Lab data** | Docker: `/opt/iiq-lab-data/HRApplications.txt` · native: `~/iiq-lab-data/HRApplications.txt` ([path cheat sheet](../../lab-data/README.md)) |
 
 ## Learning objectives
 
@@ -142,14 +142,17 @@ You are creating a Delimited File application whose feed is CSV in all but name.
 2. Application type: **DelimitedFile** (Delimited File connector).
 3. Name: `MNB-HR`. Owner: `spadmin` (lab).
 4. File settings:
-   - File path: absolute path to `HRApplications.txt` (expanded `/Users/...`, not `~`)
+   - File path (**must be readable by the IIQ process**):
+     - **Docker lab** (`./tools/lab/docker/up.sh`): `/opt/iiq-lab-data/HRApplications.txt`
+     - **Native Tomcat**: absolute host path from `realpath ~/iiq-lab-data/HRApplications.txt` (not `~`)
+   - Do **not** paste a Mac `/Users/...` path into Docker IIQ — Tomcat only sees `/opt/iiq-lab-data/…` (see [`lab-data/README.md`](../../lab-data/README.md))
    - **File format:** treat as **CSV** — delimiter: comma; has header row: yes
    - Do not switch to tab/pipe unless you are deliberately testing a non-CSV feed
 5. Save.
 
-**Expected result:** Application `MNB-HR` appears in the application list; notebook notes “Delimited File = CSV (comma + header).”
+**Expected result:** Application `MNB-HR` appears in the application list; notebook notes “Delimited File = CSV (comma + header)” and which path mode you used.
 
-**If it fails:** Check connector type spelling; confirm file path is readable by Tomcat OS user.
+**If it fails:** Check connector type spelling; confirm file path is readable by Tomcat (`Unable to open filestream` on Mac usually means Docker + host path).
 
 ### Task 3 — Schema discovery and identity attribute
 

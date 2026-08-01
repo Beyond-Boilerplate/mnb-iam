@@ -288,4 +288,4 @@ Controls without SLAs are aspirations. Write the numbers you will defend.
 ---
 
 **Previous:** [Lesson 28 — Privileged Access Role Design](28-privileged-access-roles.md)  
-**Next:** [Lesson 30 — Mover / Transfer Events](30-mover-transfers.md)
+**Next:** [Lesson 29b — Lifecycle Events & Rapid Setup (optional)](29b-lifecycle-events-rapid-setup.md) · [Lesson 30 — Mover / Transfer Events](30-mover-transfers.md)

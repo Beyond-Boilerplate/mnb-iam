@@ -175,15 +175,16 @@ Directory and CRM have different governance postures—read both extracts so you
 
 ### Task 6 — Verify kai.nguyen digital pair
 
-1. Open `kai.nguyen` cube / app accounts.
-2. Confirm `IBSI` on Internet Banking and `ECOM` on Ecommerce Ops (linked or via app lists).
-3. Binder note: **Digital SoD seed** for `IBSI,ECOM` matrix line.
-4. Open `sofia.torres` → CRM present.
-5. Open `helen.ross` → ELDAP on AD (sanity check for directory breadth).
+> **Pre-correlation (Lessons 17–18).** Directory and digital apps use different account keys than HR. Prove IBSI/ECOM/CRM/ELDAP on each **Application → Accounts** list first. Missing links on HR cubes are OK. Keep create-identities **OFF** on all four—AD especially must never mint orphan cubes from directory sprawl.
 
-**Expected result:** Kai holds both high-risk digital entitlements; CRM and AD spot-checks pass.
+1. Confirm `IBSI` under **Applications → `MNB-InternetBanking` → Accounts** and `ECOM` under `MNB-Ecommerce-Ops` (required). Cube links optional.
+2. Binder note: **Digital SoD seed** for `IBSI,ECOM` matrix line (SoD needs correlation later).
+3. Open `sofia.torres` / CRM app → CRM present on app (and cube if linked).
+4. Open `helen.ross` / AD app → ELDAP on AD (directory breadth sanity check).
 
-**If it fails:** Re-aggregate the missing digital app; confirm CSV rows for `kai.nguyen`.
+**Expected result:** Kai holds both high-risk digital entitlements on the apps; CRM and AD spot-checks pass.
+
+**If it fails:** Re-aggregate the missing digital app; confirm CSV rows; do not enable create-identities.
 
 ---
 
@@ -228,9 +229,10 @@ Directory and CRM have different governance postures—read both extracts so you
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | AD aggregation slow / large | Expected in lab scale | Wait; still tiny vs prod |
-| Kai missing one digital ent | One task failed | Re-run that Aggregate task |
-| AD created identities | Authoritative mistaken | Disable; this is severe—clean carefully |
-| CRM empty | Wrong file path | Point to Salesforce CSV |
+| Kai missing ent on **app** | One task failed / wrong CSV | Re-run that Aggregate task |
+| Kai missing ent on **HR cube** only | Correlation not taught yet | **Expected** — verify under Application → Accounts; Lessons 17–18 |
+| AD / digital created identities / login-named orphans | Authoritative / create-identities ON | Disable; this is severe—clean carefully; leave for Lessons 17–19 |
+| CRM empty | Wrong file path | Point to Salesforce CSV (`/opt/iiq-lab-data/apps/…` in Docker) |
 | Name typos (`MNB-AD`) | Inconsistent naming | Rename to curriculum names |
 
 ---

@@ -5,7 +5,7 @@
 | **Level** | Beginner |
 | **Track** | Applications |
 | **Time** | 75–90 minutes |
-| **Prereq** | Lesson 08; authoritative `MNB-HR` identities exist |
+| **Prereq** | Lesson 08 (08b triage recommended); authoritative `MNB-HR` identities exist |
 | **Lab data** | `~/iiq-lab-data/EmployeeData.txt` (also `apps/MNB-IT-Access.csv`) |
 
 ## Learning objectives
@@ -14,7 +14,7 @@ You will be able to:
 
 - Inspect Meridian’s denormalized IT entitlement dump (CSV) and count access codes
 - Create non-authoritative Delimited File application `MNB-IT-Access`
-- Mark `itAccess` as the entitlement/group attribute
+- Mark `itAccess` as entitlement **and** managed (multi-valued + merge rows) so aggregation fills the Entitlement Catalog
 - Create and run `Aggregate MNB-IT-Access` without creating new (orphan) identities
 - Explain why uncorrelated accounts must **not** become orphan identities via create-identities
 - Spot-check toxic entitlements on `jordan.reed` and `kai.nguyen`
@@ -102,7 +102,8 @@ Aggregate MNB-IT-Access
 | Config checkpoint | Required value | Exam talk-track |
 | --- | --- | --- |
 | Authoritative / create identities | **Off** | Only HR creates people |
-| Entitlement attribute | `itAccess` | Managed attribute source |
+| Entitlement + **managed** attribute | `itAccess` (`entitlement` **and** `managed`) | Catalog promotion source |
+| Multi-valued + merge rows | `itAccess` multi; merge on account id | One Link collects all codes |
 | Correlation keys | employeeId / email (later) | Owned access |
 
 **Real-life Meridian example.** `jordan.reed` has separate IT dump rows for `SAP_FI` and `AWS_ADMIN`. That multi-row shape is how SoD later detects a toxic combo on one cube—if create-identities were on, you would also invent ghost people for unmatched vendor rows.
@@ -159,11 +160,17 @@ Same Delimited File habit as HR: almost always **CSV** (comma + header), absolut
 
 1. Discover/define schema from header.
 2. Set account identity attribute to `userName` **or** `employeeId` (pick one; document it—`employeeId` often correlates cleaner to HR; `userName` matches many IT exports). Curriculum default recommendation: **`employeeId`** if the connector allows stable account id from that column; otherwise `userName`.
-3. Mark `itAccess` as the **entitlement** / group attribute (managed attribute promotion). Lesson 10 shows how to enrich those objects in the UI and how to **manually pull/create groups via the ManagedAttribute API** when aggregation alone is not enough.
+3. Configure `itAccess` for **both** Link entitlements **and** Entitlement Catalog promotion:
+   - Mark **entitlement** (group) — values appear on accounts / identity entitlements.
+   - Mark **managed** — distinct values promote into `ManagedAttribute` catalog entries when Account Aggregation runs with **Promote managed attributes** enabled.
+   - Mark **multi-valued** — required for this denormalized dump (many rows per person).
+   - On the Delimited File app, enable **merge rows** (merge/index on the account identity attribute) so one Link accumulates every `itAccess` code instead of keeping only the last CSV row.
+   - UI labels vary by build (“Managed”, “Managed Attribute”, checkbox beside Entitlement). In exported XML you want both flags, e.g. `entitlement="true" managed="true" multi="true"`.
+   - **Do not stop at entitlement-only:** `entitlement="true"` without `managed="true"` puts codes on cubes but leaves the Entitlement Catalog empty—Lesson 10 cannot enrich what was never promoted.
 4. Include `accountStatus`, `email`, `userName` on schema.
-5. Save.
+5. Save. Lesson 10 shows how to enrich catalog objects in the UI and how to **manually pull/create groups via the ManagedAttribute API** when aggregation alone is not enough.
 
-**Expected result:** Schema shows `itAccess` as entitlement-bearing; account id choice documented in CHANGELOG.
+**Expected result:** Schema shows `itAccess` as entitlement **and** managed (multi-valued); merge rows on; account id choice documented in CHANGELOG.
 
 ### Task 4 — Non-authoritative confirmation (prevent orphan identities)
 
@@ -182,23 +189,28 @@ Authoritative / create-identities is an **application** setting—same place you
 
 1. Create Account Aggregation task named `Aggregate MNB-IT-Access`.
 2. Select application `MNB-IT-Access`.
-3. Run Now.
-4. Read task result counters; screenshot to evidence.
-5. Compare identity counts before vs after: you should **not** see a spike of brand-new cubes that lack HR (that would mean orphan creation).
-6. Update runbook inventory row from Lesson 08 to “created.”
-7. Optional but recommended: run `Refresh MNB Attributes` if you mapped any IT fields to identity attrs (rare this early); otherwise note that HR attribute promotion already ran in Lesson 06.
+3. Confirm **Promote managed attributes** is enabled on the task (needed with `managed="true"` on `itAccess` to populate the Entitlement Catalog—not a separate “entitlement aggregation” task for this delimited app).
+4. Run Now.
+5. Read task result counters; screenshot to evidence.
+6. Spot-check **Applications** → `MNB-IT-Access` → Entitlements / **Entitlement Catalog** for codes such as `WIRE_INIT` or `SAP_FI` (catalog empty + values only on cubes → schema missing **managed**; fix Task 3 and re-aggregate).
+7. Compare identity counts before vs after: you should **not** see a spike of brand-new cubes that lack HR (that would mean orphan creation).
+8. Update runbook inventory row from Lesson 08 to “created.”
+9. Optional but recommended: run `Refresh MNB Attributes` if you mapped any IT fields to identity attrs (rare this early); otherwise note that HR attribute promotion already ran in Lesson 06.
 
-**Expected result:** Success with accounts/entitlements > 0. Uncorrelated accounts may exist—that is OK. New orphan identities are **not** OK.
+**Expected result:** Success with accounts/entitlements > 0 **and** ManagedAttribute / catalog entries for distinct `itAccess` codes. Uncorrelated accounts may exist—that is OK. New orphan identities are **not** OK.
 
 ### Task 6 — Verify entitlements on cubes
 
-1. Open `jordan.reed` → Accounts / Entitlements. Look for `SAP_FI`, `AWS_ADMIN`, `GL_POST`, `ELDAP` (correlation may show under `MNB-IT-Access` link).
-2. Open `kai.nguyen` → confirm `IBSI`, `ECOM`.
-3. Open `priya.wire` / `marcus.approve` → `WIRE_INIT` / `WIRE_APPR`.
-4. Open `samir.hassan` → residual IT rows with disabled status.
-5. If entitlements missing or uncorrelated, note “correlation deferred to Lessons 17–19” but confirm aggregation created application accounts (as uncorrelated accounts, **not** as orphan identities).
+> **Pre-correlation (Lessons 17–18).** HR and IT use different account keys (`userId` vs `userName`/`employeeId`). Prove inventory on **Applications → `MNB-IT-Access` → Accounts / Entitlements**. Missing IT links on an HR cube, uncorrelated rows, and login-named orphan cubes (if create-identities was left ON) are **not** Lesson 09 failures—fix create-identities OFF and proceed. Do not empty the uncorrelated list by minting identities.
 
-**Expected result:** Written spot-check table for at least three personas. Partial correlation is acceptable this lesson if accounts exist on the app.
+1. Open `jordan.reed` → Accounts / Entitlements. Look for `SAP_FI`, `AWS_ADMIN`, `GL_POST`, `ELDAP` (may be absent on the cube until correlation).
+2. Confirm the same codes exist under **Applications → `MNB-IT-Access`** (required).
+3. Open `kai.nguyen` → confirm `IBSI`, `ECOM` on app and/or cube.
+4. Open `priya.wire` / `marcus.approve` → `WIRE_INIT` / `WIRE_APPR`.
+5. Open `samir.hassan` → residual IT rows with disabled status.
+6. If entitlements missing on cubes or uncorrelated, note “correlation deferred to Lessons 17–19” but confirm aggregation created **application** accounts (uncorrelated accounts, **not** orphan identities).
+
+**Expected result:** Written spot-check table for at least three personas. Partial / zero correlation on HR cubes is acceptable if accounts exist on the app.
 
 ### Task 7 — Preview platform extracts (no onboard yet)
 
@@ -211,11 +223,12 @@ Authoritative / create-identities is an **application** setting—same place you
 
 - [ ] IT dump inspected as CSV; distinct entitlements noted
 - [ ] `MNB-IT-Access` created with absolute path
-- [ ] `itAccess` configured as entitlement attribute
+- [ ] `itAccess` configured as entitlement **and** managed (multi-valued); merge rows enabled
 - [ ] Create-identities disabled; CHANGELOG `MNB-IT-Access authoritative=false`
 - [ ] Bank craft exit: works in IIQ; optional XML under `config/Application/MNB-Application-IT-Access.xml`
 - [ ] Orphan vs uncorrelated distinction written in binder
-- [ ] `Aggregate MNB-IT-Access` succeeded with evidence
+- [ ] `Aggregate MNB-IT-Access` succeeded with evidence (promote managed attributes on)
+- [ ] Entitlement Catalog shows distinct `itAccess` codes (not only on identity cubes)
 - [ ] jordan.reed / kai.nguyen / wire personas spot-checked
 - [ ] CHANGELOG + runbook updated
 
@@ -224,10 +237,12 @@ Authoritative / create-identities is an **application** setting—same place you
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | 0 accounts | Path/delimiter/header | Same hygiene as HR; verify absolute path + CSV comma/header |
-| New orphan identities | App marked authoritative | Disable create identities; clean orphans carefully (Lesson 19) |
+| New orphan / login-named cubes | App marked authoritative / create-identities ON | Disable create identities; leave or clean orphans carefully (Lesson 19); do not re-enable to “clear” uncorrelated |
 | No entitlements visible | `itAccess` not marked entitlement | Fix schema; re-aggregate; Lesson 10 ManagedAttribute API if catalog empty |
+| Entitlements on cubes, **catalog empty** | `entitlement` set but **managed** not set (or promote off on task) | Set `managed="true"` on `itAccess`; enable Promote managed attributes; re-aggregate |
+| Only one code per person | merge rows off / `itAccess` not multi | Enable merge on account id; mark multi-valued; re-aggregate |
 | Duplicates alarms | Multi-row file | Expected—document; do not “dedupe away” entitlements blindly |
-| Nothing on cube | Correlation mismatch | Confirm account id choice; continue to Lesson 17 |
+| Nothing on HR cube, rows on app | Correlation not configured yet | **Expected** — verify under Application → Accounts; Lessons 17–18 |
 
 ## Training binder evidence
 
@@ -242,20 +257,22 @@ Authoritative / create-identities is an **application** setting—same place you
 ## Knowledge check
 
 1. Why must IT apps be non-authoritative?
-2. What column becomes the entitlement?
+2. What column becomes the entitlement, and which two schema flags must both be set for catalog promotion?
 3. Name two people useful for SoD demos.
 4. Why does the file have multiple rows per userName?
 5. Where does `Aggregate MNB-IT-Access` sit in the nightly order?
 6. What is an orphan identity, and how do uncorrelated accounts become one?
+7. Why can identity entitlements show `WIRE_INIT` while the Entitlement Catalog stays empty?
 
 ### Answers
 
 1. Only HR should create workforce identities; IT must not invent people from messy dumps.
-2. `itAccess`.
+2. `itAccess`; **entitlement** and **managed** (plus multi-valued + merge rows for this dump).
 3. `jordan.reed` (SAP_FI+AWS_ADMIN) and `kai.nguyen` (IBSI+ECOM).
 4. Denormalized entitlement inventory—one entitlement per row.
 5. After `Aggregate MNB-HR`, before `Refresh MNB Attributes` / managers.
 6. A cube minted from an app account without a real HR person; it happens when create-identities/authoritative is on for a non-HR app—uncorrelated accounts should stay accounts until remediated.
+7. Schema has `entitlement` without `managed` (or Promote managed attributes off)—values attach to Links but never become `ManagedAttribute` catalog objects.
 
 ## Further reading
 
@@ -277,7 +294,7 @@ Authoritative / create-identities is an **application** setting—same place you
 
 - `MNB-IT-Access` onboards Meridian’s messy CSV entitlement dump without creating identities.
 - Uncorrelated accounts are fixable; orphan identities from create-identities-on are a control failure.
-- `itAccess` is the governable entitlement attribute; aggregation feeds cubes for SoD demos.
+- `itAccess` must be entitlement **and** managed (multi + merge rows); aggregation feeds cubes **and** the Entitlement Catalog for SoD/certs.
 - Platform-specific apps come next; the inventory teaches imperfect-truth discipline.
 
 ---

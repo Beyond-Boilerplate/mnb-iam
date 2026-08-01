@@ -315,4 +315,4 @@ Examiner question: *“Show your oldest uncorrelated privileged account and its 
 ---
 
 **Previous:** [Lesson 18 — Correlation Rules & Edge Cases](18-correlation-rules-advanced.md)  
-**Next:** [Lesson 20 — Orphan & Dormant Access Hunting](20-orphan-dormant-hunting.md)
+**Next:** [Lesson 19b — Dirty Data War Room](19b-dirty-data-war-room.md) · [Lesson 20 — Orphan & Dormant Access Hunting](20-orphan-dormant-hunting.md)

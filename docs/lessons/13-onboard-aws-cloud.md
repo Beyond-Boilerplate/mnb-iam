@@ -166,16 +166,18 @@ Vendor/contractor admins require employeeId correlation and sponsor review.
 
 ### Task 6 — Verify toxic combination on jordan.reed
 
-1. Open `jordan.reed` cube.
-2. Confirm (linked or via app lists):
+> **Same Lessons 11–12 gotcha.** Prove `AWS_ADMIN` (and `SAP_FI`) on **application** account lists first. HR cube Accounts may not show target apps until Lessons 17–18. Keep create-identities **OFF**—especially for privileged AWS—so vendor rows like `raj.external` stay uncorrelated accounts, not ghost cubes.
+
+1. Open `jordan.reed` cube (or search by employeeId `MNB00092` if cube naming differs).
+2. Confirm via **app lists** (required) and cube if linked (optional):
    - `MNB-SAP-Finance` / `SAP_FI` active
    - `MNB-AWS-Cloud` / `AWS_ADMIN` active
-3. Mark notebook: **SoD candidate ready** for Lessons 39–41.
+3. Mark notebook: **SoD candidate ready** for Lessons 39–41 (SoD needs correlation later; data seeds exist now).
 4. Optional: open `reference/sod-matrix.csv` and read the SAP_FI/AWS_ADMIN rationale line.
 
-**Expected result:** Jordan holds both critical entitlements in lab data as designed.
+**Expected result:** Jordan holds both critical entitlements in lab data as designed (visible on apps even if not yet on one cube).
 
-**If it fails:** Re-aggregate the missing app; do not manually invent entitlements on the cube.
+**If it fails:** Re-aggregate the missing app; do not manually invent entitlements on the cube or enable create-identities.
 
 ---
 
@@ -220,9 +222,10 @@ Vendor/contractor admins require employeeId correlation and sponsor review.
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Raj creates a new identity | Create-identities on | Disable immediately; clean up |
-| Jordan missing AWS | Wrong CSV / failed task | Re-run Aggregate MNB-AWS-Cloud |
-| Email match “works” for everyone except Raj | Expected | Use employeeId in Lesson 17–18 |
+| Raj creates a new identity / login-named orphans | Create-identities on | Disable immediately; clean up; leave privileged unknowns uncorrelated |
+| Jordan missing AWS on **app** | Wrong CSV / failed task | Re-run Aggregate MNB-AWS-Cloud |
+| Jordan missing AWS on **HR cube** only | Correlation not taught yet | Check app Accounts; proceed — Lessons 17–18 |
+| Email match “works” for everyone except Raj | Expected | Use employeeId in Lessons 17–18 |
 | Confused orphan vs terminated | Mixing Raj and Samir | Raj=contractor email risk; Samir=leaver residual |
 | Owner blank on certs later | Never set app owner | Set `christopher.hayes` now |
 

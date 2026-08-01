@@ -3,7 +3,7 @@
 **Level:** Intermediate  
 **Track:** Correlation  
 **Time:** 60–75 min  
-**Prereq:** Lesson 16 (pipeline run); `MNB-IT-Access` from Lesson 09; `MNB-HR` populated  
+**Prereq:** Lesson 16 (pipeline run); Lesson 16b (Task Results) recommended; `MNB-IT-Access` from Lesson 09; `MNB-HR` populated  
 
 **Lab data:**
 - Application under test: **MNB-IT-Access** (from `EmployeeData.txt` / `apps/MNB-IT-Access.csv`)
@@ -122,10 +122,13 @@ One consequence worth remembering: correlation does not “fix” bad source dat
 
 Before changing configuration, capture the “before” state. Auditors and your future self need proof that correlation improved something — not that you clicked Save once.
 
+> **Carry-forward from Lessons 09–16.** High uncorrelated counts, missing target apps on HR cubes, and occasional login-named orphan cubes (create-identities left ON during onboard) are **normal** starting points—not proof that aggregation failed. This lesson is where you wire `employeeId` → HR `userId` (and email fallback) so accounts land on the right cubes. Do **not** “baseline clean” by enabling create-identities.
+
 1. Open application `MNB-IT-Access` → Accounts (or Uncorrelated Accounts view / equivalent filter).
 2. Note approximate count of uncorrelated accounts (may be high if correlation never configured).
-3. Search identity `priya.wire` → Accounts tab. Note whether an `MNB-IT-Access` account is already linked.
-4. Record baseline numbers in binder: *Before correlation config: U=___ ; Priya linked? Y/N*.
+3. Search identity `priya.wire` → Accounts tab. Note whether an `MNB-IT-Access` account is already linked. Also search by display/`userId` style if your HR cubes use that naming.
+4. Optionally note orphan cubes named like logins (`aisha.murphy`) vs HR cubes (`Aisha Murphy` / `MNB00013`)—those are remediation candidates after correlation, not a reason to skip this lesson.
+5. Record baseline numbers in binder: *Before correlation config: U=___ ; Priya linked? Y/N ; orphan login cubes noted? Y/N*.
 
 **Expected result:** Baseline captured so you can prove improvement after configuration.
 

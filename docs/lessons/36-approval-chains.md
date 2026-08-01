@@ -266,4 +266,4 @@ Queues die when managers are OOO. Escalation is the anti-deadlock control.
 ---
 
 **Previous:** [Lesson 35 — Access Request Catalog](35-access-request-catalog.md)  
-**Next:** [Lesson 37 — Emergency / Break-Glass Access](37-break-glass-access.md)
+**Next:** [Lesson 36b — Be the Approver](36b-be-the-approver.md) · [Lesson 37 — Emergency / Break-Glass Access](37-break-glass-access.md)

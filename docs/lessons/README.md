@@ -20,9 +20,15 @@ Learner setup **is** the scoped bank setup: same SSB repo, same `config/` object
 
 1. Complete [LOCAL_SETUP.md](../LOCAL_SETUP.md) until you can log in as `spadmin` (or use the shared homelab URL).
 2. Skim [INFRASTRUCTURE.md](../INFRASTRUCTURE.md), [SSD.md](../SSD.md), and [config/PACKS.md](../../config/PACKS.md) — CD ships **HelloWorld only**; you build the rest in lessons.
-3. Copy lab fixtures (CSV truth) and record absolute paths:
+3. Lab CSV paths (Delimited File apps) — see [`lab-data/README.md`](../../lab-data/README.md):
+
+| Lab mode | Path to paste into IIQ |
+| --- | --- |
+| Docker (`./tools/lab/docker/up.sh`) | `/opt/iiq-lab-data/HRApplications.txt` |
+| Native Tomcat | `realpath ~/iiq-lab-data/HRApplications.txt` after copy below |
 
 ```bash
+# Native Tomcat only (Docker already mounts repo lab-data/ → /opt/iiq-lab-data)
 mkdir -p ~/iiq-lab-data ~/iiq-lab-evidence/$(date +%F)
 cp lab-data/HRApplications.txt lab-data/EmployeeData.txt ~/iiq-lab-data/
 cp -R lab-data/apps lab-data/scenarios lab-data/reference lab-data/notifications lab-data/connectors ~/iiq-lab-data/
@@ -77,26 +83,30 @@ See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and 
 
 ### Core Path — entry-level (default in Academy TOC)
 
-- **Foundations:** 01–08
-- **Applications:** 09–16 → **[mid-16 Apps checkpoint](mid-16-apps-capstone.md)**
-- **Correlation:** 17–22
+- **Foundations:** 01–08 → **[08b Ticket triage](08b-day-in-the-life-ticket-triage.md)**
+- **Applications:** 09–16 → **[mid-16](mid-16-apps-capstone.md)** → **[16b Task Results](16b-reading-task-results.md)**
+- **Correlation:** 17–19 → **[19b Dirty data war room](19b-dirty-data-war-room.md)** → 20–22
 - **Roles:** 23–28
-- **Lifecycle:** 29–34 → **[mid-34 JML checkpoint](mid-34-jml-capstone.md)**
-- **Requests:** 35–38
+- **Lifecycle:** 29 → **[29b LCM optional](29b-lifecycle-events-rapid-setup.md)** → 30–34 → **[mid-34](mid-34-jml-capstone.md)**
+- **Requests:** 35–36 → **[36b Be the approver](36b-be-the-approver.md)** → 37–38
 - **Policies:** 39–42
-- **Certifications:** 43–46 → **[mid-46 Certs checkpoint](mid-46-certs-capstone.md)**
+- **Certifications:** 43–46 → **[mid-46](mid-46-certs-capstone.md)**
 - **Ops:** 47–49
 - **Capstone I:** 50
 
-**Start here:** [First 90 days as an IIQ engineer](first-90-days.md) · remaining work plan: [_CORE_PATH_ROADMAP.md](_CORE_PATH_ROADMAP.md)
+**Start here:** [First 90 days as an IIQ engineer](first-90-days.md) · roadmap: [_CORE_PATH_ROADMAP.md](_CORE_PATH_ROADMAP.md)
 
-JML scenario runners (upsert by `userId`):
+JML / HR scenario runners (upsert by `userId` — see [`lab-data/scenarios/README.md`](../../lab-data/scenarios/README.md)):
 
 ```bash
 ./tools/lab/scripts/scenarios/apply-joiner.sh
 ./tools/lab/scripts/scenarios/apply-mover.sh
 ./tools/lab/scripts/scenarios/apply-leaver.sh
 ./tools/lab/scripts/scenarios/apply-loa.sh
+./tools/lab/scripts/scenarios/apply-rehire.sh
+./tools/lab/scripts/scenarios/apply-batch-hire.sh
+./tools/lab/scripts/scenarios/apply-contractor-end.sh
+./tools/lab/scripts/scenarios/apply-bad-row.sh   # diagnose only
 ```
 
 ### Part II — Specialist tracks (opt-in after Capstone 50; hidden by default in Academy)
@@ -253,9 +263,9 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 
 | Block | Lessons | Focus |
 | --- | --- | --- |
-| Weeks 1–2 | 01–16 + mid-16 | Foundations + file apps + Apps checkpoint |
-| Weeks 3–4 | 17–34 + mid-34 | Correlation, roles, JML + JML checkpoint |
-| Weeks 5–6 | 35–50 + mid-46 | Requests, SoD, certs, ops, Capstone I |
+| Weeks 1–2 | 01–08b, 09–16, mid-16, 16b | Foundations, ticket triage, file apps, Task Results |
+| Weeks 3–4 | 17–19b–22, 23–28, 29–29b–34, mid-34 | Correlation war room, roles, JML (+ optional LCM) |
+| Weeks 5–6 | 35–36b–38, 39–46, mid-46, 47–50 | Approver chair, SoD, certs, ops, Capstone I |
 | Weeks 7+ | Specialist opt-in | Pick Directory/JDBC or SaaS/ERP after Capstone 50 |
 
 Full catalog (if you unlock specialist tracks):

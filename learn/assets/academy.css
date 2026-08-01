@@ -669,6 +669,22 @@ h2.is-hidden,
   line-height: 1.35;
   color: var(--rail-muted);
 }
+.toc-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  background: #243041;
+  color: #9fb0c6;
+}
+.toc-badge-check {
+  background: rgba(31, 111, 108, 0.35);
+  color: #b7e3df;
+}
 .lede-sm {
   color: var(--ink-soft);
   max-width: 42rem;

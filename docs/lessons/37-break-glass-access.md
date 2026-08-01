@@ -277,5 +277,5 @@ Write the three-artifact answer: (1) IdentityRequest with `MNB-INC-####` comment
 
 ---
 
-**Previous:** [Lesson 36 — Approval Chains & Escalations](36-approval-chains.md)  
+**Previous:** [Lesson 36b — Be the Approver](36b-be-the-approver.md) · [Lesson 36 — Approval Chains & Escalations](36-approval-chains.md)  
 **Next:** [Lesson 38 — IdentityRequest Tracking & Auditing](38-identity-request-tracking.md)

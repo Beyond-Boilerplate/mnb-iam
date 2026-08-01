@@ -1,0 +1,36 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "08b",
+  "stem": "08b-day-in-the-life-ticket-triage",
+  "title": "Day in the Life: Ticket Triage",
+  "description": "Core Path N+1 verify for 08b-day-in-the-life-ticket-triage",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application MNB-HR exists"
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/scenarios/bad-row/hr-delta-bad-row-diagnose.csv",
+      "id": "bad-row",
+      "message": "Bad-row diagnose fixture present"
+    },
+    {
+      "type": "identity.exists",
+      "name": "amelia.brooks",
+      "id": "id-amelia",
+      "message": "amelia.brooks exists for unlock triage",
+      "softFail": true
+    }
+  ]
+}

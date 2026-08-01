@@ -259,10 +259,10 @@ def parse_lesson_meta(path: Path) -> dict:
 
 
 def lesson_path_kind(stem: str) -> str:
-    """core = entry path (01–50 + mid-caps + guides); specialist = 51–110."""
+    """core = entry path (01–50 + inserts/mid-caps + guides); specialist = 51–110."""
     if stem.startswith("mid-") or stem in {"first-90-days"}:
         return "core"
-    m = re.match(r"^(\d{2,3})-", stem)
+    m = re.match(r"^(\d{2,3})[a-z]?-", stem)
     if not m:
         return "core"
     n = int(m.group(1))
@@ -271,14 +271,18 @@ def lesson_path_kind(stem: str) -> str:
 
 def lesson_sort_key(stem: str) -> tuple:
     if stem == "first-90-days":
-        return (-1, 0, stem)
+        return (-1, 0, 0, stem)
     m = re.match(r"^mid-(\d+)-", stem)
     if m:
-        return (int(m.group(1)), 1, stem)  # after the lesson number it checkpoints
-    m = re.match(r"^(\d{2,3})-", stem)
+        # After base lesson and letter inserts (08b, 16b, …)
+        return (int(m.group(1)), 50, 0, stem)
+    m = re.match(r"^(\d{2,3})([a-z])?-", stem)
     if m:
-        return (int(m.group(1)), 0, stem)
-    return (9999, 0, stem)
+        n = int(m.group(1))
+        letter = m.group(2)
+        sub = 0 if not letter else (ord(letter) - ord("a") + 1)
+        return (n, sub, 0, stem)
+    return (9999, 0, 0, stem)
 
 
 def lesson_num(stem: str) -> str:
@@ -287,7 +291,18 @@ def lesson_num(stem: str) -> str:
     m = re.match(r"^mid-(\d+)-", stem)
     if m:
         return f"✓{m.group(1)}"
+    m = re.match(r"^(\d{2,3})([a-z])?-", stem)
+    if m:
+        return f"{int(m.group(1)):02d}{m.group(2) or ''}"
     return stem.split("-", 1)[0].zfill(2)
+
+
+def toc_badge(stem: str) -> str:
+    if stem.startswith("mid-"):
+        return '<span class="toc-badge toc-badge-check">checkpoint</span>'
+    if re.match(r"^\d{2,3}[a-z]-", stem):
+        return '<span class="toc-badge">lab+</span>'
+    return ""
 
 
 def build() -> None:
@@ -298,15 +313,16 @@ def build() -> None:
     assets_out.mkdir()
     shutil.copytree(ASSETS_SRC, assets_out, dirs_exist_ok=True)
 
-    numbered = [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2,3}-", p.name)]
+    numbered = [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2,3}[a-z]?-", p.name)]
     extras = [
         LESSONS / "first-90-days.md",
         LESSONS / "mid-16-apps-capstone.md",
         LESSONS / "mid-34-jml-capstone.md",
         LESSONS / "mid-46-certs-capstone.md",
     ]
+    # numbered already includes 08b/16b/…; keep extras for mid-* + first-90
     lesson_files = sorted(
-        [p for p in numbered + [e for e in extras if e.exists()]],
+        {p.resolve(): p for p in numbered + [e for e in extras if e.exists()]}.values(),
         key=lambda p: lesson_sort_key(p.stem),
     )
     metas = [parse_lesson_meta(p) for p in lesson_files]
@@ -327,11 +343,12 @@ def build() -> None:
                 f'<p class="toc-track" data-path="{track_path}">{html.escape(current_track or "Lessons")}</p>'
             )
         num = lesson_num(meta["stem"])
+        badge = toc_badge(meta["stem"])
         toc_parts.append(
             f'<a class="toc-item" data-path="{meta["path"]}" data-title="{html.escape(meta["title"].lower())}" '
             f'href="{html.escape(meta["stem"])}.html">'
             f'<span class="toc-num">{num}</span>'
-            f'<span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}</span></a>'
+            f'<span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}{badge}</span></a>'
         )
     toc = "\n".join(toc_parts)
 
@@ -387,7 +404,7 @@ def build() -> None:
     for idx, meta in enumerate(metas):
         body = md_to_html(meta["text"])
         # Lesson-to-lesson markdown links → html
-        body = re.sub(r'href="(\d{2,3}-[^"]+)\.md"', r'href="\1.html"', body)
+        body = re.sub(r'href="(\d{2,3}[a-z]?-[^"]+)\.md"', r'href="\1.html"', body)
         body = re.sub(r'href="(mid-\d+-[^"]+)\.md"', r'href="\1.html"', body)
         body = re.sub(r'href="(first-90-days)\.md"', r'href="\1.html"', body)
         body = re.sub(r'href="(_CORE_PATH_ROADMAP)\.md"', r'href="#"', body)

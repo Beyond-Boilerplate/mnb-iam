@@ -189,15 +189,20 @@ Confirm the CORE entitlement and holder set before modeling the app—ownership 
 
 ### Task 7 — Verify on identity / account views
 
-1. Search Identities for `daniel.griffin`.
-2. Open the cube → Accounts (or equivalent). Look for an account on `MNB-CoreBanking`.
-3. If the account is linked, confirm entitlement `CORE` (or its display name).
-4. If the account is **uncorrelated**, open Applications → `MNB-CoreBanking` → Accounts and confirm `daniel.griffin` exists there. Correlation is deepened in Lessons 17–18—do not force-create identities.
-5. Spot-check one more holder (e.g. `aisha.murphy`).
+> **Expected until Lessons 17–18 (do not block here).**  
+> `MNB-HR` and `MNB-CoreBanking` use **different account identity attributes** (`userId` vs `userName`). That is correct. Without account correlation (Core `employeeId` → HR `userId`), Core accounts often **do not appear** on the HR identity cube’s Accounts tab.  
+> **Pass this lesson by proving accounts on the application**, not by requiring every holder’s HR cube to show `MNB-CoreBanking`.  
+> If you see a second cube named like the login (`aisha.murphy`) while HR shows display/`userId` style (`Aisha Murphy` / `MNB00013`), that is usually create-identities left ON on Core or default matching on `userName`—turn create-identities **OFF**, note the orphan for Lessons 17–18, and keep going. Do not invent correlation yet.
 
-**Expected result:** Core accounts exist in IIQ; linked cubes show `CORE` when correlation already works; otherwise accounts are visible as uncorrelated on the application—still valid for this lesson.
+1. Search Identities for `daniel.griffin` (or whatever name your HR cube actually uses).
+2. Open the cube → Accounts. Look for `MNB-CoreBanking` — it may be **missing**; that is OK for Lesson 11.
+3. Open **Applications → `MNB-CoreBanking` → Accounts** and confirm holders from the CSV (e.g. `daniel.griffin`, `aisha.murphy`) exist there with entitlement `CORE`.
+4. If an account **is** linked on an HR cube, confirm `CORE` (or its display name)—bonus, not required.
+5. Spot-check one more holder the same way: app Accounts tab first, identity cube second.
 
-**If it fails:** Re-run Aggregate MNB-CoreBanking after schema save; then Refresh Identities only if your lab already uses refresh after target aggregates.
+**Expected result:** ~7 Core accounts exist under `MNB-CoreBanking`. HR cubes may or may not show the Core link yet—both outcomes are valid until Lessons 17–18.
+
+**If it fails:** Zero rows on the **application** Accounts tab → re-run Aggregate after schema/path fix. Missing only on the HR cube → not a Lesson 11 failure; proceed.
 
 ---
 
@@ -232,9 +237,10 @@ Evidence: Aggregate MNB-CoreBanking task result + CORE holder list
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| 0 accounts aggregated | Bad path or Tomcat cannot read file | Use absolute `~/…` expanded path; `chmod`/`ls` the file |
+| 0 accounts aggregated | Bad path or Tomcat cannot read file | Docker: `/opt/iiq-lab-data/apps/MNB-CoreBanking.csv`; native: absolute `realpath` path — see [`lab-data/README.md`](../../lab-data/README.md) |
 | Entitlements missing | `entitlement` not marked as entitlement attribute | Edit schema; re-aggregate |
-| New mystery identities | Create-identities enabled | Disable; delete erroneous cubes carefully; re-aggregate |
+| New mystery identities / login-named cubes (`aisha.murphy` next to HR `Aisha Murphy`) | Create-identities ON on Core, or default match on `userName` before correlation | Disable create-identities; leave orphans for Lessons 17–18 (or delete carefully in lab); do **not** enable authoritative on Core |
+| Core missing on HR cube Accounts tab | No correlation yet (`employeeId` ↔ HR `userId`) | **Expected** — verify under Application → Accounts; proceed |
 | Duplicate apps | Typo name `MNB-Corebanking` | Delete/rename; standardize on `MNB-CoreBanking` |
 | Accounts uncorrelated | Normal before Lesson 17 | Proceed; do not flip authoritative |
 | Task “running” forever | Stuck worker / prior hung task | Check Task results; restart Tomcat only if hung |

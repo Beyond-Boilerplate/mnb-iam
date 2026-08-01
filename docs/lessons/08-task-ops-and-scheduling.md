@@ -243,4 +243,4 @@ Write a five-line checklist titled “Aggregation failed”:
 ---
 
 **Previous:** [Lesson 07 — Populations & Identity Selectors](07-populations-and-selectors.md)  
-**Next:** [Lesson 09 — Onboard IT Access Inventory App](09-it-access-inventory-app.md)
+**Next:** [Lesson 08b — Day in the Life: Ticket Triage](08b-day-in-the-life-ticket-triage.md) · [Lesson 09 — Onboard IT Access Inventory App](09-it-access-inventory-app.md)

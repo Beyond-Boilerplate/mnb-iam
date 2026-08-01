@@ -307,5 +307,5 @@ Hierarchy changes are governance changes: future manager certs and approvals mus
 
 ---
 
-**Previous:** [Lesson 29 — Joiner Lifecycle](29-joiner-lifecycle.md)  
+**Previous:** [Lesson 29b — Lifecycle Events (optional)](29b-lifecycle-events-rapid-setup.md) · [Lesson 29 — Joiner Lifecycle](29-joiner-lifecycle.md)  
 **Next:** [Lesson 31 — Leaver & Access Disablement](31-leaver-disablement.md)

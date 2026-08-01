@@ -21,22 +21,26 @@ Use this one-pager to connect **Academy lessons** to the **ticket types** you wi
 
 | Weeks | Lessons | Real ticket types you are practicing |
 | ---: | --- | --- |
-| 1 | 01–08 | Lab access, naming standards, “HR feed broke aggregation,” schema / attribute promotion, refresh failures, population requests |
-| 2 | 09–16 + **mid-16** | Onboard delimited inventory app, entitlement dictionary cleanup, multi-app aggregation runbook, “why is create-identities on?” |
-| 3 | 17–22 | Uncorrelated account queue, false-merge risk review, orphan/dormant hunting, manager hierarchy broken, attribute sync drift |
-| 4 | 23–28 | Birthright design review, dept/job role pack, privileged role guardrails, detection vs assignment confusion |
-| 5 | 29–34 + **mid-34** | Joiner SLA miss, mover residual access, same-day leaver, contractor expiry, LoA freeze vs terminate, emergency offboarding |
-| 6 | 35–38 | Access request catalog gaps, approval / escalation stuck work items, break-glass evidence, IdentityRequest audit pull |
-| 7 | 39–46 + **mid-46** | SoD violation triage, dual-control payment findings, policy mitigation, manager/owner cert campaigns, remediation evidence packs |
-| 8 | 47–50 | Failed provisioning plan, audit reports for exam week, notification template fix, Capstone go-live checklist |
+| 1 | 01–08 + **08b** | Lab access, naming, unlock / failed agg / “no access” triage, bad HR delta refuse |
+| 2 | 09–16 + **mid-16** + **16b** | Onboard delimited apps, runbook order, read Task Results before correlation |
+| 3 | 17–19 + **19b** + 20–22 | Uncorrelated + orphan war room, false-merge risk, manager hierarchy, attr sync |
+| 4 | 23–28 | Birthright design, dept/job packs, privileged role guardrails |
+| 5 | 29 + **29b** + 30–34 + **mid-34** | Joiner/mover/leaver/LoA via runners; optional LCM design; emergency offboard |
+| 6 | 35–36 + **36b** + 37–38 | Catalog + **be the approver** (approve/reject), break-glass, IdentityRequest audit |
+| 7 | 39–46 + **mid-46** | SoD triage, dual-control, cert campaigns, remediation evidence |
+| 8 | 47–50 | Provisioning plan failures, audit reports, Capstone go-live checklist |
 
-Scenario runners (avoid hand-editing HR):
+Scenario runners (avoid hand-editing HR) — full list in [`lab-data/scenarios/README.md`](../../lab-data/scenarios/README.md):
 
 ```bash
 ./tools/lab/scripts/scenarios/apply-joiner.sh
 ./tools/lab/scripts/scenarios/apply-mover.sh
 ./tools/lab/scripts/scenarios/apply-leaver.sh
 ./tools/lab/scripts/scenarios/apply-loa.sh
+./tools/lab/scripts/scenarios/apply-rehire.sh
+./tools/lab/scripts/scenarios/apply-batch-hire.sh
+./tools/lab/scripts/scenarios/apply-contractor-end.sh
+./tools/lab/scripts/scenarios/apply-bad-row.sh   # diagnose only
 ```
 
 ---
