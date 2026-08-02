@@ -14,7 +14,20 @@ sys.path.insert(0, str(CHAT_ROOT))
 
 from catalog import CATALOG, ToolCatalog, FAVORITE_PRESETS  # noqa: E402
 from llm import LlmError, OpenRouterClient, _bad_summary, _local_summary, _skippable_model_error  # noqa: E402
-from normalize import normalize_tool_args, resolve_identity_username  # noqa: E402
+from enrich import enrich_tool_result  # noqa: E402
+from normalize import normalize_tool_args, resolve_identity_username, unwrap_identity_mention  # noqa: E402
+from safety import is_write_tool  # noqa: E402
+
+
+def test_write_tool_classifier():
+    assert is_write_tool("trigger_aggregation") is True
+    assert is_write_tool("unlock_identity") is True
+    assert is_write_tool("disable_account") is True
+    assert is_write_tool("list_applications") is False
+    assert is_write_tool("get_identity") is False
+    assert is_write_tool("search_identities") is False
+    assert is_write_tool("count_open_sod_violations") is False
+    assert is_write_tool("toolkit_ping") is False
 
 
 def _fake_search_factory(payload_by_query: dict):
@@ -152,6 +165,90 @@ def test_normalize_unlock_uses_identity_name():
         search_fn=search,
     )
     assert out == {"identity_name": "anita.rao"}
+
+
+def test_unwrap_identity_mention():
+    assert unwrap_identity_mention("Christopher Hayes (MNB00002)") == "MNB00002"
+    assert unwrap_identity_mention("Anita Rao (anita.rao)") == "anita.rao"
+    assert unwrap_identity_mention("anita.rao") == "anita.rao"
+    assert unwrap_identity_mention("MNB00002") == "MNB00002"
+
+
+def test_normalize_mention_manager_for_transitive_reports():
+    out = normalize_tool_args(
+        "list_transitive_reports",
+        {"manager": "Christopher Hayes (MNB00002)"},
+    )
+    assert out == {"manager": "MNB00002"}
+
+
+def test_normalize_mention_id_for_get_identity():
+    out = normalize_tool_args(
+        "get_identity",
+        {"id": "Christopher Hayes (MNB00002)"},
+    )
+    assert out == {"id": "MNB00002"}
+
+
+def test_enrich_transitive_reports_adds_labels():
+    raw = {
+        "ok": True,
+        "data": {
+            "manager": "MNB00002",
+            "count": 2,
+            "reports": [{"name": "MNB00026", "depth": 1}, {"name": "MNB00068", "depth": 1}],
+        },
+    }
+
+    def call(tool, args):
+        assert tool == "get_identity"
+        key = args["id"]
+        names = {"MNB00002": "Christopher Hayes", "MNB00026": "Raj Ross", "MNB00068": "Anita Rao"}
+        return {"ok": True, "data": {"userName": key, "displayName": names[key]}}
+
+    out = enrich_tool_result("list_transitive_reports", raw, call)
+    assert out["data"]["managerLabel"] == "Christopher Hayes (MNB00002)"
+    assert out["data"]["reportLabels"] == ["Raj Ross (MNB00026)", "Anita Rao (MNB00068)"]
+    assert out["data"]["reports"][0]["displayName"] == "Raj Ross"
+
+
+def test_enrich_hierarchy_labels():
+    raw = {
+        "ok": True,
+        "data": {
+            "directReports": [
+                {"userName": "MNB00012", "displayName": "Meera Torres"},
+                {"userName": "MNB00068", "displayName": "Anita Rao"},
+            ]
+        },
+    }
+    out = enrich_tool_result("get_manager_hierarchy", raw, None)
+    assert out["data"]["directReportLabels"] == [
+        "Meera Torres (MNB00012)",
+        "Anita Rao (MNB00068)",
+    ]
+
+
+def test_enrich_search_items_labels():
+    raw = {
+        "ok": True,
+        "data": {
+            "items": [{"userName": "MNB00068", "displayName": "Anita Rao", "active": True}],
+        },
+    }
+    out = enrich_tool_result("search_identities", raw, None)
+    assert out["data"]["items"][0]["label"] == "Anita Rao (MNB00068)"
+    assert out["data"]["peopleLabels"] == ["Anita Rao (MNB00068)"]
+
+
+def test_enrich_bare_manager_field():
+    raw = {"ok": True, "data": {"items": [{"policy": "SoD-Wire", "identity": "MNB00015"}]}}
+
+    def call(tool, args):
+        return {"ok": True, "data": {"userName": "MNB00015", "displayName": "Michael Ross"}}
+
+    out = enrich_tool_result("list_open_sod_violations", raw, call)
+    assert out["data"]["items"][0]["identityLabel"] == "Michael Ross (MNB00015)"
 
 
 def test_resolve_identity_username_anita():
@@ -300,6 +397,69 @@ def test_agent_loop_who_is_anita_rao():
     assert "Anita Rao" in outcome["reply"]
     assert [c[0] for c in calls] == ["search_identities", "get_identity"]
     assert len(outcome["steps"]) == 2
+
+
+def test_agent_loop_emits_live_events():
+    """on_event should surface status + tool_start/tool_result for SSE UX."""
+    from llm import _brief_tool_result, _extract_thought
+
+    assert "shown" in _brief_tool_result(
+        {"ok": True, "data": {"items": [{"a": 1}], "totalResults": 3}}
+    )
+    assert "error" in _brief_tool_result({"ok": False, "error": "boom"})
+    assert "look up" in _extract_thought(
+        {"content": "I should look up Anita.", "tool_calls": [{"id": "1"}]}
+    ).lower()
+
+    client = OpenRouterClient(api_key="test-key")
+    events: list[tuple[str, dict]] = []
+
+    def call_tool(name: str, args: dict[str, Any]) -> Any:
+        return {
+            "ok": True,
+            "data": {"items": [{"userName": "anita.rao"}], "totalResults": 1},
+        }
+
+    responses = [
+        {
+            "content": "Searching the directory…",
+            "tool_calls": [
+                {
+                    "id": "1",
+                    "function": {
+                        "name": "search_identities",
+                        "arguments": json.dumps({"query": "Anita", "count": 10}),
+                    },
+                }
+            ],
+        },
+        {"content": "Found anita.rao.", "tool_calls": []},
+    ]
+    idx = {"i": 0}
+
+    def fake_complete(model, messages, tools=None):
+        i = idx["i"]
+        idx["i"] += 1
+        return responses[min(i, len(responses) - 1)]
+
+    client._complete_message = fake_complete  # type: ignore[method-assign]
+    cat = ToolCatalog()
+    cat.refresh(lambda: FAKE_MCP_TOOLS)
+    outcome = client.run_agent(
+        "Find Anita",
+        cat.openai_tools(),
+        call_tool,
+        allowed_names=cat.names(),
+        on_event=lambda et, payload: events.append((et, payload)),
+    )
+    assert outcome["ok"]
+    kinds = [e[0] for e in events]
+    assert "status" in kinds
+    assert "thought" in kinds
+    assert "tool_start" in kinds
+    assert "tool_result" in kinds
+    starts = [p for t, p in events if t == "tool_start"]
+    assert starts[0]["tool"] == "search_identities"
 
 
 def test_agent_loop_anyone_named_anita():

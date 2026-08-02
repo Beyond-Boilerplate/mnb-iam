@@ -7,6 +7,8 @@ import threading
 import time
 from typing import Any, Callable
 
+from safety import is_write_tool
+
 # Optional one-click presets: MCP tool name → default args (rail shortcuts only).
 # These are NOT an LLM routing catalog — free-text always uses live tools/list.
 FAVORITE_PRESETS: list[dict[str, Any]] = [
@@ -188,6 +190,7 @@ class ToolCatalog:
                     "needsArgs": False,
                     "favorite": True,
                     "llm": False,
+                    "write": is_write_tool(tool),
                 }
             )
             seen.add(tool)
@@ -207,6 +210,7 @@ class ToolCatalog:
                     "needsArgs": needs_args,
                     "favorite": name in seen,
                     "llm": False,
+                    "write": is_write_tool(name),
                 }
             )
         return actions
