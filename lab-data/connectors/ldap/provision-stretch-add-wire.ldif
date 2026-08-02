@@ -1,0 +1,17 @@
+# Lesson 58 — live provision stretch LDIF helpers
+# Apply with svc-iiq-provision (not admin) after ACL init:
+#
+#   ldapmodify -x -H ldap://localhost:389 \
+#     -D 'cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com' -w 'Provision1!' \
+#     -f lab-data/connectors/ldap/provision-stretch-add-wire.ldif
+#
+# Verify:
+#   ldapsearch -x -H ldap://localhost:389 -b 'cn=wire-initiators,ou=groups,dc=meridiannb,dc=com' \
+#     -D 'cn=svc-iiq-read,dc=meridiannb,dc=com' -w 'Readonly1!' uniqueMember
+#
+# Then Aggregate MNB-OpenLDAP and confirm amelia.brooks gained wire-initiators.
+
+dn: cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
+changetype: modify
+add: uniqueMember
+uniqueMember: uid=amelia.brooks,ou=people,dc=meridiannb,dc=com

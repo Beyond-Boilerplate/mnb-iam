@@ -1,0 +1,10 @@
+# Remove Amelia from wire-initiators (leaver / residual cleanup pattern)
+#
+#   ldapmodify -x -H ldap://localhost:389 \
+#     -D 'cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com' -w 'Provision1!' \
+#     -f lab-data/connectors/ldap/provision-stretch-remove-wire.ldif
+
+dn: cn=wire-initiators,ou=groups,dc=meridiannb,dc=com
+changetype: modify
+delete: uniqueMember
+uniqueMember: uid=amelia.brooks,ou=people,dc=meridiannb,dc=com
