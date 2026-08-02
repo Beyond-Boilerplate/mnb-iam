@@ -69,6 +69,22 @@ Maps **UIAPI** gaps → MCP tools → OpenAPI ops in
 | UIAPI-56 | **`restart_iiq_service`** | `/agent/system/services/{name}/restart` |
 | UIAPI-57 | **`assign_identity_scope`** | `/agent/scopes/assign` |
 | UIAPI-58 | **`rebuild_manager_hierarchy`** | `/agent/identities/managers/rebuild` |
+| UIAPI-59 | **`get_orgchart`** | `/agent/orgchart` (+ `/orgchart/search`) |
+| UIAPI-60 | Console orphans / summary / menu | `/agent/console/{orphans,summary,menu}` |
+| UIAPI-61 | Console aggregation pipeline | `/agent/console/pipeline` |
+| UIAPI-62 | Console approval inbox | `/agent/console/inbox` |
+| UIAPI-63 | Console access catalog | `/agent/console/catalog` |
+| UIAPI-64 | Console cert campaigns + items | `/agent/console/certs`, `/certs/{id}` |
+| UIAPI-65 | Console SoD war room | `/agent/console/sod` |
+| UIAPI-66 | Console Identity 360 | `/agent/console/identity360` |
+| UIAPI-67 | Console JML timeline | `/agent/console/jml` |
+| UIAPI-68 | Console evidence pack | `/agent/console/evidence` |
+| UIAPI-69 | Console provisioning debugger | `/agent/console/provisioning` |
+| UIAPI-70 | Console workgroups | `/agent/console/workgroups` |
+| UIAPI-71 | Console risk heatmap | `/agent/console/heatmap` |
+| UIAPI-72 | Console audit activity | `/agent/console/audit` |
+
+Teller Console UI: `http://localhost:4180/console.html` (Waves 1–3 central menu). Org chart risk badges: inactive / brokenManager / privileged.
 
 These tools cover the 300 Teller NL scenarios (domain map in canvas `teller-gap-scenarios-300`), plus manager rebuild for HR hierarchy.
 

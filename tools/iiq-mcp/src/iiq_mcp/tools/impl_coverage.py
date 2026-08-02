@@ -891,6 +891,55 @@ def register(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
             audit=audit,
         )
 
+    # —— UIAPI-59 Org chart ——
+    meta_org = ToolMeta(
+        name="get_orgchart",
+        phase=1,
+        risk=Risk.READ,
+        implemented=True,
+        gap_id="UIAPI-59",
+    )
+
+    @mcp.tool(
+        name=meta_org.name,
+        description=tool_description(
+            meta_org,
+            "Return Meridian manager hierarchy as a forest/tree for org-chart UI. "
+            "mode=company (default) or subtree; optional root identity name/id, depth, "
+            "include_inactive, include_technical.",
+        ),
+    )
+    async def get_orgchart(
+        root: str | None = None,
+        mode: str = "company",
+        depth: int = 12,
+        include_inactive: bool = False,
+        include_technical: bool = False,
+    ) -> dict[str, Any]:
+        async def _run() -> Any:
+            params: dict[str, Any] = {
+                "mode": mode,
+                "depth": depth,
+                "includeInactive": include_inactive,
+                "includeTechnical": include_technical,
+            }
+            if root:
+                params["root"] = root
+            return await agent_get(client, "/orgchart", params=params)
+
+        return await run_tool(
+            meta_org,
+            {
+                "root": root,
+                "mode": mode,
+                "depth": depth,
+                "include_inactive": include_inactive,
+                "include_technical": include_technical,
+            },
+            _run,
+            audit=audit,
+        )
+
     # —— UIAPI-56 Service restart ——
     meta_svc = ToolMeta(
         name="restart_iiq_service",
