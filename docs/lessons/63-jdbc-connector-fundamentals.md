@@ -8,7 +8,7 @@
 **Lab data:**
 - Repo: `lab-data/connectors/jdbc/mnb_core_accounts.sql`
 - Repo: `lab-data/connectors/jdbc/sample-rows.csv`
-- Repo: `docker-compose.connectors.yml` — **live Postgres (`jdbc-pg`) on host port 5433; required for this lesson**
+- Repo: main stack `jdbc-pg` (or `docker-compose.connectors.yml`) — **live Postgres on host port 5435; required**
 - Runtime: `~/iiq-lab-data/connectors/jdbc/`
 
 ---
@@ -66,7 +66,7 @@ Prediction before Task Connection: **4 accounts scanned; 1 DISABLED; wire dual-c
 `MNB-CoreBanking-JDBC` is a **target**. Create-identities **OFF**. HR remains workforce truth. DB orphans become uncorrelated accounts, not cubes.
 
 ```
-  docker jdbc-pg :5433  (db mnb_apps, user mnb)
+  docker jdbc-pg :5435  (db mnb_apps, user mnb)
         │  schema from mnb_core_accounts.sql
         │  rows from sample-rows.csv
         ▼
@@ -84,7 +84,7 @@ The JDBC connector opens a JDBC connection from the IIQ server, runs configured 
 
 ```
 IdentityIQ (MNB-CoreBanking-JDBC)
-        │  jdbc:postgresql://localhost:5433/mnb_apps
+        │  jdbc:postgresql://localhost:5435/mnb_apps
         │  user mnb / password mnb  (lab only)
         ▼
 PostgreSQL 16 (jdbc-pg container)
@@ -104,50 +104,33 @@ PostgreSQL 16 (jdbc-pg container)
 
 ## Real-world setup (outside IIQ)
 
-Per the style contract, **the live Postgres path is mandatory** — `docker-compose.connectors.yml` ships `jdbc-pg`.
+Per the style contract, **the live Postgres path is mandatory** — `./tools/lab/docker/up.sh` starts `jdbc-pg` (host **:5435**, not IIQ’s `:5433`).
 
 ### Step 1 — Start Postgres
 
 From the repo root:
 
 ```bash
-docker compose -f docker-compose.connectors.yml up -d jdbc-pg
+./tools/lab/docker/up.sh   # includes jdbc-pg
+# or: docker compose -f docker-compose.connectors.yml up -d jdbc-pg
 docker compose -f docker-compose.connectors.yml ps
 ```
 
-Image `postgres:16-alpine` creates database `mnb_apps` with user/password `mnb`/`mnb` and applies `lab-data/connectors/jdbc/mnb_core_accounts.sql` on first init (tables `mnb_app_accounts`, `mnb_app_entitlements`). Host port **5433** maps to container 5432 (avoids clashing with a local Postgres on 5432).
+Image `postgres:16-alpine` creates database `mnb_apps` with user/password `mnb`/`mnb` and applies `lab-data/connectors/jdbc/mnb_core_accounts.sql` on first init (**tables + 4 seed rows**). Host port **5435** maps to container 5432. Host **5433** is the IdentityIQ DB — do not point the JDBC app there.
 
 ### Step 2 — Verify with psql before IIQ
 
 ```bash
-psql "postgresql://mnb:mnb@localhost:5433/mnb_apps" -c '\dt'
-psql "postgresql://mnb:mnb@localhost:5433/mnb_apps" -c 'SELECT COUNT(*) FROM mnb_app_accounts;'
+psql "postgresql://mnb:mnb@localhost:5435/mnb_apps" -c '\dt'
+psql "postgresql://mnb:mnb@localhost:5435/mnb_apps" -c \
+  'SELECT account_id, username, status, entitlement FROM mnb_app_accounts ORDER BY 1;'
 ```
 
-Expect tables present. Count may be **0** until you load seed data — schema init does not insert the CSV rows.
-
-### Step 3 — Load seed rows
+Expect tables present and **4** seeded rows (Priya, Marcus, Jordan, Samir DISABLED). Seed is applied automatically from `mnb_core_accounts.sql` on first volume init. If count is 0, recreate the `jdbc-pg` volume (see [`lab-data/connectors/jdbc/README.md`](../../lab-data/connectors/jdbc/README.md)) or re-run the SQL file manually:
 
 ```bash
-psql "postgresql://mnb:mnb@localhost:5433/mnb_apps" <<'SQL'
-INSERT INTO mnb_app_accounts (account_id, username, email, employee_id, status, entitlement) VALUES
- ('jdbc-001','priya.wire','priya.wire@meridiannb.com','MNB00090','ACTIVE','WIRE_INIT'),
- ('jdbc-002','marcus.approve','marcus.approve@meridiannb.com','MNB00091','ACTIVE','WIRE_APPR'),
- ('jdbc-003','jordan.reed','jordan.reed@meridiannb.com','MNB00092','ACTIVE','SAP_FI'),
- ('jdbc-004','samir.hassan','samir.hassan@meridiannb.com','MNB00094','DISABLED','DWRP')
-ON CONFLICT (account_id) DO UPDATE SET
-  username=EXCLUDED.username, email=EXCLUDED.email, employee_id=EXCLUDED.employee_id,
-  status=EXCLUDED.status, entitlement=EXCLUDED.entitlement, updated_at=CURRENT_TIMESTAMP;
-
-INSERT INTO mnb_app_entitlements (entitlement_code, display_name, risk_tier) VALUES
- ('WIRE_INIT','Wire Initiate','critical'),
- ('WIRE_APPR','Wire Approve','critical'),
- ('SAP_FI','SAP Finance','high'),
- ('DWRP','Dormant / wrap-up','low')
-ON CONFLICT (entitlement_code) DO NOTHING;
-
-SELECT account_id, username, status, entitlement FROM mnb_app_accounts ORDER BY account_id;
-SQL
+psql "postgresql://mnb:mnb@localhost:5435/mnb_apps" \
+  -f lab-data/connectors/jdbc/mnb_core_accounts.sql
 ```
 
 ### Step 4 — Production deltas (document in binder)
@@ -195,13 +178,13 @@ cat ~/iiq-lab-data/connectors/jdbc/sample-rows.csv
 
 ### Task 2 — Start live Postgres and load data
 
-1. `docker compose -f docker-compose.connectors.yml up -d jdbc-pg`
-2. Run Step 2–3 `psql` verification and INSERT block.
+1. `./tools/lab/docker/up.sh` (includes `jdbc-pg`) — or `docker compose -f docker-compose.connectors.yml up -d jdbc-pg`
+2. Run Step 2 `psql` verification (expect 4 rows).
 3. Confirm `SELECT COUNT(*) FROM mnb_app_accounts;` returns **4**.
 
 **Expected result:** Live DB with four rows matching the CSV.
 
-**If it fails:** `connection refused` → container not up or wrong port (5433); auth fail → user/password `mnb`/`mnb`; empty tables after INSERT → connected to wrong database.
+**If it fails:** `connection refused` → container not up or wrong port (**5435**, not IIQ’s 5433); auth fail → user/password `mnb`/`mnb`; empty tables → wrong database or stale volume without seed.
 
 ### Task 3 — SQL map worksheet
 
@@ -232,7 +215,7 @@ FROM mnb_app_accounts;
 1. Applications → Add New → **JDBC** (or equivalent menu path).
 2. Name: `MNB-CoreBanking-JDBC`. Owner: Core Banking / Technology (lab `spadmin`); IAM contact `helen.ross`.
 3. Connection:
-   - **URL:** `jdbc:postgresql://localhost:5433/mnb_apps`  
+   - **URL:** `jdbc:postgresql://localhost:5435/mnb_apps`  
      (if IIQ is in Docker: `host.docker.internal` or compose network hostname — classic trap)
    - **User / password:** `mnb` / `mnb` — annotate *lab-only; production uses vaulted `iiq_corebank_ro`*
    - **Driver class:** PostgreSQL driver per your build
@@ -309,12 +292,12 @@ Secondary path — binder must say live path was **unavailable**, not skipped.
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Driver not found | Missing PostgreSQL JDBC jar | Install driver per IIQ docs; restart app server if required |
-| Connection refused | Container down or wrong port | `docker compose … ps`; use host port **5433** |
+| Connection refused | Container down or wrong port | `docker compose … ps`; use host port **5435** |
 | 0 rows, task green | Wrong SQL/table or empty DB | Re-run seed INSERT; match `mnb_app_accounts` |
 | Orphan cubes | Create-identities on | Disable; Lesson 62 remediation |
 | Entitlements missing | Column not marked entitlement | Fix schema; re-aggregate |
 | Password in XML export | Hygiene | Redact; use encrypted config / vault |
-| IIQ in Docker cannot reach DB | `localhost` is the container itself | Use `host.docker.internal` or compose service name `jdbc-pg` |
+| IIQ in Docker cannot reach DB | `localhost` is the container itself | From IIQ container use `jdbc:postgresql://jdbc-pg:5432/mnb_apps` (or `host.docker.internal:5435`) |
 
 ---
 
@@ -343,7 +326,7 @@ Secondary path — binder must say live path was **unavailable**, not skipped.
 1. JDBC (alternate: Microsoft SQL Server - Direct).
 2. `samir.hassan`.
 3. `employee_id` → `employeeId`.
-4. Port **5433**; database `mnb_apps`; user `mnb` (lab).
+4. Port **5435**; database `mnb_apps`; user `mnb` (lab).
 5. `WIRE_INIT`.
 6. No — it is a non-authoritative target.
 
@@ -367,7 +350,7 @@ Join `mnb_app_entitlements` in iterate SQL to surface `risk_tier`. Time aggregat
 
 ## Summary
 
-- `MNB-CoreBanking-JDBC` is onboarded against **live** Postgres (`jdbc-pg` :5433) with predicted counts from Meridian fixtures.
+- `MNB-CoreBanking-JDBC` is onboarded against **live** Postgres (`jdbc-pg` :5435) with predicted counts from Meridian fixtures.
 - Test Connection + aggregation Task Results, not CSV wishful thinking, are the examiner evidence for core banking inventory.
 - Correlation on `employee_id` and create-identities off protect HR truth while wire dual-control entitlements become certifiable.
 

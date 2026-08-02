@@ -10,7 +10,7 @@
 - Repo: `lab-data/connectors/webservices/sample-users.json`
 - Repo: `lab-data/connectors/connector-selection-matrix.csv` (Wire Portal API row)
 - Runtime: `~/iiq-lab-data/connectors/webservices/`
-- Optional live: mock API on `http://localhost:8091` per OpenAPI `servers`
+- **Live mock (mandatory when Docker runs):** `http://localhost:8091` — service `connector-mock` from `./tools/lab/docker/up.sh`
 
 ---
 
@@ -21,7 +21,7 @@ You will be able to:
 - Read Meridian’s Wire Portal OpenAPI and map every path to Web Services connector operations
 - Create **MNB-Wire-Portal-WS** with schema aligned to `sample-users.json`
 - Configure authentication placeholders (API key / OAuth) without committing secrets
-- Run Account Aggregation against a live mock **or** a documented Shadow path derived from the JSON fixture
+- Start the Meridian **connector-mock**, Test Connection to `:8091`, and aggregate Priya/Marcus (Shadow only if Docker is impossible)
 - Defend the Web Services vs SCIM choice and keep `WIRE_INIT` / `WIRE_APPR` SoD-safe
 
 ---
@@ -125,10 +125,19 @@ Links on priya.wire / marcus.approve cubes
 2. Separate **read** client (aggregation) from **write** client (provisioning) when the API allows.
 3. Rotate on bank schedule; page on 401 bursts.
 
-### Step 3 — Network
+### Step 3 — Network + start the lab mock
 
 1. IIQ servers → Wire Portal VIP only; TLS in non-lab.
-2. Mock lab listens on **8091** per OpenAPI — do not assume 8080 (that is IIQ).
+2. Lab mock listens on **8091** — do not assume 8080 (that is IIQ).
+
+```bash
+./tools/lab/docker/up.sh   # starts connector-mock
+# or: python3 tools/connector-mock/serve.py
+curl -s http://localhost:8091/health
+curl -s http://localhost:8091/users | python3 -m json.tool | head
+```
+
+From the IIQ container use base URL `http://connector-mock:8091` (not `localhost`).
 
 ### Step 4 — SoD before go-live
 
@@ -143,7 +152,7 @@ Links on priya.wire / marcus.approve cubes
 - [ ] `~/iiq-lab-data/connectors/webservices/` contains OpenAPI + `sample-users.json`
 - [ ] HR cubes for `priya.wire` / `marcus.approve` if correlation will be tested
 - [ ] Lesson 55: Wire Portal features still Unknown until this OpenAPI read
-- [ ] Optional: mock server on `:8091`; otherwise use Shadow path
+- [ ] `curl http://localhost:8091/health` returns ok (or dated deferral if Docker impossible)
 
 ---
 
@@ -179,8 +188,8 @@ The connector is only as correct as your reading of this file.
 
 1. Applications → Add New → **Web Services** (or equivalent template).
 2. Name: `MNB-Wire-Portal-WS`. Owner: `helen.ross`; business contact `priya.wire`.
-3. Base URL: `http://localhost:8091` (or lab gateway).
-4. Auth: API key / Basic / OAuth fields per build — vault placeholders only; never commit tokens.
+3. Base URL: `http://localhost:8091` (host IIQ) or `http://connector-mock:8091` (IIQ in Docker).
+4. Auth: API key / Basic / OAuth fields per build — vault placeholders only; never commit tokens. Lab mock accepts unauthenticated GETs.
 5. Create-identities **OFF**. Save.
 
 **Expected result:** Application object exists with Meridian naming.
@@ -194,18 +203,18 @@ This map is examiner evidence that IAM understood the API.
 1. Create `~/iiq-lab-data/connectors/webservices/MNB-Wire-Portal-WS-Ops-Map.md`.
 2. For Test Connection, Account Aggregation iterate, Get Object, Create, Update, Delete, fill: Method, URL, headers, body template, success codes, identity JSON path.
 3. Iterate example: `GET /users` → native identity `users[*].username`; entitlements `users[*].entitlements`.
-4. Create example: `POST /users` with `username`, `email`, `employeeId` from plan; expect 201.
+4. Create example: `POST /users` with `username`, `email`, `employeeId` from plan; expect 201 (OpenAPI; mock may be read-heavy).
 5. Update example: `PATCH /users/{id}` per OpenAPI — do not invent PUT.
 
 **Expected result:** Complete ops map covering read + write paths.
 
 **If it fails:** Copy OpenAPI paths verbatim; mark “response parse TBD” rather than guessing JSONPath.
 
-### Task 5 — Aggregation (live mock or Shadow)
+### Task 5 — Aggregation against connector-mock (primary)
 
-**If mock API up on :8091:** configure iterate op; **Test Connection**; run Account Aggregation `MNB-Wire-Portal-WS-Account-Aggregation`; expect `priya.wire` and `marcus.approve`.
+**Primary (live mock):** configure iterate op to `GET /users`; **Test Connection**; run Account Aggregation `MNB-Wire-Portal-WS-Account-Aggregation`; expect `priya.wire` and `marcus.approve`.
 
-**If API down (lab-without-live-target):** flatten `sample-users.json` to CSV:
+**Fallback only if Docker/mock impossible (lab-without-live-target):** flatten `sample-users.json` to CSV and create Shadow DelimitedFile `MNB-Wire-Portal-WS-Shadow`; binder must say live path was *unavailable*, not skipped.
 
 ```csv
 id,username,email,employeeId,active,entitlements
@@ -213,10 +222,7 @@ wp-90,priya.wire,priya.wire@meridiannb.com,MNB00090,true,WIRE_INIT
 wp-91,marcus.approve,marcus.approve@meridiannb.com,MNB00091,true,WIRE_APPR
 ```
 
-Create Shadow DelimitedFile `MNB-Wire-Portal-WS-Shadow`; aggregate; document that production uses Web Services.
-
-**Expected result:** Task Result Success with two wire users (live or shadow).
-
+**Expected result:** Task Result Success with two wire users from `:8091` (or dated Shadow deferral).
 **If it fails:** Wrong JSON root (`users` vs `data`); fix parse path to match fixture.
 
 ### Task 6 — Provisioning sketch + SoD
@@ -295,7 +301,7 @@ CHANGELOG: “Lesson 68 Web Services connector MNB-Wire-Portal-WS mapped from wi
 1. Web Services (alternate SCIM 2.0).
 2. `lab-data/connectors/webservices/wire-portal-openapi.yaml`.
 3. `priya.wire` → WIRE_INIT; `marcus.approve` → WIRE_APPR.
-4. Complete ops map + Shadow DelimitedFile from fixture JSON/CSV.
+4. Prefer `./tools/lab/docker/up.sh` / `connector-mock` on `:8091`; only if Docker is impossible, complete ops map + Shadow DelimitedFile and date the deferral.
 5. Tokens are credentials; use vault/env; redact screenshots.
 6. PATCH `/users/{id}`.
 
@@ -320,7 +326,7 @@ Implement response mapping for `GET /users/{id}/entitlements` as a separate enti
 ## Summary
 
 - Web Services maps OpenAPI operations to IIQ connector ops for custom bank APIs — Wire Portal is the Meridian exemplar.
-- `MNB-Wire-Portal-WS` plus the ops map is valid training evidence with or without `:8091`.
+- Primary path aggregates against `connector-mock` `:8091`; Shadow is fallback only when Docker is impossible.
 - Wire entitlements remain SoD-sensitive; aggregation must preserve initiator vs approver.
 
 ---

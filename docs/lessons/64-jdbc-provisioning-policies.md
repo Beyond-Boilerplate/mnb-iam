@@ -9,7 +9,7 @@
 - Repo: `lab-data/connectors/jdbc/mnb_core_accounts.sql`
 - Repo: `lab-data/connectors/jdbc/sample-rows.csv`
 - Repo: `lab-data/connectors/features-string-glossary.md`
-- Repo: `docker-compose.connectors.yml` — **live Postgres (`jdbc-pg`) on host port 5433; required**
+- Repo: main stack `jdbc-pg` (or `docker-compose.connectors.yml`) — **live Postgres on host port 5435; required**
 - Runtime: `~/iiq-lab-data/connectors/jdbc/`
 
 ---
@@ -76,7 +76,7 @@ Never grant both `WIRE_INIT` and `WIRE_APPR` to one identity — SoD (Lessons 40
   JDBC provisioning policy (binds + SQL/proc)
         │
         ▼
-  PostgreSQL jdbc-pg :5433 / mnb_apps
+  PostgreSQL jdbc-pg :5435 / mnb_apps
         │
         ▼
   mnb_app_accounts row change → next aggregation sees it
@@ -90,7 +90,7 @@ IIQ builds a provisioning plan (create account, set attribute, disable). The JDB
 
 ```
 IdentityIQ (MNB-CoreBanking-JDBC)
-        │  jdbc:postgresql://localhost:5433/mnb_apps
+        │  jdbc:postgresql://localhost:5435/mnb_apps
         │  provisioning SQL / CALL mnb_sp_*
         ▼
 PostgreSQL 16 (jdbc-pg)
@@ -112,17 +112,18 @@ Use **bind parameters** (`?`) — never string-concatenate usernames or entitlem
 
 ## Real-world setup (outside IIQ)
 
-Live Postgres is **mandatory** for this lesson when Docker runs — same `jdbc-pg` as Lesson 63.
+Live Postgres is **mandatory** — same `jdbc-pg` as Lesson 63 (main stack or connectors compose; host **:5435**).
 
 ### Step 1 — Confirm jdbc-pg and seed data
 
 ```bash
-docker compose -f docker-compose.connectors.yml up -d jdbc-pg
-psql "postgresql://mnb:mnb@localhost:5433/mnb_apps" -c \
+./tools/lab/docker/up.sh   # includes jdbc-pg
+# or: docker compose -f docker-compose.connectors.yml up -d jdbc-pg
+psql "postgresql://mnb:mnb@localhost:5435/mnb_apps" -c \
   "SELECT account_id, username, status, entitlement FROM mnb_app_accounts ORDER BY account_id;"
 ```
 
-Expect four rows. If empty, re-run Lesson 63 seed INSERT block.
+Expect four rows. If empty, recreate the `mnb-jdbc-pg` volume so init SQL re-runs (see `lab-data/connectors/jdbc/README.md`) — do not point at IIQ’s `:5433`.
 
 ### Step 2 — Production privilege split (document even in lab)
 
@@ -145,7 +146,7 @@ Store procedure definitions next to schema fixtures. Examiners will ask for the 
 
 ## Before you start
 
-- [ ] Lesson 63 complete: `MNB-CoreBanking-JDBC` Test Connection works to `:5433`
+- [ ] Lesson 63 complete: `MNB-CoreBanking-JDBC` Test Connection works to `:5435`
 - [ ] `psql` available; four seed rows present
 - [ ] Feature matrix: PROVISIONING/ENABLE for JDBC = Y (Lesson 55)
 - [ ] IIQ at `http://localhost:8080/identityiq` as `spadmin`
@@ -197,7 +198,7 @@ WHERE account_id = ?;
 Before wiring IIQ, prove the disable statement against `samir.hassan`’s row (already DISABLED — re-run must be idempotent).
 
 ```bash
-psql "postgresql://mnb:mnb@localhost:5433/mnb_apps" <<'SQL'
+psql "postgresql://mnb:mnb@localhost:5435/mnb_apps" <<'SQL'
 UPDATE mnb_app_accounts
 SET status = 'DISABLED', updated_at = CURRENT_TIMESTAMP
 WHERE account_id = 'jdbc-004';
@@ -216,7 +217,7 @@ Joiner create must be reversible in the lab so you do not pollute the four-row b
 1. Insert a lab account:
 
 ```bash
-psql "postgresql://mnb:mnb@localhost:5433/mnb_apps" <<'SQL'
+psql "postgresql://mnb:mnb@localhost:5435/mnb_apps" <<'SQL'
 INSERT INTO mnb_app_accounts
   (account_id, username, email, employee_id, status, entitlement)
 VALUES
@@ -238,7 +239,7 @@ This is where Lesson 63’s application grows write capability.
 1. Open `MNB-CoreBanking-JDBC` → provisioning policy / create policy forms (or equivalent menu path).
 2. Map plan attributes to binds: `account_id`, `username`, `email`, `employee_id`, `entitlement`, `status`.
 3. Configure disable to use status UPDATE (ENABLE), not a missing operation.
-4. Prefer the same JDBC URL as aggregation: `jdbc:postgresql://localhost:5433/mnb_apps` (or `host.docker.internal` if IIQ is containerized).
+4. Prefer the same JDBC URL as aggregation: `jdbc:postgresql://localhost:5435/mnb_apps` (or `host.docker.internal` if IIQ is containerized).
 5. Save. If UI fields differ by version, paste a field→SQL table into the markdown — still complete the live `psql` proofs.
 
 **Expected result:** Policy configured in IIQ **and** live SQL proofs attached.
@@ -308,7 +309,7 @@ Secondary path — binder must say live path was **unavailable**.
 | Hard deletes in prod plan | Missing ADR | Soft-disable proc only |
 | Bind mismatch | Wrong attribute names | Align to Lesson 63 maps |
 | SoD bypass | Direct SQL grant | Keep IIQ + SoD checks |
-| Connection refused | jdbc-pg down / wrong port | Host port **5433**; compose ps |
+| Connection refused | jdbc-pg down / wrong port | Host port **5435**; compose ps |
 | IIQ in Docker cannot reach DB | `localhost` is the container | `host.docker.internal` or `jdbc-pg` |
 
 ---
@@ -339,7 +340,7 @@ Secondary path — binder must say live path was **unavailable**.
 2. `status='DISABLED'` (ENABLE semantics).
 3. No — prefer soft-disable / controlled proc.
 4. No — SoD still applies.
-5. **5433** (container 5432).
+5. **5435** (container 5432).
 6. Prevent SQL injection and broken quoting; OWASP parameterization.
 
 ---

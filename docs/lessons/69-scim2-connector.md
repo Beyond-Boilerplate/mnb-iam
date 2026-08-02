@@ -134,9 +134,20 @@ Confirm `featuresString` (`PROVISIONING`, `ENABLE`, …) via glossary/registry b
 2. Document which core attributes are authoritative on the SaaS vs HR.
 3. Create-identities **OFF** — SaaS is a target.
 
-### Step 4 — Network / IP allow lists
+### Step 4 — Network / IP allow lists + lab mock
 
 Many SaaS products allowlist IIQ egress IPs — request before Test Connection day.
+
+**Lab mock (mandatory when Docker runs):** same `connector-mock` service as Lesson 68.
+
+```bash
+./tools/lab/docker/up.sh
+curl -s http://localhost:8091/scim/v2/Users | python3 -m json.tool | head
+```
+
+Base URL for IIQ:
+- Host IIQ / laptop: `http://localhost:8091/scim/v2`
+- IIQ container: `http://connector-mock:8091/scim/v2`
 
 ---
 
@@ -144,6 +155,7 @@ Many SaaS products allowlist IIQ egress IPs — request before Test Connection d
 
 - [ ] IIQ up; Lesson 68 ops-map concepts fresh (contrast only)
 - [ ] `Users.json` copied under `~/iiq-lab-data/connectors/scim/`
+- [ ] `curl http://localhost:8091/scim/v2/Users` returns `totalResults: 2` (or dated deferral)
 - [ ] Know `externalId` values MNB00090 / MNB00091
 - [ ] Feature glossary available
 
@@ -185,11 +197,11 @@ python3 -m json.tool ~/iiq-lab-data/connectors/scim/Users.json >/dev/null
 ### Task 3 — Create MNB-SCIM-SaaS
 
 1. Applications → Add New → **SCIM 2.0** (or equivalent).
-2. Base URL placeholder: `https://saas.example.meridiannb.com/scim/v2` (lab) or vendor URL.
-3. Auth placeholders only — no real tokens in repo.
+2. Base URL: `http://localhost:8091/scim/v2` (or `http://connector-mock:8091/scim/v2` from IIQ container). Production card still documents `https://saas.example.meridiannb.com/scim/v2`.
+3. Auth placeholders only — lab mock accepts unauthenticated GETs; never commit real tokens.
 4. Create-identities **OFF**. Save.
 
-**Expected result:** Application shell saved.
+**Expected result:** Application shell saved pointing at connector-mock.
 
 **If it fails:** Document intended settings in notes; continue attribute mapping.
 
@@ -202,11 +214,11 @@ python3 -m json.tool ~/iiq-lab-data/connectors/scim/Users.json >/dev/null
 
 **Expected result:** Attribute/correlation map table signed off.
 
-### Task 5 — Aggregation (live or lab-without-live-target)
+### Task 5 — Aggregation against connector-mock (primary)
 
-**Live SCIM:** Test Connection; run **Account Aggregation** `MNB-SCIM-SaaS-Account-Aggregation`; expect 2 accounts.
+**Primary (live mock):** Test Connection; run **Account Aggregation** `MNB-SCIM-SaaS-Account-Aggregation`; expect 2 accounts (`priya.wire`, `marcus.approve`). Optional: `PATCH /scim/v2/Users/scim-90` with `active=false` via curl to practice disable echo, then re-GET.
 
-**No live target:** Flatten to `MNB-SCIM-SaaS-Shadow.csv`:
+**Fallback only if mock unavailable (lab-without-live-target):** Flatten to `MNB-SCIM-SaaS-Shadow.csv` — binder must say live path was unavailable:
 
 ```csv
 id,userName,email,employeeId,active
@@ -298,7 +310,7 @@ DelimitedFile shadow app; aggregate; label training shadow clearly.
 2. `externalId` (e.g., MNB00090).
 3. `priya.wire` and `marcus.approve`.
 4. When the SaaS vendor provides standard SCIM Users/Groups.
-5. Flattened fixture/CSV Shadow app plus full attribute map.
+5. Prefer `connector-mock` `GET /scim/v2/Users`; only if unavailable, flatten fixture/CSV to a `-Shadow` app and date the deferral.
 6. `2`.
 
 ---
@@ -321,7 +333,7 @@ Add a Groups ListResponse stub JSON and document how group entitlements would ap
 
 ## Summary
 
-- SCIM 2.0 standardizes SaaS user aggregation and enable/disable for Meridian; `Users.json` is the golden contract when no tenant exists.
+- SCIM 2.0 standardizes SaaS user aggregation and enable/disable; lab primary target is `connector-mock` `/scim/v2` (`Users.json` remains the contract / Shadow source).
 - Correlate on `externalId` → `userId`; treat Wire Portal as Web Services, not faux-SCIM.
 - Paging reconcile and disable storyboards are examiner-facing controls.
 

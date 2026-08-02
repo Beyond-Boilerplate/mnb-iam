@@ -292,20 +292,58 @@ Connect the plumbing to the control story — this paragraph of narrative is wha
 
 **Expected result:** Entitlement described and risk-flagged; leaver evidence chain written down, including the no-disable-flag caveat.
 
-### Task 8 — Production hardening notes
+### Task 8 — Live provision stretch (group add → re-aggregate → remove)
+
+Aggregation alone does not prove the write path. The main stack already applied ACLs for `cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com` / `Provision1!` — use that bind (not `cn=admin`) to change a group, then prove it in IIQ.
+
+1. Switch `MNB-OpenLDAP` application bind to the **provision** service account (see [`lab-data/connectors/ldap/README.md`](../../lab-data/connectors/ldap/README.md)). Re-Test Connection.
+2. Add teller `amelia.brooks` to `wire-initiators` via the provision bind:
+
+```bash
+ldapmodify -x -H ldap://localhost:389 \
+  -D 'cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com' -w 'Provision1!' \
+  -f lab-data/connectors/ldap/provision-stretch-add-wire.ldif
+```
+
+3. Confirm with a read bind:
+
+```bash
+ldapsearch -x -H ldap://localhost:389 \
+  -b 'cn=wire-initiators,ou=groups,dc=meridiannb,dc=com' \
+  -D 'cn=svc-iiq-read,dc=meridiannb,dc=com' -w 'Readonly1!' uniqueMember
+```
+
+4. Run **Account Aggregation** for `MNB-OpenLDAP`. Open `amelia.brooks` — she should now show `wire-initiators` (SoD-risky for a teller — binder finding).
+5. Remove the membership (leaver / residual pattern) and re-aggregate:
+
+```bash
+ldapmodify -x -H ldap://localhost:389 \
+  -D 'cn=svc-iiq-provision,ou=service,dc=meridiannb,dc=com' -w 'Provision1!' \
+  -f lab-data/connectors/ldap/provision-stretch-remove-wire.ldif
+```
+
+6. Binder: before/after Task Results + note that OpenLDAP still has **no disable flag** — group remove is the evidence.
+
+**Expected result:** Add and remove of `uniqueMember` proven via provision ACL + aggregation deltas for Amelia.
+
+**If it fails:** `insufficient access` → ACL init did not run (`openldap-provision-acl`); wrong bind still on read-only `svc-iiq-read`. From IIQ container use host `openldap` not `localhost`.
+
+Optional IIQ-native path: if your build can emit a Modify plan that adds/removes the group entitlement, execute one plan as stretch-on-stretch and still verify with `ldapsearch`.
+
+### Task 9 — Production hardening notes
 
 The lab deliberately violates three production rules; writing them down is what separates a lab exercise from training evidence.
 
-1. In the schema file, record the three deltas from the Real-world setup section: (1) read-only service bind DN instead of `cn=admin`, vaulted and rotated; (2) LDAPS/StartTLS with named trust-store owner — plain LDAP requires an ADR exception; (3) paged results enabled before pointing at any directory larger than the server size limit.
-2. Add the examiner line: *"Lab used admin bind over plain LDAP on localhost only; production design is documented at right."*
+1. In the schema file, record the three deltas from the Real-world setup section: (1) dedicated service bind (provision vs read) vaulted and rotated — not `cn=admin`; (2) LDAPS/StartTLS with named trust-store owner — plain LDAP requires an ADR exception; (3) paged results enabled before pointing at any directory larger than the server size limit.
+2. Add the examiner line: *"Lab used plain LDAP on localhost; provision ACL + svc-iiq-provision exercised for group change; production design is documented at right."*
 
 **Expected result:** Hardening section with all three deltas and the lab-only disclaimer.
 
-### Task 9 — Fallback path (only if you cannot run Docker)
+### Task 10 — Fallback path (only if you cannot run Docker)
 
 This path exists for locked-down machines; it is explicitly secondary and your binder must say the live path was unavailable, not skipped.
 
-1. Complete Tasks 2, 3 (placeholder host `mnb-openldap:389`), 5, 7, and 8 using the LDIF as schema truth; skip Test Connection and mark Task 6 as *deferred — no live target*, keeping the prediction card as the expected-results record.
+1. Complete Tasks 2, 3 (placeholder host `mnb-openldap:389`), 5, 7, and 9 using the LDIF as schema truth; skip Test Connection and mark Tasks 6 and 8 as *deferred — no live target*, keeping the prediction card as the expected-results record.
 
 **Expected result:** All design artifacts complete; a dated deferred-aggregation note in the binder.
 
@@ -319,7 +357,8 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 - [ ] Schema: `inetOrgPerson` accounts on `uid`, `groupOfUniqueNames` entitlements, create-identities off
 - [ ] Aggregation Task Result matches the prediction exactly; accounts correlated by `employeeNumber`
 - [ ] `wire-initiators` described and risk-flagged; leaver evidence chain written
-- [ ] Hardening notes: read-only bind, LDAPS, paged results (fallback path: deferred note instead of live results)
+- [ ] Provision stretch: Amelia added to / removed from `wire-initiators` via `svc-iiq-provision` + re-aggregate (or dated deferral)
+- [ ] Hardening notes: service binds, LDAPS, paged results (fallback path: deferred note instead of live results)
 
 ---
 
@@ -381,7 +420,7 @@ This path exists for locked-down machines; it is explicitly secondary and your b
 
 ## Stretch lab
 
-Add a new `inetOrgPerson` and a SoD-risky membership (e.g. put `raj.external` into `wire-initiators`). Recreate OpenLDAP volumes so bootstrap reloads, re-run aggregation, and verify the new prediction. Document the contractor-in-wire-initiators finding for Lesson 40 policies. Optionally convert the container to LDAPS with a self-signed cert and document the trust-store import on the IIQ side.
+Put `raj.external` into `wire-initiators` with the same provision-bind pattern (custom LDIF), re-aggregate, and document the contractor-in-wire-initiators finding for Lesson 40 policies. Optionally convert the container to LDAPS with a self-signed cert and document the trust-store import on the IIQ side.
 
 ---
 
