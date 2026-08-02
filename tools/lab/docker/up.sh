@@ -58,6 +58,8 @@ LDAP_PORT="${LDAP_PORT:-389}"
 LDAPS_PORT="${LDAPS_PORT:-636}"
 PHPLDAPADMIN_PORT="${PHPLDAPADMIN_PORT:-8090}"
 PG_PORT="${PG_PORT:-5433}"
+JDBC_PG_PORT="${JDBC_PG_PORT:-5435}"
+CONNECTOR_MOCK_PORT="${CONNECTOR_MOCK_PORT:-8091}"
 
 PORTS=(
   "IIQ:${IIQ_HTTP_PORT}"
@@ -69,6 +71,8 @@ PORTS=(
   "OpenLDAP:${LDAP_PORT}"
   "LDAPS:${LDAPS_PORT}"
   "Postgres:${PG_PORT}"
+  "JDBC-lab:${JDBC_PG_PORT}"
+  "connector-mock:${CONNECTOR_MOCK_PORT}"
 )
 
 # Images we build locally (pull-only IIQ image is separate).
@@ -78,6 +82,7 @@ LOCAL_IMAGES=(
   "${OPENLDAP_IMAGE:-mnb-openldap:local}"
   "${API_DOCS_IMAGE:-mnb-api-docs:local}"
   "${ACADEMY_IMAGE:-mnb-academy:local}"
+  "${CONNECTOR_MOCK_IMAGE:-mnb-connector-mock:local}"
 )
 
 die() { echo "ERROR: $*" >&2; exit 1; }

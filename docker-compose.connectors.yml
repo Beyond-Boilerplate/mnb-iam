@@ -1,12 +1,13 @@
 # Optional connector backends when not using the main Meridian stack.
 #
-# Prefer the main stack (includes OpenLDAP with seed baked in):
+# Prefer the main stack (includes OpenLDAP, jdbc-pg, connector-mock):
 #   ./tools/lab/docker/up.sh
 #
 # Standalone:
 #   docker compose -f docker-compose.connectors.yml up -d --build
 #
-# Note: main stack Postgres already binds host :5433 — jdbc-pg uses :5434 here.
+# Note: main stack IIQ Postgres binds host :5433 — jdbc-pg uses :5435 here.
+# Mock API: http://localhost:8091/
 
 services:
   openldap:
@@ -62,10 +63,38 @@ services:
       POSTGRES_PASSWORD: mnb
       POSTGRES_DB: mnb_apps
     ports:
-      - "${JDBC_PG_PORT:-5434}:5432"
+      - "${JDBC_PG_PORT:-5435}:5432"
     volumes:
       - ./lab-data/connectors/jdbc/mnb_core_accounts.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - mnb-connectors-jdbc-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mnb -d mnb_apps"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  connector-mock:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.connector-mock
+    image: ${CONNECTOR_MOCK_IMAGE:-mnb-connector-mock:local}
+    container_name: mnb-connector-mock
+    ports:
+      - "${CONNECTOR_MOCK_PORT:-8091}:8091"
+    environment:
+      MOCK_HOST: "0.0.0.0"
+      MOCK_PORT: "8091"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8091/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
 
 volumes:
   mnb-connectors-openldap-data:

@@ -29,6 +29,8 @@ Startup **fails fast** if required host ports are taken by something other than 
 | http://localhost:4180/ | **Teller** chatbot (pre-baked MCP + OpenRouter) |
 | http://localhost:8090/ | **phpLDAPadmin** (browse OpenLDAP; `cn=admin,dc=meridiannb,dc=com` / `admin`) |
 | ldap://localhost:389 | **OpenLDAP** (`cn=admin,dc=meridiannb,dc=com` / `admin`) |
+| localhost:5435 | **jdbc-pg** Meridian apps DB (`mnb` / `mnb` / `mnb_apps`) — Lessons 63–64 |
+| http://localhost:8091/health | **connector-mock** Wire Portal + SCIM — Lessons 68–69 |
 
 ### Lab file paths (Delimited File connectors)
 
@@ -78,10 +80,12 @@ claude mcp add --scope user --transport http identityiq http://127.0.0.1:8766/mc
 
 ## Optional JDBC sample
 
-Sample JDBC Postgres (host port **5434**, avoids clashing with lab Postgres on 5433):
+Sample JDBC Postgres (host port **5435**, avoids clashing with lab Postgres on 5433):
 
 ```bash
-docker compose -f docker-compose.connectors.yml up -d jdbc-pg
+# jdbc-pg (:5435) and connector-mock (:8091) ship with the main stack.
+# Standalone only if needed:
+docker compose -f docker-compose.connectors.yml up -d jdbc-pg connector-mock
 ```
 
 ## Alternative: Tomcat on the host

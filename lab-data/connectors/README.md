@@ -17,4 +17,12 @@ Use these when lessons move beyond Delimited File. Optional Docker targets are d
 | `rules/README.md` | Rule type cheat sheet + stub names |
 | `plugins/README.md` | Plugin packaging notes for Meridian |
 
-OpenLDAP starts with the main Docker lab (`./tools/lab/docker/up.sh`). Sample JDBC is optional via `docker-compose.connectors.yml`. Every connector lesson still includes a **lab-without-live-target** path so training completes without Docker backends.
+The main Docker lab (`./tools/lab/docker/up.sh`) starts:
+
+| Service | Host | Lessons |
+| --- | --- | --- |
+| OpenLDAP | `:389` | 58 (+ provision stretch) |
+| `jdbc-pg` | `:5435` → `mnb_apps` | 63–64 |
+| `connector-mock` | `:8091` | 68–69 (WS + SCIM) |
+
+Standalone: `docker-compose.connectors.yml`. Every connector lesson still includes a **lab-without-live-target** (Shadow) path when Docker backends are unavailable.
