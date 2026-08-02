@@ -3,7 +3,8 @@
   "lesson": "59",
   "stem": "59-azure-entra-id-connector",
   "title": "Azure / Entra ID Connector",
-  "description": "Auto-generated verify checks for Lesson 59. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 59. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

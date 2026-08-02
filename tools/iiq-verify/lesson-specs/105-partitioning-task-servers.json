@@ -3,7 +3,8 @@
   "lesson": "105",
   "stem": "105-partitioning-task-servers",
   "title": "Partitioning & Task Servers",
-  "description": "Auto-generated verify checks for Lesson 105. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 105. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

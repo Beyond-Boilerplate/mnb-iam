@@ -3,7 +3,8 @@
   "lesson": "85",
   "stem": "85-logical-applications",
   "title": "Logical Applications",
-  "description": "Auto-generated verify checks for Lesson 85. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 85. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

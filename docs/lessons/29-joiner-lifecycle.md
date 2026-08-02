@@ -8,6 +8,8 @@
 
 ---
 
+> **Verify:** Lab lesson — apply joiner delta, aggregate/refresh, prove `nina.joiner` + birthright. Academy **Verify now** checks birthright, HR, joiner file, and Nina (soft until applied).
+
 ## Learning objectives
 
 You will be able to:

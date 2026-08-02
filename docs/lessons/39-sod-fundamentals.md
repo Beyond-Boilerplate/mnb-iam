@@ -13,6 +13,8 @@
 
 ---
 
+> **Verify:** Lab lesson — create SoD policies. Academy **Verify now** checks `MNB-SOD-Wire-DualControl` and `MNB-SOD-Finance-Cloud`.
+
 ## Learning objectives
 
 You will be able to:

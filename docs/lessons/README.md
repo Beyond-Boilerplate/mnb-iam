@@ -52,7 +52,7 @@ docker compose -f docker-compose.connectors.yml up -d jdbc-pg connector-mock
 ```
 
 7. Keep a CHANGELOG of `MNB-*` objects you **create**, optional `config/` exports, and evidence screenshots.
-8. After each lesson, run **Verify now** in the Academy (or the CLI). Progress updates only from a live IIQ check — JSON paste is disabled.
+8. After each lesson, run **Verify now** in the Academy (or the CLI) for **lab** lessons. Paperwork / design lessons disable live Verify — use **Mark binder complete** instead. Progress never comes from JSON paste.
 
 ```bash
 ./tools/lab/up.sh   # or ./tools/lab/docker/up.sh

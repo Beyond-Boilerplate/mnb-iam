@@ -3,7 +3,8 @@
   "lesson": "88",
   "stem": "88-connector-gateway-cloud-patterns",
   "title": "Connector Gateway / Cloud Patterns",
-  "description": "Auto-generated verify checks for Lesson 88. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 88. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "object.exists",

@@ -3,7 +3,8 @@
   "lesson": "102",
   "stem": "102-custom-java-services",
   "title": "Custom Java Services",
-  "description": "Auto-generated verify checks for Lesson 102. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 102. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "object.exists",

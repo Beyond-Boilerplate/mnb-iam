@@ -3,7 +3,8 @@
   "lesson": "83",
   "stem": "83-linux-unix-connector",
   "title": "Linux / Unix Connector",
-  "description": "Auto-generated verify checks for Lesson 83. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 83. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

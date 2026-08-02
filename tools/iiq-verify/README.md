@@ -12,7 +12,9 @@
 - Prefer **SCIM/REST** when enabled; **iiq console** fallback for Applications/Tasks
 - Modes: `local` (default), `docker`, `k8s`
 
-Track progress in the Academy UI with **Verify now** only (live IIQ). Pasting JSON cannot mark a lesson PASS.
+Track progress in the Academy UI with **Verify now** (live IIQ) for lab lessons. Pasting JSON cannot mark a lesson PASS.
+
+**Paperwork / design lessons** (`verifyMode: paperwork` in the spec) disable live checks — use **Mark binder complete** in the Academy (or CLI, which returns PASS with a paperwork note).
 
 ```bash
 ./tools/lab/up.sh            # Tomcat + Academy

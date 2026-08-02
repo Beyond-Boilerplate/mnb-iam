@@ -840,6 +840,51 @@ def main() -> int:
     spec_path = resolve_spec(args.lesson)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     mode = args.mode or detect_mode()
+    verify_mode = (spec.get("verifyMode") or "lab").strip().lower()
+    if spec.get("disabled") is True:
+        verify_mode = "paperwork"
+
+    # Paperwork / design lessons: no live IIQ object checks (binder evidence only).
+    if verify_mode == "paperwork":
+        note = spec.get("paperworkNote") or (
+            "Paperwork / design lesson — no IIQ lab mutation required. "
+            "Complete the binder acceptance criteria; live Verify is disabled."
+        )
+        results = [
+            {
+                "id": "paperwork-disabled",
+                "type": "paperwork",
+                "status": "PASS",
+                "message": "Live IIQ verify disabled (paperwork / design)",
+                "detail": note,
+                "hint": "",
+            }
+        ]
+        report = {
+            "schema": "mnb-lesson-verify-report/v1",
+            "lesson": spec.get("lesson"),
+            "stem": spec.get("stem"),
+            "title": spec.get("title"),
+            "verifyMode": "paperwork",
+            "verdict": "PASS",
+            "checkedAt": datetime.now(timezone.utc).isoformat(),
+            "target": {"baseUrl": args.base_url, "mode": mode, "user": args.user},
+            "transport": ["paperwork"],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "warned": 0},
+            "gaps": [],
+            "checks": results,
+            "paperworkNote": note,
+        }
+        REPORT_DIR.mkdir(parents=True, exist_ok=True)
+        out_path = Path(args.json_out) if args.json_out else REPORT_DIR / f"lesson-{spec.get('lesson')}.json"
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(f"Lesson {spec.get('lesson')} — {spec.get('title')}")
+        print("Verify mode: paperwork (live IIQ checks disabled)")
+        print(f"Note: {note}")
+        print(f"Verdict: PASS")
+        print(f"Report: {out_path}")
+        return 0
+
     client = IIQClient(args.base_url, args.user, args.password, mode)
 
     checks = list(spec.get("checks", []))
@@ -868,6 +913,7 @@ def main() -> int:
         "lesson": spec.get("lesson"),
         "stem": spec.get("stem"),
         "title": spec.get("title"),
+        "verifyMode": "lab",
         "verdict": verdict,
         "checkedAt": datetime.now(timezone.utc).isoformat(),
         "target": {"baseUrl": args.base_url, "mode": mode, "user": args.user},

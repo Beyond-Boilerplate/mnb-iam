@@ -9,6 +9,8 @@
 
 ---
 
+> **Verify:** Optional design lesson — paper event card or disabled draft only. Academy **Verify now** is disabled; mark the binder complete if you finish the design (skip freely for Core Path).
+
 ## Learning objectives
 
 You will be able to:

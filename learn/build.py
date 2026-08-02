@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 import shutil
 from pathlib import Path
@@ -12,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LESSONS = ROOT / "docs" / "lessons"
 OUT = ROOT / "learn" / "dist"
 ASSETS_SRC = ROOT / "learn" / "assets"
+SPECS = ROOT / "tools" / "iiq-verify" / "lesson-specs"
 
 
 def md_to_html(md: str) -> str:
@@ -222,7 +224,7 @@ SHELL = """<!DOCTYPE html>
         <div class="crumb">{crumb}</div>
         <a class="lab-link" href="https://sailpoint.lmsapp.us/identityiq/login.jsf" target="_blank" rel="noopener">Open IIQ lab ↗</a>
       </header>
-      <main id="main" class="lesson">
+      <main id="main" class="lesson" data-stem="{stem}" data-verify-mode="{verify_mode}" data-paperwork-note="{paperwork_note}">
         {body}
         <footer class="pager">{pager}</footer>
       </main>
@@ -303,6 +305,24 @@ def toc_badge(stem: str) -> str:
     if re.match(r"^\d{2,3}[a-z]-", stem):
         return '<span class="toc-badge">lab+</span>'
     return ""
+
+
+def load_verify_meta(stem: str) -> dict:
+    """Read verifyMode / paperworkNote from lesson-spec JSON when present."""
+    path = SPECS / f"{stem}.json"
+    if not path.is_file():
+        return {"verifyMode": "lab", "paperworkNote": ""}
+    try:
+        spec = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"verifyMode": "lab", "paperworkNote": ""}
+    mode = (spec.get("verifyMode") or "lab").strip().lower()
+    if spec.get("disabled") is True:
+        mode = "paperwork"
+    note = spec.get("paperworkNote") or ""
+    if mode not in {"lab", "paperwork"}:
+        mode = "lab"
+    return {"verifyMode": mode, "paperworkNote": note}
 
 
 def build() -> None:
@@ -398,6 +418,9 @@ def build() -> None:
         crumb="<span>Curriculum</span>",
         body=index_body,
         pager='<a class="btn primary" href="' + start["stem"] + '.html">Begin with Lesson 01 →</a>',
+        stem="index",
+        verify_mode="lab",
+        paperwork_note="",
     )
     (OUT / "index.html").write_text(index_html, encoding="utf-8")
 
@@ -432,6 +455,7 @@ def build() -> None:
             if idx < len(metas) - 1
             else "<span>Curriculum complete</span>"
         )
+        vmeta = load_verify_meta(meta["stem"])
         page = SHELL.format(
             title=meta["title"],
             description=meta["why"] or meta["title"],
@@ -440,6 +464,9 @@ def build() -> None:
             crumb=f'<a href="index.html">Curriculum</a><span>/</span><span>{html.escape(lesson_num(meta["stem"]))}</span>',
             body=body,
             pager=f'<div class="pager-row">{prev_link}{next_link}</div>',
+            stem=html.escape(meta["stem"], quote=True),
+            verify_mode=html.escape(vmeta["verifyMode"], quote=True),
+            paperwork_note=html.escape(vmeta["paperworkNote"], quote=True),
         )
         # Mark active toc item
         page = page.replace(

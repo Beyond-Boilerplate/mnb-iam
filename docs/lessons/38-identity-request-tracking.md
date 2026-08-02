@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Evidence / paperwork — assemble an IdentityRequest audit pack from prior requests. No new lab objects required. Academy **Verify now** is disabled; mark the binder complete when the pack is done.
+
 ## Learning objectives
 
 You will be able to:

@@ -87,6 +87,16 @@ Per-lesson JSON under [`tools/iiq-verify/lesson-specs/`](../tools/iiq-verify/les
 
 Check types: `http.ok`, `host.file.exists`, `object.exists` (optional `softFail`), `object.absent`, `identity.exists`, `identity.countMin`, `identity.attr`.
 
+### Paperwork / design lessons (`verifyMode: paperwork`)
+
+Some lessons only produce binder artifacts (catalog sketches, evidence packs, worksheets). Their specs set `"verifyMode": "paperwork"` and `"disabled": true` with **empty `checks`**.
+
+- Academy shows **Verify now (disabled)** and **Mark binder complete** instead of a live IIQ run.
+- CLI `./tools/iiq-verify/verify-lesson.sh <n>` returns PASS immediately with a paperwork note (no IIQ required).
+- Progress still tracks PASS from the binder mark (or CLI paperwork report).
+
+Lab-mutation lessons keep `"verifyMode": "lab"` and must check the objects the learner actually builds.
+
 JML HR deltas — prefer runners over hand edits:
 
 ```bash

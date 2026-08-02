@@ -3,7 +3,8 @@
   "lesson": "48",
   "stem": "48-audit-ready-reporting",
   "title": "Audit-Ready Reporting & Dashboards",
-  "description": "Auto-generated verify checks for Lesson 48. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 48. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -19,9 +20,17 @@
       "message": "Application 'MNB-HR' exists"
     },
     {
+      "type": "object.exists",
+      "objectClass": "Policy",
+      "name": "MNB-SOD-Wire-DualControl",
+      "softFail": true,
+      "id": "object-exists-3",
+      "message": "Policy 'MNB-SOD-Wire-DualControl' exists"
+    },
+    {
       "type": "identity.countMin",
       "min": 50,
-      "id": "identity-countMin-3",
+      "id": "identity-countMin-4",
       "message": "At least 50 identities"
     }
   ]

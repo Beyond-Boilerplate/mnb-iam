@@ -3,7 +3,8 @@
   "lesson": "68",
   "stem": "68-web-services-connector",
   "title": "Web Services Connector",
-  "description": "Auto-generated verify checks for Lesson 68. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 68. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

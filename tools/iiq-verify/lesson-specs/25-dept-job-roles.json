@@ -3,7 +3,8 @@
   "lesson": "25",
   "stem": "25-dept-job-roles",
   "title": "Department & Job-Based Roles",
-  "description": "Auto-generated verify checks for Lesson 25. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 25. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -14,19 +15,56 @@
     {
       "type": "object.exists",
       "objectClass": "Bundle",
-      "name": "MNB-Birthright-Employee",
+      "name": "MNB-IT-Developer",
       "id": "object-exists-2",
-      "message": "Bundle 'MNB-Birthright-Employee' exists"
+      "message": "Bundle 'MNB-IT-Developer' exists"
     },
     {
       "type": "object.exists",
-      "objectClass": "GroupDefinition",
-      "name": "MNB-Finance",
-      "alternateClasses": [
-        "Population"
-      ],
+      "objectClass": "Bundle",
+      "name": "MNB-Role-Developer",
       "id": "object-exists-3",
-      "message": "GroupDefinition 'MNB-Finance' exists"
+      "message": "Bundle 'MNB-Role-Developer' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-IT-CRM",
+      "id": "object-exists-4",
+      "message": "Bundle 'MNB-IT-CRM' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Role-RelationshipManager",
+      "id": "object-exists-5",
+      "message": "Bundle 'MNB-Role-RelationshipManager' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-IT-WireInit",
+      "id": "object-exists-6",
+      "message": "Bundle 'MNB-IT-WireInit' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Role-WireInitiator",
+      "id": "object-exists-7",
+      "message": "Bundle 'MNB-Role-WireInitiator' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "identity-exists-8",
+      "message": "Identity 'priya.wire' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "marcus.approve",
+      "id": "identity-exists-9",
+      "message": "Identity 'marcus.approve' exists"
     }
   ]
 }

@@ -3,7 +3,8 @@
   "lesson": "30",
   "stem": "30-mover-transfers",
   "title": "Mover / Transfer Events",
-  "description": "Auto-generated verify checks for Lesson 30. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 30. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,21 @@
       "name": "Refresh MNB Attributes",
       "id": "object-exists-3",
       "message": "TaskDefinition 'Refresh MNB Attributes' exists"
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/scenarios/mover/hr-delta-priya-to-commercial.csv",
+      "id": "host-file-exists-4",
+      "message": "Repo/lab file present: lab-data/scenarios/mover/hr-delta-priya-to-commercial.csv"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Role-WireInitiator",
+      "softFail": true,
+      "hint": "Mover residual review assumes Lesson 25 WireInitiator role exists.",
+      "id": "object-exists-5",
+      "message": "Bundle 'MNB-Role-WireInitiator' exists"
     }
   ]
 }

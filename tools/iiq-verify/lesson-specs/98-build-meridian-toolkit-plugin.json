@@ -3,7 +3,8 @@
   "lesson": "98",
   "stem": "98-build-meridian-toolkit-plugin",
   "title": "Build Meridian Toolkit Plugin",
-  "description": "Auto-generated verify checks for Lesson 98. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 98. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

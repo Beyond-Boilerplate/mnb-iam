@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Paperwork — provisioning feature matrix and test cases. Academy **Verify now** is disabled; mark the binder complete when the matrix is signed off.
+
 ## Learning objectives
 
 You will be able to:

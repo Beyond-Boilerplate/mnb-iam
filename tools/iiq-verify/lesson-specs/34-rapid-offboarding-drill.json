@@ -3,7 +3,8 @@
   "lesson": "34",
   "stem": "34-rapid-offboarding-drill",
   "title": "Rapid Offboarding Incident Drill",
-  "description": "Auto-generated verify checks for Lesson 34. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 34. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -19,10 +20,18 @@
       "message": "Application 'MNB-HR' exists"
     },
     {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "identity-exists-3",
+      "message": "Identity 'priya.wire' exists"
+    },
+    {
       "type": "object.exists",
       "objectClass": "Bundle",
       "name": "MNB-Role-BreakGlass",
-      "id": "object-exists-3",
+      "softFail": true,
+      "hint": "Break-glass role from Lesson 28; drill still valid if you document disable path without it.",
+      "id": "object-exists-4",
       "message": "Bundle 'MNB-Role-BreakGlass' exists"
     }
   ]

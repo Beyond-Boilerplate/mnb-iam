@@ -2,43 +2,10 @@
   "$schema": "mnb-lesson-spec/v1",
   "lesson": "29b",
   "stem": "29b-lifecycle-events-rapid-setup",
-  "title": "Lifecycle Events & Rapid Setup Joiner",
-  "description": "Core Path N+1 verify for 29b-lifecycle-events-rapid-setup",
-  "path": "core",
-  "checks": [
-    {
-      "type": "http.ok",
-      "path": "/login.jsf",
-      "id": "http-ok",
-      "message": "IIQ login page reachable"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-HR",
-      "id": "app-hr",
-      "message": "Application MNB-HR exists"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Bundle",
-      "name": "MNB-Birthright-Employee",
-      "id": "birthright",
-      "message": "Birthright bundle exists"
-    },
-    {
-      "type": "identity.exists",
-      "name": "nina.joiner",
-      "id": "id-nina",
-      "message": "nina.joiner exists",
-      "softFail": true,
-      "hint": "apply-joiner.sh + Aggregate MNB-HR"
-    },
-    {
-      "type": "host.file.exists",
-      "path": "lab-data/scenarios/joiner/hr-delta-new-hire.csv",
-      "id": "joiner-file",
-      "message": "Joiner delta present"
-    }
-  ]
+  "title": "Lesson 29b \u2014 Lifecycle Events & Rapid Setup Joiner (Optional)",
+  "verifyMode": "paperwork",
+  "disabled": true,
+  "paperworkNote": "Optional LCM event design (paper or disabled draft) \u2014 not required for Core Path.",
+  "description": "Paperwork / design only for Lesson 29b. Live IIQ Verify is disabled \u2014 binder acceptance criteria only.",
+  "checks": []
 }

@@ -3,7 +3,8 @@
   "lesson": "54",
   "stem": "54-aggregation-patterns-advanced",
   "title": "Aggregation Patterns Advanced",
-  "description": "Auto-generated verify checks for Lesson 54. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 54. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,14 @@
       "name": "Aggregate MNB-HR",
       "id": "object-exists-3",
       "message": "TaskDefinition 'Aggregate MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-IT-Access",
+      "softFail": true,
+      "id": "object-exists-4",
+      "message": "Application 'MNB-IT-Access' exists"
     }
   ]
 }

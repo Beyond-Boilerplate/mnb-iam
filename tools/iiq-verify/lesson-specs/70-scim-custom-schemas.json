@@ -3,7 +3,8 @@
   "lesson": "70",
   "stem": "70-scim-custom-schemas",
   "title": "SCIM Custom Schemas",
-  "description": "Auto-generated verify checks for Lesson 70. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 70. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

@@ -3,26 +3,9 @@
   "lesson": "46",
   "stem": "46-cert-remediation-evidence",
   "title": "Certification Remediation & Evidence",
-  "description": "Auto-generated verify checks for Lesson 46. Live IIQ only \u2014 no JSON paste.",
-  "checks": [
-    {
-      "type": "http.ok",
-      "path": "/login.jsf",
-      "id": "http-ok-1",
-      "message": "IIQ login page reachable"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-HR",
-      "id": "object-exists-2",
-      "message": "Application 'MNB-HR' exists"
-    },
-    {
-      "type": "host.file.exists",
-      "path": "lab-data/reference/hr-column-map.md",
-      "id": "host-file-exists-3",
-      "message": "Repo/lab file present: lab-data/reference/hr-column-map.md"
-    }
-  ]
+  "verifyMode": "paperwork",
+  "disabled": true,
+  "paperworkNote": "Certification evidence binder assembly \u2014 no new campaign objects required.",
+  "description": "Paperwork / design only for Lesson 46. Live IIQ Verify is disabled \u2014 binder acceptance criteria only.",
+  "checks": []
 }

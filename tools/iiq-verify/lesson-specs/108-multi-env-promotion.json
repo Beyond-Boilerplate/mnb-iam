@@ -3,7 +3,8 @@
   "lesson": "108",
   "stem": "108-multi-env-promotion",
   "title": "Multi-Environment Promotion",
-  "description": "Auto-generated verify checks for Lesson 108. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 108. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

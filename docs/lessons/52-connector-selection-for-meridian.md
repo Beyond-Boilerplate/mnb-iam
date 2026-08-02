@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Paperwork — connector selection matrix and decision records. Academy **Verify now** is disabled; mark the binder complete when Risk Q&A and CHANGELOG are done.
+
 ## Learning objectives
 
 You will be able to:

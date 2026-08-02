@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Lab lesson — harden correlation on IT Access and AWS Cloud. Academy **Verify now** checks those apps + `jordan.reed` / `raj.external`.
+
 ## Learning objectives
 
 You will be able to:

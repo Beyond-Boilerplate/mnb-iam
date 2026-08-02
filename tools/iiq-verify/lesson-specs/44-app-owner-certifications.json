@@ -3,7 +3,8 @@
   "lesson": "44",
   "stem": "44-app-owner-certifications",
   "title": "Application Owner Certifications",
-  "description": "Auto-generated verify checks for Lesson 44. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 44. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -20,10 +21,23 @@
     },
     {
       "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-IT-Access",
+      "objectClass": "CertificationDefinition",
+      "name": "MNB-Q-Lab-Owner-Cert-Wire",
+      "alternateClasses": [
+        "TaskDefinition"
+      ],
+      "softFail": true,
+      "hint": "Create app-owner cert MNB-Q-Lab-Owner-Cert-Wire (or AWS variant) from Lesson 44.",
       "id": "object-exists-3",
-      "message": "Application 'MNB-IT-Access' exists"
+      "message": "CertificationDefinition 'MNB-Q-Lab-Owner-Cert-Wire' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-AWS-Cloud",
+      "softFail": true,
+      "id": "object-exists-4",
+      "message": "Application 'MNB-AWS-Cloud' exists"
     }
   ]
 }

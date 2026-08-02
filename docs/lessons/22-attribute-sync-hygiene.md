@@ -8,6 +8,8 @@
 
 ---
 
+> **Verify:** Paperwork / hygiene design — source-of-truth table and disagreement notes. No new IIQ objects required. Academy **Verify now** is disabled; mark the binder complete when done.
+
 ## Learning objectives
 
 You will be able to:

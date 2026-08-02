@@ -3,26 +3,9 @@
   "lesson": "51",
   "stem": "51-connector-landscape-and-registry",
   "title": "Connector Landscape & Registry",
-  "description": "Auto-generated verify checks for Lesson 51. Live IIQ only \u2014 no JSON paste.",
-  "checks": [
-    {
-      "type": "http.ok",
-      "path": "/login.jsf",
-      "id": "http-ok-1",
-      "message": "IIQ login page reachable"
-    },
-    {
-      "type": "host.file.exists",
-      "path": "lab-data/connectors/connector-selection-matrix.csv",
-      "id": "host-file-exists-2",
-      "message": "Repo/lab file present: lab-data/connectors/connector-selection-matrix.csv"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Rule",
-      "name": "MNB-Rule-Hello-World",
-      "id": "object-exists-3",
-      "message": "Rule 'MNB-Rule-Hello-World' exists"
-    }
-  ]
+  "verifyMode": "paperwork",
+  "disabled": true,
+  "paperworkNote": "Connector registry literacy + worksheets \u2014 no new Application required.",
+  "description": "Paperwork / design only for Lesson 51. Live IIQ Verify is disabled \u2014 binder acceptance criteria only.",
+  "checks": []
 }

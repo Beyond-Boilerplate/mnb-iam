@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Design / paperwork only — sketch the role catalog here; **do not create Bundles in IIQ** (Lessons 24–28 implement them). Academy **Verify now** is disabled; mark the binder complete when the catalog is done.
+
 ## Learning objectives
 
 You will be able to:
@@ -191,14 +193,14 @@ Catalog go-live is dual-controlled design, not an IAM-only publish.
 
 ## Acceptance criteria
 
-- [ ] **Bank craft exit:** Role model notes cite seeded `MNB-Role-Birthright-Employee` / `MNB-Role-IT-Directory-User` under `config/Bundle/`
-
+- [ ] **Bank craft exit (paperwork):** `MNB-Role-Catalog-v0` binder table lists planned `MNB-Birthright-Employee`, `MNB-IT-*` packs, and `MNB-Role-*` business roles (IIQ objects are built in Lessons 24–28 — not here)
 - [ ] IT vs business role explanation written in Meridian language
-- [ ] Catalog v0 table with MNB-Birthright-* and MNB-Role-* entries
+- [ ] Catalog v0 table with MNB-Birthright-* / MNB-IT-* / MNB-Role-* entries
 - [ ] Job→role mapping includes WIR01-only initiator rule
 - [ ] Privileged roles marked request-only
 - [ ] Stakeholder approval list completed
 - [ ] Dual-control anti-pattern (initiate+approve) parked for enforcement
+- [ ] Academy binder marked complete (live Verify disabled for this lesson)
 
 ---
 

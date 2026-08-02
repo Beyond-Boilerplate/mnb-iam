@@ -3,7 +3,8 @@
   "lesson": "33",
   "stem": "33-leave-of-absence",
   "title": "Leave of Absence Controls",
-  "description": "Auto-generated verify checks for Lesson 33. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 33. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -13,20 +14,32 @@
     },
     {
       "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "object-exists-2",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "sofia.torres",
+      "id": "identity-exists-3",
+      "message": "Identity 'sofia.torres' exists"
+    },
+    {
+      "type": "object.exists",
       "objectClass": "GroupDefinition",
       "name": "MNB-On-Leave",
       "alternateClasses": [
         "Population"
       ],
-      "id": "object-exists-2",
+      "id": "object-exists-4",
       "message": "GroupDefinition 'MNB-On-Leave' exists"
     },
     {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-HR",
-      "id": "object-exists-3",
-      "message": "Application 'MNB-HR' exists"
+      "type": "host.file.exists",
+      "path": "lab-data/scenarios/on-leave/hr-delta-sofia-loa.csv",
+      "id": "host-file-exists-5",
+      "message": "Repo/lab file present: lab-data/scenarios/on-leave/hr-delta-sofia-loa.csv"
     }
   ]
 }

@@ -3,7 +3,8 @@
   "lesson": "24",
   "stem": "24-birthright-employee-role",
   "title": "Birthright Employee Role",
-  "description": "Auto-generated verify checks for Lesson 24. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 24. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -14,15 +15,22 @@
     {
       "type": "object.exists",
       "objectClass": "Bundle",
-      "name": "MNB-Birthright-Employee",
+      "name": "MNB-IT-ELDAP",
       "id": "object-exists-2",
+      "message": "Bundle 'MNB-IT-ELDAP' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "object-exists-3",
       "message": "Bundle 'MNB-Birthright-Employee' exists"
     },
     {
       "type": "identity.exists",
-      "name": "helen.ross",
-      "id": "identity-exists-3",
-      "message": "Identity 'helen.ross' exists"
+      "name": "amelia.brooks",
+      "id": "identity-exists-4",
+      "message": "Identity 'amelia.brooks' exists"
     }
   ]
 }

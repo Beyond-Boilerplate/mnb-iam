@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Paperwork — IQService placement and install worksheets (no live IQService required). Academy **Verify now** is disabled; mark the binder complete when worksheets are filed.
+
 ## Learning objectives
 
 You will be able to:

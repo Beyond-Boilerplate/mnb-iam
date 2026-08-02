@@ -3,7 +3,8 @@
   "lesson": "71",
   "stem": "71-salesforce-native-connector",
   "title": "Salesforce Native Connector",
-  "description": "Auto-generated verify checks for Lesson 71. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 71. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

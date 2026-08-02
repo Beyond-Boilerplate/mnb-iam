@@ -3,7 +3,8 @@
   "lesson": "45",
   "stem": "45-targeted-campaigns",
   "title": "Targeted & Focused Campaigns",
-  "description": "Auto-generated verify checks for Lesson 45. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 45. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -20,12 +21,25 @@
     },
     {
       "type": "object.exists",
+      "objectClass": "CertificationDefinition",
+      "name": "MNB-Q-Lab-Manager-Cert",
+      "alternateClasses": [
+        "TaskDefinition"
+      ],
+      "softFail": true,
+      "hint": "Micro-cert may reuse or fork the manager cert definition from Lesson 43.",
+      "id": "object-exists-3",
+      "message": "CertificationDefinition 'MNB-Q-Lab-Manager-Cert' exists"
+    },
+    {
+      "type": "object.exists",
       "objectClass": "GroupDefinition",
       "name": "MNB-Finance",
       "alternateClasses": [
         "Population"
       ],
-      "id": "object-exists-3",
+      "softFail": true,
+      "id": "object-exists-4",
       "message": "GroupDefinition 'MNB-Finance' exists"
     }
   ]

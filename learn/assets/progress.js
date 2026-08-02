@@ -1,5 +1,6 @@
 /**
  * Meridian academy progress — localStorage + live Verify only (no JSON paste).
+ * Paperwork / design lessons disable live checks; learners mark binder complete.
  */
 (() => {
   const KEY = "mnb-academy-progress-v1";
@@ -22,6 +23,12 @@
   };
 
   const lessonNum = (stem) => (stem || "").split("-", 1)[0];
+
+  const verifyModeFromPage = () => {
+    const main = document.getElementById("main");
+    const mode = (main?.dataset?.verifyMode || "lab").toLowerCase();
+    return mode === "paperwork" || mode === "disabled" ? "paperwork" : "lab";
+  };
 
   const paintToc = () => {
     const data = load();
@@ -58,8 +65,8 @@
       bar.style.setProperty("--pct", `${Math.min(100, Math.round((passed / total) * 100))}%`);
       bar.title =
         mode === "core"
-          ? "Core Path lessons with a live PASS verify in this browser"
-          : "All lessons with a live PASS verify in this browser";
+          ? "Core Path lessons with PASS (live verify or binder complete) in this browser"
+          : "All lessons with PASS (live verify or binder complete) in this browser";
     }
   };
 
@@ -73,7 +80,7 @@
     return apiAvailable;
   };
 
-  /** Persist only reports produced by the live verify API. */
+  /** Persist only reports produced by the live verify API or paperwork mark. */
   const applyLiveReport = (report, expectedStem) => {
     if (!report || typeof report !== "object") {
       throw new Error("Empty verify response");
@@ -87,19 +94,58 @@
     const data = load();
     data[stem] = {
       verdict,
-      source: "live-verify",
+      source: report.verifyMode === "paperwork" ? "paperwork" : "live-verify",
+      verifyMode: report.verifyMode || "lab",
       checkedAt: report.checkedAt || new Date().toISOString(),
       gaps: report.gaps || [],
       summary: report.summary,
       target: report.target,
       error: report.error,
+      paperworkNote: report.paperworkNote,
     };
     save(data);
     paintToc();
     return data[stem];
   };
 
+  const markPaperworkComplete = (stem, msgEl) => {
+    if (!stem) return;
+    const main = document.getElementById("main");
+    const note =
+      main?.dataset?.paperworkNote ||
+      "Paperwork / design lesson — binder acceptance criteria complete.";
+    const report = {
+      schema: "mnb-lesson-verify-report/v1",
+      stem,
+      lesson: lessonNum(stem),
+      verifyMode: "paperwork",
+      verdict: "PASS",
+      checkedAt: new Date().toISOString(),
+      gaps: [],
+      summary: { total: 0, passed: 0, failed: 0, warned: 0 },
+      paperworkNote: note,
+      checks: [
+        {
+          id: "paperwork-disabled",
+          status: "PASS",
+          message: "Live IIQ verify disabled (paperwork / design)",
+          detail: note,
+        },
+      ],
+    };
+    applyLiveReport(report, stem);
+    if (msgEl) msgEl.textContent = "Binder marked complete — live Verify stays disabled for this lesson.";
+    renderPanel();
+  };
+
   const runVerify = async (stem, msgEl, btn) => {
+    if (verifyModeFromPage() === "paperwork") {
+      if (msgEl) {
+        msgEl.textContent =
+          "This lesson is paperwork / design only. Live Verify is disabled — use Mark binder complete.";
+      }
+      return;
+    }
     const num = lessonNum(stem);
     msgEl.textContent = "Running checks against your IIQ lab…";
     if (btn) btn.disabled = true;
@@ -121,6 +167,12 @@
       }
       const report = await res.json();
       if (!report.stem) report.stem = stem;
+      if (report.verifyMode === "paperwork") {
+        applyLiveReport(report, stem);
+        msgEl.textContent = "Paperwork lesson — live checks disabled (recorded as complete).";
+        renderPanel();
+        return;
+      }
       const saved = applyLiveReport(report, stem);
       const gapN = saved.gaps?.length || 0;
       msgEl.textContent =
@@ -141,6 +193,45 @@
     const stem = stemFromPath() || host.dataset.stem;
     const data = load();
     const entry = stem ? data[stem] : null;
+    const paperwork = verifyModeFromPage() === "paperwork";
+    const main = document.getElementById("main");
+    const paperworkNote =
+      main?.dataset?.paperworkNote ||
+      "Paperwork / design only — no IIQ lab mutation required. Complete the binder acceptance criteria.";
+
+    if (paperwork) {
+      const status = entry
+        ? `<p class="verify-status verify-pass">Binder: <strong>${entry.verdict}</strong> · ${entry.checkedAt || ""}</p>`
+        : `<p class="verify-status">Binder not marked yet — complete acceptance criteria, then mark done.</p>`;
+      host.innerHTML = `
+      <h2>Lesson verify</h2>
+      <p class="verify-banner verify-paperwork">Paperwork / design lesson — <strong>live Verify disabled</strong>. No IIQ lab objects are required for this lesson.</p>
+      <p class="muted" id="verifyPaperworkNote"></p>
+      ${status}
+      <div class="verify-actions">
+        <button type="button" class="btn primary" id="verifyPaperwork">Mark binder complete</button>
+        <button type="button" class="btn ghost" id="verifyRun" disabled title="Live IIQ checks disabled for paperwork lessons">Verify now (disabled)</button>
+        <button type="button" class="btn ghost" id="verifyClear">Clear this lesson</button>
+      </div>
+      <p id="verifyMsg" class="muted" role="status"></p>
+    `;
+      const noteEl = host.querySelector("#verifyPaperworkNote");
+      if (noteEl) noteEl.textContent = paperworkNote;
+      const msg = host.querySelector("#verifyMsg");
+      host.querySelector("#verifyPaperwork")?.addEventListener("click", () => {
+        markPaperworkComplete(stem, msg);
+      });
+      host.querySelector("#verifyClear")?.addEventListener("click", () => {
+        if (!stem) return;
+        const next = load();
+        delete next[stem];
+        save(next);
+        paintToc();
+        renderPanel();
+      });
+      return;
+    }
+
     const status = entry
       ? `<p class="verify-status verify-${(entry.verdict || "").toLowerCase()}">Last live verify: <strong>${entry.verdict}</strong> · ${entry.checkedAt || ""}</p>`
       : `<p class="verify-status">Not verified yet — run <strong>Verify now</strong> against your IIQ lab.</p>`;
@@ -167,6 +258,7 @@
 
     host.innerHTML = `
       <h2>Lesson verify</h2>
+      <p class="verify-banner verify-lab">Lab lesson — Verify checks objects you build or change in IIQ.</p>
       ${apiNote}
       ${status}
       ${gaps}
@@ -197,7 +289,7 @@
     const el = document.createElement("span");
     el.id = "progressBar";
     el.className = "progress-chip";
-    el.title = "Lessons with a live PASS verify in this browser";
+    el.title = "Lessons with PASS (live verify or binder complete) in this browser";
     top.insertBefore(el, top.querySelector(".lab-link"));
   };
 
@@ -231,5 +323,5 @@
   renderPanel();
   probeApi().then(() => renderPanel());
 
-  window.MnbAcademyProgress = { load, paintToc, runVerify, probeApi };
+  window.MnbAcademyProgress = { load, paintToc, runVerify, probeApi, verifyModeFromPage };
 })();

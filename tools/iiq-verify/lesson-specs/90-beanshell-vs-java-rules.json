@@ -3,7 +3,8 @@
   "lesson": "90",
   "stem": "90-beanshell-vs-java-rules",
   "title": "BeanShell vs Java Rules",
-  "description": "Auto-generated verify checks for Lesson 90. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 90. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

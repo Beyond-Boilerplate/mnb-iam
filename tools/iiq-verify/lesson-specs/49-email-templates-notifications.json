@@ -3,29 +3,9 @@
   "lesson": "49",
   "stem": "49-email-templates-notifications",
   "title": "Email Templates & Notifications",
-  "description": "Auto-generated verify checks for Lesson 49. Live IIQ only — no JSON paste.",
-  "checks": [
-    {
-      "type": "http.ok",
-      "path": "/login.jsf",
-      "id": "http-ok-1",
-      "message": "IIQ login page reachable"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-HR",
-      "id": "object-exists-2",
-      "message": "Application 'MNB-HR' exists"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "EmailTemplate",
-      "name": "MNB-Email-AccessRequest",
-      "id": "object-exists-3",
-      "message": "EmailTemplate 'MNB-Email-AccessRequest' exists",
-      "softFail": true,
-      "hint": "Name may vary — create the email template from Lesson 49; soft if renamed."
-    }
-  ]
+  "verifyMode": "paperwork",
+  "disabled": true,
+  "paperworkNote": "Email template review and Meridian copy drafts \u2014 binder evidence.",
+  "description": "Paperwork / design only for Lesson 49. Live IIQ Verify is disabled \u2014 binder acceptance criteria only.",
+  "checks": []
 }

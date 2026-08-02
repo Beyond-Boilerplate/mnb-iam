@@ -3,7 +3,8 @@
   "lesson": "109",
   "stem": "109-hardening-spadmin-capabilities",
   "title": "Hardening spadmin & Capabilities",
-  "description": "Auto-generated verify checks for Lesson 109. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 109. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "object.exists",

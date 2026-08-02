@@ -8,6 +8,8 @@
 
 ---
 
+> **Verify:** Bridge / paperwork — write the stack choice card. Academy **Verify now** is disabled; mark the binder complete when you opt into a specialist track.
+
 ## Learning objectives
 
 You will be able to:

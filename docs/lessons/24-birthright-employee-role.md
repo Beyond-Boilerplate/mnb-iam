@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Lab lesson — create `MNB-IT-ELDAP` + `MNB-Birthright-Employee` and assign on refresh. Academy **Verify now** checks both Bundles + `amelia.brooks`.
+
 ## Learning objectives
 
 You will be able to:

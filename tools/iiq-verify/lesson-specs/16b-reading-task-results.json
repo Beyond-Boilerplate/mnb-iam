@@ -2,38 +2,10 @@
   "$schema": "mnb-lesson-spec/v1",
   "lesson": "16b",
   "stem": "16b-reading-task-results",
-  "title": "Reading Task Results & Early Provisioning Signals",
-  "description": "Core Path N+1 verify for 16b-reading-task-results",
-  "path": "core",
-  "checks": [
-    {
-      "type": "http.ok",
-      "path": "/login.jsf",
-      "id": "http-ok",
-      "message": "IIQ login page reachable"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-HR",
-      "id": "app-hr",
-      "message": "Application MNB-HR exists"
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-IT-Access",
-      "id": "app-it",
-      "message": "Application MNB-IT-Access exists",
-      "softFail": true
-    },
-    {
-      "type": "object.exists",
-      "objectClass": "TaskDefinition",
-      "name": "Refresh MNB Attributes",
-      "id": "task-refresh",
-      "message": "Refresh MNB Attributes exists",
-      "softFail": true
-    }
-  ]
+  "title": "Lesson 16b \u2014 Reading Task Results & Early Provisioning Signals",
+  "verifyMode": "paperwork",
+  "disabled": true,
+  "paperworkNote": "Task Result reading literacy \u2014 no lab mutation.",
+  "description": "Paperwork / design only for Lesson 16b. Live IIQ Verify is disabled \u2014 binder acceptance criteria only.",
+  "checks": []
 }

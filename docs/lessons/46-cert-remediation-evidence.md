@@ -9,6 +9,8 @@
 
 ---
 
+> **Verify:** Evidence binder lesson — assemble cert remediation proof. No new campaign objects required. Academy **Verify now** is disabled; mark the binder complete when the pack passes the stranger test.
+
 ## Learning objectives
 
 You will be able to:

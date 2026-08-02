@@ -3,7 +3,8 @@
   "lesson": "43",
   "stem": "43-manager-certifications",
   "title": "Manager Access Certifications",
-  "description": "Auto-generated verify checks for Lesson 43. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 43. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -27,6 +28,13 @@
       "name": "MNB-HR",
       "id": "object-exists-3",
       "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "rachel.evans",
+      "softFail": true,
+      "id": "identity-exists-4",
+      "message": "Identity 'rachel.evans' exists"
     }
   ]
 }

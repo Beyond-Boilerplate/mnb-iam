@@ -3,7 +3,8 @@
   "lesson": "40",
   "stem": "40-payment-dual-control-policy",
   "title": "Payment Dual-Control Policy Deep Dive",
-  "description": "Auto-generated verify checks for Lesson 40. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 40. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,18 @@
       "name": "MNB-WirePortal",
       "id": "object-exists-3",
       "message": "Application 'MNB-WirePortal' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "id": "identity-exists-4",
+      "message": "Identity 'priya.wire' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "marcus.approve",
+      "id": "identity-exists-5",
+      "message": "Identity 'marcus.approve' exists"
     }
   ]
 }

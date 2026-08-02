@@ -3,7 +3,8 @@
   "lesson": "18",
   "stem": "18-correlation-rules-advanced",
   "title": "Correlation Rules & Edge Cases",
-  "description": "Auto-generated verify checks for Lesson 18. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 18. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,20 @@
       "name": "MNB-AWS-Cloud",
       "id": "object-exists-3",
       "message": "Application 'MNB-AWS-Cloud' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "raj.external",
+      "softFail": true,
+      "hint": "Raj is the employeeId edge-case persona for Lesson 18.",
+      "id": "identity-exists-4",
+      "message": "Identity 'raj.external' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "jordan.reed",
+      "id": "identity-exists-5",
+      "message": "Identity 'jordan.reed' exists"
     }
   ]
 }

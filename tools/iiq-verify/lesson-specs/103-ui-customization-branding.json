@@ -3,7 +3,8 @@
   "lesson": "103",
   "stem": "103-ui-customization-branding",
   "title": "UI Customization & Branding",
-  "description": "Auto-generated verify checks for Lesson 103. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 103. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

@@ -2,8 +2,9 @@
 """Generate lesson-specs for Meridian academy lessons missing JSON specs.
 
 Derives object.exists / task / identity checks from acceptance criteria and a
-curated map. Paper-heavy lessons still require IIQ reachable + prerequisite
-Meridian objects so Verify now cannot be skipped with empty checks.
+curated map. Lessons that only produce binder/design artifacts use
+``verifyMode: paperwork`` (live IIQ checks disabled). Lab-mutation lessons get
+real object / identity checks matching what the learner builds.
 
 Identity checks may keep persona logins (``helen.ross``); ``verify_lesson.py``
 adaptively resolves HR ``userId`` / displayName / email aliases at runtime, so
@@ -24,6 +25,43 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 LESSONS = ROOT / "docs" / "lessons"
 SPECS = Path(__file__).resolve().parent / "lesson-specs"
+
+# Lessons that are binder/design only — no durable IIQ lab mutation required.
+# Letter stems (16b, 29b, …) are handled in LETTERED_PAPERWORK below.
+PAPERWORK: set[int] = {
+    22,  # attribute sync hygiene — SoT table + disagreement notes
+    23,  # role model catalog sketch (implement in 24–28)
+    27,  # detection vs assignment — inspect + write policy
+    38,  # IdentityRequest evidence pack
+    46,  # cert remediation evidence binder
+    49,  # email template copy / recipient matrix
+    51,  # connector landscape worksheet
+    52,  # connector selection matrix worksheets
+    53,  # IQService architecture worksheets
+    55,  # provisioning feature matrix worksheets
+}
+
+LETTERED_PAPERWORK: set[str] = {
+    "16b",  # reading Task Results
+    "29b",  # optional LCM design (paper or disabled draft)
+    "50b",  # choose-your-stack bridge card
+}
+
+PAPERWORK_NOTES: dict[str, str] = {
+    "22": "Source-of-truth table and hygiene notes — no new IIQ objects required.",
+    "23": "Role catalog sketch only — bundles are built in Lessons 24–28.",
+    "27": "Assigned vs detected analysis and cert policy notes — no new roles to create.",
+    "38": "IdentityRequest evidence pack from prior requests — no new lab objects.",
+    "46": "Certification evidence binder assembly — no new campaign objects required.",
+    "49": "Email template review and Meridian copy drafts — binder evidence.",
+    "51": "Connector registry literacy + worksheets — no new Application required.",
+    "52": "Connector selection matrix and decision records — binder evidence.",
+    "53": "IQService placement/worksheets — no live IQService install required.",
+    "55": "Provisioning feature matrix worksheets — binder evidence.",
+    "16b": "Task Result reading literacy — no lab mutation.",
+    "29b": "Optional LCM event design (paper or disabled draft) — not required for Core Path.",
+    "50b": "Stack choice card after Capstone 50 — binder bridge, not an IIQ build.",
+}
 
 # Curated primary Application / Bundle / Rule / etc. per lesson (authoritative names).
 CURATED: dict[int, list[dict]] = {
@@ -63,53 +101,73 @@ CURATED: dict[int, list[dict]] = {
     17: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
         {"type": "identity.exists", "name": "priya.wire"},
+        {"type": "identity.exists", "name": "jordan.reed", "softFail": True,
+         "hint": "Jordan should exist from HR; correlate IT Access after Lesson 17 config."},
     ],
     18: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-AWS-Cloud"},
+        {"type": "identity.exists", "name": "raj.external", "softFail": True,
+         "hint": "Raj is the employeeId edge-case persona for Lesson 18."},
+        {"type": "identity.exists", "name": "jordan.reed"},
     ],
     19: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-AWS-Cloud"},
+        {"type": "host.file.exists", "path": "lab-data/apps/MNB-AWS-Cloud.csv"},
     ],
     20: [
-        {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Terminated-With-Access",
-         "alternateClasses": ["Population", "GroupFactory"]},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "identity.exists", "name": "samir.hassan"},
+        {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Terminated-With-Access",
+         "alternateClasses": ["Population", "GroupFactory"],
+         "softFail": True,
+         "hint": "Create population/search MNB-Terminated-With-Access (or MNB-Terminated) from Lesson 20."},
+        {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Terminated",
+         "alternateClasses": ["Population"],
+         "softFail": True,
+         "hint": "Optional broader terminated population from Lesson 07/20."},
     ],
     21: [
-        {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Refresh MNB Managers"},
-        {"type": "identity.exists", "name": "priya.wire"},
-    ],
-    22: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
-        {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Refresh MNB Attributes"},
-        {"type": "identity.attr", "name": "helen.ross", "attr": "email", "contains": "@"},
+        {"type": "identity.exists", "name": "priya.wire"},
+        {"type": "identity.exists", "name": "rachel.evans"},
+        {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Refresh MNB Attributes",
+         "softFail": True,
+         "hint": "Manager reassignment uses Aggregate MNB-HR + identity refresh (Refresh MNB Attributes / Identities)."},
     ],
-    23: [
-        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-Birthright-Employee"},
-        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-IT-Directory-User"},
-    ],
+    # 22 paperwork
+    # 23 paperwork
     24: [
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-ELDAP"},
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
-        {"type": "identity.exists", "name": "helen.ross"},
+        {"type": "identity.exists", "name": "amelia.brooks"},
     ],
     25: [
-        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
-        {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Finance",
-         "alternateClasses": ["Population"]},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-Developer"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-Developer"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-CRM"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-RelationshipManager"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-WireInit"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-WireInitiator"},
+        {"type": "identity.exists", "name": "priya.wire"},
+        {"type": "identity.exists", "name": "marcus.approve"},
     ],
     26: [
-        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-IT-Directory-User"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-ELDAP"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-Developer"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-WireInit"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-Developer"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
     ],
-    27: [
-        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
-        {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Refresh MNB Attributes"},
-    ],
+    # 27 paperwork
     28: [
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-CloudAdmin"},
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-BreakGlass"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-IT-CloudAdmin",
+         "softFail": True,
+         "hint": "Preferred two-tier model: IT pack MNB-IT-CloudAdmin required by MNB-Role-CloudAdmin."},
     ],
     29: [
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
@@ -125,49 +183,68 @@ CURATED: dict[int, list[dict]] = {
     30: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
         {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Refresh MNB Attributes"},
+        {"type": "host.file.exists", "path": "lab-data/scenarios/mover/hr-delta-priya-to-commercial.csv"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-WireInitiator",
+         "softFail": True,
+         "hint": "Mover residual review assumes Lesson 25 WireInitiator role exists."},
     ],
     31: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "identity.exists", "name": "samir.hassan"},
         {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Terminated",
-         "alternateClasses": ["Population"]},
+         "alternateClasses": ["Population"],
+         "softFail": True,
+         "hint": "Create or reuse MNB-Terminated population for leaver residual hunting."},
     ],
     32: [
         {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Contractors",
          "alternateClasses": ["Population"]},
         {"type": "identity.exists", "name": "raj.external"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee",
+         "softFail": True},
     ],
     33: [
+        {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "identity.exists", "name": "sofia.torres"},
         {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-On-Leave",
          "alternateClasses": ["Population"]},
-        {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "host.file.exists", "path": "lab-data/scenarios/on-leave/hr-delta-sofia-loa.csv"},
     ],
     34: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
-        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-BreakGlass"},
+        {"type": "identity.exists", "name": "priya.wire"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-BreakGlass",
+         "softFail": True,
+         "hint": "Break-glass role from Lesson 28; drill still valid if you document disable path without it."},
     ],
     35: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-CloudAdmin"},
+        {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-RelationshipManager",
+         "softFail": True},
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
     ],
     36: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-WirePortal"},
         {"type": "identity.exists", "name": "rachel.evans"},
+        {"type": "identity.exists", "name": "christopher.hayes", "softFail": True,
+         "hint": "Technology / cloud owner persona for privileged second approval."},
     ],
     37: [
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Role-BreakGlass"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-AWS-Cloud"},
     ],
-    38: [
-        {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
-        {"type": "http.ok", "path": "/login.jsf"},
-    ],
+    # 38 paperwork
     39: [
         {"type": "object.exists", "objectClass": "Policy", "name": "MNB-SOD-Wire-DualControl"},
         {"type": "object.exists", "objectClass": "Policy", "name": "MNB-SOD-Finance-Cloud"},
+        {"type": "object.exists", "objectClass": "Application", "name": "MNB-WirePortal"},
     ],
     40: [
         {"type": "object.exists", "objectClass": "Policy", "name": "MNB-SOD-Wire-DualControl"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-WirePortal"},
+        {"type": "identity.exists", "name": "priya.wire"},
+        {"type": "identity.exists", "name": "marcus.approve"},
     ],
     41: [
         {"type": "object.exists", "objectClass": "Policy", "name": "MNB-SOD-Wire-DualControl"},
@@ -176,63 +253,64 @@ CURATED: dict[int, list[dict]] = {
     42: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-AWS-Cloud"},
         {"type": "identity.exists", "name": "jordan.reed"},
+        {"type": "object.exists", "objectClass": "Application", "name": "MNB-WirePortal",
+         "softFail": True},
     ],
     43: [
         {"type": "object.exists", "objectClass": "CertificationDefinition", "name": "MNB-Q-Lab-Manager-Cert",
          "alternateClasses": ["TaskDefinition"]},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "identity.exists", "name": "rachel.evans", "softFail": True},
     ],
     44: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-WirePortal"},
-        {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
+        {"type": "object.exists", "objectClass": "CertificationDefinition", "name": "MNB-Q-Lab-Owner-Cert-Wire",
+         "alternateClasses": ["TaskDefinition"],
+         "softFail": True,
+         "hint": "Create app-owner cert MNB-Q-Lab-Owner-Cert-Wire (or AWS variant) from Lesson 44."},
+        {"type": "object.exists", "objectClass": "Application", "name": "MNB-AWS-Cloud",
+         "softFail": True},
     ],
     45: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-AWS-Cloud"},
+        {"type": "object.exists", "objectClass": "CertificationDefinition", "name": "MNB-Q-Lab-Manager-Cert",
+         "alternateClasses": ["TaskDefinition"],
+         "softFail": True,
+         "hint": "Micro-cert may reuse or fork the manager cert definition from Lesson 43."},
         {"type": "object.exists", "objectClass": "GroupDefinition", "name": "MNB-Finance",
-         "alternateClasses": ["Population"]},
+         "alternateClasses": ["Population"],
+         "softFail": True},
     ],
-    46: [
-        {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
-        {"type": "host.file.exists", "path": "lab-data/reference/hr-column-map.md"},
-    ],
+    # 46 paperwork
     47: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-ActiveDirectory"},
     ],
     48: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "object.exists", "objectClass": "Policy", "name": "MNB-SOD-Wire-DualControl",
+         "softFail": True},
         {"type": "identity.countMin", "min": 50},
     ],
-    49: [
-        {"type": "http.ok", "path": "/login.jsf"},
-        {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
-        {
-            "type": "object.exists",
-            "objectClass": "EmailTemplate",
-            "name": "MNB-Email-AccessRequest",
-            "softFail": True,
-            "hint": "Name may vary — create the email template from Lesson 49; soft if renamed.",
-        },
-    ],
+    # 49 paperwork
     50: [
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-WirePortal"},
         {"type": "object.exists", "objectClass": "Policy", "name": "MNB-SOD-Wire-DualControl"},
         {"type": "object.exists", "objectClass": "Bundle", "name": "MNB-Birthright-Employee"},
+        {"type": "object.exists", "objectClass": "CertificationDefinition", "name": "MNB-Q-Lab-Manager-Cert",
+         "alternateClasses": ["TaskDefinition"],
+         "softFail": True},
         {"type": "identity.countMin", "min": 50},
     ],
-    # Part II connectors — application objects (lab CSV or live)
-    51: [{"type": "host.file.exists", "path": "lab-data/connectors/connector-selection-matrix.csv"},
-         {"type": "object.exists", "objectClass": "Rule", "name": "MNB-Rule-Hello-World"}],
-    52: [{"type": "host.file.exists", "path": "lab-data/connectors/connector-selection-matrix.csv"},
-         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"}],
-    53: [{"type": "object.exists", "objectClass": "Application", "name": "MNB-ActiveDirectory"},
-         {"type": "http.ok", "path": "/login.jsf"}],
-    54: [{"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
-         {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Aggregate MNB-HR"}],
-    55: [{"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access"},
-         {"type": "http.ok", "path": "/login.jsf"}],
+    # 51–53, 55 paperwork — connector worksheets
+    54: [
+        {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
+        {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Aggregate MNB-HR"},
+        {"type": "object.exists", "objectClass": "Application", "name": "MNB-IT-Access",
+         "softFail": True},
+    ],
     56: [{"type": "object.exists", "objectClass": "Application", "name": "MNB-ActiveDirectory"},
          {"type": "object.exists", "objectClass": "TaskDefinition", "name": "Aggregate MNB-ActiveDirectory"}],
     57: [{"type": "object.exists", "objectClass": "Application", "name": "MNB-ActiveDirectory"}],
@@ -381,28 +459,64 @@ def enrich(checks: list[dict]) -> list[dict]:
     return out
 
 
+def _lesson_num_token(stem: str) -> tuple[int | None, str]:
+    """Return (int_num or None, lesson_id token like '17' or '16b')."""
+    m = re.match(r"^(\d{2,3})([a-z])?-", stem)
+    if not m:
+        return None, stem.split("-", 1)[0]
+    n = int(m.group(1))
+    letter = m.group(2) or ""
+    token = f"{n:02d}{letter}" if n < 100 else f"{n}{letter}"
+    return n, token
+
+
+def is_paperwork(stem: str, num: int | None) -> bool:
+    token = stem.split("-", 1)[0]
+    if token in LETTERED_PAPERWORK:
+        return True
+    return num is not None and num in PAPERWORK
+
+
 def build_spec(path: Path) -> dict | None:
     stem = path.stem
-    num_s = stem.split("-", 1)[0]
-    try:
-        num = int(num_s)
-    except ValueError:
+    num, lesson_id = _lesson_num_token(stem)
+    if num is None and not re.match(r"^\d", stem):
         return None
     text = path.read_text(encoding="utf-8")
     title = lesson_title(text, stem)
+    if is_paperwork(stem, num):
+        note = PAPERWORK_NOTES.get(lesson_id) or PAPERWORK_NOTES.get(str(num) if num else "") or (
+            "Paperwork / design lesson — no IIQ lab mutation required."
+        )
+        return {
+            "$schema": "mnb-lesson-spec/v1",
+            "lesson": lesson_id,
+            "stem": stem,
+            "title": title,
+            "verifyMode": "paperwork",
+            "disabled": True,
+            "paperworkNote": note,
+            "description": (
+                f"Paperwork / design only for Lesson {lesson_id}. "
+                "Live IIQ Verify is disabled — binder acceptance criteria only."
+            ),
+            "checks": [],
+        }
+    if num is None:
+        return None
     raw = CURATED.get(num, [
         {"type": "http.ok", "path": "/login.jsf"},
         {"type": "object.exists", "objectClass": "Rule", "name": "MNB-Rule-Hello-World"},
         {"type": "object.exists", "objectClass": "Application", "name": "MNB-HR"},
     ])
     checks = enrich(raw)
-    lesson_id = f"{num:02d}" if num < 100 else str(num)
     return {
         "$schema": "mnb-lesson-spec/v1",
-        "lesson": lesson_id,
+        "lesson": lesson_id if num >= 100 else f"{num:02d}",
         "stem": stem,
         "title": title,
-        "description": f"Auto-generated verify checks for Lesson {lesson_id}. Live IIQ only — no JSON paste.",
+        "verifyMode": "lab",
+        "description": f"Live IIQ verify checks for Lesson {lesson_id}. Lab mutation required — no JSON paste.",
         "checks": checks,
     }
 
@@ -413,16 +527,25 @@ def main() -> int:
     ap.add_argument("--all", action="store_true", help="Also regenerate 01–10 (dangerous)")
     ap.add_argument("--min", type=int, default=11)
     ap.add_argument("--max", type=int, default=110)
+    ap.add_argument("--lettered", action="store_true", help="Also regenerate NNb lettered Core Path inserts")
     args = ap.parse_args()
 
     SPECS.mkdir(parents=True, exist_ok=True)
     written = 0
     skipped = 0
-    for path in sorted(LESSONS.glob("[0-9]*.md")):
-        num = int(path.stem.split("-", 1)[0])
-        if num < args.min or num > args.max:
+    paths = sorted(LESSONS.glob("[0-9]*.md"))
+    for path in paths:
+        num, token = _lesson_num_token(path.stem)
+        if num is None:
             continue
-        if num <= 10 and not args.all:
+        lettered = bool(re.match(r"^\d{2,3}[a-z]-", path.stem))
+        if lettered and not args.lettered and token not in LETTERED_PAPERWORK:
+            continue
+        # Lettered paperwork stems always refresh with --overwrite even if outside --min/--max.
+        in_range = args.min <= num <= args.max or token in LETTERED_PAPERWORK
+        if not in_range:
+            continue
+        if num <= 10 and not args.all and not lettered:
             continue
         spec = build_spec(path)
         if not spec:
@@ -433,7 +556,9 @@ def main() -> int:
             continue
         out.write_text(json.dumps(spec, indent=2) + "\n", encoding="utf-8")
         written += 1
-        print(f"wrote {out.name} ({len(spec['checks'])} checks)")
+        mode = spec.get("verifyMode", "lab")
+        nchecks = len(spec.get("checks") or [])
+        print(f"wrote {out.name} (mode={mode}, {nchecks} checks)")
 
     print(f"done: written={written} skipped={skipped} specs_dir={SPECS}")
     return 0

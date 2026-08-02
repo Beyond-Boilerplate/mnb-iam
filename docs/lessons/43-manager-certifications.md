@@ -9,6 +9,8 @@
 
 ---
 
+> **Verify:** Lab lesson — create and complete `MNB-Q-Lab-Manager-Cert`. Academy **Verify now** checks that CertificationDefinition.
+
 ## Learning objectives
 
 You will be able to:

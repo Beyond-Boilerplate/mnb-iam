@@ -3,7 +3,8 @@
   "lesson": "19",
   "stem": "19-uncorrelated-remediation",
   "title": "Uncorrelated Account Remediation",
-  "description": "Auto-generated verify checks for Lesson 19. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 19. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,12 @@
       "name": "MNB-AWS-Cloud",
       "id": "object-exists-3",
       "message": "Application 'MNB-AWS-Cloud' exists"
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/apps/MNB-AWS-Cloud.csv",
+      "id": "host-file-exists-4",
+      "message": "Repo/lab file present: lab-data/apps/MNB-AWS-Cloud.csv"
     }
   ]
 }

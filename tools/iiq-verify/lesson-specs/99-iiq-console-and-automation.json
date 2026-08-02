@@ -3,7 +3,8 @@
   "lesson": "99",
   "stem": "99-iiq-console-and-automation",
   "title": "IIQ Console & Automation",
-  "description": "Auto-generated verify checks for Lesson 99. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 99. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "object.exists",

@@ -3,7 +3,8 @@
   "lesson": "28",
   "stem": "28-privileged-access-roles",
   "title": "Privileged Access Role Design",
-  "description": "Auto-generated verify checks for Lesson 28. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 28. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,22 @@
       "name": "MNB-Role-BreakGlass",
       "id": "object-exists-3",
       "message": "Bundle 'MNB-Role-BreakGlass' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "object-exists-4",
+      "message": "Bundle 'MNB-Birthright-Employee' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-IT-CloudAdmin",
+      "softFail": true,
+      "hint": "Preferred two-tier model: IT pack MNB-IT-CloudAdmin required by MNB-Role-CloudAdmin.",
+      "id": "object-exists-5",
+      "message": "Bundle 'MNB-IT-CloudAdmin' exists"
     }
   ]
 }

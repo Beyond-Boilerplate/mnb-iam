@@ -3,7 +3,8 @@
   "lesson": "95",
   "stem": "95-quicklinks-custom-ui",
   "title": "QuickLinks and Custom UI",
-  "description": "Auto-generated verify checks for Lesson 95. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 95. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

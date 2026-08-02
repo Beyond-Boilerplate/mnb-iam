@@ -3,7 +3,8 @@
   "lesson": "47",
   "stem": "47-provisioning-troubleshooting",
   "title": "Provisioning Plans & Troubleshooting",
-  "description": "Auto-generated verify checks for Lesson 47. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 47. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",

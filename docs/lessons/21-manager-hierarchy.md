@@ -8,6 +8,8 @@
 
 ---
 
+> **Verify:** Lab lesson — prove manager resolution and optional reassignment simulation. Academy **Verify now** checks `MNB-HR`, `priya.wire`, and `rachel.evans`.
+
 ## Learning objectives
 
 You will be able to:

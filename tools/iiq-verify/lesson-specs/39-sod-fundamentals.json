@@ -3,7 +3,8 @@
   "lesson": "39",
   "stem": "39-sod-fundamentals",
   "title": "SoD Fundamentals for Banking",
-  "description": "Auto-generated verify checks for Lesson 39. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 39. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -24,6 +25,13 @@
       "name": "MNB-SOD-Finance-Cloud",
       "id": "object-exists-3",
       "message": "Policy 'MNB-SOD-Finance-Cloud' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-WirePortal",
+      "id": "object-exists-4",
+      "message": "Application 'MNB-WirePortal' exists"
     }
   ]
 }

@@ -3,7 +3,8 @@
   "lesson": "31",
   "stem": "31-leaver-disablement",
   "title": "Leaver & Access Disablement",
-  "description": "Auto-generated verify checks for Lesson 31. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 31. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -19,13 +20,21 @@
       "message": "Application 'MNB-HR' exists"
     },
     {
+      "type": "identity.exists",
+      "name": "samir.hassan",
+      "id": "identity-exists-3",
+      "message": "Identity 'samir.hassan' exists"
+    },
+    {
       "type": "object.exists",
       "objectClass": "GroupDefinition",
       "name": "MNB-Terminated",
       "alternateClasses": [
         "Population"
       ],
-      "id": "object-exists-3",
+      "softFail": true,
+      "hint": "Create or reuse MNB-Terminated population for leaver residual hunting.",
+      "id": "object-exists-4",
       "message": "GroupDefinition 'MNB-Terminated' exists"
     }
   ]

@@ -699,6 +699,22 @@ h2.is-hidden,
   border-radius: 4px;
 }
 .verify-panel h2 { margin-top: 0; font-family: var(--display); font-size: 1.35rem; }
+.verify-banner {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+.verify-banner.verify-paperwork {
+  background: rgba(176, 141, 58, 0.14);
+  border: 1px solid rgba(138, 108, 40, 0.35);
+  color: var(--ink);
+}
+.verify-banner.verify-lab {
+  background: rgba(15, 92, 90, 0.08);
+  border: 1px solid rgba(15, 92, 90, 0.22);
+  color: var(--ink);
+}
 .verify-cmd {
   background: var(--rail);
   color: #d7dde8;

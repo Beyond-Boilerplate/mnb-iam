@@ -5,6 +5,7 @@ Use this for every lesson authored or rewritten. Voice: **a senior IAM engineer 
 ## Required sections (in order)
 
 1. **Title block** — Lesson number, title, level, track, time, prereq, lab data paths
+1b. **Verify callout** *(required for lessons 17+)* — One blockquote after the title block: either `> **Verify:** Lab lesson — …` (what Academy checks in IIQ) or `> **Verify:** Paperwork / design only — …` (live Verify disabled). Keep the lesson-spec `verifyMode` in sync (`lab` vs `paperwork` under `tools/iiq-verify/lesson-specs/`).
 2. **Learning objectives** — 4–7 measurable bullets ("You will be able to…")
 3. **Why this matters** — 1 short business paragraph + 1 control/audit paragraph, grounded in a concrete Meridian scenario (a named persona, a real consequence)
 4. **Concepts** — See "Concept depth rules" below. This is the teaching core, not a warm-up.

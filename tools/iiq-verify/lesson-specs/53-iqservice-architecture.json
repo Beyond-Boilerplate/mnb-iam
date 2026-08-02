@@ -3,20 +3,9 @@
   "lesson": "53",
   "stem": "53-iqservice-architecture",
   "title": "IQService Architecture",
-  "description": "Auto-generated verify checks for Lesson 53. Live IIQ only \u2014 no JSON paste.",
-  "checks": [
-    {
-      "type": "object.exists",
-      "objectClass": "Application",
-      "name": "MNB-ActiveDirectory",
-      "id": "object-exists-1",
-      "message": "Application 'MNB-ActiveDirectory' exists"
-    },
-    {
-      "type": "http.ok",
-      "path": "/login.jsf",
-      "id": "http-ok-2",
-      "message": "IIQ login page reachable"
-    }
-  ]
+  "verifyMode": "paperwork",
+  "disabled": true,
+  "paperworkNote": "IQService placement/worksheets \u2014 no live IQService install required.",
+  "description": "Paperwork / design only for Lesson 53. Live IIQ Verify is disabled \u2014 binder acceptance criteria only.",
+  "checks": []
 }

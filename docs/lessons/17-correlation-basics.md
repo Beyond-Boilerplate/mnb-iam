@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Lab lesson — configure correlation on `MNB-IT-Access`, re-aggregate, and prove `priya.wire` linkage. Academy **Verify now** checks the app + personas.
+
 ## Learning objectives
 
 You will be able to:

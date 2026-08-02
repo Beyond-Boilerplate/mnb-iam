@@ -12,6 +12,8 @@
 
 ---
 
+> **Verify:** Lab lesson — hunt terminated residual access (`samir.hassan`) and create/search populations. Academy **Verify now** checks HR + Samir + optional `MNB-Terminated*` populations.
+
 ## Learning objectives
 
 You will be able to:

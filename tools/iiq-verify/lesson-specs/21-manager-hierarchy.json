@@ -3,7 +3,8 @@
   "lesson": "21",
   "stem": "21-manager-hierarchy",
   "title": "Manager Hierarchy & Reassignment",
-  "description": "Auto-generated verify checks for Lesson 21. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 21. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -13,16 +14,31 @@
     },
     {
       "type": "object.exists",
-      "objectClass": "TaskDefinition",
-      "name": "Refresh MNB Managers",
+      "objectClass": "Application",
+      "name": "MNB-HR",
       "id": "object-exists-2",
-      "message": "TaskDefinition 'Refresh MNB Managers' exists"
+      "message": "Application 'MNB-HR' exists"
     },
     {
       "type": "identity.exists",
       "name": "priya.wire",
       "id": "identity-exists-3",
       "message": "Identity 'priya.wire' exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "rachel.evans",
+      "id": "identity-exists-4",
+      "message": "Identity 'rachel.evans' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "Refresh MNB Attributes",
+      "softFail": true,
+      "hint": "Manager reassignment uses Aggregate MNB-HR + identity refresh (Refresh MNB Attributes / Identities).",
+      "id": "object-exists-5",
+      "message": "TaskDefinition 'Refresh MNB Attributes' exists"
     }
   ]
 }

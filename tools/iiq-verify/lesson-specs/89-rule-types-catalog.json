@@ -3,7 +3,8 @@
   "lesson": "89",
   "stem": "89-rule-types-catalog",
   "title": "Rule Types Catalog",
-  "description": "Auto-generated verify checks for Lesson 89. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 89. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "object.exists",

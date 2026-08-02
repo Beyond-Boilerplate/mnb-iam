@@ -9,6 +9,8 @@
 
 ---
 
+> **Verify:** Paperwork / reading only — no IIQ lab mutation. Academy **Verify now** is disabled; mark the binder complete when acceptance criteria are done.
+
 ## Learning objectives
 
 You will be able to:

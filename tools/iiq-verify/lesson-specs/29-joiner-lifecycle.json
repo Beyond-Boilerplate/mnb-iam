@@ -3,8 +3,8 @@
   "lesson": "29",
   "stem": "29-joiner-lifecycle",
   "title": "Joiner Lifecycle",
-  "description": "Joiner delta for nina.joiner + birthright role. Prefer apply-joiner.sh.",
-  "path": "core",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 29. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -29,16 +29,16 @@
     {
       "type": "identity.exists",
       "name": "nina.joiner",
-      "id": "id-nina",
-      "message": "Joiner persona nina.joiner exists",
       "softFail": true,
-      "hint": "Run ./tools/lab/scripts/scenarios/apply-joiner.sh then Aggregate MNB-HR + Refresh."
+      "hint": "Run ./tools/lab/scripts/scenarios/apply-joiner.sh then Aggregate MNB-HR + Refresh.",
+      "id": "identity-exists-4",
+      "message": "Identity 'nina.joiner' exists"
     },
     {
       "type": "host.file.exists",
       "path": "lab-data/scenarios/joiner/hr-delta-new-hire.csv",
-      "id": "file-joiner",
-      "message": "Joiner scenario delta present"
+      "id": "host-file-exists-5",
+      "message": "Repo/lab file present: lab-data/scenarios/joiner/hr-delta-new-hire.csv"
     }
   ]
 }

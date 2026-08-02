@@ -3,7 +3,8 @@
   "lesson": "35",
   "stem": "35-access-request-catalog",
   "title": "Access Request Catalog",
-  "description": "Auto-generated verify checks for Lesson 35. Live IIQ only \u2014 no JSON paste.",
+  "verifyMode": "lab",
+  "description": "Live IIQ verify checks for Lesson 35. Lab mutation required \u2014 no JSON paste.",
   "checks": [
     {
       "type": "http.ok",
@@ -21,8 +22,23 @@
     {
       "type": "object.exists",
       "objectClass": "Bundle",
-      "name": "MNB-Birthright-Employee",
+      "name": "MNB-Role-CloudAdmin",
       "id": "object-exists-3",
+      "message": "Bundle 'MNB-Role-CloudAdmin' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Role-RelationshipManager",
+      "softFail": true,
+      "id": "object-exists-4",
+      "message": "Bundle 'MNB-Role-RelationshipManager' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Bundle",
+      "name": "MNB-Birthright-Employee",
+      "id": "object-exists-5",
       "message": "Bundle 'MNB-Birthright-Employee' exists"
     }
   ]
