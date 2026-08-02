@@ -260,7 +260,7 @@ def parse_lesson_meta(path: Path) -> dict:
 
 def lesson_path_kind(stem: str) -> str:
     """core = entry path (01–50 + inserts/mid-caps + guides); specialist = 51–110."""
-    if stem.startswith("mid-") or stem in {"first-90-days"}:
+    if stem.startswith("mid-") or stem in {"first-90-days", "50b-choose-your-stack"}:
         return "core"
     m = re.match(r"^(\d{2,3})[a-z]?-", stem)
     if not m:

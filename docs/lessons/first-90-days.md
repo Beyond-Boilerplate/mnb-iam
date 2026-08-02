@@ -61,16 +61,19 @@ Full map: [`lab-data/reference/hr-column-map.md`](../../lab-data/reference/hr-co
 
 ## After Capstone 50 — pick a specialist track
 
-| If your team’s next pain is… | Start here |
-| --- | --- |
-| AD / LDAP / directory truth | Lessons 51–58, 61–62 (OpenLDAP is live in Docker) |
-| Database apps | Lessons 63–64 (JDBC sample Postgres) |
-| SaaS / API | Lessons 68–76 (tenant optional — treat real-world setup as primary reading) |
-| ERP / HRIS modernization | Lessons 77–82 |
-| Rules / LCM / plugins / SSD | Lessons 89–103 |
-| Production hardening | Lessons 104–110 |
+Full bridge lesson: [`50b-choose-your-stack.md`](50b-choose-your-stack.md).
 
-Bridge narrative: complete Capstone 50 evidence pack → write one paragraph naming *your* next track → only then expand the Academy TOC to specialist lessons.
+| If your team’s next pain is… | Start here | Live today |
+| --- | --- | --- |
+| AD / LDAP / directory truth | 51–58, 61–62 | OpenLDAP + provision ACL |
+| Database apps | 63–64 | `jdbc-pg` host **:5435** |
+| Custom REST / SCIM | 68–69 | `connector-mock` **:8091** |
+| Cloud IdP / M365 / Okta / AWS | 59, 73–76 | Tenant optional |
+| ERP / HRIS modernization | 77–82 | Design-heavy |
+| Rules / LCM / plugins / SSD | 89–103 | After Capstone objects exist |
+| Production hardening | 104–110 | Production-engineer track |
+
+Default for Core grads: **58 → 63–64 → 68–69**, then opt into SaaS tenants.
 
 ---
 

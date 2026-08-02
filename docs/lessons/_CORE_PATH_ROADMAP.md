@@ -6,48 +6,24 @@ Owner posture: ship **Core Path (01–50)** as the entry-level product; speciali
 
 ## Shipped
 
-### Packaging iteration
+### Packaging + N+1 (Core realism)
 
-| Item | Location |
-| --- | --- |
-| HR naming drift (`userId` / Active-Terminated / `exceptions=LOA`) | `docs/lessons/*`, column map |
-| Core Path TOC filter | `learn/build.py`, `academy.js` |
-| Mid-capstones 16 / 34 / 46 | `docs/lessons/mid-*-capstone.md` + specs |
-| First 90 Days map | `docs/lessons/first-90-days.md` |
+See prior sections in git history / Academy: naming drift, Core TOC filter, mid-capstones, scenario runners, ticket-shaped labs (`08b`–`36b`).
 
-### N+1 — Core realism (**done**)
+### N+2 — Live credibility (**done**)
 
 | ID | Work item | Location |
 | --- | --- | --- |
-| C1 | Scenarios: rehire, bad-row, batch-hire, contractor-end | `lab-data/scenarios/*` + `apply-*.sh` |
-| C2 | Runners taught in JML lessons 29–34 | Joiner/mover/leaver/loa/contractor-end callouts |
-| C3 | Day in the life / ticket triage | `08b-day-in-the-life-ticket-triage.md` |
-| C4 | Dirty data war room | `19b-dirty-data-war-room.md` |
-| C5 | Be the approver | `36b-be-the-approver.md` |
-| C6 | Optional Rapid Setup / LCM joiner | `29b-lifecycle-events-rapid-setup.md` |
-| C7 | Early Task Result literacy | `16b-reading-task-results.md` |
-| C8 | Checkpoint badges + Core TOC polish | `learn/assets/*`, README tracks |
+| L1 | JDBC 63–64 live on `jdbc-pg` **:5435** with seeded SQL; in main stack | `docker-compose.iiq.yml`, `lab-data/connectors/jdbc/` |
+| L2 | LDAP provision stretch (group add/remove via `svc-iiq-provision`) | Lesson 58 Task 8 + `lab-data/connectors/ldap/provision-stretch-*.ldif` |
+| L3 | `connector-mock` :8091 for Wire Portal + SCIM; Lessons 68–69 primary path | `tools/connector-mock/`, compose service |
+| L4 | Capstone bridge — choose your stack | `50b-choose-your-stack.md` |
 
-**Exit met:** Nina→Priya→Jordan→Sofia via runners + mid-34; bad-row diagnose refuses upsert; letter-suffix lessons in Academy Core Path.
+**Exit met:** Core graduate can run Directory + JDBC + API mock tracks without a SaaS tenant; Capstone 50 no longer dumps straight into Lesson 51.
 
 ---
 
-## Iteration N+2 — Live credibility (**next**)
-
-**Goal:** Match Lesson 58 (OpenLDAP) quality for the connectors juniors actually touch first.
-
-| ID | Work item | Acceptance |
-| --- | --- | --- |
-| L1 | JDBC 63–64 mandatory against `jdbc-pg` / main-stack seed | Live Test Connection + aggregate in lab procedure |
-| L2 | LDAP provisioning stretch (group add/remove / disable pattern) | Uses compose provision ACL; evidence in binder |
-| L3 | Thin mock SCIM or Web Services container for 68–69 | Primary path not “no tenant”; fallback remains labeled |
-| L4 | Bridge page after Capstone 50 (“choose your stack”) | Academy page + README link; TOC default still Core |
-
-**Exit:** Core graduate can complete Directory + JDBC live tracks without a SaaS tenant.
-
----
-
-## Iteration N+3 — Specialist polish (selective)
+## Iteration N+3 — Specialist polish (**next**)
 
 | ID | Work item | Acceptance |
 | --- | --- | --- |
@@ -63,9 +39,8 @@ Owner posture: ship **Core Path (01–50)** as the entry-level product; speciali
 | ID | Work item | Notes |
 | --- | --- | --- |
 | V1 | `identity.hasBundle` / entitlement absence checks | Hard “Nina has birthright, no wire” |
-| V2 | Progress chip Core-only | Shipped with path filter |
 | V3 | Public academy deploy rebuild | CD / `learn/build.py` |
-| V4 | Homelab collision policy | Documented in `lab-data/scenarios/README.md` |
+| V4 | Homelab collision policy | `lab-data/scenarios/README.md` |
 
 ---
 
@@ -73,9 +48,9 @@ Owner posture: ship **Core Path (01–50)** as the entry-level product; speciali
 
 ```text
 Packaging  → done
-N+1        → done (Core realism / ticket-shaped labs)
-N+2 (next) → L1–L4 live Directory/JDBC/API mocks + Capstone bridge
-N+3        → S1–S4 selective specialist depth
+N+1        → done
+N+2        → done (live Directory / JDBC / API mock + bridge)
+N+3 (next) → S1–S4 selective specialist depth
 Parallel   → V1, V3–V4
 ```
 
@@ -83,8 +58,8 @@ Parallel   → V1, V3–V4
 
 ## References
 
-- Style: [`_STYLE.md`](_STYLE.md)
-- Column map: [`../../lab-data/reference/hr-column-map.md`](../../lab-data/reference/hr-column-map.md)
-- Scenarios: [`../../lab-data/scenarios/README.md`](../../lab-data/scenarios/README.md)
-- Verify: [`../LESSON_VERIFY.md`](../LESSON_VERIFY.md)
+- JDBC: [`../../lab-data/connectors/jdbc/README.md`](../../lab-data/connectors/jdbc/README.md)
+- LDAP: [`../../lab-data/connectors/ldap/README.md`](../../lab-data/connectors/ldap/README.md)
+- Mock: [`../../tools/connector-mock/README.md`](../../tools/connector-mock/README.md)
+- Bridge: [`50b-choose-your-stack.md`](50b-choose-your-stack.md)
 - Curriculum: [`README.md`](README.md)

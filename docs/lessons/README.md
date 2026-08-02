@@ -45,10 +45,10 @@ export SPTARGET=sandbox
 ./build.sh importdynamic   # smoke Rule only until you export your own objects
 ```
 
-6. Live OpenLDAP is included in `./tools/lab/docker/up.sh`. Optional sample JDBC (host :5434):
+6. Live OpenLDAP, **jdbc-pg** (host **:5435**), and **connector-mock** (**:8091**) ship with `./tools/lab/docker/up.sh`. Standalone JDBC/mock if needed:
 
 ```bash
-docker compose -f docker-compose.connectors.yml up -d jdbc-pg
+docker compose -f docker-compose.connectors.yml up -d jdbc-pg connector-mock
 ```
 
 7. Keep a CHANGELOG of `MNB-*` objects you **create**, optional `config/` exports, and evidence screenshots.
@@ -92,7 +92,7 @@ See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and 
 - **Policies:** 39–42
 - **Certifications:** 43–46 → **[mid-46](mid-46-certs-capstone.md)**
 - **Ops:** 47–49
-- **Capstone I:** 50
+- **Capstone I:** 50 → **[50b Choose your stack](50b-choose-your-stack.md)**
 
 **Start here:** [First 90 days as an IIQ engineer](first-90-days.md) · roadmap: [_CORE_PATH_ROADMAP.md](_CORE_PATH_ROADMAP.md)
 

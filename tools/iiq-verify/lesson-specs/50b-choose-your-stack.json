@@ -1,0 +1,21 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "50b",
+  "stem": "50b-choose-your-stack",
+  "title": "After Capstone 50 — Choose Your Stack",
+  "description": "Bridge lesson — IIQ reachable; stack choice is binder evidence (not auto-verified).",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "host.file.exists",
+      "path": "docs/lessons/50b-choose-your-stack.md",
+      "id": "bridge-doc",
+      "message": "Choose-your-stack bridge lesson present in repo"
+    }
+  ]
+}

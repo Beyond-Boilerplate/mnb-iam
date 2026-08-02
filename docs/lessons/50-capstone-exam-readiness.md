@@ -352,4 +352,4 @@ Onboard a new application `MNB-MobileDeposit` with two entitlements; aggregate; 
 
 **Previous:** [Lesson 49 — Email Templates & Notifications](49-email-templates-notifications.md)
 
-**Next:** [Lesson 51 — Connector Landscape & Registry](51-connector-landscape-and-registry.md) — Part II (connectors & customization) continues. Archive your Part I capstone binder, keep residual risks under review, and use the go-live checklist as the gate for any environment promotion beyond lab; then proceed into the connector and enterprise customization track through Lesson 110.
+**Next:** [After Capstone 50 — Choose Your Stack](50b-choose-your-stack.md) — pick Directory / JDBC / API mock (or another specialist track) before grinding Lesson 51+. Archive your Part I capstone binder, keep residual risks under review, and use the go-live checklist as the gate for any environment promotion beyond lab.
