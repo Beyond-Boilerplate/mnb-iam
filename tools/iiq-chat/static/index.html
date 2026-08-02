@@ -29,15 +29,22 @@
       </div>
     </div>
     <div class="mast-actions">
+      <label class="mode-toggle" title="Block unlock, aggregation, and other write tools">
+        <input type="checkbox" id="read-only" />
+        <span>Read-only</span>
+      </label>
       <div class="mast-status" id="status" title="MCP connectivity">
         <span class="dot" data-state="pending"></span>
         <span class="status-text">Checking MCP…</span>
       </div>
-      <button type="button" class="ghost-btn" id="clear-chat" title="Clear conversation">Clear</button>
+      <button type="button" class="ghost-btn" id="palette-btn" title="Command palette (⌘K)">⌘K</button>
+      <button type="button" class="ghost-btn" id="help-btn" title="Keyboard shortcuts (?)">?</button>
+      <button type="button" class="ghost-btn" id="new-chat" title="Clear conversation">New</button>
     </div>
   </header>
 
   <div class="rail-backdrop" id="rail-backdrop" hidden></div>
+  <div class="detail-backdrop" id="detail-backdrop" hidden></div>
 
   <main class="desk">
     <aside class="rail" id="rail" aria-label="Pre-baked MCP actions">
@@ -45,13 +52,13 @@
         <div class="rail-head-row">
           <div>
             <h2>Tools</h2>
-            <p>Instant MCP calls — no model needed.</p>
+            <p>One-click MCP</p>
           </div>
-          <button type="button" class="ghost-btn rail-close" id="rail-close" hidden>Close</button>
+          <button type="button" class="ghost-btn rail-close" id="rail-close" title="Hide tools panel">Hide</button>
         </div>
         <label class="sr-only" for="action-filter">Filter tools</label>
         <div class="filter-wrap">
-          <input id="action-filter" type="search" placeholder="Search tools…  (/)" autocomplete="off" enterkeyhint="search" />
+          <input id="action-filter" type="search" placeholder="Search tools…" autocomplete="off" enterkeyhint="search" />
           <kbd class="filter-kbd" aria-hidden="true">/</kbd>
         </div>
         <div class="group-tabs" id="group-tabs" role="tablist" aria-label="Tool groups"></div>
@@ -61,7 +68,7 @@
         </div>
       </div>
       <div class="favorites" id="favorites" hidden>
-        <h3 class="group-title">Pinned</h3>
+        <h3 class="group-title static">Pinned</h3>
         <div class="chips" id="favorite-chips"></div>
       </div>
       <div class="rail-groups" id="actions"></div>
@@ -69,27 +76,121 @@
 
     <section class="pane" aria-label="Conversation">
       <div class="pane-brass" aria-hidden="true"></div>
+      <header class="pane-head">
+        <div>
+          <h2 class="pane-title">Console</h2>
+          <p class="pane-sub" id="pane-sub">Plain language over IdentityIQ</p>
+        </div>
+        <div class="status-bar" id="status-bar" aria-live="polite">
+          <span class="sb-item" id="sb-mcp">MCP…</span>
+          <span class="sb-item" id="sb-model">Model…</span>
+          <span class="sb-item" id="sb-mode">Read/Write</span>
+          <span class="sb-item" id="sb-latency" hidden></span>
+        </div>
+      </header>
       <div class="transcript" id="transcript" role="log" aria-live="polite" aria-relevant="additions"></div>
       <form class="composer" id="composer">
         <div class="suggest" id="suggest" aria-label="Suggested questions">
-          <button type="button" class="suggest-chip" data-q="Who is Anita Rao?">Who is Anita Rao?</button>
-          <button type="button" class="suggest-chip" data-q="Do I have anyone named Anita?">Anyone named Anita?</button>
-          <button type="button" class="suggest-chip" data-q="Find me all employees in Paris">Employees in Paris</button>
-          <button type="button" class="suggest-chip" data-q="How many open SoD violations are there?">Open SoD count</button>
+          <div class="suggest-row" id="suggest-row">
+            <button type="button" class="suggest-chip" data-q="Who is Anita Rao?">Anita Rao</button>
+            <button type="button" class="suggest-chip" data-q="Find me all employees in Paris">Paris</button>
+            <button type="button" class="suggest-chip" data-q="How many open SoD violations are there?">Open SoD</button>
+          </div>
+          <div class="suggest-row playbook-row" id="playbook-row" aria-label="Playbooks"></div>
         </div>
         <label class="sr-only" for="message">Ask IdentityIQ</label>
-        <textarea id="message" rows="2" placeholder="Ask in plain language… (Enter to send, Shift+Enter for newline)" required></textarea>
-        <div class="composer-row">
-          <p class="hint" id="llm-hint">LLM chat needs OPENROUTER_API_KEY</p>
+        <div class="composer-box">
+          <div class="composer-field">
+            <div
+              id="slash-menu"
+              class="slash-menu"
+              role="listbox"
+              aria-label="Tool commands"
+              hidden
+            ></div>
+            <textarea
+              id="message"
+              rows="2"
+              placeholder="Ask IIQ…  / tools · @ people · ⌘K"
+              required
+              autocomplete="off"
+              aria-autocomplete="list"
+              aria-controls="slash-menu"
+            ></textarea>
+          </div>
+          <button type="button" class="stop" id="stop" hidden>Stop</button>
           <button type="submit" class="send" id="send">
             <span class="send-label">Send</span>
-            <span class="send-busy" hidden>Working…</span>
+            <span class="send-busy" hidden>Running…</span>
           </button>
         </div>
+        <p class="hint" id="llm-hint">Needs OPENROUTER_API_KEY · <kbd>?</kbd> shortcuts</p>
       </form>
     </section>
+
+    <aside class="detail" id="detail" hidden aria-label="Detail panel">
+      <header class="detail-head">
+        <div>
+          <p class="detail-kind" id="detail-kind">Detail</p>
+          <h2 class="detail-title" id="detail-title">Inspector</h2>
+        </div>
+        <div class="detail-head-actions">
+          <button type="button" class="text-btn" id="detail-copy">Copy JSON</button>
+          <button type="button" class="ghost-btn" id="detail-close" title="Close detail">Close</button>
+        </div>
+      </header>
+      <div class="detail-summary" id="detail-summary"></div>
+      <pre class="detail-json" id="detail-json"></pre>
+    </aside>
   </main>
 
+  <div class="modal-backdrop" id="confirm-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title">Approve write tool?</h3>
+      <p class="modal-lead" id="confirm-lead">This will change IdentityIQ state.</p>
+      <p class="modal-tool"><code id="confirm-tool"></code></p>
+      <pre class="modal-args" id="confirm-args"></pre>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" id="confirm-deny">Deny</button>
+        <button type="button" class="send" id="confirm-approve">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="help-modal" hidden>
+    <div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="help-head">
+        <h3 id="help-title">Keyboard shortcuts</h3>
+        <button type="button" class="ghost-btn" id="help-close">Close</button>
+      </div>
+      <dl class="help-list">
+        <div><dt><kbd>/</kbd></dt><dd>Tool menu (recent, fuzzy filter)</dd></div>
+        <div><dt><kbd>@</kbd></dt><dd>Mention an identity or application</dd></div>
+        <div><dt><kbd>⌘</kbd><kbd>K</kbd></dt><dd>Command palette (tools, playbooks)</dd></div>
+        <div><dt><kbd>?</kbd></dt><dd>Show this shortcuts panel</dd></div>
+        <div><dt><kbd>Enter</kbd></dt><dd>Send / run selected menu item</dd></div>
+        <div><dt><kbd>Shift</kbd>+<kbd>Enter</kbd></dt><dd>New line in ask box</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Close menus / detail · hide tools · stop run</dd></div>
+        <div><dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Move in menus</dd></div>
+      </dl>
+      <p class="help-note">Read-only blocks unlock, aggregation, and other write tools. Write tools always ask for approval in chat. Use Export on answers for demo evidence.</p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="palette-modal" hidden>
+    <div class="modal palette-modal" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+      <div class="palette-head">
+        <h3 id="palette-title">Command palette</h3>
+        <button type="button" class="ghost-btn" id="palette-close">Close</button>
+      </div>
+      <label class="sr-only" for="palette-input">Filter commands</label>
+      <input id="palette-input" type="search" placeholder="Search tools and playbooks…" autocomplete="off" />
+      <div class="palette-list" id="palette-list" role="listbox" aria-label="Commands"></div>
+      <p class="palette-foot"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> run · <kbd>Esc</kbd> close</p>
+    </div>
+  </div>
+
+  <script src="/playbooks.js" defer></script>
   <script src="/app.js" defer></script>
 </body>
 </html>

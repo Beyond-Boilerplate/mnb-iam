@@ -23,10 +23,14 @@ or `POST /api/tools/refresh`.
 ### Operator UX
 
 - Group tabs + collapsible sections (state remembered)
+- Collapsible tools rail (desktop + mobile drawer; header toggle)
 - Pin up to 8 favorites (★, localStorage)
-- Collapsed JSON results with one-line summary + Copy
-- Mobile drawer for the tools rail
-- Starter chips are example utterances only (not tool bindings)
+- Split detail pane for identity/app/JSON (Inspect) — not buried in chat
+- Markdown answers, `@` mentions, `/` tool menu, follow-up chips
+- Playbooks (JML / SoD / org checks) + `⌘K` / `Ctrl+K` command palette
+- Export Q+A+trace from answers (clipboard markdown)
+- Tool results enriched with display-name labels for free models
+- Free-text chat streams live agent activity (model status, thinking text, tool calls/results) via SSE
 
 ## Quick start
 
@@ -55,7 +59,11 @@ python3 tools/iiq-chat/serve.py
 | GET | `/api/config` | LLM auth + `agentMode: native-tools` + toolCount |
 | GET | `/api/actions` | Rail from MCP `tools/list` (+ favorite presets) |
 | POST | `/api/action` | `{ "id": "<tool\|fav:tool>" }` — **no LLM** |
-| POST | `/api/chat` | `{ "message": "...", "history": [] }` — agent loop |
+| POST | `/api/chat` | `{ "message", "history", "readOnly?" }` — agent loop (JSON; no interactive confirm) |
+| POST | `/api/chat/stream` | SSE agent: `run`, `status`, `thought`, `tool_start`, `tool_confirm`, `tool_result`, `done` / `error` |
+| POST | `/api/chat/cancel` | `{ "runId" }` — stop an in-flight stream |
+| POST | `/api/chat/decision` | `{ "runId", "id", "approve" }` — approve/deny a write tool |
+| GET | `/api/suggest` | `?q=&kind=all\|identity\|app` — `@` mention autocomplete via MCP |
 | POST | `/api/tools/refresh` | Force-refresh MCP tool cache |
 
 ## Env
