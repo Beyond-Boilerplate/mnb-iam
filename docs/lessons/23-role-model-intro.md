@@ -120,14 +120,14 @@ Before naming roles, speak Meridian’s desk language. Wrong job codes in the sk
 
 ### Task 2 — Sketch IT vs business roles
 
-Enterprises argue endlessly about nested IT roles vs flat business roles. Decide now for the academy so Lessons 24–28 stay consistent.
+Enterprises argue endlessly about flat vs nested role models. Decide now for the academy so Lessons 24–28 stay consistent with stock IIQ.
 
 1. Write two paragraphs:
    - IT roles = reusable entitlement packs for engineers
    - Business roles = “desk” language for HR/managers/certifiers
-2. Decide Meridian’s v0 approach: **business roles that embed entitlements directly** (simpler for the lab) with optional future IT-role nesting.
+2. Decide Meridian’s v0 approach: **two-tier** — **business** roles for “who” (assignment rules) + **IT** roles for “what” (entitlements), linked by **Required Roles**. Stock IIQ business types do **not** support the Entitlements panel (`noProfiles`); Lesson 24 hits that warning on purpose.
 
-**Expected result:** Explicit lab decision recorded (flat business roles OK for academy).
+**Expected result:** Explicit lab decision recorded (business + required IT packs for the academy).
 
 ### Task 3 — Build catalog v0 table
 
@@ -219,7 +219,7 @@ Catalog go-live is dual-controlled design, not an IAM-only publish.
 - Job→role mapping sheet
 - Stakeholder approval list
 - Anti-pattern park lot (3 items)
-- Decision note: flat business roles for lab vs nested IT roles later
+- Decision note: two-tier business + required IT packs (stock IIQ; Entitlements not on business)
 
 **Control owner:** IAM Architecture (draft) + Risk (approve compositions)  
 **Examiner question:** “Show me which roles are birthright and prove privileged access is excluded.”
