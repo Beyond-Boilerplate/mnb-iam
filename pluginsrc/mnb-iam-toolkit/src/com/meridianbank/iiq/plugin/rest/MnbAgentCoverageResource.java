@@ -3,9 +3,12 @@ package com.meridianbank.iiq.plugin.rest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -1201,6 +1204,341 @@ public class MnbAgentCoverageResource extends BasePluginResource {
     data.put("unresolvedSamples", unresolvedSamples);
     data.put("next", "Run Refresh Identity Cube (refreshManagerStatus) to update isManager flags");
     return MnbAgentSupport.ok("UIAPI-58", data);
+  }
+
+  // —— UIAPI-59 Org chart (authoritative manager hierarchy) ——
+  @GET
+  @Path("orgchart")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> orgChart(
+      @QueryParam("root") String root,
+      @QueryParam("depth") Integer depth,
+      @QueryParam("mode") String mode,
+      @QueryParam("includeInactive") Boolean includeInactive,
+      @QueryParam("includeTechnical") Boolean includeTechnical)
+      throws GeneralException {
+    MnbAgentSupport.requireAgentEnabled(this, "UIAPI-59");
+    int maxDepth = depth == null ? 12 : Math.max(1, Math.min(depth, 20));
+    boolean inactiveOk = Boolean.TRUE.equals(includeInactive);
+    boolean techOk = Boolean.TRUE.equals(includeTechnical);
+    String chartMode =
+        Util.isNullOrEmpty(mode) ? (Util.isNullOrEmpty(root) ? "company" : "subtree") : mode.trim();
+
+    SailPointContext ctx = getContext();
+    QueryOptions qo = new QueryOptions();
+    qo.setResultLimit(5000);
+    List<Identity> all = ctx.getObjects(Identity.class, qo);
+    Map<String, Identity> byId = new LinkedHashMap<>();
+    Map<String, List<Identity>> children = new HashMap<>();
+    if (all != null) {
+      for (Identity idn : all) {
+        if (idn == null || idn.isWorkgroup()) {
+          continue;
+        }
+        if (!techOk && isTechnicalIdentity(idn)) {
+          continue;
+        }
+        if (!inactiveOk && idn.isInactive()) {
+          continue;
+        }
+        byId.put(idn.getId(), idn);
+      }
+      for (Identity idn : byId.values()) {
+        Identity mgr = idn.getManager();
+        if (mgr == null || !byId.containsKey(mgr.getId())) {
+          continue;
+        }
+        children.computeIfAbsent(mgr.getId(), k -> new ArrayList<>()).add(idn);
+      }
+    }
+    Set<String> brokenManagers = new HashSet<>();
+    for (Identity idn : byId.values()) {
+      Identity mgr = idn.getManager();
+      Object mgrAttr = firstAttr(idn, "managersAssociateID", "manager", "managerId");
+      if (mgr != null && !byId.containsKey(mgr.getId())) {
+        brokenManagers.add(idn.getId());
+      } else if (mgr == null && mgrAttr != null && !Util.isNullOrEmpty(String.valueOf(mgrAttr))) {
+        brokenManagers.add(idn.getId());
+      }
+    }
+    for (List<Identity> kids : children.values()) {
+      kids.sort(
+          (a, b) -> {
+            String da = a.getDisplayableName() != null ? a.getDisplayableName() : a.getName();
+            String db = b.getDisplayableName() != null ? b.getDisplayableName() : b.getName();
+            return da.compareToIgnoreCase(db);
+          });
+    }
+
+    List<Map<String, Object>> forests = new ArrayList<>();
+    int nodeCount = 0;
+    if ("subtree".equalsIgnoreCase(chartMode) || !Util.isNullOrEmpty(root)) {
+      Identity rootId =
+          Util.isNullOrEmpty(root)
+              ? null
+              : MnbAgentSupport.resolveIdentity(ctx, root, "UIAPI-59");
+      if (rootId == null) {
+        throw MnbAgentSupport.error(400, "invalid_request", "root required for subtree mode", "UIAPI-59", null);
+      }
+      if (!byId.containsKey(rootId.getId())) {
+        // Allow focusing an inactive/technical root when filtered out of company scan
+        byId.put(rootId.getId(), rootId);
+      }
+      Map<String, Object> tree =
+          buildOrgNode(rootId, children, brokenManagers, 0, maxDepth, new HashSet<>());
+      forests.add(tree);
+      nodeCount = countOrgNodes(tree);
+    } else {
+      // Company mode: roots = people with no in-scope manager who either manage someone or are tops
+      List<Identity> roots = new ArrayList<>();
+      for (Identity idn : byId.values()) {
+        Identity mgr = idn.getManager();
+        boolean isRoot = mgr == null || !byId.containsKey(mgr.getId());
+        if (!isRoot) {
+          continue;
+        }
+        boolean hasReports = children.containsKey(idn.getId()) && !children.get(idn.getId()).isEmpty();
+        // Include all roots that have reports; also lone exec tops with empty manager
+        if (hasReports || mgr == null) {
+          roots.add(idn);
+        }
+      }
+      roots.sort(
+          (a, b) -> {
+            int ca = children.containsKey(a.getId()) ? children.get(a.getId()).size() : 0;
+            int cb = children.containsKey(b.getId()) ? children.get(b.getId()).size() : 0;
+            if (cb != ca) {
+              return Integer.compare(cb, ca);
+            }
+            String da = a.getDisplayableName() != null ? a.getDisplayableName() : a.getName();
+            String db = b.getDisplayableName() != null ? b.getDisplayableName() : b.getName();
+            return da.compareToIgnoreCase(db);
+          });
+      for (Identity r : roots) {
+        // Skip leaf isolates with no reports in company view (noise)
+        if (!children.containsKey(r.getId()) || children.get(r.getId()).isEmpty()) {
+          continue;
+        }
+        Map<String, Object> tree =
+            buildOrgNode(r, children, brokenManagers, 0, maxDepth, new HashSet<>());
+        forests.add(tree);
+        nodeCount += countOrgNodes(tree);
+      }
+    }
+
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("mode", Util.isNullOrEmpty(root) && "company".equalsIgnoreCase(chartMode) ? "company" : "subtree");
+    data.put("root", root);
+    data.put("maxDepth", maxDepth);
+    data.put("includeInactive", inactiveOk);
+    data.put("includeTechnical", techOk);
+    data.put("forestCount", forests.size());
+    data.put("nodeCount", nodeCount);
+    data.put("identityUniverse", byId.size());
+    data.put("brokenManagerCount", brokenManagers.size());
+    data.put("forest", forests);
+    data.put(
+        "source",
+        "Identity.manager links (authoritative HR managersAssociateID after aggregate + refresh)");
+    return MnbAgentSupport.ok("UIAPI-59", data);
+  }
+
+  @GET
+  @Path("orgchart/search")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> orgChartSearch(@QueryParam("q") String q, @QueryParam("limit") Integer limit)
+      throws GeneralException {
+    MnbAgentSupport.requireAgentEnabled(this, "UIAPI-59");
+    String query = q == null ? "" : q.trim().toLowerCase();
+    if (query.length() < 2) {
+      throw MnbAgentSupport.error(400, "invalid_request", "q must be at least 2 characters", "UIAPI-59", null);
+    }
+    int lim = limit == null ? 20 : Math.max(1, Math.min(limit, 50));
+    QueryOptions qo = new QueryOptions();
+    qo.addFilter(
+        Filter.or(
+            Filter.like("name", query, Filter.MatchMode.ANYWHERE),
+            Filter.like("displayName", query, Filter.MatchMode.ANYWHERE),
+            Filter.like("email", query, Filter.MatchMode.ANYWHERE),
+            Filter.like("firstname", query, Filter.MatchMode.ANYWHERE),
+            Filter.like("lastname", query, Filter.MatchMode.ANYWHERE)));
+    qo.setResultLimit(lim);
+    List<Identity> hits = getContext().getObjects(Identity.class, qo);
+    List<Map<String, Object>> rows = new ArrayList<>();
+    if (hits != null) {
+      for (Identity idn : hits) {
+        if (idn == null || idn.isWorkgroup()) {
+          continue;
+        }
+        Map<String, Object> m = summarizeOrgIdentity(idn, false);
+        Identity mgr = idn.getManager();
+        m.put("managerName", mgr != null ? mgr.getName() : null);
+        m.put(
+            "managerDisplayName",
+            mgr != null
+                ? (mgr.getDisplayableName() != null ? mgr.getDisplayableName() : mgr.getName())
+                : null);
+        rows.add(m);
+      }
+    }
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("q", q);
+    data.put("count", rows.size());
+    data.put("results", rows);
+    return MnbAgentSupport.ok("UIAPI-59", data);
+  }
+
+  private static boolean isTechnicalIdentity(Identity idn) {
+    if (idn == null) {
+      return true;
+    }
+    String name = idn.getName();
+    if (name == null) {
+      return true;
+    }
+    String n = name.toLowerCase();
+    return "spadmin".equals(n)
+        || n.startsWith("iiq")
+        || n.contains("service")
+        || n.startsWith("svc");
+  }
+
+  private static Map<String, Object> buildOrgNode(
+      Identity idn,
+      Map<String, List<Identity>> children,
+      Set<String> brokenManagers,
+      int depth,
+      int maxDepth,
+      Set<String> stack) {
+    boolean broken = brokenManagers != null && brokenManagers.contains(idn.getId());
+    Map<String, Object> node = summarizeOrgIdentity(idn, broken);
+    node.put("depth", depth);
+    List<Identity> kids = children.get(idn.getId());
+    int direct = kids == null ? 0 : kids.size();
+    node.put("directReports", direct);
+    List<Map<String, Object>> childNodes = new ArrayList<>();
+    if (depth < maxDepth && kids != null && stack.add(idn.getId())) {
+      for (Identity kid : kids) {
+        childNodes.add(buildOrgNode(kid, children, brokenManagers, depth + 1, maxDepth, stack));
+      }
+      stack.remove(idn.getId());
+    }
+    node.put("children", childNodes);
+    node.put("truncated", depth >= maxDepth && direct > 0);
+    return node;
+  }
+
+  private static int countOrgNodes(Map<String, Object> node) {
+    int n = 1;
+    Object kids = node.get("children");
+    if (kids instanceof List) {
+      for (Object o : (List<?>) kids) {
+        if (o instanceof Map) {
+          @SuppressWarnings("unchecked")
+          Map<String, Object> child = (Map<String, Object>) o;
+          n += countOrgNodes(child);
+        }
+      }
+    }
+    return n;
+  }
+
+  private static final String[] ORG_PRIVILEGED = {
+    "AWS_ADMIN", "WIRE_INIT", "WIRE_APPR", "SAP_FI", "GL_POST", "CORE_ADMIN"
+  };
+
+  private static Map<String, Object> summarizeOrgIdentity(Identity idn, boolean brokenManager) {
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("id", idn.getId());
+    m.put("name", idn.getName());
+    m.put(
+        "displayName",
+        idn.getDisplayableName() != null ? idn.getDisplayableName() : idn.getName());
+    m.put("firstname", idn.getFirstname());
+    m.put("lastname", idn.getLastname());
+    m.put("email", idn.getEmail());
+    m.put("inactive", idn.isInactive());
+    try {
+      m.put("isManager", Boolean.TRUE.equals(idn.getAttribute("managerStatus")) || idn.getManagerStatus());
+    } catch (Exception e) {
+      m.put("isManager", null);
+    }
+    Object title = firstAttr(idn, "title", "jobTitle");
+    Object dept = firstAttr(idn, "departmentName", "department", "dept");
+    Object job = firstAttr(idn, "jobCode", "JobCode");
+    Object userId = firstAttr(idn, "userId", "employeeId");
+    Object type = firstAttr(idn, "employeeType", "type");
+    Object loc = firstAttr(idn, "locationCode", "location", "city");
+    m.put("title", title != null ? String.valueOf(title) : null);
+    m.put("department", dept != null ? String.valueOf(dept) : null);
+    m.put("jobCode", job != null ? String.valueOf(job) : null);
+    m.put("userId", userId != null ? String.valueOf(userId) : idn.getName());
+    m.put("employeeType", type != null ? String.valueOf(type) : null);
+    m.put("location", loc != null ? String.valueOf(loc) : null);
+    boolean privileged = identityHasPrivilegedAccess(idn);
+    m.put("privilegedAccess", privileged);
+    m.put("brokenManager", brokenManager);
+    List<String> risks = new ArrayList<>();
+    if (idn.isInactive()) {
+      risks.add("inactive");
+    }
+    if (brokenManager) {
+      risks.add("brokenManager");
+    }
+    if (privileged) {
+      risks.add("privileged");
+    }
+    m.put("riskFlags", risks);
+    return m;
+  }
+
+  private static boolean identityHasPrivilegedAccess(Identity idn) {
+    if (idn == null || idn.getLinks() == null) {
+      return false;
+    }
+    for (Object o : idn.getLinks()) {
+      if (!(o instanceof Link)) {
+        continue;
+      }
+      Link link = (Link) o;
+      for (String key : new String[] {"entitlement", "itAccess", "groups", "memberOf", "Roles"}) {
+        Object v = link.getAttribute(key);
+        if (v == null) {
+          continue;
+        }
+        String u = String.valueOf(v).toUpperCase(Locale.ROOT);
+        for (String p : ORG_PRIVILEGED) {
+          if (u.contains(p)) {
+            return true;
+          }
+        }
+      }
+      Application app = link.getApplication();
+      if (app != null) {
+        String an = app.getName() != null ? app.getName().toUpperCase(Locale.ROOT) : "";
+        if (an.contains("AWS") || an.contains("WIRE") || an.contains("SAP")) {
+          // Flag high-risk app presence lightly; UI shows badge only with riskFlags
+          Object ei = link.getAttribute("entitlement");
+          if (ei != null && String.valueOf(ei).toUpperCase(Locale.ROOT).contains("ADMIN")) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private static Object firstAttr(Identity idn, String... keys) {
+    if (idn == null || keys == null) {
+      return null;
+    }
+    for (String k : keys) {
+      Object v = idn.getAttribute(k);
+      if (v != null && !Util.isNullOrEmpty(String.valueOf(v))) {
+        return v;
+      }
+    }
+    return null;
   }
 
   private static Identity resolveManagerIdentity(SailPointContext ctx, String key)

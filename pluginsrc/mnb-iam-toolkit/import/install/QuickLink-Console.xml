@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <!-- Central Meridian Console shell (Waves 1–3). Deep-links open specific desks. -->
+  <QuickLink action="externalURL" category="Access" messageKey="Meridian Console"
+      name="MNB-QL-Console" ordering="88">
+    <Attributes>
+      <Map>
+        <entry key="url" value="http://localhost:4180/console.html"/>
+        <entry key="rightRequired" value="MNBToolkitAccess"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+  <QuickLink action="externalURL" category="Access" messageKey="Meridian SoD War Room"
+      name="MNB-QL-SoD" ordering="96">
+    <Attributes>
+      <Map>
+        <entry key="url" value="http://localhost:4180/console.html#sod"/>
+        <entry key="rightRequired" value="MNBToolkitAccess"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+  <QuickLink action="externalURL" category="Access" messageKey="Meridian Identity 360"
+      name="MNB-QL-Identity-360" ordering="97">
+    <Attributes>
+      <Map>
+        <entry key="url" value="http://localhost:4180/console.html#identity"/>
+        <entry key="rightRequired" value="MNBToolkitAccess"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+  <QuickLink action="externalURL" category="Access" messageKey="Meridian Evidence Pack"
+      name="MNB-QL-Evidence" ordering="98">
+    <Attributes>
+      <Map>
+        <entry key="url" value="http://localhost:4180/console.html#evidence"/>
+        <entry key="rightRequired" value="MNBToolkitAccess"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+</sailpoint>

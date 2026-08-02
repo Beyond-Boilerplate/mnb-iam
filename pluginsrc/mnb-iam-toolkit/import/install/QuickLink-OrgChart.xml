@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <!-- Opens Meridian Teller Org Chart (full company layout + PDF). Lab URL; change per env. -->
+  <QuickLink action="externalURL" category="Access" messageKey="Meridian Org Chart"
+      name="MNB-QL-Org-Chart" ordering="90">
+    <Attributes>
+      <Map>
+        <entry key="url" value="http://localhost:4180/orgchart.html"/>
+        <entry key="rightRequired" value="MNBToolkitAccess"/>
+      </Map>
+    </Attributes>
+  </QuickLink>
+</sailpoint>

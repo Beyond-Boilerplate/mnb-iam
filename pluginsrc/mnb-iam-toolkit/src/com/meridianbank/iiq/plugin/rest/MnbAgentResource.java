@@ -154,6 +154,7 @@ public class MnbAgentResource extends BasePluginResource {
     rows.add(gap("UIAPI-56", "implemented", "system/services/*/restart", "restart_iiq_service"));
     rows.add(gap("UIAPI-57", "implemented", "scopes/assign", "assign_identity_scope"));
     rows.add(gap("UIAPI-58", "implemented", "identities/managers/rebuild", "rebuild_manager_hierarchy"));
+    rows.add(gap("UIAPI-59", "implemented", "orgchart", "get_orgchart"));
     Map<String, Object> flags = new LinkedHashMap<>();
     flags.put("agentApiEnabled", MnbAgentSupport.flag(this, "agentApiEnabled"));
     flags.put("mutateGovernanceEnabled", MnbAgentSupport.flag(this, "mutateGovernanceEnabled"));
