@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0c2340" />
+  <title>Meridian Org Chart — Teller</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c2340'/%3E%3Cpath d='M7 22 L16 8 L25 22 Z' fill='%23c4a35a'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/orgchart.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="oc-mast">
+    <div class="oc-brand">
+      <a class="oc-back" href="/" title="Back to Teller">← Teller</a>
+      <a class="oc-back" href="/console.html" title="Operator console">Console</a>
+      <span class="mark" aria-hidden="true"></span>
+      <div>
+        <p class="eyebrow">Meridian National Bank</p>
+        <h1>Org Chart</h1>
+      </div>
+    </div>
+    <div class="oc-toolbar" role="toolbar" aria-label="Chart controls">
+      <label class="oc-field">
+        <span>Search</span>
+        <input id="oc-search" type="search" placeholder="Priya, MNB00005…" autocomplete="off" />
+      </label>
+      <label class="oc-field">
+        <span>Layout</span>
+        <select id="oc-layout">
+          <option value="tree">Top-down tree</option>
+          <option value="cluster">Tidy cluster</option>
+          <option value="tree-h">Horizontal tree</option>
+          <option value="radial">Radial</option>
+        </select>
+      </label>
+      <label class="oc-field">
+        <span>Mode</span>
+        <select id="oc-mode">
+          <option value="company">Full company</option>
+          <option value="subtree">Subtree</option>
+        </select>
+      </label>
+      <label class="oc-field oc-root-field" hidden>
+        <span>Root</span>
+        <input id="oc-root" type="text" placeholder="MNB00002" />
+      </label>
+      <label class="oc-check"><input type="checkbox" id="oc-inactive" /> Inactive</label>
+      <button type="button" class="oc-btn" id="oc-reload">Reload</button>
+      <button type="button" class="oc-btn" id="oc-fit">Fit</button>
+      <button type="button" class="oc-btn" id="oc-expand">Expand all</button>
+      <button type="button" class="oc-btn" id="oc-collapse">Collapse</button>
+      <button type="button" class="oc-btn primary" id="oc-print">Print / PDF</button>
+      <button type="button" class="oc-btn" id="oc-svg-export">Export SVG</button>
+      <button type="button" class="oc-btn" id="oc-png">Export PNG</button>
+    </div>
+  </header>
+
+  <div class="oc-status" id="oc-status">Loading hierarchy from IdentityIQ…</div>
+
+  <main class="oc-stage">
+    <svg id="oc-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Organization chart"></svg>
+    <aside class="oc-drawer" id="oc-drawer" hidden>
+      <button type="button" class="oc-drawer-close" id="oc-drawer-close" aria-label="Close">×</button>
+      <p class="eyebrow">Identity</p>
+      <h2 id="d-name">—</h2>
+      <dl class="oc-dl">
+        <div><dt>Key</dt><dd id="d-key">—</dd></div>
+        <div><dt>Title</dt><dd id="d-title">—</dd></div>
+        <div><dt>Department</dt><dd id="d-dept">—</dd></div>
+        <div><dt>Job code</dt><dd id="d-job">—</dd></div>
+        <div><dt>Email</dt><dd id="d-email">—</dd></div>
+        <div><dt>Type</dt><dd id="d-type">—</dd></div>
+        <div><dt>Location</dt><dd id="d-loc">—</dd></div>
+        <div><dt>Direct reports</dt><dd id="d-reports">—</dd></div>
+        <div><dt>Status</dt><dd id="d-status">—</dd></div>
+      </dl>
+      <div class="oc-drawer-actions">
+        <button type="button" class="oc-btn primary" id="d-focus">Focus subtree</button>
+        <button type="button" class="oc-btn" id="d-toggle">Collapse / expand</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="oc-foot">
+    <span id="oc-meta">—</span>
+    <span>Source: Identity.manager ← MNB-HR managersAssociateID</span>
+  </footer>
+
+  <!-- Print/PDF target: native SVG only (no foreignObject / zoom transform) -->
+  <div id="oc-print-root" class="oc-print-root" hidden aria-hidden="true"></div>
+
+  <script src="/vendor/d3.v7.min.js"></script>
+  <script src="/orgchart.js"></script>
+</body>
+</html>
