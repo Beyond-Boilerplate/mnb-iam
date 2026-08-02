@@ -11,6 +11,8 @@
 #   OpenAPI   http://localhost:8765/swagger/
 #   MCP       http://127.0.0.1:8766/mcp  (Bearer ${MCP_API_KEY:-mnb-lab-mcp-key})
 #   Teller    http://localhost:4180/  (chatbot; set OPENROUTER_API_KEY for free-text)
+#   Console   http://localhost:4180/console.html  (Waves 1–3 operator desks)
+#   Org chart http://localhost:4180/orgchart.html
 #   OpenLDAP  ldap://localhost:389  (cn=admin,dc=meridiannb,dc=com / admin)
 #   LDAP UI   http://localhost:8090/  (phpLDAPadmin; same admin bind)
 #   JDBC lab  localhost:5435  (mnb/mnb @ mnb_apps) — Lessons 63–64
@@ -322,6 +324,9 @@ services:
       CHAT_PORT: "4180"
       IIQ_MCP_URL: http://iiq-mcp:8766/mcp
       MCP_API_KEY: ${MCP_API_KEY:-mnb-lab-mcp-key}
+      IIQ_BASE_URL: http://identityiq:8080/identityiq
+      IIQ_USER: ${IIQ_USER:-spadmin}
+      IIQ_PASSWORD: ${IIQ_PASSWORD:-admin}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       OPENROUTER_FALLBACK_MODELS: ${OPENROUTER_FALLBACK_MODELS:-openrouter/free,meta-llama/llama-3.3-70b-instruct:free,google/gemma-3-27b-it:free,inclusionai/ling-3.0-flash:free,cohere/north-mini-code:free,google/gemma-4-26b-a4b-it:free}
