@@ -19,9 +19,10 @@
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --rail-width: min(300px, 92vw);
   --detail-width: min(360px, 92vw);
-  --focus: 2px solid rgba(15, 107, 95, 0.55);
+  --focus: 3px solid #0a6b5c;
   --radius-lg: 1.15rem;
   --radius-md: 0.75rem;
+  --tap-min: 44px;
 }
 
 *,
@@ -1699,8 +1700,160 @@ body.read-only .chip.write {
 .modal-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.55rem;
   margin-top: 1rem;
+}
+
+.tap-lg {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding-inline: 1.1rem;
+  font-size: 1rem;
+}
+
+.degrade-banner {
+  margin: 0 1rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(181, 72, 56, 0.35);
+  background: #fff5f3;
+  color: #6b241c;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.degrade-banner[hidden] {
+  display: none;
+}
+
+.degrade-banner.warn {
+  border-color: rgba(138, 106, 40, 0.4);
+  background: #fff8e8;
+  color: #5c4310;
+}
+
+.degrade-banner .text-btn {
+  color: inherit;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.triage-cards {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.55rem 0 0.15rem;
+}
+
+.triage-card {
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--brass);
+  border-radius: 0.7rem;
+  background: var(--surface-soft);
+  padding: 0.65rem 0.75rem;
+}
+
+.triage-card.sod {
+  border-left-color: var(--coral);
+}
+
+.triage-card.certs {
+  border-left-color: var(--teal);
+}
+
+.triage-card h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  font-family: var(--font-display);
+}
+
+.triage-card dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.65rem;
+  font-size: 0.84rem;
+}
+
+.triage-card dt {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.triage-card dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.triage-card .card-source {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+}
+
+.feedback-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.feedback-row .fb-btn {
+  min-height: 36px;
+  min-width: 36px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+
+.feedback-row .fb-btn:hover,
+.feedback-row .fb-btn:focus-visible,
+.feedback-row .fb-btn[aria-pressed="true"] {
+  border-color: var(--teal);
+  color: var(--teal);
+  outline: var(--focus);
+  outline-offset: 2px;
+}
+
+.feedback-row .fb-btn.down:hover,
+.feedback-row .fb-btn.down:focus-visible,
+.feedback-row .fb-btn.down[aria-pressed="true"] {
+  border-color: var(--coral);
+  color: var(--coral);
+}
+
+.feedback-modal textarea {
+  width: 100%;
+  margin-top: 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.feedback-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.feedback-reasons .ghost-btn[aria-pressed="true"] {
+  border-color: var(--coral);
+  color: var(--coral);
+  background: #fff5f3;
 }
 
 .help-modal {
@@ -2204,10 +2357,24 @@ body.read-only .chip.write {
   .stop,
   .send {
     width: 100%;
+    min-height: var(--tap-min);
+    font-size: 1.05rem;
+  }
+
+  .modal-actions .ghost-btn,
+  .modal-actions .send,
+  .suggest-chip,
+  .followup-chip,
+  .chip {
+    min-height: var(--tap-min);
   }
 
   .status-bar {
     display: none;
+  }
+
+  .degrade-banner {
+    margin: 0 0.65rem;
   }
 }
 

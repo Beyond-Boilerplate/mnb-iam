@@ -95,6 +95,43 @@ def _truncate(text: str, limit: int = 280) -> str:
     return text[: limit - 1] + "…"
 
 
+# Short Meridian glossary hints appended to OpenAI tool descriptions (not rail labels).
+_TOOL_GLOSSARY: dict[str, str] = {
+    "search_identities": "MNB people search by name/login/MNB#####. Prefer before get_identity.",
+    "get_identity": "Identity/cube detail for one person. Keys: login or employee id.",
+    "search_profiles": "Find people by HR attrs (city, title, dept) e.g. Paris.",
+    "list_transitive_reports": "Org reports under a manager (who reports under X).",
+    "get_manager_hierarchy": "Manager chain / hierarchy for an identity.",
+    "count_open_sod_violations": "SoD = segregation of duties toxic access conflicts.",
+    "list_open_sod_violations": "List open SoD policy violations with identities/entitlements.",
+    "list_applications": "Connected apps (CoreBanking, AD, Salesforce, …).",
+    "get_application": "One application detail / connector metadata.",
+    "list_certifications": "Access review campaigns / open certifications.",
+    "list_work_items": "Approvals, forms, cert items awaiting action.",
+    "trigger_aggregation": "WRITE: pull accounts/entitlements from an app into IIQ.",
+    "unlock_identity": "WRITE: unlock a locked IIQ identity.",
+}
+
+
+def _enrich_tool_description(name: str, description: str) -> str:
+    base = (description or name).strip()
+    hint = _TOOL_GLOSSARY.get(name) or _TOOL_GLOSSARY.get(name.lower())
+    if not hint:
+        # Fuzzy glossary by fragment
+        low = name.lower()
+        if "sod" in low:
+            hint = "SoD = segregation of duties conflicts."
+        elif "certif" in low:
+            hint = "Certification / access review campaign."
+        elif "aggregat" in low:
+            hint = "Aggregation syncs app accounts into IIQ."
+        elif "identity" in low:
+            hint = "Identity/cube = person record in IIQ."
+    if hint and hint.lower() not in base.lower():
+        return _truncate(f"{base} | Meridian: {hint}", 420)
+    return _truncate(base, 420)
+
+
 class ToolCatalog:
     """TTL-cached view of MCP tools/list."""
 
@@ -159,7 +196,9 @@ class ToolCatalog:
                     "type": "function",
                     "function": {
                         "name": name,
-                        "description": _truncate(str(t.get("description") or name)),
+                        "description": _enrich_tool_description(
+                            name, str(t.get("description") or name)
+                        ),
                         "parameters": schema,
                     },
                 }

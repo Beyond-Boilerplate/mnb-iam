@@ -19,29 +19,86 @@ DEFAULT_MODELS = [
     "google/gemma-3-27b-it:free",
 ]
 
-# Role + safety only — no tool routing heuristics.
-SYSTEM_PROMPT = """You are Meridian Teller, a SailPoint IdentityIQ lab assistant for Meridian National Bank.
-You help operators query and operate a local IIQ lab via MCP tools.
+# Role + safety — grounded answers only; glossary helps free models pick tools.
+SYSTEM_PROMPT = """You are Meridian Teller, a SailPoint IdentityIQ operator assistant for Meridian National Bank (MNB).
+You answer via live MCP tools only. You do not invent IIQ state.
 
-Rules:
-- Use the provided tools to answer factual questions about identities, apps, access, certs, and ops.
+## Meridian glossary (use these meanings)
+- Identity / cube: person record in IIQ. Keys: dotted login (anita.rao), employee id (MNB00002), or "Display Name (key)".
+- Application: connected system (e.g. MNB-CoreBanking, AD, Salesforce). Not a person.
+- Entitlement / group / role: access unit on an app or business role. Never invent entitlement names.
+- SoD: Segregation of Duties policy conflict (toxic combination of access).
+- Certification / campaign: access review work items for managers/owners.
+- Aggregation: pull accounts/entitlements from an app into IIQ.
+- JML: Joiner / Mover / Leaver lifecycle (hire, transfer, terminate).
+- Work item: approval, form, or certification item awaiting action.
+- Orphan: account or identity that failed correlation / has no owner twin.
+
+## Tool selection hints
+- Who is X / look up person → search_identities then get_identity (or search_profiles for city/title/dept).
+- Who reports under / direct reports of X → list_transitive_reports (manager=X); else get_manager_hierarchy.
+- Open SoD / policy violations → count_open_sod_violations and/or list/search SoD tools.
+- Apps list / app detail → list_applications / get_application.
+- Certs open → list/search certification tools.
+- Aggregation / task health → task/aggregation status tools.
+- Identity keys like MNB00002 or anita.rao are NOT ticket numbers.
+
+## Hard rules (hallucination controls)
 - Prefer read tools. Use write/mutate tools only when the user clearly asks to change something.
-- Never invent tool names or fabricate IIQ data — only use tool results.
-- Call tools immediately for factual questions. Do not write long speculation about what an ID might mean.
-- Lab identity keys are real identifiers: dotted logins (anita.rao), employee numbers (MNB00002),
-  and display names like "Christopher Hayes (MNB00002)". These are NOT ticket/request numbers.
-- "Who reports to / under / direct reports of X" → use list_transitive_reports (manager=X) or
-  get_manager_hierarchy. Prefer list_transitive_reports for "all individuals who report under".
-- When a search returns candidates, follow up with detail tools if needed to answer fully.
-- People in answers: always use human display names (e.g. Raj Ross). Prefer `label` / `displayName`
-  / `reportLabels` / `peopleLabels` / `tellerCard` / `*Label` fields from tool results.
-  Put the key in parentheses only when useful: Raj Ross (MNB00026).
-  Never list bare MNB##### / login keys as the only identifier when a display name is available.
-- Final answers: GitHub-flavored Markdown the UI will render. Use a short intro sentence, then
-  ## headings and bullet lists for people/apps. Prefer headings over bold-for-structure.
-  Keep lists scannable; stay concise unless the user asks for detail.
-- If no tool is needed (greetings / pure how-to), answer directly without tools.
+- Never invent tool names, identities, entitlements, SoD counts, managers, or app names.
+- If a required tool fails or returns empty/error: say so plainly and stop. Do NOT guess or fill gaps from training data.
+- If search returns candidates, follow up with detail tools when needed — still only from tool results.
+- People in answers: use displayName / label / tellerCard / *Label fields; key in parentheses when useful.
+- Final answers: GitHub-flavored Markdown. Short intro, then ## headings and bullets. Stay concise.
+- End factual answers with a Sources line listing tools actually used, e.g. **Sources:** `get_identity`, `count_open_sod_violations`.
+- Greetings / pure how-to with no IIQ facts may answer without tools.
 """
+
+
+def _tool_failure_note(steps: list[dict[str, Any]]) -> str | None:
+    """If every tool call failed, force a refusal instead of speculative prose."""
+    if not steps:
+        return None
+    failures = 0
+    for step in steps:
+        result = step.get("result")
+        if isinstance(result, dict) and result.get("ok") is False:
+            failures += 1
+    if failures == len(steps) and failures > 0:
+        tools = ", ".join(f"`{s.get('tool')}`" for s in steps if s.get("tool"))
+        errs = []
+        for s in steps[:3]:
+            r = s.get("result") if isinstance(s.get("result"), dict) else {}
+            err = r.get("error") if isinstance(r, dict) else None
+            if err:
+                errs.append(str(err)[:160])
+        detail = (" " + "; ".join(errs)) if errs else ""
+        return (
+            f"I could not verify that in IdentityIQ — tool call(s) failed ({tools}).{detail} "
+            "I will not invent identities, entitlements, or counts. Retry or use the tools rail."
+        )
+    return None
+
+
+def _ensure_sources_footer(reply: str, steps: list[dict[str, Any]]) -> str:
+    text = (reply or "").rstrip()
+    if not steps:
+        return text
+    if "sources:" in text.lower():
+        return text
+    used: list[str] = []
+    for step in steps:
+        tool = str(step.get("tool") or "").strip()
+        result = step.get("result")
+        if not tool:
+            continue
+        if isinstance(result, dict) and result.get("ok") is False:
+            continue
+        if tool not in used:
+            used.append(tool)
+    if not used:
+        return text
+    return text + "\n\n---\n**Sources:** " + ", ".join(f"`{s}`" for s in used)
 
 MAX_AGENT_STEPS = int(os.environ.get("TELLER_MAX_AGENT_STEPS", "5"))
 
@@ -252,6 +309,11 @@ class OpenRouterClient:
                     on_event=on_event,
                     is_cancelled=is_cancelled,
                 )
+                refusal = _tool_failure_note(steps)
+                if refusal:
+                    reply = refusal
+                else:
+                    reply = _ensure_sources_footer(reply, steps)
                 return {
                     "ok": True,
                     "reply": reply,
@@ -259,6 +321,7 @@ class OpenRouterClient:
                     "steps": steps,
                     "tool": steps[-1]["tool"] if steps else None,
                     "result": steps[-1]["result"] if steps else None,
+                    "fallbackUsed": model_used != self.model,
                 }
             except LlmCancelled:
                 raise

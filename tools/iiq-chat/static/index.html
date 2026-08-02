@@ -37,11 +37,16 @@
         <span class="dot" data-state="pending"></span>
         <span class="status-text">Checking MCP…</span>
       </div>
+      <a class="ghost-btn" href="/console.html" title="Operator console desks">Console</a>
+      <a class="ghost-btn" href="/orgchart.html" title="Company org chart">Org Chart</a>
       <button type="button" class="ghost-btn" id="palette-btn" title="Command palette (⌘K)">⌘K</button>
       <button type="button" class="ghost-btn" id="help-btn" title="Keyboard shortcuts (?)">?</button>
       <button type="button" class="ghost-btn" id="new-chat" title="Clear conversation">New</button>
     </div>
   </header>
+
+  <div class="degrade-banner" id="degrade-banner" hidden role="status" aria-live="polite"></div>
+  <div class="sr-only" id="agent-live" aria-live="polite" aria-atomic="true"></div>
 
   <div class="rail-backdrop" id="rail-backdrop" hidden></div>
   <div class="detail-backdrop" id="detail-backdrop" hidden></div>
@@ -91,11 +96,7 @@
       <div class="transcript" id="transcript" role="log" aria-live="polite" aria-relevant="additions"></div>
       <form class="composer" id="composer">
         <div class="suggest" id="suggest" aria-label="Suggested questions">
-          <div class="suggest-row" id="suggest-row">
-            <button type="button" class="suggest-chip" data-q="Who is Anita Rao?">Anita Rao</button>
-            <button type="button" class="suggest-chip" data-q="Find me all employees in Paris">Paris</button>
-            <button type="button" class="suggest-chip" data-q="How many open SoD violations are there?">Open SoD</button>
-          </div>
+          <div class="suggest-row" id="suggest-row"></div>
           <div class="suggest-row playbook-row" id="playbook-row" aria-label="Playbooks"></div>
         </div>
         <label class="sr-only" for="message">Ask IdentityIQ</label>
@@ -145,20 +146,39 @@
   </main>
 
   <div class="modal-backdrop" id="confirm-modal" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" tabindex="-1">
       <h3 id="confirm-title">Approve write tool?</h3>
       <p class="modal-lead" id="confirm-lead">This will change IdentityIQ state.</p>
       <p class="modal-tool"><code id="confirm-tool"></code></p>
       <pre class="modal-args" id="confirm-args"></pre>
       <div class="modal-actions">
-        <button type="button" class="ghost-btn" id="confirm-deny">Deny</button>
-        <button type="button" class="send" id="confirm-approve">Approve</button>
+        <button type="button" class="ghost-btn tap-lg" id="confirm-deny">Deny</button>
+        <button type="button" class="send tap-lg" id="confirm-approve">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="feedback-modal" hidden>
+    <div class="modal feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-title" tabindex="-1">
+      <h3 id="feedback-title">What went wrong?</h3>
+      <p class="modal-lead">Optional — helps improve prompts and tool routing.</p>
+      <div class="feedback-reasons" role="group" aria-label="Feedback reason">
+        <button type="button" class="ghost-btn tap-lg" data-reason="wrong_tool">Wrong tool</button>
+        <button type="button" class="ghost-btn tap-lg" data-reason="wrong_answer">Wrong answer</button>
+        <button type="button" class="ghost-btn tap-lg" data-reason="incomplete">Incomplete</button>
+        <button type="button" class="ghost-btn tap-lg" data-reason="other">Other</button>
+      </div>
+      <label class="sr-only" for="feedback-comment">Comment</label>
+      <textarea id="feedback-comment" rows="2" placeholder="Optional comment…"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn tap-lg" id="feedback-skip">Skip</button>
+        <button type="button" class="send tap-lg" id="feedback-submit">Submit</button>
       </div>
     </div>
   </div>
 
   <div class="modal-backdrop" id="help-modal" hidden>
-    <div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title" tabindex="-1">
       <div class="help-head">
         <h3 id="help-title">Keyboard shortcuts</h3>
         <button type="button" class="ghost-btn" id="help-close">Close</button>
@@ -178,7 +198,7 @@
   </div>
 
   <div class="modal-backdrop" id="palette-modal" hidden>
-    <div class="modal palette-modal" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+    <div class="modal palette-modal" role="dialog" aria-modal="true" aria-labelledby="palette-title" tabindex="-1">
       <div class="palette-head">
         <h3 id="palette-title">Command palette</h3>
         <button type="button" class="ghost-btn" id="palette-close">Close</button>

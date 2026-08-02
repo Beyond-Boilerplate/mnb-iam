@@ -44,6 +44,13 @@
   const confirmLeadEl = $("#confirm-lead");
   const confirmApprove = $("#confirm-approve");
   const confirmDeny = $("#confirm-deny");
+  const feedbackModal = $("#feedback-modal");
+  const feedbackComment = $("#feedback-comment");
+  const feedbackSkip = $("#feedback-skip");
+  const feedbackSubmit = $("#feedback-submit");
+  const degradeBanner = $("#degrade-banner");
+  const agentLive = $("#agent-live");
+  const suggestRow = $("#suggest-row");
   const sbMcp = $("#sb-mcp");
   const sbModel = $("#sb-model");
   const sbMode = $("#sb-mode");
@@ -54,8 +61,17 @@
   const READONLY_KEY = "meridian.teller.readOnly";
   const RECENT_KEY = "meridian.teller.recentTools";
   const RAIL_COLLAPSED_KEY = "meridian.teller.railCollapsed";
+  const ROLE_KEY = "meridian.teller.playbookRole";
   const SLASH_LIMIT = 14;
-  const PLAYBOOKS = Array.isArray(window.TELLER_PLAYBOOKS) ? window.TELLER_PLAYBOOKS : [];
+  let PLAYBOOKS = Array.isArray(window.TELLER_PLAYBOOKS) ? window.TELLER_PLAYBOOKS : [];
+  let SUGGEST = Array.isArray(window.TELLER_SUGGEST) ? window.TELLER_SUGGEST : [];
+  let playbookRole = null;
+  let toolsOnlyMode = false;
+  let mcpFlaky = false;
+  let lastCorrelationId = "";
+  let feedbackContext = null;
+  let feedbackReason = null;
+  let focusTrapCleanup = null;
 
   let menuMode = null; // 'slash' | 'mention' | null
   let slashOpen = false;
@@ -122,6 +138,7 @@
   recentTools = loadJson(RECENT_KEY, []);
   if (!Array.isArray(recentTools)) recentTools = [];
   railCollapsed = Boolean(loadJson(RAIL_COLLAPSED_KEY, false));
+  playbookRole = loadJson(ROLE_KEY, null);
   collapsed = new Set(loadJson(COLLAPSE_KEY, null) ?? ["Apps", "Identities", "Work", "Governance", "Ops", "Catalog"]);
   if (readOnlyEl) readOnlyEl.checked = readOnly;
   // Drop retired chat-history keys from earlier builds
@@ -232,9 +249,64 @@
     sbLatency.textContent = ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
   }
 
+  function announceAgent(text) {
+    if (!agentLive) return;
+    agentLive.textContent = String(text || "");
+  }
+
+  function focusableIn(root) {
+    if (!root) return [];
+    return [
+      ...root.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ),
+    ].filter((el) => el.offsetParent !== null || el === document.activeElement);
+  }
+
+  function trapFocus(backdrop) {
+    if (focusTrapCleanup) {
+      focusTrapCleanup();
+      focusTrapCleanup = null;
+    }
+    if (!backdrop || backdrop.hidden) return;
+    const dialog = backdrop.querySelector('[role="dialog"]') || backdrop;
+    const previouslyFocused = document.activeElement;
+    const nodes = () => focusableIn(dialog);
+    const onKey = (e) => {
+      if (e.key !== "Tab") return;
+      const list = nodes();
+      if (!list.length) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    backdrop.addEventListener("keydown", onKey);
+    const initial = nodes()[0] || dialog;
+    initial.focus?.();
+    focusTrapCleanup = () => {
+      backdrop.removeEventListener("keydown", onKey);
+      if (previouslyFocused && previouslyFocused.focus) {
+        try {
+          previouslyFocused.focus();
+        } catch {
+          /* ignore */
+        }
+      }
+      focusTrapCleanup = null;
+    };
+  }
+
   function showHelp(open) {
     if (!helpModal) return;
     helpModal.hidden = !open;
+    if (open) trapFocus(helpModal);
+    else if (focusTrapCleanup) focusTrapCleanup();
   }
 
   function askConfirm({ tool, arguments: args, lead }) {
@@ -254,12 +326,15 @@
           lead || "This tool can change IdentityIQ. Approve to continue.";
       }
       if (confirmModal) confirmModal.hidden = false;
+      trapFocus(confirmModal);
+      announceAgent(`Approve write tool ${tool || ""}?`);
       confirmApprove?.focus();
     });
   }
 
   function closeConfirm(approve) {
     if (confirmModal) confirmModal.hidden = true;
+    if (focusTrapCleanup) focusTrapCleanup();
     if (confirmResolver) {
       const r = confirmResolver;
       confirmResolver = null;
@@ -617,6 +692,113 @@
     }
   }
 
+  function renderTriageCards(cards) {
+    if (!Array.isArray(cards) || !cards.length) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "triage-cards";
+    wrap.setAttribute("aria-label", "Structured triage cards");
+    cards.forEach((card) => {
+      const el = document.createElement("article");
+      el.className = `triage-card ${card.type || ""}`;
+      const h = document.createElement("h4");
+      h.textContent = card.title || card.type || "Card";
+      el.appendChild(h);
+      const dl = document.createElement("dl");
+      const fields = card.fields || {};
+      Object.entries(fields).forEach(([key, val]) => {
+        if (val == null || val === "") return;
+        if (Array.isArray(val) && !val.length) return;
+        const dt = document.createElement("dt");
+        dt.textContent = key;
+        const dd = document.createElement("dd");
+        dd.textContent = Array.isArray(val) ? val.join(" · ") : String(val);
+        dl.appendChild(dt);
+        dl.appendChild(dd);
+      });
+      el.appendChild(dl);
+      if (card.source) {
+        const src = document.createElement("p");
+        src.className = "card-source";
+        src.textContent = `source: ${card.source}`;
+        el.appendChild(src);
+      }
+      wrap.appendChild(el);
+    });
+    return wrap;
+  }
+
+  function attachFeedback(actionsEl, ctx) {
+    const row = document.createElement("div");
+    row.className = "feedback-row";
+    row.setAttribute("aria-label", "Rate this answer");
+    const up = document.createElement("button");
+    up.type = "button";
+    up.className = "fb-btn";
+    up.title = "Helpful";
+    up.setAttribute("aria-label", "Thumbs up");
+    up.textContent = "👍";
+    const down = document.createElement("button");
+    down.type = "button";
+    down.className = "fb-btn down";
+    down.title = "Not helpful";
+    down.setAttribute("aria-label", "Thumbs down");
+    down.textContent = "👎";
+    up.addEventListener("click", () => {
+      up.setAttribute("aria-pressed", "true");
+      down.removeAttribute("aria-pressed");
+      submitFeedback({ ...ctx, rating: "up" });
+    });
+    down.addEventListener("click", () => {
+      down.setAttribute("aria-pressed", "true");
+      up.removeAttribute("aria-pressed");
+      openFeedbackModal(ctx);
+    });
+    row.appendChild(up);
+    row.appendChild(down);
+    actionsEl.appendChild(row);
+  }
+
+  function openFeedbackModal(ctx) {
+    feedbackContext = ctx;
+    feedbackReason = null;
+    if (feedbackComment) feedbackComment.value = "";
+    feedbackModal?.querySelectorAll("[data-reason]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", "false");
+    });
+    if (feedbackModal) feedbackModal.hidden = false;
+    trapFocus(feedbackModal);
+  }
+
+  function closeFeedbackModal() {
+    if (feedbackModal) feedbackModal.hidden = true;
+    if (focusTrapCleanup) focusTrapCleanup();
+    feedbackContext = null;
+    feedbackReason = null;
+  }
+
+  async function submitFeedback(payload) {
+    try {
+      await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rating: payload.rating,
+          reason: payload.reason || null,
+          comment: payload.comment || "",
+          question: payload.question || "",
+          reply: payload.reply || "",
+          model: payload.model || "",
+          tools: payload.tools || [],
+          runId: payload.runId || null,
+          correlationId: payload.correlationId || lastCorrelationId || null,
+        }),
+      });
+      announceAgent(payload.rating === "up" ? "Thanks for the feedback." : "Feedback recorded.");
+    } catch {
+      announceAgent("Could not save feedback.");
+    }
+  }
+
   function addBubble({
     role,
     text,
@@ -627,6 +809,8 @@
     onRetry = null,
     exportPayload = null,
     openInspector = false,
+    cards = null,
+    feedback = null,
   }) {
     const div = document.createElement("div");
     div.className = `bubble ${role}`;
@@ -655,6 +839,9 @@
         div.appendChild(p);
       }
     }
+
+    const cardEl = renderTriageCards(cards);
+    if (cardEl) div.appendChild(cardEl);
 
     if (role === "assistant" && (text || exportPayload || result != null)) {
       const actions = document.createElement("div");
@@ -685,6 +872,7 @@
         inspect.addEventListener("click", () => openDetail(result, { tool: detailTool }));
         actions.appendChild(inspect);
       }
+      if (feedback) attachFeedback(actions, feedback);
       if (actions.childNodes.length) div.appendChild(actions);
     }
 
@@ -1135,20 +1323,28 @@
     let errorPayload = null;
 
     const onEvent = async (event, payload) => {
-      if (event === "run" && payload.runId) {
-        activeRunId = payload.runId;
+      if (event === "run") {
+        if (payload.runId) activeRunId = payload.runId;
+        if (payload.correlationId) lastCorrelationId = String(payload.correlationId);
       } else if (event === "status" && payload.message) {
         // Ignore legacy/no-op finishing labels if any still arrive
         if (/^finishing/i.test(payload.message)) return;
         live.setStatus(payload.message);
+        announceAgent(payload.message);
       } else if (event === "thought" && payload.text) {
         live.appendThought(payload.text);
       } else if (event === "tool_start") {
         live.toolStart(payload);
+        if (payload.tool) announceAgent(`Running ${payload.tool}`);
       } else if (event === "tool_result") {
         live.toolResult(payload);
+        if (payload.ok === false) {
+          mcpFlaky = true;
+          setDegradeBanner({ mcpOk: true, toolsOnly: toolsOnlyMode, flaky: true });
+        }
       } else if (event === "tool_confirm") {
         live.setStatus(`Awaiting approval: ${payload.tool || "write tool"}`);
+        announceAgent(`Awaiting approval for ${payload.tool || "write tool"}`);
         const approved = await askConfirm({
           tool: payload.tool,
           arguments: payload.arguments || {},
@@ -1158,8 +1354,13 @@
         live.setStatus(approved ? `Approved ${payload.tool}` : `Denied ${payload.tool}`);
       } else if (event === "done") {
         finalPayload = payload;
+        if (payload.correlationId) lastCorrelationId = String(payload.correlationId);
       } else if (event === "error") {
         errorPayload = payload;
+        if (payload.correlationId) lastCorrelationId = String(payload.correlationId);
+        if (payload.toolsOnly) {
+          setDegradeBanner({ mcpOk: true, toolsOnly: true, flaky: mcpFlaky });
+        }
       }
     };
 
@@ -1231,6 +1432,79 @@
     return { ok: false, error: "Stream ended without a reply" };
   }
 
+  function setDegradeBanner({ mcpOk, toolsOnly, flaky }) {
+    if (!degradeBanner) return;
+    mcpFlaky = Boolean(flaky);
+    toolsOnlyMode = Boolean(toolsOnly);
+    const bits = [];
+    if (!mcpOk) {
+      bits.push("MCP is unreachable — retries may help; tools rail is unavailable until it recovers.");
+    } else if (flaky) {
+      bits.push("MCP looks flaky — if calls fail, retry or refresh tools.");
+    }
+    if (toolsOnly) {
+      bits.push("LLM unavailable — tools-only mode. Use the tools rail or fix OPENROUTER_API_KEY.");
+    }
+    if (!bits.length) {
+      degradeBanner.hidden = true;
+      degradeBanner.textContent = "";
+      degradeBanner.classList.remove("warn");
+      return;
+    }
+    degradeBanner.hidden = false;
+    degradeBanner.classList.toggle("warn", mcpOk && toolsOnly);
+    degradeBanner.innerHTML = "";
+    const msg = document.createElement("span");
+    msg.textContent = bits.join(" ");
+    degradeBanner.appendChild(msg);
+    if (!mcpOk || flaky) {
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "text-btn";
+      retry.textContent = "Retry MCP";
+      retry.addEventListener("click", () => loadConfig());
+      degradeBanner.appendChild(retry);
+    }
+  }
+
+  async function loadPlaybooks() {
+    const roleQ = playbookRole ? `?role=${encodeURIComponent(playbookRole)}` : "";
+    const data = await fetch(`/api/playbooks${roleQ}`)
+      .then((r) => r.json())
+      .catch(() => ({ playbooks: [], suggest: [] }));
+    PLAYBOOKS = Array.isArray(data.playbooks) ? data.playbooks : [];
+    SUGGEST = Array.isArray(data.suggest) ? data.suggest : [];
+    if (data.role) {
+      playbookRole = data.role;
+      saveJson(ROLE_KEY, playbookRole);
+    }
+    window.TELLER_PLAYBOOKS = PLAYBOOKS;
+    window.TELLER_SUGGEST = SUGGEST;
+    renderSuggestChips();
+    renderPlaybookChips();
+  }
+
+  function renderSuggestChips() {
+    if (!suggestRow) return;
+    suggestRow.innerHTML = "";
+    const items = SUGGEST.length
+      ? SUGGEST
+      : [
+          {
+            label: "Open SoD",
+            prompt: "How many open SoD policy violations are there right now?",
+          },
+        ];
+    items.slice(0, 6).forEach((item) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "suggest-chip";
+      btn.textContent = item.label || "Ask";
+      btn.setAttribute("data-q", item.prompt || item.label || "");
+      suggestRow.appendChild(btn);
+    });
+  }
+
   async function loadConfig() {
     const [health, config, actions] = await Promise.all([
       fetch("/api/health").then((r) => r.json()).catch(() => ({ ok: false })),
@@ -1240,7 +1514,8 @@
 
     allActions = actions.actions || [];
     const toolCount = config.actionCount || allActions.length;
-    if (health.ok) {
+    const mcpOk = Boolean(health.ok);
+    if (mcpOk) {
       setStatus("up", `MCP · ${toolCount} tools`);
       if (sbMcp) sbMcp.textContent = `MCP · ${toolCount}`;
     } else {
@@ -1248,8 +1523,9 @@
       if (sbMcp) sbMcp.textContent = "MCP down";
     }
 
+    const llmReady = Boolean(config.llmConfigured && config.llmAuthOk);
     if (!config.llmConfigured) {
-      llmHint.textContent = "Buttons work offline from LLM — set OPENROUTER_API_KEY for free-text";
+      llmHint.textContent = "Tools-only · set OPENROUTER_API_KEY for free-text · press ?";
       if (sbModel) sbModel.textContent = "No LLM key";
     } else if (config.llmAuthOk) {
       const model = (config.model || "openrouter").split("/").pop();
@@ -1257,13 +1533,25 @@
       llmHint.textContent = `Ask anything · ${model} · press ? for shortcuts`;
       if (sbModel) sbModel.textContent = model;
     } else {
-      llmHint.textContent = "OpenRouter key rejected — buttons still work";
+      llmHint.textContent = "Tools-only · OpenRouter key rejected · buttons still work";
       if (sbModel) sbModel.textContent = "LLM auth failed";
+    }
+
+    setDegradeBanner({
+      mcpOk,
+      toolsOnly: !llmReady || Boolean(config.toolsOnly),
+      flaky: mcpOk && Array.isArray(config.degraded) && config.degraded.includes("mcp"),
+    });
+    if (!mcpOk) {
+      announceAgent("MCP unreachable. Retry or use when IdentityIQ MCP is back.");
+    } else if (!llmReady) {
+      announceAgent("LLM unavailable. Tools-only mode.");
     }
 
     updateModeBar();
     renderGroupTabs();
     renderAll();
+    await loadPlaybooks();
   }
 
   function renderGroupTabs() {
@@ -1453,13 +1741,33 @@
   function renderPlaybookChips() {
     if (!playbookRow) return;
     playbookRow.innerHTML = "";
-    PLAYBOOKS.slice(0, 4).forEach((pb) => {
+    // Prefer recent tools as chips when available; then role playbooks
+    const recent = recentTools
+      .map((name) => allActions.find((a) => a.tool === name || a.id === name))
+      .filter(Boolean)
+      .slice(0, 2);
+    recent.forEach((action) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "suggest-chip playbook";
+      btn.textContent = action.label || action.tool;
+      btn.title = `Recent: ${action.tool}`;
+      btn.addEventListener("click", () => runAction(action));
+      playbookRow.appendChild(btn);
+    });
+    PLAYBOOKS.slice(0, Math.max(0, 4 - recent.length)).forEach((pb) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "suggest-chip playbook";
       btn.textContent = pb.label;
       btn.title = pb.prompt;
       btn.addEventListener("click", () => {
+        if (toolsOnlyMode) {
+          messageEl.value = pb.prompt;
+          messageEl.focus();
+          announceAgent("LLM unavailable — paste the playbook into chat after LLM is restored, or run a tool from the rail.");
+          return;
+        }
         messageEl.value = pb.prompt;
         messageEl.focus();
         composer.requestSubmit();
@@ -1475,6 +1783,7 @@
     if (!paletteOpen) {
       paletteItems = [];
       paletteIndex = 0;
+      if (focusTrapCleanup) focusTrapCleanup();
       return;
     }
     showHelp(false);
@@ -1485,6 +1794,7 @@
       paletteInput.select();
     }
     renderPalette(filter);
+    trapFocus(paletteModal);
   }
 
   function renderPalette(query) {
@@ -1796,6 +2106,11 @@
           Boolean(detailDataRoot(result)?.tellerCard) ||
           Boolean(detailDataRoot(result)?.peopleLabels) ||
           Boolean(detailDataRoot(result)?.reportLabels));
+      if (data.correlationId) lastCorrelationId = String(data.correlationId);
+      if (data.toolsOnly || (!data.ok && /openrouter|llm|api key/i.test(String(data.error || "")))) {
+        setDegradeBanner({ mcpOk: !mcpFlaky, toolsOnly: true, flaky: mcpFlaky });
+      }
+      announceAgent(data.ok ? "Answer ready." : data.cancelled ? "Stopped." : "Answer failed.");
       addBubble({
         role: "assistant",
         text,
@@ -1805,11 +2120,23 @@
         openInspector: shouldInspect,
         followUps,
         exportPayload,
+        cards: data.cards || null,
+        feedback: data.ok
+          ? {
+              question: textIn,
+              reply: text,
+              model: data.model || lastModel,
+              tools: (data.steps || []).map((s) => s.tool).filter(Boolean),
+              runId: data.runId || activeRunId,
+              correlationId: data.correlationId || lastCorrelationId,
+            }
+          : null,
         onRetry: () => sendChat(textIn),
       });
       history.push({ role: "assistant", content: text });
     } catch (err) {
       live.remove();
+      announceAgent("Answer failed.");
       addBubble({
         role: "assistant",
         text: String(err),
@@ -1820,6 +2147,7 @@
     } finally {
       setBusy(false);
       messageEl.focus();
+      renderPlaybookChips();
     }
   }
 
@@ -2321,6 +2649,11 @@
         closeConfirm(false);
         return;
       }
+      if (!feedbackModal?.hidden) {
+        e.preventDefault();
+        closeFeedbackModal();
+        return;
+      }
       if (!helpModal?.hidden) {
         e.preventDefault();
         showHelp(false);
@@ -2376,6 +2709,39 @@
       typeof detailPayload === "string" ? detailPayload : JSON.stringify(detailPayload, null, 2);
     copyText(payload, detailCopy);
   });
+  feedbackModal?.querySelectorAll("[data-reason]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      feedbackReason = btn.getAttribute("data-reason");
+      feedbackModal.querySelectorAll("[data-reason]").forEach((b) => {
+        b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+      });
+    });
+  });
+  feedbackSkip?.addEventListener("click", async () => {
+    if (feedbackContext) {
+      await submitFeedback({
+        ...feedbackContext,
+        rating: "down",
+        reason: feedbackReason || "other",
+        comment: feedbackComment?.value || "",
+      });
+    }
+    closeFeedbackModal();
+  });
+  feedbackSubmit?.addEventListener("click", async () => {
+    if (feedbackContext) {
+      await submitFeedback({
+        ...feedbackContext,
+        rating: "down",
+        reason: feedbackReason || "other",
+        comment: feedbackComment?.value || "",
+      });
+    }
+    closeFeedbackModal();
+  });
+  feedbackModal?.addEventListener("click", (e) => {
+    if (e.target === feedbackModal) closeFeedbackModal();
+  });
   readOnlyEl?.addEventListener("change", () => {
     readOnly = Boolean(readOnlyEl.checked);
     saveJson(READONLY_KEY, readOnly);
@@ -2399,7 +2765,52 @@
     composer.requestSubmit();
   });
 
+  async function handleDeepLink() {
+    const path = window.location.pathname || "";
+    const m = path.match(/^\/(identity|cert|app|entitlement)\/([^/]+)\/?$/i);
+    if (!m) return false;
+    const kind = m[1].toLowerCase();
+    const key = decodeURIComponent(m[2] || "").trim();
+    if (!key) return false;
+    const prompts = {
+      identity: `Look up identity ${key}. Summarize display name, manager, title, location, and lock/active status.`,
+      cert: `Find certification or campaign matching ${key}. Summarize owners and remaining items.`,
+      app: `Look up application ${key}. Summarize type, owner, and recent aggregation health if available.`,
+      entitlement: `Find entitlement ${key}. Summarize which application it belongs to and a short description.`,
+    };
+    const toolHints = {
+      identity: "get_identity",
+      cert: "list_certifications",
+      app: "get_application",
+      entitlement: "search_entitlements",
+    };
+    addBubble({
+      role: "system",
+      text: `Deep link: ${kind}/${key} — opening Inspect after lookup.`,
+    });
+    announceAgent(`Deep link ${kind} ${key}`);
+    // Prefetch into Inspect with a stub while chat runs
+    openDetail(
+      {
+        ok: true,
+        data: {
+          deepLink: { kind, key },
+          displayName: key,
+          note: "Loading live data via chat…",
+        },
+      },
+      { tool: toolHints[kind] || kind, auto: true }
+    );
+    await sendChat(prompts[kind] || `Look up ${kind} ${key}`);
+    return true;
+  }
+
   applyRailLayout();
+  // Mobile: tools drawer is the starting surface
+  if (isMobileRail()) {
+    setRailOpen(true);
+  }
+  renderSuggestChips();
   renderPlaybookChips();
   startNewChat({ announce: false });
   addBubble({
@@ -2409,5 +2820,5 @@
 
   messageEl?.setAttribute("aria-expanded", "false");
   updateModeBar();
-  loadConfig();
+  loadConfig().then(() => handleDeepLink());
 })();

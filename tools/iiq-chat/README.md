@@ -32,6 +32,17 @@ or `POST /api/tools/refresh`.
 - Tool results enriched with display-name labels for free models
 - Free-text chat streams live agent activity (model status, thinking text, tool calls/results) via SSE
 
+## Org Chart
+
+Interactive company hierarchy (zoom / pan / collapse / search / Print-PDF / SVG / PNG):
+
+| URL | Notes |
+| --- | --- |
+| http://localhost:4180/orgchart.html | Full Meridian layout engine |
+| IIQ QuickLink `MNB-QL-Org-Chart` | Opens the same URL |
+
+Data: toolkit `GET /mnbToolkit/agent/orgchart` (UIAPI-59 / MCP `get_orgchart`), with SCIM fallback if the plugin is older.
+
 ## Quick start
 
 With the Docker lab stack (preferred):
@@ -40,6 +51,7 @@ With the Docker lab stack (preferred):
 export OPENROUTER_API_KEY=sk-or-...   # free models work
 ./tools/lab/docker/up.sh
 open http://localhost:4180/
+open http://localhost:4180/orgchart.html
 ```
 
 Host-only (MCP already on `:8766`):
@@ -55,15 +67,22 @@ python3 tools/iiq-chat/serve.py
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| GET | `/api/health` | MCP `/healthz` probe + live tool count |
-| GET | `/api/config` | LLM auth + `agentMode: native-tools` + toolCount |
+| GET | `/api/health` | MCP `/healthz` probe + live tool count + `degraded` |
+| GET | `/api/config` | LLM auth + `toolsOnly` / `degraded` + toolCount |
 | GET | `/api/actions` | Rail from MCP `tools/list` (+ favorite presets) |
+| GET | `/api/playbooks` | Role-scoped suggest + playbooks (`?role=operator\|helpdesk\|lab`) |
+| GET | `/api/metrics` | Counters, chat/tool p95 latency, MCP uptime ratio |
+| POST | `/api/feedback` | 👍/👎 + reason → `data/feedback.jsonl` |
 | POST | `/api/action` | `{ "id": "<tool\|fav:tool>" }` — **no LLM** |
-| POST | `/api/chat` | `{ "message", "history", "readOnly?" }` — agent loop (JSON; no interactive confirm) |
-| POST | `/api/chat/stream` | SSE agent: `run`, `status`, `thought`, `tool_start`, `tool_confirm`, `tool_result`, `done` / `error` |
+| POST | `/api/chat` | Agent loop (JSON); returns `cards` + `correlationId` |
+| POST | `/api/chat/stream` | SSE agent: `run`, `status`, `thought`, `tool_*`, `done` / `error` |
 | POST | `/api/chat/cancel` | `{ "runId" }` — stop an in-flight stream |
 | POST | `/api/chat/decision` | `{ "runId", "id", "approve" }` — approve/deny a write tool |
 | GET | `/api/suggest` | `?q=&kind=all\|identity\|app` — `@` mention autocomplete via MCP |
+| GET | `/api/orgchart` | Manager hierarchy forest (`mode`, `root`, `depth`, `includeInactive`) |
+| GET | `/api/orgchart/search` | Identity search for chart highlight |
+| GET | `/orgchart.html` | Zoomable company org chart UI |
+| GET | `/identity/<key>`, `/cert/<id>`, `/app/<name>` | Deep links → Teller + Inspect |
 | POST | `/api/tools/refresh` | Force-refresh MCP tool cache |
 
 ## Env
@@ -78,6 +97,9 @@ python3 tools/iiq-chat/serve.py
 | `OPENROUTER_FALLBACK_MODELS` | several `:free` models | Failover list |
 | `TELLER_TOOL_CACHE_TTL` | `60` | Seconds between `tools/list` refreshes |
 | `TELLER_MAX_AGENT_STEPS` | `5` | Max LLM↔tool iterations per chat |
+| `TELLER_PLAYBOOK_ROLE` | `operator` | Default playbook role (`operator` / `helpdesk` / `lab`) |
+| `TELLER_PLAYBOOKS_PATH` | `config/playbooks.json` | Override playbooks file |
+| `TELLER_FEEDBACK_PATH` | `data/feedback.jsonl` | Append-only feedback store |
 
 Get a key at [openrouter.ai/keys](https://openrouter.ai/keys). The tools rail works without a key.
 

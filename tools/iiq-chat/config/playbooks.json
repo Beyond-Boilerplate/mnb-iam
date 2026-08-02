@@ -1,0 +1,150 @@
+{
+  "defaultRole": "operator",
+  "roles": {
+    "operator": {
+      "label": "Operator",
+      "suggest": [
+        {
+          "id": "open-sod",
+          "label": "Open SoD",
+          "prompt": "How many open SoD policy violations are there right now? Summarize top conflicts with identity display names and conflicting entitlements."
+        },
+        {
+          "id": "agg-health",
+          "label": "Aggregation health",
+          "prompt": "Check recent aggregation and task health for Meridian apps. List any failed or stuck tasks and what to do next."
+        },
+        {
+          "id": "open-certs",
+          "label": "Open certifications",
+          "prompt": "Are there open certifications or certification campaigns? Summarize owners and how many items remain."
+        }
+      ],
+      "playbooks": [
+        {
+          "id": "sod-triage",
+          "label": "SoD triage",
+          "group": "Governance",
+          "prompt": "How many open SoD policy violations are there right now? Summarize the top conflicts with identity display names and the conflicting entitlements."
+        },
+        {
+          "id": "cert-open",
+          "label": "Open certifications",
+          "group": "Governance",
+          "prompt": "Are there open certifications or certification campaigns? Summarize owners and how many items remain."
+        },
+        {
+          "id": "agg-health",
+          "label": "Aggregation health",
+          "group": "Ops",
+          "prompt": "Check recent aggregation / task health for Meridian apps. List any failed or stuck tasks and what to do next."
+        },
+        {
+          "id": "orphan-desk",
+          "label": "Orphan remediation",
+          "group": "Ops",
+          "prompt": "Are there any login-named orphan identities or uncorrelated accounts right now? List twin keepers and recommended merge/correlate actions."
+        },
+        {
+          "id": "open-orgchart",
+          "label": "Open Org Chart",
+          "group": "Identities",
+          "prompt": "Open the Meridian org chart at /orgchart.html. Summarize how many root trees and people get_orgchart returns in company mode."
+        },
+        {
+          "id": "open-console",
+          "label": "Meridian Console",
+          "group": "Ops",
+          "prompt": "Point me to /console.html. Summarize live summary counts (orphans, pipeline, SoD, inbox, certs, provisioning)."
+        }
+      ]
+    },
+    "helpdesk": {
+      "label": "Helpdesk",
+      "suggest": [
+        {
+          "id": "find-person",
+          "label": "Find a person",
+          "prompt": "Help me look up an identity by name or login and summarize status, manager, and lock state."
+        },
+        {
+          "id": "open-sod",
+          "label": "Open SoD",
+          "prompt": "How many open SoD policy violations are there right now?"
+        }
+      ],
+      "playbooks": [
+        {
+          "id": "identity-lookup",
+          "label": "Identity lookup",
+          "group": "Identities",
+          "prompt": "Look up the identity I name next. Summarize display name, manager, title, location, and IIQ lock/active status."
+        },
+        {
+          "id": "sod-triage",
+          "label": "SoD triage",
+          "group": "Governance",
+          "prompt": "How many open SoD policy violations are there right now? Summarize the top conflicts."
+        }
+      ]
+    },
+    "lab": {
+      "label": "Lab scenarios",
+      "suggest": [
+        {
+          "id": "anita",
+          "label": "Anita Rao",
+          "prompt": "Who is Anita Rao? Summarize her identity, manager, title, location, and IIQ lock/active status."
+        },
+        {
+          "id": "paris",
+          "label": "Paris",
+          "prompt": "Find employees whose workplace or location is Paris. List display names and identity keys."
+        },
+        {
+          "id": "open-sod",
+          "label": "Open SoD",
+          "prompt": "How many open SoD violations are there?"
+        }
+      ],
+      "playbooks": [
+        {
+          "id": "joiner-check",
+          "label": "Joiner check (Nina)",
+          "group": "JML",
+          "prompt": "Look up identity Nina Joiner (or nina.joiner / MNB00120). Summarize her cube status, manager, job title, and whether she has birthright / baseline access accounts."
+        },
+        {
+          "id": "mover-check",
+          "label": "Mover check (Priya)",
+          "group": "JML",
+          "prompt": "Find Priya (priya.wire / MNB00090). What is her current department/manager versus a commercial banking move, and which apps/entitlements look like leftover wire access?"
+        },
+        {
+          "id": "leaver-check",
+          "label": "Leaver check (Jordan)",
+          "group": "JML",
+          "prompt": "Find Jordan Reed (jordan.reed / MNB00092). Is the identity disabled/terminated, and does any application account still look active?"
+        },
+        {
+          "id": "sod-triage",
+          "label": "SoD triage",
+          "group": "Governance",
+          "prompt": "How many open SoD policy violations are there right now? Summarize the top conflicts with identity display names and the conflicting entitlements."
+        },
+        {
+          "id": "anita-lookup",
+          "label": "Anita Rao lookup",
+          "group": "Identities",
+          "prompt": "Who is Anita Rao? Summarize her identity, manager, title, location, and IIQ lock/active status."
+        },
+        {
+          "id": "hayes-org",
+          "label": "Hayes org chart",
+          "group": "Identities",
+          "prompt": "Who reports under Christopher Hayes (MNB00002)? List people by display name with their keys."
+        }
+      ]
+    }
+  }
+}
