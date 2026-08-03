@@ -1,12 +1,12 @@
 # Meridian IAM Academy — static lessons + live Verify API (homelab / public).
 # Serves learn/dist and POST /api/verify/<lesson> against in-cluster IdentityIQ.
-FROM python:3.12-slim-bookworm AS build
+FROM python:3.14-slim-bookworm AS build
 WORKDIR /src
 COPY docs/lessons /src/docs/lessons
 COPY learn /src/learn
 RUN python3 /src/learn/build.py
 
-FROM python:3.12-slim-bookworm
+FROM python:3.14-slim-bookworm
 ARG KUBECTL_VERSION=v1.29.14
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates curl \
