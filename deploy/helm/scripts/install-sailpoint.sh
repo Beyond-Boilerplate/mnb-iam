@@ -61,8 +61,11 @@ if helm -n "$NS" status "$RELEASE" >/dev/null 2>&1; then
   esac
 fi
 
-# Schema job reset only when (re)building the data plane — not on thin app rollouts.
+# Schema job reset when (re)building data plane, or clearing a prior failed hook left behind.
 if [[ "$PHASE" == "all" || "$PHASE" == "data" ]]; then
+  kubectl -n "$NS" delete job sailpoint-pg-schema-init --ignore-not-found --wait=false || true
+elif [[ "${REL_STATUS:-}" == "failed" ]]; then
+  # App rollouts disable schemaInit below; still remove a stuck failed hook so Helm can recover.
   kubectl -n "$NS" delete job sailpoint-pg-schema-init --ignore-not-found --wait=false || true
 fi
 
@@ -145,6 +148,10 @@ run_helm() {
       ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}; then
     echo "ERROR: Helm phase ${label} failed"
     dump_status
+    if kubectl -n "$NS" get job sailpoint-pg-schema-init >/dev/null 2>&1; then
+      echo "---- sailpoint-pg-schema-init logs ----"
+      kubectl -n "$NS" logs job/sailpoint-pg-schema-init --all-containers --tail=200 || true
+    fi
     return 1
   fi
   kill "$ticker_pid" 2>/dev/null || true
@@ -171,9 +178,17 @@ if [[ "$PHASE" == "all" || "$PHASE" == "app" ]]; then
       exit 1
     fi
   fi
-  run_helm "app" \
-    --set identityiq.enabled=true \
+  APP_SETS=(
+    --set identityiq.enabled=true
     --set identityiq-data.enabled=true
+  )
+  # Thin app rollouts must not re-fire the schema post-upgrade hook — it race/fails on
+  # healthy existing DBs and marks the Helm release failed even when IIQ rolls out fine.
+  if [[ "$PHASE" == "app" ]]; then
+    APP_SETS+=(--set identityiq-data.schemaInit.enabled=false)
+    echo "App phase: schemaInit.enabled=false (skip post-upgrade schema hook)"
+  fi
+  run_helm "app" "${APP_SETS[@]}"
 fi
 
 echo "Release ${RELEASE} installed in $NS"
