@@ -1,0 +1,263 @@
+[
+  {
+    "key": "MNB-105",
+    "type": "identity-admin",
+    "title": "Unlock Meera Torres (MNB00012) after AD lock cascade",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-105.json",
+    "mcp": ["search_identities", "unlock_iiq_identity", "get_identity_accounts"],
+    "acceptance": "IIQ identity unlocked; searchable; linked accounts in evidence.",
+    "why": "Canonical identity-admin dry-run — unlock + verify path is fully MCP-covered."
+  },
+  {
+    "key": "MNB-106",
+    "type": "identity-admin",
+    "title": "Reset + expire password for contractor offboarding",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-106.json",
+    "mcp": ["search_identities", "set_identity_password", "expire_password", "get_password_policy"],
+    "acceptance": "Password reset/expire applied; policy noted in evidence.",
+    "why": "Password lifecycle tools are on the MCP surface (live needs CAB-aware ops)."
+  },
+  {
+    "key": "MNB-108",
+    "type": "identity-admin",
+    "title": "Disable terminated Anita Ross (MNB00010) and verify leaver accounts",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-108.json",
+    "mcp": ["search_identities", "disable_identity", "get_identity_accounts"],
+    "acceptance": "Identity disabled; account state captured.",
+    "why": "Disable + account verify is a clean identity-admin slice."
+  },
+  {
+    "key": "MNB-101",
+    "type": "app-onboarding",
+    "title": "Onboard WirePortal delimited feed for Bengaluru wire initiators",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-101.json",
+    "mcp": ["create_application", "update_application_config", "trigger_aggregation", "get_task_result"],
+    "acceptance": "App exists with delimiter/header; aggregation completable.",
+    "why": "Application create/config + aggregation is first-class MCP."
+  },
+  {
+    "key": "MNB-102",
+    "type": "app-onboarding",
+    "title": "Salesforce-CRM correlation on email for CRM reps",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-102.json",
+    "mcp": ["get_application_config", "update_application_config", "trigger_aggregation", "search_identities"],
+    "acceptance": "CRM correlates on email; sample accounts link to HR users.",
+    "why": "Correlation attribute patch + re-agg is allowlisted app-onboarding."
+  },
+  {
+    "key": "MNB-121",
+    "type": "task-ops",
+    "title": "Run Identity Refresh now; triage last TaskResult failure",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-121.json",
+    "mcp": ["run_task_now", "get_task_result", "list_recent_task_failures"],
+    "acceptance": "Refresh triggered; failure triage noted in evidence.",
+    "why": "Task-ops path: run + read TaskResult without SSD edits."
+  },
+  {
+    "key": "MNB-125",
+    "type": "task-ops",
+    "title": "Schedule daily open-SoD report to Helen Ross",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-125.json",
+    "mcp": ["list_agent_schedules", "update_task_schedule", "upsert_task_definition"],
+    "acceptance": "Schedule exists for daily open-SoD report.",
+    "why": "Schedule CRUD is MCP; email template may be HYBRID if template missing."
+  },
+  {
+    "key": "MNB-113",
+    "type": "access-request",
+    "title": "Retail CSR → InternetBanking entitlement (manager approval)",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-113.json",
+    "mcp": ["create_access_request", "get_access_request", "search_identities"],
+    "acceptance": "Access request created; approval path documented.",
+    "why": "Access request create/get is MCP; manager approval may wait on human."
+  },
+  {
+    "key": "MNB-114",
+    "type": "access-request",
+    "title": "Remove orphaned AWS admin after team transfer",
+    "capability": "MCP_E2E",
+    "phase": 1,
+    "fixture": "jira-stories/fixtures/MNB-114.json",
+    "mcp": ["create_access_request", "get_identity_accounts", "search_identities"],
+    "acceptance": "Revoke request filed; account evidence attached.",
+    "why": "Revoke-as-request is the safe MCP pattern vs direct entitlement delete."
+  },
+  {
+    "key": "MNB-119",
+    "type": "governance-admin",
+    "title": "Create population Kathmandu Hub risk reviewers",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-119.json",
+    "mcp": ["create_population", "get_population", "search_identities"],
+    "acceptance": "Population exists with filter matching hub reviewers.",
+    "why": "Population CRUD is on the toolkit MCP surface."
+  },
+  {
+    "key": "MNB-120",
+    "type": "governance-admin",
+    "title": "Add Chloe Adhikari (MNB00009) to IAM incident responders workgroup",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-120.json",
+    "mcp": ["get_workgroup", "update_workgroup_members", "search_identities"],
+    "acceptance": "Workgroup membership updated; evidence lists members.",
+    "why": "Workgroup member update is MCP (grant_capability stays denylisted)."
+  },
+  {
+    "key": "MNB-117",
+    "type": "certification",
+    "title": "Launch manager certification for Retail Banking population",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-117.json",
+    "mcp": ["create_certification", "list_certifications", "get_certification"],
+    "acceptance": "Campaign launched for Retail Banking population.",
+    "why": "Cert definition/launch tools exist; sign-off may need manager persona."
+  },
+  {
+    "key": "MNB-115",
+    "type": "policy-sod",
+    "title": "SoD exception: Finance GL + Wire initiator for Deepa Nair delegate",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-115.json",
+    "mcp": ["list_sod_policies", "simulate_sod", "create_sod_exception"],
+    "acceptance": "Exception recorded or simulation evidence proves conflict path.",
+    "why": "SoD list/simulate/exception tools are MCP; policy authoring may be HYBRID."
+  },
+  {
+    "key": "MNB-109",
+    "type": "jml-lifecycle",
+    "title": "Joiner: ingest HR scenario hire + Identity Refresh",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-109.json",
+    "mcp": ["trigger_aggregation", "run_task_now", "search_identities", "get_task_result"],
+    "acceptance": "HR delta applied; new identity appears after refresh.",
+    "why": "Agent drives MCP tasks; HR file apply may use lab script as precondition."
+  },
+  {
+    "key": "MNB-110",
+    "type": "jml-lifecycle",
+    "title": "Mover: Rachel Evans (MNB00005) dept/role birthright deltas",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-110.json",
+    "mcp": ["trigger_aggregation", "run_task_now", "get_identity", "get_identity_roles"],
+    "acceptance": "Dept/role birthright updated after mover refresh.",
+    "why": "Same JML pattern: feed + refresh + verify roles via MCP."
+  },
+  {
+    "key": "MNB-111",
+    "type": "jml-lifecycle",
+    "title": "Same-day leaver: revoke WirePortal + AWS for Jordan",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-111.json",
+    "mcp": ["trigger_aggregation", "run_task_now", "disable_identity", "get_identity_accounts", "create_access_request"],
+    "acceptance": "Leaver inactive; WirePortal + AWS removed or revoke requested.",
+    "why": "Leaver: HR terminate delta + disable + access cleanup."
+  },
+  {
+    "key": "MNB-126",
+    "type": "governance-admin",
+    "title": "Birthright employee role: selector + Required IT packs",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-126.json",
+    "mcp": ["list_agent_roles", "set_role_selector", "set_role_requirements", "run_task_now", "get_identity_roles"],
+    "acceptance": "Birthright selector + Required Roles correct; sample identity has pack.",
+    "why": "Roles: birthright assignment path (lessons 24–25)."
+  },
+  {
+    "key": "MNB-127",
+    "type": "governance-admin",
+    "title": "Dept/job role packaging: Retail CSR SoD-safe IT packs",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-127.json",
+    "mcp": ["list_agent_roles", "set_role_requirements", "list_sod_policies"],
+    "acceptance": "Job roles Required list SoD-safe; CloudAdmin not birthright.",
+    "why": "Roles: IT packaging / composition (lessons 25–26)."
+  },
+  {
+    "key": "MNB-128",
+    "type": "policy-sod",
+    "title": "SoD policy: Finance GL vs Wire initiator — simulate + constrain",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-128.json",
+    "mcp": ["list_sod_policies", "create_sod_policy", "update_sod_constraints", "simulate_sod_policy", "list_open_sod_violations"],
+    "acceptance": "Policy present; simulation evidence; exception only if pre-approved.",
+    "why": "Policies: SoD create/constrain/simulate path."
+  },
+  {
+    "key": "MNB-129",
+    "type": "policy-sod",
+    "title": "Create wire exclusive SoD policy (WireInitiator vs WireApprover)",
+    "capability": "MCP_E2E",
+    "phase": 2,
+    "fixture": "jira-stories/fixtures/MNB-129.json",
+    "mcp": [
+      "list_sod_policies",
+      "create_sod_policy",
+      "update_sod_constraints",
+      "simulate_sod_policy",
+      "list_open_sod_violations",
+      "list_agent_roles",
+      "run_task_now"
+    ],
+    "acceptance": "MNB-SOD-Wire-DualControl enabled; Priya/Marcus clean; evidence pack complete.",
+    "why": "Canonical payment dual-control policy (lessons 39–40)."
+  },
+  {
+    "key": "MNB-122",
+    "type": "automation-rule-workflow",
+    "title": "Export CoreBanking Application XML → SSD MNB-Application",
+    "capability": "HYBRID",
+    "phase": null,
+    "fixture": null,
+    "mcp": ["get_application", "export_object"],
+    "acceptance": "XML landed under config/; PR review required.",
+    "why": "Agent can export/read; durable SSD commit needs human PR — not auto In Review alone."
+  },
+  {
+    "key": "MNB-124",
+    "type": "automation-rule-workflow",
+    "title": "Author SSD Rule for HR userId normalization (no live rule edit)",
+    "capability": "BLOCKED",
+    "phase": null,
+    "fixture": null,
+    "mcp": [],
+    "acceptance": "SSD Rule authored offline; update_rule_source denylisted.",
+    "why": "Live rule source edits are denylisted; agent labels blocked-needs-human."
+  },
+  {
+    "key": "MNB-123",
+    "type": "plugin-work",
+    "title": "Install/enable study plugin zip; verify toolkit_ping",
+    "capability": "HYBRID",
+    "phase": null,
+    "fixture": "jira-stories/fixtures/MNB-123.json",
+    "mcp": ["toolkit_ping"],
+    "acceptance": "Plugin installed; toolkit_ping OK.",
+    "why": "Install is ops/file drop; verify via MCP ping only."
+  }
+]

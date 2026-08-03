@@ -27,3 +27,37 @@ intake:
   primary: atlassian_mcp
   secondary: rest_poller   # requires JIRA_* env
   tertiary: fixtures       # explicit --fixture only — never silent
+
+# —— Auto-story Jira runner (scripts/auto_story) ——
+# Policy: may auto-transition Ready → In Progress → In Review for agent-ready only.
+# NEVER auto-transition to Done (PM owns Done).
+auto_story:
+  enabled: true
+  labels:
+    ready: agent-ready
+    blocked: blocked-needs-human
+    # Optional work-type labels (one of):
+    work_types:
+      - identity-admin
+      - app-onboarding
+      - task-ops
+      - access-request
+      - governance-admin
+      - certification
+      - policy-sod
+      - jml-lifecycle
+  ready_jql: >-
+    project = KAN AND labels = "agent-ready"
+    AND status = "To Do"
+    ORDER BY created ASC
+  # Note: mnbiam KAN board maps status name "To Do" to statusCategory "Done"
+  # (misconfigured). Prefer status = "To Do" over statusCategory for this site.
+  transitions:
+    start_work: In Progress
+    ready_for_pm: In Review
+    # complete / Done is intentionally omitted — runner must never call it
+  bot:
+    # Auth via env: JIRA_SITE, JIRA_EMAIL (or JIRA_BOT_EMAIL), JIRA_API_TOKEN
+    account_env: JIRA_EMAIL
+    token_env: JIRA_API_TOKEN
+    site_env: JIRA_SITE

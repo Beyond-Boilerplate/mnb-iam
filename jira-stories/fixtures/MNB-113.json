@@ -1,0 +1,11 @@
+{
+  "key": "MNB-113",
+  "id": "11301",
+  "fields": {
+    "summary": "Retail CSR → InternetBanking entitlement (manager approval)",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["access-request", "agent-ready"],
+    "description": "Create an access request for a Retail CSR identity to InternetBanking entitlement. Manager approval expected. Capture request id and status in evidence."
+  }
+}

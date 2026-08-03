@@ -1,0 +1,11 @@
+{
+  "key": "MNB-110",
+  "id": "11001",
+  "fields": {
+    "summary": "Mover: Priya dept transfer to Commercial + birthright deltas",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["jml-lifecycle", "agent-ready"],
+    "description": "Mover path using lab-data/scenarios/mover/hr-delta-priya-to-commercial.csv (Rachel Evans MNB00005 may be used if Priya not present). After HR delta apply: HR aggregation + Identity Refresh. Verify department/title and birthright/job role membership deltas. Capture before/after role lists in evidence."
+  }
+}

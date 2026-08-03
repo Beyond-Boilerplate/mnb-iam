@@ -1,0 +1,11 @@
+{
+  "key": "MNB-127",
+  "id": "12701",
+  "fields": {
+    "summary": "Dept/job role packaging: Retail CSR Required Roles + SoD-safe IT packs",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["governance-admin", "agent-ready"],
+    "description": "For Retail CSR / branch job roles (MNB-Role-* / MNB-IT-* per lessons 25–26): inventory Required Roles, ensure WireInit and WireAppr are never co-required, and CloudAdmin is not birthright. Use list_agent_roles, set_role_requirements if remediation needed. Document composition table in evidence. Do not call update_rule_source or grant_capability."
+  }
+}

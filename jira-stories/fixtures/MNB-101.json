@@ -1,0 +1,11 @@
+{
+  "key": "MNB-101",
+  "id": "10101",
+  "fields": {
+    "summary": "Onboard WirePortal delimited feed for Bengaluru wire initiators",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["app-onboarding", "agent-ready"],
+    "description": "Create or update application MNB-WirePortal as a delimited file app for Bengaluru wire initiators. Delimiter comma, header true, correlation on userId. Feed: lab-data/apps/MNB-WirePortal.csv (or WirePortal extract). Run account aggregation and capture TaskResult."
+  }
+}

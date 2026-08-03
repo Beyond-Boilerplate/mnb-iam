@@ -9,10 +9,12 @@ from fastmcp import FastMCP
 from iiq_mcp.client.http import IiqHttpClient
 from iiq_mcp.tools import (
     impl_agent_ops,
+    impl_console,
     impl_coverage,
     impl_custom_apis,
     impl_lifecycle,
     impl_ops_ext,
+    impl_parity,
     impl_scim_catalog,
     phase1_apps,
     phase1_certs,
@@ -37,6 +39,8 @@ def register_all(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
     impl_custom_apis.register(mcp, client, **ctx)
     impl_ops_ext.register(mcp, client, **ctx)
     impl_coverage.register(mcp, client, **ctx)
+    impl_console.register(mcp, client, **ctx)
+    impl_parity.register(mcp, client, **ctx)
     stubs_catalog.register(mcp, client, **ctx)
     # Auto-derive implemented name set from registration (no hand-maintained frozenset).
     stubs_catalog.refresh_implemented_from_mcp(mcp)

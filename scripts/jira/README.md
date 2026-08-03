@@ -9,6 +9,16 @@
 JQL: project = KAN AND statusCategory = "To Do" ORDER BY created ASC
 ```
 
+## Auto-story Ready queue
+
+Issues labeled **`agent-ready`** may be claimed by [`scripts/auto_story`](../auto_story/README.md):
+
+```text
+project = KAN AND labels = "agent-ready" AND status = "To Do" ORDER BY created ASC
+```
+
+Escalation label: **`blocked-needs-human`**. Runner may auto **In Progress** / **In Review** for that queue only — **never Done**. See `auto_story` in [`status_map.yaml`](status_map.yaml).
+
 ## Optional REST poller
 
 ```bash

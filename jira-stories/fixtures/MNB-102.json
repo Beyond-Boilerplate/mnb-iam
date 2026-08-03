@@ -1,0 +1,11 @@
+{
+  "key": "MNB-102",
+  "id": "10201",
+  "fields": {
+    "summary": "Salesforce-CRM correlation on email for CRM reps",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["app-onboarding", "agent-ready"],
+    "description": "Ensure Salesforce-CRM (or MNB-Salesforce-CRM) correlates accounts to identities on email. Sample accounts: lab-data/apps/MNB-Salesforce-CRM.csv. Update correlation config, re-aggregate, verify linked identities via search."
+  }
+}

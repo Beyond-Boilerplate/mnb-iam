@@ -1,0 +1,11 @@
+{
+  "key": "MNB-126",
+  "id": "12601",
+  "fields": {
+    "summary": "Birthright employee role: verify selector + Required IT packs",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["governance-admin", "agent-ready"],
+    "description": "Confirm Meridian birthright business role (e.g. MNB-Birthright-Employee) has an assignment selector for active employees and Required Roles pointing at agreed IT packs (not privileged CloudAdmin). Use list_agent_roles / get role detail; if selector or requirements are wrong, fix via set_role_selector / set_role_requirements. Run Identity Refresh and sample one joiner identity for role membership. Evidence under .ai-delivery/MNB-126/."
+  }
+}

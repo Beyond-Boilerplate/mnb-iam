@@ -1,0 +1,11 @@
+{
+  "key": "MNB-114",
+  "id": "11401",
+  "fields": {
+    "summary": "Remove orphaned AWS admin after team transfer",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["access-request", "agent-ready"],
+    "description": "File a revoke access request for orphaned AWS admin entitlement after team transfer. Document current accounts before/after request creation."
+  }
+}

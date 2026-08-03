@@ -198,7 +198,7 @@ Document how batch hire and rehire stress Joiner events (duplicates, same `userI
 
 ## Stretch lab
 
-If LCM is present and you have a personal lab, enable a Joiner event in a sandbox and capture the work item for Nina—then disable the event again.
+If LCM is present and you have a personal lab, enable a Joiner event in a sandbox and capture the work item for Nina—then disable the event again. Full end-to-end implementation of all JML events is **[Lesson 34b](34b-lcm-automation-in-action.md)** after you finish Lessons 30–34.
 
 ---
 
@@ -206,7 +206,7 @@ If LCM is present and you have a personal lab, enable a Joiner event in a sandbo
 
 - File-delta joiner stays the Core Path backbone.  
 - Lifecycle Events are optional orchestration, not a substitute for HR authority.  
-- Design LoA and Leaver as different events.
+- Design LoA and Leaver as different events — implement them for real in Lesson 34b.
 
 **Previous:** [Lesson 29 — Joiner Lifecycle](29-joiner-lifecycle.md)  
-**Next:** [Lesson 30 — Mover / Transfer Events](30-mover-transfers.md)
+**Next:** [Lesson 30 — Mover / Transfer Events](30-mover-transfers.md) · later: [Lesson 34b — LCM Automation in Action](34b-lcm-automation-in-action.md)

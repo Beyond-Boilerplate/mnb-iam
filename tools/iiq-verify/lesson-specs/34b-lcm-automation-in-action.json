@@ -1,0 +1,74 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "34b",
+  "stem": "34b-lcm-automation-in-action",
+  "title": "Lesson 34b — LCM Automation in Action",
+  "verifyMode": "lab",
+  "description": "Practical LCM: Meridian IdentityTriggers + Joiner/Leaver workflows. Soft-fails until events are configured and LCM is imported.",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok-1",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application 'MNB-HR' exists"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Workflow",
+      "name": "Lifecycle Event - Joiner",
+      "id": "wf-joiner",
+      "message": "Workflow 'Lifecycle Event - Joiner' exists (import init-lcm.xml)",
+      "softFail": true,
+      "hint": "Run iiq console: import init-lcm.xml. RapidSetup - Joiner is an acceptable alternate — document in binder if stock name differs."
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Workflow",
+      "name": "Lifecycle Event - Leaver",
+      "id": "wf-leaver",
+      "message": "Workflow 'Lifecycle Event - Leaver' exists (import init-lcm.xml)",
+      "softFail": true,
+      "hint": "Import init-lcm.xml; RapidSetup - Leaver is acceptable if documented."
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "IdentityTrigger",
+      "name": "MNB-LE-Joiner-HR",
+      "id": "le-joiner",
+      "message": "Lifecycle Event 'MNB-LE-Joiner-HR' exists",
+      "softFail": true,
+      "hint": "Create in Lesson 34b Task 3 (Setup → Lifecycle Events or Debug IdentityTrigger)."
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "IdentityTrigger",
+      "name": "MNB-LE-Leaver-Terminate",
+      "id": "le-leaver",
+      "message": "Lifecycle Event 'MNB-LE-Leaver-Terminate' exists",
+      "softFail": true,
+      "hint": "Create in Lesson 34b Task 4 — AttributeChange on inactive."
+    },
+    {
+      "type": "identity.exists",
+      "name": "nina.joiner",
+      "id": "id-nina",
+      "message": "Joiner persona nina.joiner exists for fire-test evidence",
+      "softFail": true,
+      "hint": "apply-joiner.sh + Aggregate MNB-HR + Refresh (or use leo.batch from apply-batch-hire.sh)."
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/scenarios/joiner/hr-delta-new-hire.csv",
+      "id": "file-joiner",
+      "message": "Joiner scenario delta present"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "stem": "01-bank-briefing-and-ui",
+  "title": "Lesson 01 \u2014 Bank Briefing & UI Orientation",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 684888,
+  "durationMin": 11.4,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 82,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 32088
+    },
+    {
+      "id": "why-youre-here",
+      "words": 122,
+      "audio": "01-why-youre-here.mp3",
+      "durationMs": 51576
+    },
+    {
+      "id": "what-iam-is",
+      "words": 208,
+      "audio": "02-what-iam-is.mp3",
+      "durationMs": 63528
+    },
+    {
+      "id": "your-team",
+      "words": 189,
+      "audio": "03-your-team.mp3",
+      "durationMs": 552
+    },
+    {
+      "id": "six-constructs",
+      "words": 204,
+      "audio": "04-six-constructs.mp3",
+      "durationMs": 104376
+    },
+    {
+      "id": "shorthand-later",
+      "words": 157,
+      "audio": "05-shorthand-later.mp3",
+      "durationMs": 82464
+    },
+    {
+      "id": "four-surfaces",
+      "words": 139,
+      "audio": "06-four-surfaces.mp3",
+      "durationMs": 80904
+    },
+    {
+      "id": "lab-tour",
+      "words": 362,
+      "audio": "07-lab-tour.mp3",
+      "durationMs": 210720
+    },
+    {
+      "id": "close",
+      "words": 115,
+      "audio": "08-close.mp3",
+      "durationMs": 53904
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/01-bank-briefing-and-ui.md",
+  "audio": "learn/media/podcasts/01-bank-briefing-and-ui.mp3"
+}

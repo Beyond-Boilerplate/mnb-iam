@@ -1,0 +1,11 @@
+{
+  "key": "MNB-109",
+  "id": "10901",
+  "fields": {
+    "summary": "Joiner: ingest HR scenario hire + Identity Refresh",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["jml-lifecycle", "agent-ready"],
+    "description": "Joiner path using lab-data/scenarios/joiner/hr-delta-new-hire.csv. Precondition: apply HR delta (tools/lab/scripts/scenarios/apply-joiner.sh or apply-hr-delta.sh). Then trigger MNB-HR aggregation + Identity Refresh (promoteAttributes/refreshManagerStatus as needed). Verify the new hire is searchable and note birthright/role expectations in evidence under .ai-delivery/MNB-109/."
+  }
+}

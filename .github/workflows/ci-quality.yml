@@ -68,9 +68,16 @@ jobs:
           python3 -m py_compile learn/build.py tools/generate-mnb-curriculum.py
           python3 learn/build.py
           test -f learn/dist/index.html
-          lesson_count=$(find docs/lessons -maxdepth 1 -name '[0-9]*.md' -print | wc -l | tr -d ' ')
+          test -f learn/dist/audio.html
+          # Match learn/build.py inputs: numbered lessons + mid-capstones + first-90-days,
+          # plus static pages index.html and audio.html.
+          lesson_count=$(find docs/lessons -maxdepth 1 \( \
+            -name '[0-9]*.md' -o \
+            -name 'first-90-days.md' -o \
+            -name 'mid-*-capstone.md' \
+          \) -print | wc -l | tr -d ' ')
           html_count=$(find learn/dist -maxdepth 1 -name '*.html' -print | wc -l | tr -d ' ')
-          expected_count=$((lesson_count + 1))
+          expected_count=$((lesson_count + 2))
           if [ "$html_count" -ne "$expected_count" ]; then
             echo "::error::Expected ${expected_count} academy HTML files; found ${html_count}"
             exit 1

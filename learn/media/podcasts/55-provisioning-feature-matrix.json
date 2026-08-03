@@ -1,0 +1,56 @@
+{
+  "stem": "55-provisioning-feature-matrix",
+  "title": "Lesson 55 \u2014 Provisioning Feature Matrix",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 523751,
+  "durationMin": 8.7,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 134,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 63672
+    },
+    {
+      "id": "why-this-matters",
+      "words": 117,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 57216
+    },
+    {
+      "id": "concepts-what-featuresstring-actually-me",
+      "words": 215,
+      "audio": "02-concepts-what-featuresstring-actually-me.mp3",
+      "durationMs": 143304
+    },
+    {
+      "id": "concepts-features-vs-policies-vs-promise",
+      "words": 73,
+      "audio": "03-concepts-features-vs-policies-vs-promise.mp3",
+      "durationMs": 41712
+    },
+    {
+      "id": "concepts-meridian-application-set-this-l",
+      "words": 148,
+      "audio": "04-concepts-meridian-application-set-this-l.mp3",
+      "durationMs": 113208
+    },
+    {
+      "id": "how-it-works",
+      "words": 99,
+      "audio": "05-how-it-works.mp3",
+      "durationMs": 54984
+    },
+    {
+      "id": "close",
+      "words": 79,
+      "audio": "06-close.mp3",
+      "durationMs": 46080
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/55-provisioning-feature-matrix.md",
+  "audio": "learn/media/podcasts/55-provisioning-feature-matrix.mp3"
+}

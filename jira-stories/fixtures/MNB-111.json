@@ -1,0 +1,11 @@
+{
+  "key": "MNB-111",
+  "id": "11101",
+  "fields": {
+    "summary": "Same-day leaver: revoke WirePortal + AWS for Jordan",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["jml-lifecycle", "agent-ready"],
+    "description": "Leaver path using lab-data/scenarios/leaver/hr-delta-terminate-jordan.csv. After HR delta is applied: trigger HR aggregation + Identity Refresh, disable/verify the leaver identity, and remove or request removal of WirePortal + AWS-Cloud access. Capture account/access evidence. Do not mark Jira Done."
+  }
+}

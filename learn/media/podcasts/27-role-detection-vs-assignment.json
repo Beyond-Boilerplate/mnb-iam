@@ -1,0 +1,62 @@
+{
+  "stem": "27-role-detection-vs-assignment",
+  "title": "Lesson 27 \u2014 Role Detection vs Assignment",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 372096,
+  "durationMin": 6.2,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 121,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 58968
+    },
+    {
+      "id": "why-this-matters",
+      "words": 107,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 58704
+    },
+    {
+      "id": "concepts-normative-vs-analytical-and-whe",
+      "words": 122,
+      "audio": "02-concepts-normative-vs-analytical-and-whe.mp3",
+      "durationMs": 78096
+    },
+    {
+      "id": "concepts-outlier-pattern-privilege-witho",
+      "words": 59,
+      "audio": "03-concepts-outlier-pattern-privilege-witho.mp3",
+      "durationMs": 38736
+    },
+    {
+      "id": "concepts-birthright-pattern",
+      "words": 31,
+      "audio": "04-concepts-birthright-pattern.mp3",
+      "durationMs": 18072
+    },
+    {
+      "id": "concepts-dual-control-check",
+      "words": 39,
+      "audio": "05-concepts-dual-control-check.mp3",
+      "durationMs": 25320
+    },
+    {
+      "id": "how-it-works",
+      "words": 71,
+      "audio": "06-how-it-works.mp3",
+      "durationMs": 46680
+    },
+    {
+      "id": "close",
+      "words": 78,
+      "audio": "07-close.mp3",
+      "durationMs": 43344
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/27-role-detection-vs-assignment.md",
+  "audio": "learn/media/podcasts/27-role-detection-vs-assignment.mp3"
+}

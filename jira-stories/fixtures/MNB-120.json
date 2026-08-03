@@ -1,0 +1,11 @@
+{
+  "key": "MNB-120",
+  "id": "12001",
+  "fields": {
+    "summary": "Add Chloe Adhikari (MNB00009) to IAM incident responders workgroup",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["governance-admin", "agent-ready"],
+    "description": "Add Chloe Adhikari (MNB00009) to the IAM incident responders workgroup. Do not grant SystemAdministrator capability. Capture membership evidence."
+  }
+}

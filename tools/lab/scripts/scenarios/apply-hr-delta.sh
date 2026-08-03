@@ -5,12 +5,13 @@
 #   ./tools/lab/scripts/scenarios/apply-hr-delta.sh --file path/to/delta.csv
 #   ./tools/lab/scripts/scenarios/apply-hr-delta.sh --diagnose path/to/delta.csv
 #   HR_FILE=~/iiq-lab-data/HRApplications.txt ./tools/lab/scripts/scenarios/apply-hr-delta.sh joiner
+# Docker lab: default is repo lab-data/ (mounted at /opt/iiq-lab-data). Native Tomcat: set HR_FILE.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 SCENARIOS="$ROOT/lab-data/scenarios"
 REPO_HR="$ROOT/lab-data/HRApplications.txt"
-HR_FILE="${HR_FILE:-$HOME/iiq-lab-data/HRApplications.txt}"
+HR_FILE="${HR_FILE:-$REPO_HR}"
 
 usage() {
   cat <<EOF
@@ -32,7 +33,8 @@ Upserts delta data rows into HR_FILE by matching the userId column.
 Creates a timestamped .bak beside HR_FILE before writing.
 
 Env:
-  HR_FILE   Target HR feed (default: ~/iiq-lab-data/HRApplications.txt)
+  HR_FILE   Target HR feed (default: <repo>/lab-data/HRApplications.txt — Docker mount source).
+            Native Tomcat only: HR_FILE=~/iiq-lab-data/HRApplications.txt
 EOF
 }
 

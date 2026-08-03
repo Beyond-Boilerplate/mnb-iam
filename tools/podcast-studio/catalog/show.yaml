@@ -1,0 +1,163 @@
+# Meridian IAM Audio — thematic podcast show (not 1:1 lesson TTS)
+#
+# Each episode pulls source lessons for grounding, then agents rewrite into
+# conversational teaching — no click-paths, no lab checklists.
+
+show:
+  id: meridian-iam-audio
+  title: Meridian IAM Audio
+  tagline: Real-world identity governance — SailPoint, security posture, and the standards that matter.
+  hosts:
+    interviewer:
+      name: Alex
+      role: Curious host / interviewer
+      voice: en-US-BrianNeural
+      style: Curious, slightly irreverent, Joe-Rogan-energy interviewer — digs for stories, asks "why should a bank care?", keeps jargon honest.
+    expert:
+      name: Jordan
+      role: IAM / SailPoint practitioner
+      voice: en-US-JennyNeural
+      style: Calm topic expert — bank-realistic examples, examiner-aware, plain English first then precise terms.
+
+# Source clusters map curriculum → episode themes. Agents must cover the
+# conceptual payload without lab procedure / UI click detail.
+episodes:
+  - id: E01
+    slug: iam-at-a-bank
+    title: What IAM Actually Is (At a Bank)
+    season: 1
+    themes: [iam-fundamentals, bank-controls, sailpoint-role]
+    source_lessons: [01-bank-briefing-and-ui, 02-meridian-org-model]
+    learning_intent: >
+      Explain IAM vs directories/helpdesk, why banks buy governance platforms,
+      Meridian team shape, and the six core constructs in plain English.
+
+  - id: E02
+    slug: language-of-access
+    title: The Language of Access — Identity, Account, Entitlement
+    season: 1
+    themes: [identity-cube, account, entitlement, application]
+    source_lessons: [01-bank-briefing-and-ui, 06-identity-cubes-and-refresh, 09-it-access-inventory-app, 10-entitlement-dictionary]
+    learning_intent: >
+      Make the identity→account→entitlement model stick with Meridian personas
+      (Priya wire, Jordan smoke) and why cubes beat spreadsheets.
+
+  - id: E03
+    slug: hr-source-of-truth
+    title: HR as Source of Truth — Authoritative Identity
+    season: 1
+    themes: [authoritative-source, correlation, data-quality]
+    source_lessons: [04-authoritative-hr-source, 05-hr-schema-and-identity-attrs, 17-correlation-basics, 19-uncorrelated-remediation]
+    learning_intent: >
+      Why HR wins as people source of truth, what correlation means, and how
+      dirty data becomes a control failure.
+
+  - id: E04
+    slug: roles-and-birthright
+    title: Roles, Birthright, and Not Giving Away the Kingdom
+    season: 2
+    themes: [roles, birthright, privileged-access]
+    source_lessons: [23-role-model-intro, 24-birthright-employee-role, 25-dept-job-roles, 26-it-role-packaging, 27-role-detection-vs-assignment, 28-privileged-access-roles]
+    learning_intent: >
+      IT vs business roles, birthright boundaries, dual-control wire packs,
+      and why privileged access is never automatic.
+
+  - id: E05
+    slug: jml-lifecycle
+    title: Joiner, Mover, Leaver — The Access Lifecycle
+    season: 2
+    themes: [jml, joiner, mover, leaver, loa, contractors]
+    source_lessons: [29-joiner-lifecycle, 30-mover-transfers, 31-leaver-disablement, 32-contractor-lifecycle, 33-leave-of-absence, 34-rapid-offboarding-drill]
+    learning_intent: >
+      Lifecycle events as business risk stories; what good JML looks like before
+      you touch a workflow designer.
+
+  - id: E06
+    slug: request-approve-prove
+    title: Request, Approve, Prove — Access That Survives an Exam
+    season: 2
+    themes: [access-request, approvals, identity-request, audit]
+    source_lessons: [35-access-request-catalog, 36-approval-chains, 37-break-glass-access, 38-identity-request-tracking]
+    learning_intent: >
+      Catalog, approval chains, break-glass, and the request trail examiners
+      actually ask for.
+
+  - id: E07
+    slug: sod-and-risk
+    title: Toxic Combos — SoD, Dual Control, and Risk Scores
+    season: 3
+    themes: [sod, dual-control, policy, risk]
+    source_lessons: [39-sod-fundamentals, 40-payment-dual-control-policy, 41-policy-violations-mitigation, 42-risk-scores]
+    learning_intent: >
+      Segregation of duties as fraud prevention, payment dual control, and how
+      risk scores focus attention without becoming theater.
+
+  - id: E08
+    slug: certifications
+    title: Access Reviews That Aren't Rubber Stamps
+    season: 3
+    themes: [certifications, campaigns, remediation, evidence]
+    source_lessons: [43-manager-certifications, 44-app-owner-certifications, 45-targeted-campaigns, 46-cert-remediation-evidence, 48-audit-ready-reporting]
+    learning_intent: >
+      Why certs exist, manager vs app-owner campaigns, remediation evidence,
+      and audit-ready reporting habits.
+
+  - id: E09
+    slug: sailpoint-essentials
+    title: SailPoint IdentityIQ Essentials — What the Platform Actually Does
+    season: 1
+    themes: [sailpoint, iiq-surfaces, tasks, work-items]
+    source_lessons: [01-bank-briefing-and-ui, 06-identity-cubes-and-refresh, 08-task-ops-and-scheduling, 16b-reading-task-results]
+    learning_intent: >
+      IIQ as governance brain: cubes, tasks, work items, aggregation vs refresh —
+      mental model without UI tourism.
+
+  - id: E10
+    slug: connector-landscape
+    title: Connectors & Tooling — How IIQ Talks to the World
+    season: 4
+    themes: [connectors, iqservice, provisioning, tooling]
+    source_lessons: [51-connector-landscape-and-registry, 52-connector-selection-for-meridian, 53-iqservice-architecture, 55-provisioning-feature-matrix, 56-active-directory-connector]
+    learning_intent: >
+      Connector types, when to pick which, IQService reality, provisioning
+      feature honesty, and directory vs SaaS patterns.
+
+  - id: E11
+    slug: security-posture
+    title: Security Posture — Least Privilege, Break-Glass, Hardening Mindset
+    season: 3
+    themes: [least-privilege, break-glass, hardening, privileged-access]
+    source_lessons: [28-privileged-access-roles, 37-break-glass-access, 109-hardening-spadmin-capabilities, 104-auditconfig-and-siem]
+    learning_intent: >
+      Security posture for IGA platforms: privileged roles, break-glass discipline,
+      admin capability hygiene, audit/SIEM signals.
+
+  - id: E12
+    slug: standards-and-exams
+    title: Standards, Examiners, and Speaking Audit Fluently
+    season: 3
+    themes: [ffiec, nist, sox, exam-readiness]
+    source_lessons: [48-audit-ready-reporting, 50-capstone-exam-readiness, 02-meridian-org-model, 46-cert-remediation-evidence]
+    learning_intent: >
+      How FFIEC / NIST / SOX-style expectations show up in IAM work; evidence
+      habits; answering examiner questions without panic.
+
+  - id: E13
+    slug: industry-tooling
+    title: The Wider Stack — IdP, PAM, ITSM, and Where IIQ Fits
+    season: 4
+    themes: [idp, pam, itsm, architecture]
+    source_lessons: [73-okta-connector, 86-pam-cyberark-module, 72-servicenow-connector, 59-azure-entra-id-connector, 50b-choose-your-stack]
+    learning_intent: >
+      IIQ vs IdP vs PAM vs ITSM — boundaries, handoffs, and why "SSO alone"
+      is not governance.
+
+  - id: E14
+    slug: from-theory-to-craft
+    title: From Theory to Craft — How Pros Think About Meridian
+    season: 4
+    themes: [mental-models, career, craft]
+    source_lessons: [03-lab-hygiene-and-naming, 50-capstone-exam-readiness, 101-ssb-ssd-promotion-discipline, first-90-days]
+    learning_intent: >
+      Naming discipline, promotion mindset, first-90-days craft, and how to
+      keep learning after the podcast.

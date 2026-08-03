@@ -43,7 +43,7 @@
     const showAll = mode === "all";
     document.body.classList.toggle("path-all", showAll);
     document.body.classList.toggle("path-core", !showAll);
-    document.querySelectorAll(".path-btn").forEach((btn) => {
+    document.querySelectorAll(".path-toggle .path-btn").forEach((btn) => {
       btn.classList.toggle("is-active", btn.getAttribute("data-path") === mode);
     });
     const hint = document.getElementById("pathHint");
@@ -52,7 +52,6 @@
         ? "Showing Core Path + specialist tracks (51–110)."
         : "Entry-level: Lessons 01–50 + mid-capstones. Specialist tracks stay hidden until you opt in.";
     }
-    // Re-apply text filter on top of path filter
     applyFilters();
   };
 
@@ -75,7 +74,6 @@
       const path = el.getAttribute("data-path") || "core";
       el.classList.toggle("is-hidden", !showAll && path === "specialist");
     });
-    // Hide specialist heading's following lede
     const specH2 = document.getElementById("specialist");
     if (specH2) {
       const lede = specH2.nextElementSibling;
@@ -85,7 +83,7 @@
     }
   };
 
-  document.querySelectorAll(".path-btn").forEach((btn) => {
+  document.querySelectorAll(".path-toggle .path-btn").forEach((btn) => {
     btn.addEventListener("click", () => setPathMode(btn.getAttribute("data-path") || "core"));
   });
 
@@ -93,7 +91,6 @@
 
   applyPathMode(getPathMode());
 
-  // Soft entrance for lesson content
   const main = document.getElementById("main");
   if (main && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     main.animate(

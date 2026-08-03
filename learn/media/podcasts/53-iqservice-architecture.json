@@ -1,0 +1,62 @@
+{
+  "stem": "53-iqservice-architecture",
+  "title": "Lesson 53 \u2014 IQService Architecture",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 514320,
+  "durationMin": 8.6,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 124,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 67872
+    },
+    {
+      "id": "why-this-matters",
+      "words": 121,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 67944
+    },
+    {
+      "id": "concepts-why-a-windows-agent-exists",
+      "words": 212,
+      "audio": "02-concepts-why-a-windows-agent-exists.mp3",
+      "durationMs": 127056
+    },
+    {
+      "id": "concepts-tls-ports-and-trust",
+      "words": 188,
+      "audio": "03-concepts-tls-ports-and-trust.mp3",
+      "durationMs": 110208
+    },
+    {
+      "id": "concepts-least-privilege-and-the-service",
+      "words": 93,
+      "audio": "04-concepts-least-privilege-and-the-service.mp3",
+      "durationMs": 49728
+    },
+    {
+      "id": "concepts-what-the-meridian-checklist-cov",
+      "words": 97,
+      "audio": "05-concepts-what-the-meridian-checklist-cov.mp3",
+      "durationMs": 69192
+    },
+    {
+      "id": "how-it-works",
+      "words": 148,
+      "audio": "06-how-it-works.mp3",
+      "durationMs": 240
+    },
+    {
+      "id": "close",
+      "words": 89,
+      "audio": "07-close.mp3",
+      "durationMs": 17904
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/53-iqservice-architecture.md",
+  "audio": "learn/media/podcasts/53-iqservice-architecture.mp3"
+}

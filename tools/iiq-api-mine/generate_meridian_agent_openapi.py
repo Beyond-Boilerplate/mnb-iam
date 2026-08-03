@@ -38,6 +38,30 @@ GAPS = [
     ("UIAPI-25", "config", "implemented", "GET|POST /mnbToolkit/agent/objects/*", "Export/import SailPointObject XML"),
     ("UIAPI-26", "plugins", "implemented", "GET /mnbToolkit/agent/study/catalog", "Study plugin catalog + installed matches"),
     ("UIAPI-27", "toolkit", "implemented", "GET /mnbToolkit/ping", "Toolkit health ping"),
+    ("UIAPI-28", "entitlements", "implemented", "GET|POST /mnbToolkit/agent/entitlements*", "Managed entitlements list/upsert/promote"),
+    ("UIAPI-29", "roles", "implemented", "GET|POST /mnbToolkit/agent/roles*", "Role list/create/profiles/delete"),
+    ("UIAPI-30", "jml", "implemented", "POST /mnbToolkit/agent/jml/{event}", "Run JML lifecycle event"),
+    ("UIAPI-31", "certifications", "implemented", "POST /mnbToolkit/agent/certifications/campaigns", "Create certification campaign"),
+    ("UIAPI-32", "sod", "implemented", "GET|POST /mnbToolkit/agent/policies/sod*", "SoD policy list/create/delete"),
+    ("UIAPI-60", "console", "implemented", "GET /mnbToolkit/agent/console/*", "Teller console desks (summary/orphans/…)"),
+    ("UIAPI-73", "applications", "implemented", "POST /mnbToolkit/agent/applications/{name}/schema/apply", "Apply discovered schema attrs"),
+    ("UIAPI-74", "applications", "implemented", "POST /mnbToolkit/agent/applications/{name}/correlationConfig", "Write correlation config"),
+    ("UIAPI-75", "provisioning", "implemented", "POST /mnbToolkit/agent/provisioning/{id}/cancel", "Cancel provisioning transaction"),
+    ("UIAPI-76", "jml", "implemented", "GET|POST /mnbToolkit/agent/lifecycleEvents", "LifecycleEvent list/upsert"),
+    ("UIAPI-77", "config", "implemented", "POST /mnbToolkit/agent/objectConfigs/{name}/attributes", "Patch ObjectConfig attribute"),
+    ("UIAPI-78", "passwords", "implemented", "POST /mnbToolkit/agent/passwordPolicies", "Upsert PasswordPolicy"),
+    ("UIAPI-79", "roles", "implemented", "POST /mnbToolkit/agent/roles/{name}/requirements", "Set required roles on Bundle"),
+    ("UIAPI-80", "sod", "implemented", "POST /mnbToolkit/agent/policies/sod/{name}/constraints", "Update SoD left/right constraints"),
+    ("UIAPI-81", "applications", "implemented", "GET|POST /mnbToolkit/agent/applications/{name}/provisioningPolicies", "Provisioning policy Forms"),
+    ("UIAPI-82", "sod", "implemented", "POST /mnbToolkit/agent/policies/sod/{name}/simulate", "Simulate SoD role conflicts"),
+    ("UIAPI-83", "groups", "implemented", "POST /mnbToolkit/agent/groupFactories*", "GroupFactory upsert/run"),
+    ("UIAPI-84", "capabilities", "implemented", "POST /mnbToolkit/agent/capabilities/{name}/rights", "Set Capability SPRights"),
+    ("UIAPI-85", "roles", "implemented", "POST /mnbToolkit/agent/roles/{name}/selector", "Set Bundle assignment selector"),
+    ("UIAPI-86", "certifications", "implemented", "POST /mnbToolkit/agent/certifications/definitions/{name}", "Patch CertificationDefinition"),
+    ("UIAPI-87", "work-items", "implemented", "POST /mnbToolkit/agent/identities/{name}/forwarding", "Identity forwarding/OOO"),
+    ("UIAPI-88", "risk", "implemented", "POST /mnbToolkit/agent/risk/scoreConfig", "Patch risk score weights"),
+    ("UIAPI-89", "tasks", "implemented", "POST /mnbToolkit/agent/taskDefinitions", "TaskDefinition upsert"),
+    ("UIAPI-90", "aggregation", "implemented", "POST /mnbToolkit/agent/connectors/aggregate/stop", "Stop running aggregation"),
 ]
 
 
@@ -168,6 +192,36 @@ def main():
     add("/mnbToolkit/agent/objects/import", "post", "UIAPI-25", "Import SailPointObject XML", "implemented", True)
     add("/mnbToolkit/agent/study/catalog", "get", "UIAPI-26", "Study plugin catalog", "implemented")
 
+    # Wave A–D parity
+    add("/mnbToolkit/agent/console/summary", "get", "UIAPI-60", "Console summary desk", "implemented")
+    add("/mnbToolkit/agent/console/orphans", "get", "UIAPI-60", "Console orphans desk", "implemented")
+    add("/mnbToolkit/agent/console/menu", "get", "UIAPI-60", "Console menu", "implemented")
+    add("/mnbToolkit/agent/policies/sod", "get", "UIAPI-32", "List SoD policies", "implemented")
+    add("/mnbToolkit/agent/policies/sod", "post", "UIAPI-32", "Create/update SoD policy", "implemented", True)
+    add("/mnbToolkit/agent/policies/sod/{name}/delete", "post", "UIAPI-32", "Delete SoD policy", "implemented")
+    add("/mnbToolkit/agent/policies/sod/{name}/constraints", "post", "UIAPI-80", "Update SoD constraints", "implemented", True)
+    add("/mnbToolkit/agent/policies/sod/{name}/simulate", "post", "UIAPI-82", "Simulate SoD conflicts", "implemented", True)
+    add("/mnbToolkit/agent/applications/{name}/schema/apply", "post", "UIAPI-73", "Apply schema attributes", "implemented", True)
+    add("/mnbToolkit/agent/applications/{name}/correlationConfig", "post", "UIAPI-74", "Update correlation config", "implemented", True)
+    add("/mnbToolkit/agent/applications/{name}/provisioningPolicies", "get", "UIAPI-81", "List provisioning policies", "implemented")
+    add("/mnbToolkit/agent/applications/{name}/provisioningPolicies", "post", "UIAPI-81", "Upsert provisioning policy Form", "implemented", True)
+    add("/mnbToolkit/agent/provisioning/{id}/cancel", "post", "UIAPI-75", "Cancel provisioning transaction", "implemented")
+    add("/mnbToolkit/agent/lifecycleEvents", "get", "UIAPI-76", "List lifecycle events", "implemented")
+    add("/mnbToolkit/agent/lifecycleEvents", "post", "UIAPI-76", "Upsert lifecycle event", "implemented", True)
+    add("/mnbToolkit/agent/objectConfigs/{name}/attributes", "post", "UIAPI-77", "Patch ObjectConfig attribute", "implemented", True)
+    add("/mnbToolkit/agent/passwordPolicies", "post", "UIAPI-78", "Upsert password policy", "implemented", True)
+    add("/mnbToolkit/agent/roles/{name}/requirements", "post", "UIAPI-79", "Set role requirements", "implemented", True)
+    add("/mnbToolkit/agent/groupFactories", "post", "UIAPI-83", "Upsert group factory", "implemented", True)
+    add("/mnbToolkit/agent/groupFactories/{name}/run", "post", "UIAPI-83", "Run group factory refresh", "implemented")
+    add("/mnbToolkit/agent/workgroups", "post", "UIAPI-10", "Create workgroup", "implemented", True)
+    add("/mnbToolkit/agent/workgroups/{name}/delete", "post", "UIAPI-10", "Delete workgroup", "implemented")
+    add("/mnbToolkit/agent/quicklinks", "post", "UIAPI-16", "Create quicklink", "implemented", True)
+    add("/mnbToolkit/agent/quicklinks/{name}/delete", "post", "UIAPI-16", "Delete quicklink", "implemented")
+    add("/mnbToolkit/agent/emailTemplates/{name}", "post", "UIAPI-17", "Update email template", "implemented", True)
+    add("/mnbToolkit/agent/capabilities/{name}/rights", "post", "UIAPI-84", "Set capability rights", "implemented", True)
+    add("/mnbToolkit/agent/roles/{name}/selector", "post", "UIAPI-85", "Set role assignment selector", "implemented", True)
+    add("/mnbToolkit/agent/certifications/definitions/{name}", "post", "UIAPI-86", "Update certification definition", "implemented", True)
+
     gap_table = [
         {
             "id": g[0],
@@ -184,10 +238,10 @@ def main():
         "openapi": "3.0.3",
         "info": {
             "title": "Meridian Custom APIs",
-            "version": "1.3.0",
+            "version": "1.3.15",
             "description": (
                 "Bank-owned IdentityIQ Custom APIs for MCP / ITSM orchestration. "
-                "Closes UI-VS-API gaps (UIAPI-01…27). "
+                "Closes UI-VS-API gaps (UIAPI-01…90). "
                 "High-risk ops require plugin settings (mutateGovernanceEnabled, passwordResetEnabled, advancedOpsEnabled). "
                 "See docs/api/UI-VS-API-GAPS.md and docs/api/MCP-TOOLS.md."
             ),

@@ -1,0 +1,11 @@
+{
+  "key": "MNB-115",
+  "id": "11501",
+  "fields": {
+    "summary": "SoD exception: Finance GL + Wire initiator for Deepa Nair delegate",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["policy-sod", "agent-ready"],
+    "description": "Simulate SoD for Finance GL + Wire initiator on the Deepa Nair delegate path. Record simulation evidence and create an approved exception if policy tooling allows; otherwise document conflict for human CAB."
+  }
+}

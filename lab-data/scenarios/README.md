@@ -1,6 +1,6 @@
 # Meridian HR scenario packs
 
-Deltas upsert into `~/iiq-lab-data/HRApplications.txt` (or `HR_FILE`) by **`userId`**.
+Deltas upsert into **`lab-data/HRApplications.txt`** by default (Docker mounts that path at `/opt/iiq-lab-data`). Override with `HR_FILE` for native Tomcat (`~/iiq-lab-data/HRApplications.txt`). Matching key: **`userId`**.
 
 ```bash
 ./tools/lab/scripts/scenarios/apply-joiner.sh
@@ -10,6 +10,9 @@ Deltas upsert into `~/iiq-lab-data/HRApplications.txt` (or `HR_FILE`) by **`user
 ./tools/lab/scripts/scenarios/apply-rehire.sh
 ./tools/lab/scripts/scenarios/apply-batch-hire.sh
 ./tools/lab/scripts/scenarios/apply-contractor-end.sh
+
+# Native Tomcat only:
+# HR_FILE=~/iiq-lab-data/HRApplications.txt ./tools/lab/scripts/scenarios/apply-leaver.sh
 
 # Diagnose-only (never upserts):
 ./tools/lab/scripts/scenarios/apply-bad-row.sh

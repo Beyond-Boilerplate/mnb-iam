@@ -1,0 +1,11 @@
+{
+  "key": "MNB-128",
+  "id": "12801",
+  "fields": {
+    "summary": "SoD policy: Finance GL vs Wire initiator — simulate + constrain",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["policy-sod", "agent-ready"],
+    "description": "Ensure an SoD policy exists covering Finance GL + Wire initiator (create_sod_policy if missing). Update constraints via update_sod_constraints if needed. Simulate with simulate_sod_policy for a named identity path. List open violations; only create a time-boxed exception with business justification if Risk pre-approved. Evidence: policy name, simulation result, violation/exception ids."
+  }
+}

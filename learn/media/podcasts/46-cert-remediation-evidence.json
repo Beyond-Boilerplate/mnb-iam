@@ -1,0 +1,62 @@
+{
+  "stem": "46-cert-remediation-evidence",
+  "title": "Lesson 46 \u2014 Certification Remediation & Evidence",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 365280,
+  "durationMin": 6.1,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 112,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 49344
+    },
+    {
+      "id": "why-this-matters",
+      "words": 86,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 51024
+    },
+    {
+      "id": "concepts-remediation-vs-certification-co",
+      "words": 49,
+      "audio": "02-concepts-remediation-vs-certification-co.mp3",
+      "durationMs": 30000
+    },
+    {
+      "id": "concepts-evidence-binder-exam-pack",
+      "words": 61,
+      "audio": "03-concepts-evidence-binder-exam-pack.mp3",
+      "durationMs": 48984
+    },
+    {
+      "id": "concepts-rubber-stamp-signals",
+      "words": 42,
+      "audio": "04-concepts-rubber-stamp-signals.mp3",
+      "durationMs": 26904
+    },
+    {
+      "id": "concepts-meridian-example-a-revoke-that-",
+      "words": 78,
+      "audio": "05-concepts-meridian-example-a-revoke-that-.mp3",
+      "durationMs": 42000
+    },
+    {
+      "id": "how-it-works",
+      "words": 103,
+      "audio": "06-how-it-works.mp3",
+      "durationMs": 73152
+    },
+    {
+      "id": "close",
+      "words": 69,
+      "audio": "07-close.mp3",
+      "durationMs": 39696
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/46-cert-remediation-evidence.md",
+  "audio": "learn/media/podcasts/46-cert-remediation-evidence.mp3"
+}

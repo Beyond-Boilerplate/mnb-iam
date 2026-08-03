@@ -90,4 +90,4 @@ See [`config/PACKS.md`](../../config/PACKS.md).
 
 `docs/lessons/NN-slug.md` — keep existing slug; only deepen content.
 
-Core Path inserts use a letter suffix (no renumber of 01–110): `08b-…`, `16b-…`, `19b-…`, `29b-…`, `36b-…`. Mid-capstones stay `mid-NN-…`. Academy build sorts `NN` → `NNb` → `mid-NN` → `NN+1`.
+Core Path inserts use a letter suffix (no renumber of 01–110): `08b-…`, `16b-…`, `19b-…`, `29b-…`, `34b-…`, `36b-…`. Mid-capstones stay `mid-NN-…`. Academy build sorts `NN` → `NNb` → `mid-NN` → `NN+1`.

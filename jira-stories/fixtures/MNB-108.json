@@ -1,0 +1,11 @@
+{
+  "key": "MNB-108",
+  "id": "10801",
+  "fields": {
+    "summary": "Disable terminated Anita Ross (MNB00010) and verify leaver accounts",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["identity-admin", "agent-ready"],
+    "description": "Anita Ross (MNB00010, anita.ross@meridiannb.com) is terminated. Disable the IIQ identity and capture linked account states for leaver verification evidence."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "stem": "52-connector-selection-for-meridian",
+  "title": "Lesson 52 \u2014 Connector Selection for Meridian",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 685056,
+  "durationMin": 11.4,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 123,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 61272
+    },
+    {
+      "id": "why-this-matters",
+      "words": 117,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 64080
+    },
+    {
+      "id": "concepts-decision-criteria-meridian-actu",
+      "words": 235,
+      "audio": "02-concepts-decision-criteria-meridian-actu.mp3",
+      "durationMs": 156840
+    },
+    {
+      "id": "concepts-authoritative-vs-target-the-cre",
+      "words": 89,
+      "audio": "03-concepts-authoritative-vs-target-the-cre.mp3",
+      "durationMs": 65063
+    },
+    {
+      "id": "concepts-preferred-vs-alternate-always-d",
+      "words": 144,
+      "audio": "04-concepts-preferred-vs-alternate-always-d.mp3",
+      "durationMs": 100752
+    },
+    {
+      "id": "concepts-meridian-portfolio-snapshot-fro",
+      "words": 141,
+      "audio": "05-concepts-meridian-portfolio-snapshot-fro.mp3",
+      "durationMs": 125304
+    },
+    {
+      "id": "how-it-works",
+      "words": 51,
+      "audio": "06-how-it-works.mp3",
+      "durationMs": 53472
+    },
+    {
+      "id": "close",
+      "words": 80,
+      "audio": "07-close.mp3",
+      "durationMs": 54096
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/52-connector-selection-for-meridian.md",
+  "audio": "learn/media/podcasts/52-connector-selection-for-meridian.mp3"
+}

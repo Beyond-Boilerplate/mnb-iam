@@ -1,0 +1,11 @@
+{
+  "key": "MNB-125",
+  "id": "12501",
+  "fields": {
+    "summary": "Schedule daily open-SoD report to Helen Ross",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["task-ops", "agent-ready"],
+    "description": "Ensure a daily schedule exists for the open-SoD report (or equivalent TaskDefinition) with Helen Ross as recipient where email config allows. Document schedule id in evidence."
+  }
+}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0c2340" />
+  <meta name="description" content="Meridian Auto-story — Jira runner trace and debug" />
+  <title>Meridian Auto-story — Teller</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c2340'/%3E%3Cpath d='M7 22 L16 8 L25 22 Z' fill='%23c4a35a'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/auto-story.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="as-shell">
+    <aside class="as-side" aria-label="Auto-story navigation">
+      <div class="as-side-brand">
+        <a class="as-back" href="/" title="Back to Teller">← Teller</a>
+        <a class="as-back" href="/console.html" title="Operator console">Console</a>
+        <div class="as-side-title">
+          <span class="mark" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">Meridian National Bank</p>
+            <h1>Auto-story</h1>
+          </div>
+        </div>
+      </div>
+      <nav class="as-tabs" role="tablist" aria-label="Views">
+        <button type="button" class="as-tab is-active" data-view="queue" role="tab" aria-selected="true">Queue</button>
+        <button type="button" class="as-tab" data-view="runs" role="tab" aria-selected="false">Runs</button>
+        <button type="button" class="as-tab" data-view="stories" role="tab" aria-selected="false">Stories</button>
+      </nav>
+      <div class="as-side-panel" id="queue-panel">
+        <div class="as-side-toolbar">
+          <button type="button" class="as-btn primary" id="poll-jira" title="Poll agent-ready Jira issues" style="flex:1">Poll Jira</button>
+          <button type="button" class="as-btn" id="refresh-queue" title="Reload queue">↻</button>
+        </div>
+        <div class="as-run-list" id="queue-list" aria-label="Ready queue"></div>
+      </div>
+      <div class="as-side-panel" id="runs-panel" hidden>
+        <div class="as-side-toolbar">
+          <input type="search" id="run-filter" placeholder="Filter issue / run…" autocomplete="off" />
+          <button type="button" class="as-btn" id="refresh-runs" title="Reload runs">↻</button>
+        </div>
+        <div class="as-run-list" id="run-list" aria-label="Run history"></div>
+      </div>
+      <div class="as-side-panel" id="stories-panel" hidden>
+        <div class="as-side-toolbar">
+          <select id="cap-filter" aria-label="Capability filter">
+            <option value="all">All capabilities</option>
+            <option value="MCP_E2E">MCP_E2E</option>
+            <option value="HYBRID">HYBRID</option>
+            <option value="BLOCKED">BLOCKED</option>
+          </select>
+        </div>
+        <div class="as-story-list" id="story-list" aria-label="Example stories"></div>
+      </div>
+      <p class="as-side-foot">poll → select → dry-run or live · never Done</p>
+    </aside>
+
+    <div class="as-content">
+      <header class="as-top">
+        <div>
+          <p class="eyebrow" id="as-crumb">Ready queue</p>
+          <h2 id="as-title">Poll Jira for agent-ready work</h2>
+        </div>
+        <div class="as-top-actions">
+          <label class="as-check" title="Use LLM implement agent (needs OPENROUTER_API_KEY)">
+            <input type="checkbox" id="use-llm" checked />
+            <span>LLM</span>
+          </label>
+          <label class="as-check" title="Follow new ledger events">
+            <input type="checkbox" id="live-tail" checked />
+            <span>Live tail</span>
+          </label>
+          <button type="button" class="as-btn" id="btn-dry" title="Dry-run selected issue (no IIQ/Jira writes)" disabled>Dry-run</button>
+          <button type="button" class="as-btn primary" id="btn-live" title="Live: mutate IIQ + move to In Review" disabled>Start live</button>
+        </div>
+      </header>
+      <div class="as-status" id="as-status">Loading…</div>
+      <div class="as-process" id="as-process" hidden role="status" aria-live="polite">
+        <div class="as-process-head">
+          <span class="as-process-pulse" aria-hidden="true"></span>
+          <strong id="as-process-title">Process</strong>
+          <span id="as-process-meta" class="as-muted"></span>
+        </div>
+        <p id="as-process-msg" class="as-process-msg">—</p>
+      </div>
+
+      <section class="as-main as-stories-view" id="view-queue">
+        <article class="as-story-card" id="queue-detail">
+          <p class="eyebrow">Jira Ready</p>
+          <h3>Poll for agent-ready issues</h3>
+          <p class="as-muted">Issues labeled <code>agent-ready</code> in status <strong>To Do</strong> appear here. Select one, then <strong>Dry-run</strong> (safe) or <strong>Start live</strong> (IIQ writes + In Review). Never auto-Done.</p>
+        </article>
+      </section>
+
+      <section class="as-main" id="view-runs" hidden>
+        <div class="as-timeline-wrap">
+          <div class="as-filters" id="type-filters" role="group" aria-label="Event types"></div>
+          <ol class="as-timeline" id="timeline"></ol>
+        </div>
+        <aside class="as-detail" id="detail" aria-label="Run artifacts">
+          <div class="as-detail-tabs" role="tablist">
+            <button type="button" class="as-dtab is-active" data-art="summary">Summary</button>
+            <button type="button" class="as-dtab" data-art="feasibility">Feasibility</button>
+            <button type="button" class="as-dtab" data-art="plan">Plan</button>
+            <button type="button" class="as-dtab" data-art="evidence">Evidence</button>
+            <button type="button" class="as-dtab" data-art="verify">Verify</button>
+            <button type="button" class="as-dtab" data-art="handoff">Handoff</button>
+            <button type="button" class="as-dtab" data-art="event">Event</button>
+          </div>
+          <pre class="as-artifact" id="artifact">Select a run to inspect artifacts.</pre>
+        </aside>
+      </section>
+
+      <section class="as-main as-stories-view" id="view-stories" hidden>
+        <article class="as-story-card" id="story-detail">
+          <p class="eyebrow">Example catalog</p>
+          <h3>Pick a story on the left</h3>
+          <p class="as-muted">Each card shows capability (MCP_E2E / HYBRID / BLOCKED), MCP tools, and a fixture path for offline dry-runs.</p>
+        </article>
+      </section>
+
+      <footer class="as-foot">
+        <span>Auto-story · ledger under <code>.ai-delivery/&lt;KEY&gt;/runs/</code></span>
+        <span id="as-meta">—</span>
+      </footer>
+    </div>
+  </div>
+  <script src="/auto-story.js"></script>
+</body>
+</html>

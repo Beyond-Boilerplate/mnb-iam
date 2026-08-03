@@ -1,0 +1,11 @@
+{
+  "key": "MNB-117",
+  "id": "11701",
+  "fields": {
+    "summary": "Launch manager certification for Retail Banking population",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["certification", "agent-ready"],
+    "description": "Launch a manager certification campaign scoped to the Retail Banking population. Capture certification id and phase in evidence. Do not auto-complete manager sign-off."
+  }
+}

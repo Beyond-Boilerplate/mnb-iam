@@ -87,7 +87,7 @@ See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and 
 - **Applications:** 09–16 → **[mid-16](mid-16-apps-capstone.md)** → **[16b Task Results](16b-reading-task-results.md)**
 - **Correlation:** 17–19 → **[19b Dirty data war room](19b-dirty-data-war-room.md)** → 20–22
 - **Roles:** 23–28
-- **Lifecycle:** 29 → **[29b LCM optional](29b-lifecycle-events-rapid-setup.md)** → 30–34 → **[mid-34](mid-34-jml-capstone.md)**
+- **Lifecycle:** 29 → **[29b LCM design](29b-lifecycle-events-rapid-setup.md)** → 30–34 → **[34b LCM in action](34b-lcm-automation-in-action.md)** → **[mid-34](mid-34-jml-capstone.md)**
 - **Requests:** 35–36 → **[36b Be the approver](36b-be-the-approver.md)** → 37–38
 - **Policies:** 39–42
 - **Certifications:** 43–46 → **[mid-46](mid-46-certs-capstone.md)**
@@ -180,6 +180,7 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 | 32 | [Contractor & Contingent Worker Lifecycle](32-contractor-lifecycle.md) | Lifecycle | Intermediate | 60–75 minutes |
 | 33 | [Leave of Absence Controls](33-leave-of-absence.md) | Lifecycle | Intermediate | 45–60 minutes |
 | 34 | [Rapid Offboarding Incident Drill](34-rapid-offboarding-drill.md) | Lifecycle | Advanced | 60–75 minutes |
+| 34b | [LCM Automation in Action](34b-lcm-automation-in-action.md) | Lifecycle | Intermediate | 75–90 minutes |
 | 35 | [Access Request Catalog](35-access-request-catalog.md) | Requests | Intermediate | 60–90 minutes |
 | 36 | [Approval Chains & Escalations](36-approval-chains.md) | Requests | Intermediate | 60–75 minutes |
 | 37 | [Emergency / Break-Glass Access](37-break-glass-access.md) | Requests | Advanced | 60–75 minutes |
@@ -264,7 +265,7 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 | Block | Lessons | Focus |
 | --- | --- | --- |
 | Weeks 1–2 | 01–08b, 09–16, mid-16, 16b | Foundations, ticket triage, file apps, Task Results |
-| Weeks 3–4 | 17–19b–22, 23–28, 29–29b–34, mid-34 | Correlation war room, roles, JML (+ optional LCM) |
+| Weeks 3–4 | 17–19b–22, 23–28, 29–29b–34–34b, mid-34 | Correlation war room, roles, JML (+ practical LCM events) |
 | Weeks 5–6 | 35–36b–38, 39–46, mid-46, 47–50 | Approver chair, SoD, certs, ops, Capstone I |
 | Weeks 7+ | Specialist opt-in | Pick Directory/JDBC or SaaS/ERP after Capstone 50 |
 

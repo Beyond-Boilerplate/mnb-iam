@@ -1,0 +1,44 @@
+{
+  "stem": "49-email-templates-notifications",
+  "title": "Lesson 49 \u2014 Email Templates & Notifications",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 333888,
+  "durationMin": 5.6,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 114,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 59304
+    },
+    {
+      "id": "why-this-matters",
+      "words": 49,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 27120
+    },
+    {
+      "id": "concepts-concepts",
+      "words": 188,
+      "audio": "02-concepts-concepts.mp3",
+      "durationMs": 139632
+    },
+    {
+      "id": "how-it-works",
+      "words": 96,
+      "audio": "03-how-it-works.mp3",
+      "durationMs": 70032
+    },
+    {
+      "id": "close",
+      "words": 64,
+      "audio": "04-close.mp3",
+      "durationMs": 35424
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/49-email-templates-notifications.md",
+  "audio": "learn/media/podcasts/49-email-templates-notifications.mp3"
+}

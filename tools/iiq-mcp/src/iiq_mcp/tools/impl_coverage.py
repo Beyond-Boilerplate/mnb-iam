@@ -111,6 +111,28 @@ def register(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
         )
 
     # —— UIAPI-32 SoD ——
+    meta_sod_list = ToolMeta(
+        name="list_sod_policies",
+        phase=1,
+        risk=Risk.READ,
+        implemented=True,
+        gap_id="UIAPI-32",
+    )
+
+    @mcp.tool(
+        name=meta_sod_list.name,
+        description=tool_description(
+            meta_sod_list,
+            "List SoD / EntitlementSOD Policy objects. Optional limit.",
+        ),
+    )
+    async def list_sod_policies(limit: int | None = None) -> dict[str, Any]:
+        async def _run() -> Any:
+            params = {"limit": limit} if limit is not None else None
+            return await agent_get(client, "/policies/sod", params=params)
+
+        return await run_tool(meta_sod_list, {"limit": limit}, _run, audit=audit)
+
     meta_sod = ToolMeta(
         name="create_sod_policy",
         phase=3,
@@ -145,6 +167,30 @@ def register(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
             _run,
             audit=audit,
         )
+
+    meta_sod_del = ToolMeta(
+        name="delete_sod_policy",
+        phase=4,
+        risk=Risk.COMPLIANCE,
+        implemented=True,
+        requires_confirmation=True,
+        gap_id="UIAPI-32",
+    )
+
+    @mcp.tool(
+        name=meta_sod_del.name,
+        description=tool_description(
+            meta_sod_del,
+            "Delete an SoD Policy by name (advancedOpsEnabled). Args: name.",
+        ),
+    )
+    async def delete_sod_policy(name: str) -> dict[str, Any]:
+        async def _run() -> Any:
+            return await agent_post(
+                client, f"/policies/sod/{encode_path_segment(name)}/delete"
+            )
+
+        return await run_tool(meta_sod_del, {"name": name}, _run, audit=audit)
 
     # —— UIAPI-33 Target password ——
     meta_tpw = ToolMeta(
@@ -282,25 +328,70 @@ def register(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
         name=meta_corr.name,
         description=tool_description(
             meta_corr,
-            "Correlate an application account (native identity) to an IIQ identity cube.",
+            "Correlate an application account (native identity) to an IIQ identity cube. "
+            "Pass break_correlation=true to uncorrelate instead.",
         ),
     )
     async def correlate_account(
-        application: str, native_identity: str, identity: str
+        application: str,
+        native_identity: str,
+        identity: str,
+        break_correlation: bool = False,
     ) -> dict[str, Any]:
         async def _run() -> Any:
-            return await agent_post(
-                client,
-                "/accounts/correlate",
-                json_body={
-                    "application": application,
-                    "nativeIdentity": native_identity,
-                    "identity": identity,
-                },
-            )
+            body: dict[str, Any] = {
+                "application": application,
+                "nativeIdentity": native_identity,
+                "identity": identity,
+            }
+            if break_correlation:
+                body["break"] = True
+            return await agent_post(client, "/accounts/correlate", json_body=body)
 
         return await run_tool(
             meta_corr,
+            {
+                "application": application,
+                "native_identity": native_identity,
+                "identity": identity,
+                "break_correlation": break_correlation,
+            },
+            _run,
+            audit=audit,
+        )
+
+    meta_uncorr = ToolMeta(
+        name="uncorrelate_account",
+        phase=3,
+        risk=Risk.LOW_WRITE,
+        implemented=True,
+        requires_confirmation=True,
+        gap_id="UIAPI-37",
+    )
+
+    @mcp.tool(
+        name=meta_uncorr.name,
+        description=tool_description(
+            meta_uncorr,
+            "Break correlation for an application account (native identity). "
+            "Args: application, native_identity; optional identity (hint).",
+        ),
+    )
+    async def uncorrelate_account(
+        application: str, native_identity: str, identity: str | None = None
+    ) -> dict[str, Any]:
+        async def _run() -> Any:
+            body: dict[str, Any] = {
+                "application": application,
+                "nativeIdentity": native_identity,
+                "break": True,
+            }
+            if identity:
+                body["identity"] = identity
+            return await agent_post(client, "/accounts/correlate", json_body=body)
+
+        return await run_tool(
+            meta_uncorr,
             {
                 "application": application,
                 "native_identity": native_identity,
@@ -488,19 +579,41 @@ def register(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
         name=meta_form.name,
         description=tool_description(
             meta_form,
-            "Submit/acknowledge an IIQ Form by name with optional field values (best-effort).",
+            "Submit an IIQ Form. Pass fields; optional workflow_name launches that workflow "
+            "with formAnswers. Optional identity, dry_run.",
         ),
     )
-    async def submit_form(form_name: str, values: dict[str, Any] | None = None) -> dict[str, Any]:
+    async def submit_form(
+        form_name: str,
+        fields: dict[str, Any] | None = None,
+        values: dict[str, Any] | None = None,
+        workflow_name: str | None = None,
+        identity: str | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
         async def _run() -> Any:
+            body: dict[str, Any] = {"fields": fields or values or {}, "dryRun": dry_run}
+            if workflow_name:
+                body["workflowName"] = workflow_name
+            if identity:
+                body["identity"] = identity
             return await agent_post(
                 client,
                 f"/forms/{encode_path_segment(form_name)}/submit",
-                json_body={"values": values or {}},
+                json_body=body,
             )
 
         return await run_tool(
-            meta_form, {"form_name": form_name, "values": values}, _run, audit=audit
+            meta_form,
+            {
+                "form_name": form_name,
+                "fields": fields or values,
+                "workflow_name": workflow_name,
+                "identity": identity,
+                "dry_run": dry_run,
+            },
+            _run,
+            audit=audit,
         )
 
     # —— UIAPI-44 Email ——

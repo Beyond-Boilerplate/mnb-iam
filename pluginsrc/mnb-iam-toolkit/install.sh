@@ -2,7 +2,7 @@
 # Install mnb-iam-toolkit into a running IIQ via POST /rest/plugins
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-ZIP="${1:-$ROOT/pluginsrc/mnb-iam-toolkit/dist/mnb_iam_toolkit-1.3.10.zip}"
+ZIP="${1:-$ROOT/pluginsrc/mnb-iam-toolkit/dist/mnb_iam_toolkit-1.3.15.zip}"
 BASE="${IIQ_BASE_URL:-http://localhost:8080/identityiq}"
 USER="${IIQ_USER:-spadmin}"
 PASS="${IIQ_PASSWORD:-admin}"
@@ -10,7 +10,7 @@ PASS="${IIQ_PASSWORD:-admin}"
 if [[ ! -f "$ZIP" ]]; then
   echo "Building ZIP first…"
   "$ROOT/pluginsrc/mnb-iam-toolkit/package.sh"
-  ZIP="$ROOT/pluginsrc/mnb-iam-toolkit/dist/mnb_iam_toolkit-1.3.10.zip"
+  ZIP="$ROOT/pluginsrc/mnb-iam-toolkit/dist/mnb_iam_toolkit-1.3.15.zip"
 fi
 
 echo "Installing $ZIP → $BASE/rest/plugins as $USER"

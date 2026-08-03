@@ -251,7 +251,8 @@ body {
   text-decoration: underline;
 }
 
-.lab-link {
+.lab-link,
+.audio-link {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink);
@@ -261,8 +262,72 @@ body {
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
 }
-.lab-link:hover {
+.lab-link:hover,
+.audio-link:hover {
   border-color: var(--brass);
+}
+.audio-link {
+  color: var(--signal);
+  border-color: rgba(15, 92, 90, 0.35);
+  background: rgba(15, 92, 90, 0.06);
+}
+
+.audio-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 2.5rem;
+}
+.audio-card {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--signal);
+  background: var(--panel);
+  border-radius: 2px 12px 12px 2px;
+  padding: 1rem 1.15rem 1.1rem;
+}
+.audio-card[data-ready="0"] {
+  opacity: 0.78;
+  border-left-color: var(--line);
+}
+.audio-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+.audio-ep {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--signal);
+}
+.audio-status {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.audio-card h3 {
+  margin: 0.15rem 0 0.45rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+.audio-blurb {
+  margin: 0 0 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.audio-themes {
+  margin: 0 0 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--brass-deep);
+  letter-spacing: 0.02em;
+}
+.audio-soon {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--rail-muted);
+  font-style: italic;
 }
 
 .lesson {
@@ -539,6 +604,71 @@ hr {
 .card-why {
   font-size: 0.86rem;
   color: var(--ink-soft);
+}
+
+.podcast-card {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.1rem 0.95rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--signal);
+  background:
+    linear-gradient(135deg, rgba(15, 92, 90, 0.06), transparent 55%),
+    var(--panel);
+  border-radius: 2px 10px 10px 2px;
+}
+.podcast-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.7rem;
+}
+.podcast-kicker {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+.podcast-title {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.podcast-meta {
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+}
+.podcast-audio {
+  width: 100%;
+  height: 2.4rem;
+  accent-color: var(--signal);
+}
+
+.toc-badge-listen {
+  margin-left: 0.35rem;
+  background: rgba(15, 92, 90, 0.2);
+  color: #9fd8d5;
+  border: 1px solid rgba(159, 216, 213, 0.35);
+}
+.card-listen {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--signal);
+  background: rgba(15, 92, 90, 0.1);
+  border: 1px solid rgba(15, 92, 90, 0.22);
+  vertical-align: middle;
+}
+.listen-toggle {
+  margin-top: 0.45rem;
 }
 
 .pager {

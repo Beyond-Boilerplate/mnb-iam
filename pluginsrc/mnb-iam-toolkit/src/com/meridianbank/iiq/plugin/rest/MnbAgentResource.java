@@ -31,6 +31,7 @@ import sailpoint.connector.ConnectorFactory;
 import sailpoint.connector.DefaultApplicationFactory;
 import sailpoint.connector.DefaultConnectorServices;
 import sailpoint.object.Application;
+import sailpoint.object.Attributes;
 import sailpoint.object.AuditEvent;
 import sailpoint.object.BatchRequest;
 import sailpoint.object.Bundle;
@@ -105,14 +106,14 @@ public class MnbAgentResource extends BasePluginResource {
     rows.add(gap("UIAPI-07", "implemented", "applications/wizard"));
     rows.add(gap("UIAPI-08", "implemented", "applications/*/config"));
     rows.add(gap("UIAPI-09", "implemented", "populations"));
-    rows.add(gap("UIAPI-10", "implemented", "workgroups/*/members"));
+    rows.add(gap("UIAPI-10", "implemented", "workgroups|workgroups/*/members|workgroups/*/delete"));
     rows.add(gap("UIAPI-11", "implemented", "identities/*/capabilities"));
     rows.add(gap("UIAPI-12", "implemented", "identities/*/password"));
     rows.add(gap("UIAPI-13", "implemented", "schedules"));
     rows.add(gap("UIAPI-14", "implemented", "reports/run"));
     rows.add(gap("UIAPI-15", "implemented", "forms"));
-    rows.add(gap("UIAPI-16", "implemented", "quicklinks"));
-    rows.add(gap("UIAPI-17", "implemented", "emailTemplates"));
+    rows.add(gap("UIAPI-16", "implemented", "quicklinks|quicklinks/*/delete"));
+    rows.add(gap("UIAPI-17", "implemented", "emailTemplates|emailTemplates/*"));
     rows.add(gap("UIAPI-18", "implemented", "audit/events"));
     rows.add(gap("UIAPI-19", "implemented", "batchRequests"));
     rows.add(gap("UIAPI-20", "implemented", "accessHistory/status"));
@@ -127,7 +128,7 @@ public class MnbAgentResource extends BasePluginResource {
     rows.add(gap("UIAPI-29", "implemented", "roles|roles/*/profiles"));
     rows.add(gap("UIAPI-30", "implemented", "jml/*", "run_jml_event"));
     rows.add(gap("UIAPI-31", "implemented", "certifications/campaigns", "create_certification_campaign"));
-    rows.add(gap("UIAPI-32", "implemented", "policies/sod", "create_sod_policy"));
+    rows.add(gap("UIAPI-32", "implemented", "policies/sod", "list_sod_policies"));
     rows.add(gap("UIAPI-33", "implemented", "applications/*/accounts/*/password", "reset_target_password"));
     rows.add(gap("UIAPI-34", "implemented", "reports/*/download", "download_report_result"));
     rows.add(gap("UIAPI-35", "implemented", "executive/digest", "get_executive_digest"));
@@ -155,6 +156,37 @@ public class MnbAgentResource extends BasePluginResource {
     rows.add(gap("UIAPI-57", "implemented", "scopes/assign", "assign_identity_scope"));
     rows.add(gap("UIAPI-58", "implemented", "identities/managers/rebuild", "rebuild_manager_hierarchy"));
     rows.add(gap("UIAPI-59", "implemented", "orgchart", "get_orgchart"));
+    rows.add(gap("UIAPI-60", "implemented", "console/{orphans,summary,menu}", "console_orphans"));
+    rows.add(gap("UIAPI-61", "implemented", "console/pipeline", "console_pipeline"));
+    rows.add(gap("UIAPI-62", "implemented", "console/inbox", "console_inbox"));
+    rows.add(gap("UIAPI-63", "implemented", "console/catalog", "console_catalog"));
+    rows.add(gap("UIAPI-64", "implemented", "console/certs", "console_certs"));
+    rows.add(gap("UIAPI-65", "implemented", "console/sod", "console_sod"));
+    rows.add(gap("UIAPI-66", "implemented", "console/identity360", "console_identity360"));
+    rows.add(gap("UIAPI-67", "implemented", "console/jml", "console_jml"));
+    rows.add(gap("UIAPI-68", "implemented", "console/evidence", "console_evidence"));
+    rows.add(gap("UIAPI-69", "implemented", "console/provisioning", "console_provisioning"));
+    rows.add(gap("UIAPI-70", "implemented", "console/workgroups", "console_workgroups"));
+    rows.add(gap("UIAPI-71", "implemented", "console/heatmap", "console_heatmap"));
+    rows.add(gap("UIAPI-72", "implemented", "console/audit", "console_audit"));
+    rows.add(gap("UIAPI-73", "implemented", "applications/*/schema/apply", "apply_application_schema"));
+    rows.add(gap("UIAPI-74", "implemented", "applications/*/correlationConfig", "update_correlation_config"));
+    rows.add(gap("UIAPI-75", "implemented", "provisioning/*/cancel", "cancel_provisioning_transaction"));
+    rows.add(gap("UIAPI-76", "implemented", "lifecycleEvents", "list_lifecycle_events"));
+    rows.add(gap("UIAPI-77", "implemented", "objectConfigs/*/attributes", "patch_object_config_attribute"));
+    rows.add(gap("UIAPI-78", "implemented", "passwordPolicies", "upsert_password_policy"));
+    rows.add(gap("UIAPI-79", "implemented", "roles/*/requirements", "set_role_requirements"));
+    rows.add(gap("UIAPI-80", "implemented", "policies/sod/*/constraints", "update_sod_constraints"));
+    rows.add(gap("UIAPI-81", "implemented", "applications/*/provisioningPolicies", "list_provisioning_policies"));
+    rows.add(gap("UIAPI-82", "implemented", "policies/sod/*/simulate", "simulate_sod_policy"));
+    rows.add(gap("UIAPI-83", "implemented", "groupFactories*", "upsert_group_factory"));
+    rows.add(gap("UIAPI-84", "implemented", "capabilities/*/rights", "set_capability_rights"));
+    rows.add(gap("UIAPI-85", "implemented", "roles/*/selector", "set_role_selector"));
+    rows.add(gap("UIAPI-86", "implemented", "certifications/definitions/*", "update_certification_definition"));
+    rows.add(gap("UIAPI-87", "implemented", "identities/*/forwarding", "set_identity_forwarding"));
+    rows.add(gap("UIAPI-88", "implemented", "risk/scoreConfig", "update_risk_score_config"));
+    rows.add(gap("UIAPI-89", "implemented", "taskDefinitions", "upsert_task_definition"));
+    rows.add(gap("UIAPI-90", "implemented", "connectors/aggregate/stop", "stop_aggregation"));
     Map<String, Object> flags = new LinkedHashMap<>();
     flags.put("agentApiEnabled", MnbAgentSupport.flag(this, "agentApiEnabled"));
     flags.put("mutateGovernanceEnabled", MnbAgentSupport.flag(this, "mutateGovernanceEnabled"));
@@ -315,6 +347,46 @@ public class MnbAgentResource extends BasePluginResource {
     vars.putIfAbsent("identityName", identityName);
     vars.putIfAbsent("launcher", ctx.getUserName());
     vars.putIfAbsent("flow", "AccessRequest");
+    // G-27 / UIAPI-03 extensions: form answers + sunset date into LCM vars / plan
+    Object formAnswers = body.get("formAnswers");
+    if (formAnswers == null) {
+      formAnswers = body.get("form_answers");
+    }
+    if (formAnswers instanceof Map) {
+      vars.put("formAnswers", formAnswers);
+    }
+    String sunsetRaw =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("sunsetDate")),
+            MnbAgentSupport.str(body.get("sunset")),
+            MnbAgentSupport.str(vars.get("sunsetDate")),
+            MnbAgentSupport.str(vars.get("sunset")));
+    if (!Util.isNullOrEmpty(sunsetRaw)) {
+      vars.put("sunsetDate", sunsetRaw);
+      Object planObj = vars.get("plan");
+      if (planObj instanceof ProvisioningPlan) {
+        applySunsetToPlan((ProvisioningPlan) planObj, sunsetRaw);
+      }
+    }
+    String sunriseRaw =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("sunriseDate")),
+            MnbAgentSupport.str(body.get("sunrise")),
+            MnbAgentSupport.str(vars.get("sunriseDate")));
+    if (!Util.isNullOrEmpty(sunriseRaw)) {
+      vars.put("sunriseDate", sunriseRaw);
+      Object planObj = vars.get("plan");
+      if (planObj instanceof ProvisioningPlan) {
+        applySunriseToPlan((ProvisioningPlan) planObj, sunriseRaw);
+      }
+    }
+    Object sodOverride = body.get("sodOverride");
+    if (sodOverride == null) {
+      sodOverride = body.get("policyScheme");
+    }
+    if (sodOverride != null) {
+      vars.put("policyScheme", String.valueOf(sodOverride));
+    }
     Workflower workflower = new Workflower(ctx);
     WorkflowLaunch launch = workflower.launch(wfObj, "mnb-agent-" + System.currentTimeMillis(), vars);
     ctx.commitTransaction();
@@ -829,6 +901,52 @@ public class MnbAgentResource extends BasePluginResource {
   }
 
   @POST
+  @Path("workgroups")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  @RequiredRight("MNBToolkitAgent")
+  public Map<String, Object> createWorkgroup(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-10");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String name = MnbAgentSupport.str(body.get("name"));
+    if (Util.isNullOrEmpty(name)) {
+      throw MnbAgentSupport.error(400, "invalid_request", "name required", "UIAPI-10", null);
+    }
+    SailPointContext ctx = getContext();
+    Identity existing = ctx.getObjectByName(Identity.class, name);
+    boolean created = false;
+    Identity wg;
+    if (existing != null) {
+      if (!existing.isWorkgroup()) {
+        throw MnbAgentSupport.error(
+            409, "conflict", "Identity exists and is not a workgroup: " + name, "UIAPI-10", null);
+      }
+      wg = existing;
+    } else {
+      wg = new Identity();
+      wg.setName(name);
+      wg.setWorkgroup(true);
+      created = true;
+    }
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      wg.setDescription(description);
+    }
+    String displayName = MnbAgentSupport.str(body.get("displayName"));
+    if (!Util.isNullOrEmpty(displayName)) {
+      wg.setDisplayName(displayName);
+    }
+    ctx.saveObject(wg);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", wg.getName());
+    data.put("id", wg.getId());
+    data.put("created", created);
+    data.put("workgroup", true);
+    return MnbAgentSupport.ok("UIAPI-10", data);
+  }
+
+  @POST
   @Path("workgroups/{name}/members")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
@@ -864,6 +982,27 @@ public class MnbAgentResource extends BasePluginResource {
     data.put("workgroup", name);
     data.put("member", member);
     data.put("op", op.toLowerCase());
+    return MnbAgentSupport.ok("UIAPI-10", data);
+  }
+
+  @POST
+  @Path("workgroups/{name}/delete")
+  @Produces(MediaType.APPLICATION_JSON)
+  @RequiredRight("MNBToolkitAgent")
+  public Map<String, Object> deleteWorkgroup(@PathParam("name") String name) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-10");
+    SailPointContext ctx = getContext();
+    Identity wg = ctx.getObjectByName(Identity.class, name);
+    if (wg == null || !wg.isWorkgroup()) {
+      throw MnbAgentSupport.error(404, "not_found", "Workgroup not found: " + name, "UIAPI-10", null);
+    }
+    String id = wg.getId();
+    ctx.removeObject(wg);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("deleted", true);
+    data.put("name", name);
+    data.put("id", id);
     return MnbAgentSupport.ok("UIAPI-10", data);
   }
 
@@ -1056,6 +1195,99 @@ public class MnbAgentResource extends BasePluginResource {
         "UIAPI-16", MnbAgentSupport.listSummaries(getContext(), QuickLink.class, limit == null ? 50 : limit));
   }
 
+  @POST
+  @Path("quicklinks")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  @RequiredRight("MNBToolkitAgent")
+  public Map<String, Object> upsertQuicklink(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-16");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String name = MnbAgentSupport.str(body.get("name"));
+    if (Util.isNullOrEmpty(name)) {
+      throw MnbAgentSupport.error(400, "invalid_request", "name required", "UIAPI-16", null);
+    }
+    SailPointContext ctx = getContext();
+    QuickLink ql = ctx.getObjectByName(QuickLink.class, name);
+    boolean created = false;
+    if (ql == null) {
+      ql = new QuickLink();
+      ql.setName(name);
+      created = true;
+    }
+    String messageKey =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("messageKey")),
+            MnbAgentSupport.str(body.get("label")),
+            name);
+    ql.setMessageKey(messageKey);
+    String action =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("action")), "externalURL");
+    ql.setAction(action);
+    String category =
+        MnbAgentSupport.firstNonEmpty(MnbAgentSupport.str(body.get("category")), "Access");
+    ql.setCategory(category);
+    String url =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("url")), MnbAgentSupport.str(body.get("externalUrl")));
+    if (!Util.isNullOrEmpty(url)) {
+      Attributes<String, Object> args = ql.getArguments();
+      if (args == null) {
+        args = new Attributes<>();
+        ql.setArguments(args);
+      }
+      args.put(QuickLink.ARG_URL, url);
+    }
+    String workflowName = MnbAgentSupport.str(body.get("workflowName"));
+    if (!Util.isNullOrEmpty(workflowName)) {
+      Attributes<String, Object> args = ql.getArguments();
+      if (args == null) {
+        args = new Attributes<>();
+        ql.setArguments(args);
+      }
+      args.put(QuickLink.ARG_WORKFLOW_NAME, workflowName);
+      if (Util.isNullOrEmpty(MnbAgentSupport.str(body.get("action")))) {
+        ql.setAction(QuickLink.ACTION_WORKFLOW);
+      }
+    }
+    if (body.containsKey("hidden")) {
+      ql.setHidden(Boolean.TRUE.equals(body.get("hidden")));
+    }
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      ql.setDescription(description);
+    }
+    ctx.saveObject(ql);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", ql.getName());
+    data.put("id", ql.getId());
+    data.put("created", created);
+    data.put("action", ql.getAction());
+    data.put("category", ql.getCategory());
+    return MnbAgentSupport.ok("UIAPI-16", data);
+  }
+
+  @POST
+  @Path("quicklinks/{name}/delete")
+  @Produces(MediaType.APPLICATION_JSON)
+  @RequiredRight("MNBToolkitAgent")
+  public Map<String, Object> deleteQuicklink(@PathParam("name") String name) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-16");
+    SailPointContext ctx = getContext();
+    QuickLink ql = MnbAgentSupport.requireByIdOrName(ctx, QuickLink.class, name, "UIAPI-16");
+    String id = ql.getId();
+    String n = ql.getName();
+    ctx.removeObject(ql);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("deleted", true);
+    data.put("name", n);
+    data.put("id", id);
+    return MnbAgentSupport.ok("UIAPI-16", data);
+  }
+
   @GET
   @Path("emailTemplates")
   @Produces(MediaType.APPLICATION_JSON)
@@ -1078,6 +1310,56 @@ public class MnbAgentResource extends BasePluginResource {
     data.put("id", t.getId());
     data.put("name", t.getName());
     data.put("description", t.getDescription());
+    data.put("subject", t.getSubject());
+    data.put("body", t.getBody());
+    data.put("from", t.getFrom());
+    data.put("to", t.getTo());
+    data.put("cc", t.getCc());
+    return MnbAgentSupport.ok("UIAPI-17", data);
+  }
+
+  @POST
+  @Path("emailTemplates/{name}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  @RequiredRight("MNBToolkitAgent")
+  public Map<String, Object> updateEmailTemplate(@PathParam("name") String name, Map<String, Object> body)
+      throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-17");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    EmailTemplate t = ctx.getObjectByName(EmailTemplate.class, name);
+    boolean created = false;
+    if (t == null) {
+      t = new EmailTemplate();
+      t.setName(name);
+      created = true;
+    }
+    if (body.containsKey("description")) {
+      t.setDescription(MnbAgentSupport.str(body.get("description")));
+    }
+    if (body.containsKey("subject")) {
+      t.setSubject(MnbAgentSupport.str(body.get("subject")));
+    }
+    if (body.containsKey("body")) {
+      t.setBody(MnbAgentSupport.str(body.get("body")));
+    }
+    if (body.containsKey("from")) {
+      t.setFrom(MnbAgentSupport.str(body.get("from")));
+    }
+    if (body.containsKey("to")) {
+      t.setTo(MnbAgentSupport.str(body.get("to")));
+    }
+    if (body.containsKey("cc")) {
+      t.setCc(MnbAgentSupport.str(body.get("cc")));
+    }
+    ctx.saveObject(t);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", t.getName());
+    data.put("id", t.getId());
+    data.put("created", created);
+    data.put("subject", t.getSubject());
     return MnbAgentSupport.ok("UIAPI-17", data);
   }
 
@@ -2668,7 +2950,78 @@ public class MnbAgentResource extends BasePluginResource {
       throw MnbAgentSupport.error(
           400, "invalid_request", "Could not build provisioning plan from requestedItems", "UIAPI-03", null);
     }
+    String sunsetRaw =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(vars.get("sunsetDate")), MnbAgentSupport.str(vars.get("sunset")));
+    if (!Util.isNullOrEmpty(sunsetRaw)) {
+      applySunsetToPlan(plan, sunsetRaw);
+    }
+    String sunriseRaw =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(vars.get("sunriseDate")), MnbAgentSupport.str(vars.get("sunrise")));
+    if (!Util.isNullOrEmpty(sunriseRaw)) {
+      applySunriseToPlan(plan, sunriseRaw);
+    }
     return plan;
+  }
+
+  private static void applySunsetToPlan(ProvisioningPlan plan, String raw) {
+    Date d = parseFlexibleDate(raw);
+    if (d == null || plan.getAccountRequests() == null) {
+      return;
+    }
+    for (AccountRequest ar : plan.getAccountRequests()) {
+      if (ar == null || ar.getAttributeRequests() == null) {
+        continue;
+      }
+      for (AttributeRequest atr : ar.getAttributeRequests()) {
+        if (atr != null) {
+          atr.setRemoveDate(d);
+        }
+      }
+    }
+  }
+
+  private static void applySunriseToPlan(ProvisioningPlan plan, String raw) {
+    Date d = parseFlexibleDate(raw);
+    if (d == null || plan.getAccountRequests() == null) {
+      return;
+    }
+    for (AccountRequest ar : plan.getAccountRequests()) {
+      if (ar == null || ar.getAttributeRequests() == null) {
+        continue;
+      }
+      for (AttributeRequest atr : ar.getAttributeRequests()) {
+        if (atr != null) {
+          atr.setAddDate(d);
+        }
+      }
+    }
+  }
+
+  private static Date parseFlexibleDate(String raw) {
+    if (Util.isNullOrEmpty(raw)) {
+      return null;
+    }
+    try {
+      long epoch = Long.parseLong(raw.trim());
+      if (raw.trim().length() <= 10) {
+        epoch = epoch * 1000L;
+      }
+      return new Date(epoch);
+    } catch (NumberFormatException ignored) {
+      // fall through
+    }
+    String[] patterns =
+        new String[] {"yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"};
+    for (String p : patterns) {
+      try {
+        return new java.text.SimpleDateFormat(p).parse(raw.trim());
+      } catch (Exception ignored) {
+        // try next
+      }
+    }
+    return null;
   }
 
   private static String firstNonEmpty(String... vals) {

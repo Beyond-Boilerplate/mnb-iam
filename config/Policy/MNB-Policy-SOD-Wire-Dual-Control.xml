@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Policy PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Meridian Role SOD: wire initiate vs approve dual control. type/configPage required for IIQ sodpolicy.xhtml UI. -->
+<Policy certificationActions="Remediated,Mitigated,Delegated"
+        configPage="sodpolicy.xhtml"
+        executor="sailpoint.policy.SODPolicyExecutor"
+        name="MNB-SOD-Wire-DualControl"
+        state="Active"
+        type="SOD"
+        typeKey="policy_type_sod"
+        violationOwnerType="Identity">
+  <Description>Payment dual control: no identity may both initiate and approve wires (WireInitiator/IT-WireInit vs WireApprover/IT-WireAppr).</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <SODConstraints>
+    <SODConstraint name="WireInit-vs-WireAppr" violationOwnerType="None">
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle" name="MNB-Role-WireInitiator"/>
+        <Reference class="sailpoint.object.Bundle" name="MNB-IT-WireInit"/>
+      </LeftBundles>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle" name="MNB-Role-WireApprover"/>
+        <Reference class="sailpoint.object.Bundle" name="MNB-IT-WireAppr"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>

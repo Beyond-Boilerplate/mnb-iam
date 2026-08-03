@@ -13,7 +13,14 @@ ROOT = Path(__file__).resolve().parents[1]
 LESSONS = ROOT / "docs" / "lessons"
 OUT = ROOT / "learn" / "dist"
 ASSETS_SRC = ROOT / "learn" / "assets"
+MEDIA_SRC = ROOT / "learn" / "media"
 SPECS = ROOT / "tools" / "iiq-verify" / "lesson-specs"
+# Prefer learn/ copy (present in academy Docker build); fall back to studio catalog.
+AUDIO_HUB_CANDIDATES = (
+    ROOT / "learn" / "audio-hub.json",
+    ROOT / "tools" / "podcast-studio" / "catalog" / "hub.json",
+)
+AUDIO_MEDIA = MEDIA_SRC / "audio"
 
 
 def md_to_html(md: str) -> str:
@@ -222,6 +229,7 @@ SHELL = """<!DOCTYPE html>
       <header class="topbar">
         <button type="button" class="menu-btn" id="menuBtn" aria-label="Open lessons">☰</button>
         <div class="crumb">{crumb}</div>
+        <a class="audio-link" href="{root}audio.html">Audio</a>
         <a class="lab-link" href="https://sailpoint.lmsapp.us/identityiq/login.jsf" target="_blank" rel="noopener">Open IIQ lab ↗</a>
       </header>
       <main id="main" class="lesson" data-stem="{stem}" data-verify-mode="{verify_mode}" data-paperwork-note="{paperwork_note}">
@@ -325,6 +333,115 @@ def load_verify_meta(stem: str) -> dict:
     return {"verifyMode": mode, "paperworkNote": note}
 
 
+def load_audio_hub() -> dict:
+    for path in AUDIO_HUB_CANDIDATES:
+        if path.is_file():
+            return json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "title": "Meridian IAM Audio",
+        "tagline": "Conversational IAM podcasts — concepts without the lab click-paths.",
+        "hosts": {"interviewer": "Alex", "expert": "Jordan"},
+        "episodes": [],
+    }
+
+
+def audio_episode_ready(slug: str) -> dict | None:
+    mp3 = AUDIO_MEDIA / f"{slug}.mp3"
+    if not mp3.is_file():
+        return None
+    meta: dict = {"src": f"media/audio/{slug}.mp3", "durationMin": None}
+    man = AUDIO_MEDIA / f"{slug}.json"
+    if man.is_file():
+        try:
+            data = json.loads(man.read_text(encoding="utf-8"))
+            meta["durationMin"] = data.get("durationMin")
+            meta["turns"] = data.get("turns")
+        except (OSError, json.JSONDecodeError):
+            pass
+    return meta
+
+
+def build_audio_page(toc: str) -> str:
+    hub = load_audio_hub()
+    seasons: dict[int, list[dict]] = {}
+    ready_count = 0
+    for ep in hub.get("episodes") or []:
+        seasons.setdefault(int(ep.get("season") or 1), []).append(ep)
+        if audio_episode_ready(ep["slug"]):
+            ready_count += 1
+
+    season_titles = {
+        1: "Foundations — IAM & SailPoint essentials",
+        2: "Lifecycle & access craft",
+        3: "Security, SoD, reviews & standards",
+        4: "Connectors, tooling & professional craft",
+    }
+
+    blocks: list[str] = []
+    for season in sorted(seasons):
+        blocks.append(f'<h2 id="season-{season}">Season {season} — {html.escape(season_titles.get(season, ""))}</h2>')
+        blocks.append('<div class="audio-grid">')
+        for ep in seasons[season]:
+            ready = audio_episode_ready(ep["slug"])
+            themes = " · ".join(ep.get("themes") or [])
+            status = (
+                f'~{ready["durationMin"]} min · ready'
+                if ready and ready.get("durationMin")
+                else ("Ready" if ready else "Coming soon")
+            )
+            player = ""
+            if ready:
+                player = (
+                    f'<audio class="podcast-audio" controls preload="metadata" '
+                    f'src="{html.escape(ready["src"], quote=True)}"></audio>'
+                )
+            else:
+                player = '<p class="audio-soon">Script pipeline pending — check back after studio run.</p>'
+            blocks.append(
+                f'<article class="audio-card" id="{html.escape(ep["id"])}" data-ready="{"1" if ready else "0"}">'
+                f'<div class="audio-card-top">'
+                f'<span class="audio-ep">{html.escape(ep["id"])}</span>'
+                f'<span class="audio-status">{html.escape(status)}</span>'
+                f"</div>"
+                f'<h3>{html.escape(ep["title"])}</h3>'
+                f'<p class="audio-blurb">{html.escape(ep.get("blurb") or "")}</p>'
+                f'<p class="audio-themes">{html.escape(themes)}</p>'
+                f"{player}"
+                f"</article>"
+            )
+        blocks.append("</div>")
+
+    hosts = hub.get("hosts") or {}
+    body = f"""
+    <p class="eyebrow">Podcast · Alex &amp; Jordan</p>
+    <h1 class="display">{html.escape(hub.get("title") or "Meridian IAM Audio")}</h1>
+    <p class="lede">{html.escape(hub.get("tagline") or "")}
+    Two-host conversations — interviewer <strong>{html.escape(hosts.get("interviewer", "Alex"))}</strong> and
+    practitioner <strong>{html.escape(hosts.get("expert", "Jordan"))}</strong> — covering SailPoint essentials,
+    IAM constructs, security posture, industry standards, and tooling options.
+    Lab click-paths stay in the written lessons; this hub is for digesting the ideas.</p>
+    <section class="stats" aria-label="Show snapshot">
+      <div><span>{len(hub.get("episodes") or [])}</span> planned episodes</div>
+      <div><span>{ready_count}</span> ready to play</div>
+      <div><span>2</span> hosts</div>
+      <div><span>4</span> seasons</div>
+    </section>
+    {"".join(blocks)}
+    """
+    return SHELL.format(
+        title=hub.get("title") or "Audio",
+        description=hub.get("tagline") or "Meridian IAM Audio",
+        root="",
+        toc=toc,
+        crumb='<a href="index.html">Curriculum</a><span>/</span><span>Audio</span>',
+        body=body,
+        pager='<a class="btn primary" href="index.html">← Back to curriculum</a>',
+        stem="audio",
+        verify_mode="paperwork",
+        paperwork_note="",
+    )
+
+
 def build() -> None:
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -332,6 +449,18 @@ def build() -> None:
     assets_out = OUT / "assets"
     assets_out.mkdir()
     shutil.copytree(ASSETS_SRC, assets_out, dirs_exist_ok=True)
+    # Podcast / screencast media (gitignored binaries; present when generated locally)
+    if MEDIA_SRC.is_dir():
+        media_out = OUT / "media"
+        for src in MEDIA_SRC.rglob("*"):
+            if not src.is_file() or src.name.startswith("."):
+                continue
+            if src.suffix.lower() not in {".mp3", ".mp4", ".webm", ".wav", ".json"}:
+                continue
+            rel = src.relative_to(MEDIA_SRC)
+            dest = media_out / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dest)
 
     numbered = [p for p in LESSONS.glob("*.md") if re.match(r"^\d{2,3}[a-z]?-", p.name)]
     extras = [
@@ -365,10 +494,12 @@ def build() -> None:
         num = lesson_num(meta["stem"])
         badge = toc_badge(meta["stem"])
         toc_parts.append(
-            f'<a class="toc-item" data-path="{meta["path"]}" data-title="{html.escape(meta["title"].lower())}" '
+            f'<a class="toc-item" data-path="{meta["path"]}" '
+            f'data-title="{html.escape(meta["title"].lower())}" '
             f'href="{html.escape(meta["stem"])}.html">'
             f'<span class="toc-num">{num}</span>'
-            f'<span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}{badge}</span></a>'
+            f'<span class="toc-label">{html.escape(meta["title"].split("—",1)[-1].strip())}'
+            f"{badge}</span></a>"
         )
     toc = "\n".join(toc_parts)
 
@@ -376,7 +507,8 @@ def build() -> None:
     def card_html(meta: dict) -> str:
         num = lesson_num(meta["stem"])
         return (
-            f'<a class="card" data-path="{meta["path"]}" href="{html.escape(meta["stem"])}.html">'
+            f'<a class="card" data-path="{meta["path"]}" '
+            f'href="{html.escape(meta["stem"])}.html">'
             f'<span class="card-num">{num}</span>'
             f'<span class="card-body"><strong>{html.escape(meta["title"].split("—",1)[-1].strip())}</strong>'
             f'<span class="card-meta">{html.escape(meta["track"])} · {html.escape(meta["level"])}</span>'
@@ -386,20 +518,23 @@ def build() -> None:
     core_cards = "".join(card_html(m) for m in metas if m["path"] == "core")
     specialist_cards = "".join(card_html(m) for m in metas if m["path"] == "specialist")
     start = next(m for m in metas if m["stem"].startswith("01-"))
+    hub = load_audio_hub()
+    audio_ready = sum(1 for ep in hub.get("episodes") or [] if audio_episode_ready(ep["slug"]))
+    audio_planned = len(hub.get("episodes") or [])
 
     index_body = f"""
     <p class="eyebrow">SailPoint IdentityIQ 8.5 · Core Path for new IIQ engineers</p>
     <h1 class="display">Govern access like a bank that expects an exam.</h1>
-    <p class="lede">Interactive tutorials for <strong>Meridian National Bank</strong>. Start with the <strong>Core Path</strong> (Lessons 01–50 + mid-capstones)—HR through JML, SoD, and certifications. Specialist connector and hardening tracks stay optional until Capstone 50.</p>
+    <p class="lede">Interactive tutorials for <strong>Meridian National Bank</strong>. Start with the <strong>Core Path</strong> (Lessons 01–50 + mid-capstones)—HR through JML, SoD, and certifications. Specialist connector and hardening tracks stay optional until Capstone 50. Prefer listening first? Open <a href="audio.html"><strong>Meridian IAM Audio</strong></a> — conversational episodes on essentials, security posture, and standards.</p>
     <div class="hero-actions">
       <a class="btn primary" href="{start['stem']}.html">Start lesson 01</a>
+      <a class="btn ghost" href="audio.html">Listen · Audio hub</a>
       <a class="btn ghost" href="first-90-days.html">First 90 days map</a>
-      <a class="btn ghost" href="#path">Core learning path</a>
     </div>
     <section class="stats" aria-label="Curriculum snapshot">
       <div><span>{core_count}</span> Core Path modules</div>
       <div><span>{specialist_count}</span> specialist (opt-in)</div>
-      <div><span>3</span> mid-capstone verifies</div>
+      <div><span>{audio_ready}/{audio_planned}</span> audio episodes</div>
       <div><span>@meridiannb.com</span> corp domain</div>
     </section>
     <h2 id="path">Core Path (entry-level)</h2>
@@ -423,6 +558,7 @@ def build() -> None:
         paperwork_note="",
     )
     (OUT / "index.html").write_text(index_html, encoding="utf-8")
+    (OUT / "audio.html").write_text(build_audio_page(toc), encoding="utf-8")
 
     for idx, meta in enumerate(metas):
         body = md_to_html(meta["text"])

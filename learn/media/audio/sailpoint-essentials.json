@@ -1,0 +1,207 @@
+{
+  "id": "E09",
+  "slug": "sailpoint-essentials",
+  "title": "SailPoint IdentityIQ Essentials \u2014 What the Platform Actually Does",
+  "season": 1,
+  "themes": [
+    "sailpoint",
+    "iiq-surfaces",
+    "tasks",
+    "work-items"
+  ],
+  "source_lessons": [
+    "01-bank-briefing-and-ui",
+    "06-identity-cubes-and-refresh",
+    "08-task-ops-and-scheduling",
+    "16b-reading-task-results"
+  ],
+  "audio": "learn/media/audio/sailpoint-essentials.mp3",
+  "script": "tools/podcast-studio/out/E09/03-dialogue.md",
+  "hosts": {
+    "interviewer": "Alex",
+    "expert": "Jordan",
+    "voices": {
+      "ALEX": "en-US-BrianNeural",
+      "JORDAN": "en-US-JennyNeural"
+    }
+  },
+  "turns": 29,
+  "durationMs": 400992,
+  "durationMin": 6.7,
+  "turnMeta": [
+    {
+      "i": 0,
+      "speaker": "ALEX",
+      "chars": 423,
+      "durationMs": 30360
+    },
+    {
+      "i": 1,
+      "speaker": "JORDAN",
+      "chars": 290,
+      "durationMs": 22032
+    },
+    {
+      "i": 2,
+      "speaker": "ALEX",
+      "chars": 98,
+      "durationMs": 7920
+    },
+    {
+      "i": 3,
+      "speaker": "JORDAN",
+      "chars": 416,
+      "durationMs": 33864
+    },
+    {
+      "i": 4,
+      "speaker": "ALEX",
+      "chars": 46,
+      "durationMs": 4608
+    },
+    {
+      "i": 5,
+      "speaker": "JORDAN",
+      "chars": 174,
+      "durationMs": 15696
+    },
+    {
+      "i": 6,
+      "speaker": "ALEX",
+      "chars": 70,
+      "durationMs": 5520
+    },
+    {
+      "i": 7,
+      "speaker": "JORDAN",
+      "chars": 376,
+      "durationMs": 30192
+    },
+    {
+      "i": 8,
+      "speaker": "ALEX",
+      "chars": 83,
+      "durationMs": 6864
+    },
+    {
+      "i": 9,
+      "speaker": "JORDAN",
+      "chars": 365,
+      "durationMs": 29640
+    },
+    {
+      "i": 10,
+      "speaker": "ALEX",
+      "chars": 78,
+      "durationMs": 6360
+    },
+    {
+      "i": 11,
+      "speaker": "JORDAN",
+      "chars": 193,
+      "durationMs": 16224
+    },
+    {
+      "i": 12,
+      "speaker": "ALEX",
+      "chars": 79,
+      "durationMs": 5904
+    },
+    {
+      "i": 13,
+      "speaker": "JORDAN",
+      "chars": 356,
+      "durationMs": 34464
+    },
+    {
+      "i": 14,
+      "speaker": "ALEX",
+      "chars": 56,
+      "durationMs": 4272
+    },
+    {
+      "i": 15,
+      "speaker": "JORDAN",
+      "chars": 144,
+      "durationMs": 12312
+    },
+    {
+      "i": 16,
+      "speaker": "ALEX",
+      "chars": 59,
+      "durationMs": 4728
+    },
+    {
+      "i": 17,
+      "speaker": "JORDAN",
+      "chars": 305,
+      "durationMs": 25824
+    },
+    {
+      "i": 18,
+      "speaker": "ALEX",
+      "chars": 97,
+      "durationMs": 8064
+    },
+    {
+      "i": 19,
+      "speaker": "JORDAN",
+      "chars": 186,
+      "durationMs": 17328
+    },
+    {
+      "i": 20,
+      "speaker": "ALEX",
+      "chars": 63,
+      "durationMs": 4296
+    },
+    {
+      "i": 21,
+      "speaker": "JORDAN",
+      "chars": 171,
+      "durationMs": 13704
+    },
+    {
+      "i": 22,
+      "speaker": "ALEX",
+      "chars": 98,
+      "durationMs": 5496
+    },
+    {
+      "i": 23,
+      "speaker": "JORDAN",
+      "chars": 80,
+      "durationMs": 7944
+    },
+    {
+      "i": 24,
+      "speaker": "ALEX",
+      "chars": 63,
+      "durationMs": 4896
+    },
+    {
+      "i": 25,
+      "speaker": "JORDAN",
+      "chars": 146,
+      "durationMs": 13848
+    },
+    {
+      "i": 26,
+      "speaker": "ALEX",
+      "chars": 54,
+      "durationMs": 4344
+    },
+    {
+      "i": 27,
+      "speaker": "JORDAN",
+      "chars": 114,
+      "durationMs": 10176
+    },
+    {
+      "i": 28,
+      "speaker": "ALEX",
+      "chars": 98,
+      "durationMs": 7416
+    }
+  ]
+}

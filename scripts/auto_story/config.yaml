@@ -1,0 +1,54 @@
+# Auto-story runner defaults (override with AUTO_STORY_CONFIG)
+# Package path: scripts/auto_story (python -m scripts.auto_story)
+
+llm:
+  provider: openrouter   # openrouter | openai | azure_openai | gemini_openai_compat
+  model: openrouter/free
+  fallback_models: []
+  base_url: null
+  api_key_env: OPENROUTER_API_KEY
+  referer: http://localhost:4180
+  title: Meridian Auto-story
+
+agent:
+  max_steps: 24
+  dry_run: true
+  verbose_think: false
+  mcp_url_env: IIQ_MCP_URL
+  mcp_url_default: http://127.0.0.1:8766/mcp
+  mcp_api_key_env: MCP_API_KEY
+  mcp_api_key_default: mnb-lab-mcp-key
+
+jira:
+  site_env: JIRA_SITE
+  email_env: JIRA_EMAIL
+  bot_email_env: JIRA_BOT_EMAIL
+  token_env: JIRA_API_TOKEN
+  project_key: KAN
+  ready_jql: 'project = KAN AND labels = "agent-ready" AND status = "To Do" ORDER BY created ASC'
+  label_ready: agent-ready
+  label_blocked: blocked-needs-human
+  transition_in_progress: In Progress
+  transition_in_review: In Review
+  # Never configure a Done transition here
+
+lease:
+  db_path: .ai-delivery/_state/auto_story_leases.sqlite
+  ttl_seconds: 3600
+
+story_allowlist:
+  - identity-admin
+  - app-onboarding
+  - task-ops
+  - access-request
+  # Phase 2 widen:
+  - governance-admin
+  - certification
+  - policy-sod
+  - jml-lifecycle
+
+# Tools never callable by the implement agent
+tool_denylist:
+  - update_rule_source
+  - update_scope
+  - grant_capability

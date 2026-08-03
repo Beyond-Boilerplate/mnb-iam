@@ -1,0 +1,68 @@
+{
+  "stem": "22-attribute-sync-hygiene",
+  "title": "Lesson 22 \u2014 Identity Attribute Sync Hygiene",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 503088,
+  "durationMin": 8.4,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 118,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 58056
+    },
+    {
+      "id": "why-this-matters",
+      "words": 91,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 52104
+    },
+    {
+      "id": "concepts-authoritative-promotion-vs-acco",
+      "words": 58,
+      "audio": "02-concepts-authoritative-promotion-vs-acco.mp3",
+      "durationMs": 33408
+    },
+    {
+      "id": "concepts-flip-flopping-defined",
+      "words": 99,
+      "audio": "03-concepts-flip-flopping-defined.mp3",
+      "durationMs": 55920
+    },
+    {
+      "id": "concepts-what-it-may-carry-without-ownin",
+      "words": 136,
+      "audio": "04-concepts-what-it-may-carry-without-ownin.mp3",
+      "durationMs": 116328
+    },
+    {
+      "id": "concepts-aggregation-order-as-a-control",
+      "words": 43,
+      "audio": "05-concepts-aggregation-order-as-a-control.mp3",
+      "durationMs": 22584
+    },
+    {
+      "id": "concepts-wrong-way-vs-bank-ready-way",
+      "words": 114,
+      "audio": "06-concepts-wrong-way-vs-bank-ready-way.mp3",
+      "durationMs": 71112
+    },
+    {
+      "id": "how-it-works",
+      "words": 117,
+      "audio": "07-how-it-works.mp3",
+      "durationMs": 44976
+    },
+    {
+      "id": "close",
+      "words": 80,
+      "audio": "08-close.mp3",
+      "durationMs": 43824
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/22-attribute-sync-hygiene.md",
+  "audio": "learn/media/podcasts/22-attribute-sync-hygiene.mp3"
+}

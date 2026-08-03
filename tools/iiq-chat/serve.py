@@ -49,6 +49,7 @@ from observability import (  # noqa: E402
 )
 from playbooks_loader import playbooks_for_role  # noqa: E402
 from safety import is_write_tool  # noqa: E402
+import auto_story_api  # noqa: E402
 
 HOST = os.environ.get("CHAT_HOST", "127.0.0.1")
 PORT = int(os.environ.get("CHAT_PORT", "4180"))
@@ -390,12 +391,16 @@ class ChatHandler(SimpleHTTPRequestHandler):
             return self._orgchart_search(parse_qs(parsed.query))
         if path.startswith("/api/console/"):
             return self._console_get(path, parse_qs(parsed.query))
+        if path.startswith("/api/auto-story/"):
+            return self._auto_story_get(path, parse_qs(parsed.query))
         if path in ("/", "/index.html"):
             return self._serve_index()
         if path in ("/orgchart", "/orgchart.html"):
             return self._serve_static_file("orgchart.html", "text/html; charset=utf-8")
         if path in ("/console", "/console.html"):
             return self._serve_static_file("console.html", "text/html; charset=utf-8")
+        if path in ("/auto-story", "/auto-story.html"):
+            return self._serve_static_file("auto-story.html", "text/html; charset=utf-8")
         # Deep links into Teller Inspect (/identity/anita.rao, /cert/..., /app/...)
         if path.startswith(("/identity/", "/cert/", "/app/", "/entitlement/")):
             return self._serve_index()
@@ -420,6 +425,8 @@ class ChatHandler(SimpleHTTPRequestHandler):
             return self._refresh_tools()
         if path.startswith("/api/console/"):
             return self._console_post(path, body)
+        if path.startswith("/api/auto-story/"):
+            return self._auto_story_post(path, body)
         self.send_error(404, "Not found")
 
     def _cors(self) -> None:
@@ -1499,6 +1506,75 @@ class ChatHandler(SimpleHTTPRequestHandler):
             return {}
         return data if isinstance(data, dict) else {}
 
+    def _auto_story_get(self, path: str, qs: dict[str, list[str]]) -> None:
+        name = path.removeprefix("/api/auto-story/").strip("/")
+        if name == "runs":
+            return self._json(200, {"ok": True, "runs": auto_story_api.list_runs()})
+        if name == "examples":
+            return self._json(200, {"ok": True, "examples": auto_story_api.load_examples()})
+        if name == "poll":
+            result = auto_story_api.poll_ready()
+            status = 200 if result.get("ok") else 502
+            return self._json(status, result)
+        if name == "jobs":
+            return self._json(200, {"ok": True, "jobs": auto_story_api.list_jobs()})
+        if name.startswith("jobs/"):
+            job_id = name.removeprefix("jobs/").strip("/")
+            job = auto_story_api.job_status(job_id)
+            if not job:
+                return self._json(404, {"ok": False, "error": "job not found"})
+            return self._json(200, {"ok": True, **job})
+        # runs/<issue>/<runId>[/events]
+        parts = name.split("/")
+        if len(parts) >= 3 and parts[0] == "runs":
+            issue, run_id = parts[1], parts[2]
+            if len(parts) == 3:
+                events = auto_story_api.read_events(issue, run_id)
+                artifacts = auto_story_api.read_artifacts(issue, run_id)
+                if not events and not artifacts:
+                    return self._json(404, {"ok": False, "error": "run not found"})
+                return self._json(
+                    200,
+                    {
+                        "ok": True,
+                        "issue": issue,
+                        "run_id": run_id,
+                        "events": events,
+                        "artifacts": artifacts,
+                    },
+                )
+            if len(parts) == 4 and parts[3] == "events":
+                after_raw = (qs.get("after") or ["0"])[0]
+                try:
+                    after = max(0, int(after_raw))
+                except ValueError:
+                    after = 0
+                return self._json(
+                    200,
+                    {
+                        "ok": True,
+                        "issue": issue,
+                        "run_id": run_id,
+                        "after": after,
+                        "events": auto_story_api.read_events(issue, run_id, after=after),
+                    },
+                )
+        return self._json(404, {"ok": False, "error": "not found"})
+
+    def _auto_story_post(self, path: str, body: dict[str, Any]) -> None:
+        name = path.removeprefix("/api/auto-story/").strip("/")
+        if name == "run":
+            result = auto_story_api.start_run(
+                issue=str(body.get("issue") or ""),
+                fixture=body.get("fixture"),
+                no_llm=bool(body.get("no_llm", False)),
+                live=bool(body.get("live", False)),
+                confirm_live=bool(body.get("confirm_live", False)),
+            )
+            status = 200 if result.get("ok") else 400
+            return self._json(status, result)
+        return self._json(404, {"ok": False, "error": "not found"})
+
 
 def main() -> int:
     if not STATIC.is_dir():
@@ -1507,6 +1583,7 @@ def main() -> int:
     httpd = ThreadingHTTPServer((HOST, PORT), ChatHandler)
     print("Meridian IIQ Teller (native MCP tool agent)")
     print(f"  UI:      http://{HOST}:{PORT}/")
+    print(f"  Auto:    http://{HOST}:{PORT}/auto-story.html")
     print(f"  LLM:     {'OpenRouter ready' if _llm.configured else 'set OPENROUTER_API_KEY for chat'}")
     print(f"  MCP:     {os.environ.get('IIQ_MCP_URL', 'http://127.0.0.1:8766/mcp')}")
     try:

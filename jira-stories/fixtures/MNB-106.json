@@ -1,0 +1,11 @@
+{
+  "key": "MNB-106",
+  "id": "10601",
+  "fields": {
+    "summary": "Reset + expire password for contractor offboarding",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["identity-admin", "agent-ready"],
+    "description": "Contractor offboarding: reset IIQ password for the named contractor identity and set expire-on-next-login. Confirm password policy constraints. Do not unlock if intentionally locked for leaver."
+  }
+}

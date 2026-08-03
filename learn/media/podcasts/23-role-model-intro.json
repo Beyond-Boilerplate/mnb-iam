@@ -1,0 +1,56 @@
+{
+  "stem": "23-role-model-intro",
+  "title": "Lesson 23 \u2014 Role Model Introduction",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 451968,
+  "durationMin": 7.5,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 113,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 53160
+    },
+    {
+      "id": "why-this-matters",
+      "words": 104,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 58464
+    },
+    {
+      "id": "concepts-bundles-speak-two-languages",
+      "words": 88,
+      "audio": "02-concepts-bundles-speak-two-languages.mp3",
+      "durationMs": 53592
+    },
+    {
+      "id": "concepts-starter-catalog-sketch-implemen",
+      "words": 122,
+      "audio": "03-concepts-starter-catalog-sketch-implemen.mp3",
+      "durationMs": 132456
+    },
+    {
+      "id": "concepts-why-dual-control-shows-up-in-th",
+      "words": 46,
+      "audio": "04-concepts-why-dual-control-shows-up-in-th.mp3",
+      "durationMs": 28536
+    },
+    {
+      "id": "how-it-works",
+      "words": 115,
+      "audio": "05-how-it-works.mp3",
+      "durationMs": 79008
+    },
+    {
+      "id": "close",
+      "words": 70,
+      "audio": "06-close.mp3",
+      "durationMs": 43176
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/23-role-model-intro.md",
+  "audio": "learn/media/podcasts/23-role-model-intro.mp3"
+}

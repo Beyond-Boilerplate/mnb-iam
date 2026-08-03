@@ -17,6 +17,17 @@ local.iiq.properties
 *.local.properties
 tools/iiq-chat/.env
 tools/iiq-mcp/.env
+scripts/auto_story/.env
+
+# Lab HR delta backups (scenario apply scripts)
+lab-data/HRApplications.txt.bak-*
+
+# Local podcast / TTS tooling
+tools/lesson-podcast/.venv/
+tools/lesson-podcast/out/
+tools/podcast-studio/.venv/
+tools/podcast-studio/out/
+pluginsrc/mnb-iam-toolkit/dist/
 
 # Node / misc
 node_modules/

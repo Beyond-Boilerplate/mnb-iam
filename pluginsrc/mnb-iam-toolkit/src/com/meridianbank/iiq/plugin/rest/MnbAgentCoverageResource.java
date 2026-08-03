@@ -21,30 +21,50 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
+import sailpoint.api.Grouper;
 import sailpoint.api.SailPointContext;
 import sailpoint.api.TaskManager;
 import sailpoint.api.Workflower;
 import sailpoint.object.Application;
+import sailpoint.object.AttributeDefinition;
 import sailpoint.object.Attributes;
 import sailpoint.object.BatchRequest;
+import sailpoint.object.Bundle;
 import sailpoint.object.Capability;
 import sailpoint.object.Certification;
 import sailpoint.object.CertificationDefinition;
+import sailpoint.object.CorrelationConfig;
 import sailpoint.object.EmailOptions;
 import sailpoint.object.EmailTemplate;
+import sailpoint.object.Field;
 import sailpoint.object.Filter;
 import sailpoint.object.Form;
+import sailpoint.object.GroupDefinition;
+import sailpoint.object.GroupFactory;
 import sailpoint.object.Identity;
+import sailpoint.object.IdentitySelector;
+import sailpoint.object.IdentityTrigger;
 import sailpoint.object.Link;
 import sailpoint.object.ManagedAttribute;
+import sailpoint.object.ObjectAttribute;
+import sailpoint.object.ObjectConfig;
+import sailpoint.object.PasswordPolicy;
 import sailpoint.object.Policy;
 import sailpoint.object.PolicyViolation;
 import sailpoint.object.ProvisioningPlan;
 import sailpoint.object.ProvisioningPlan.AccountRequest;
 import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningTransaction;
 import sailpoint.object.QueryOptions;
+import sailpoint.object.SPRight;
+import sailpoint.object.Schema;
+import sailpoint.object.ScoreConfig;
+import sailpoint.object.ScoreDefinition;
+import sailpoint.object.Script;
+import sailpoint.object.SODConstraint;
 import sailpoint.object.TaskDefinition;
 import sailpoint.object.TaskResult;
+import sailpoint.object.Template;
 import sailpoint.object.WorkItem;
 import sailpoint.object.Workflow;
 import sailpoint.object.WorkflowLaunch;
@@ -292,10 +312,24 @@ public class MnbAgentCoverageResource extends BasePluginResource {
       throw MnbAgentSupport.error(400, "invalid_request", "name required", "UIAPI-32", null);
     }
     SailPointContext ctx = getContext();
-    String templateName =
-        MnbAgentSupport.firstNonEmpty(
-            MnbAgentSupport.str(body.get("template")), "SOD Template", "Entitlement SOD Template");
-    Policy template = ctx.getObjectByName(Policy.class, templateName);
+    // Prefer caller template, then Role SOD template, then entitlement SOD.
+    // Never keep an invalid template name — that yields a bare Policy the UI cannot edit as SOD.
+    Policy template = null;
+    String templateName = null;
+    for (String candidate :
+        new String[] {
+          MnbAgentSupport.str(body.get("template")), "SOD Template", "Entitlement SOD Template"
+        }) {
+      if (Util.isNullOrEmpty(candidate)) {
+        continue;
+      }
+      Policy t = ctx.getObjectByName(Policy.class, candidate);
+      if (t != null) {
+        template = t;
+        templateName = candidate;
+        break;
+      }
+    }
     Policy policy = ctx.getObjectByName(Policy.class, name);
     boolean created = false;
     if (policy == null) {
@@ -303,15 +337,36 @@ public class MnbAgentCoverageResource extends BasePluginResource {
         policy = (Policy) template.deepCopy((XMLReferenceResolver) ctx);
         policy.setId(null);
         policy.setName(name);
+        policy.setTemplate(false);
       } else {
         policy = new Policy();
         policy.setName(name);
+        applyRoleSodMetadata(policy);
       }
       created = true;
+    } else if (Util.isNullOrEmpty(policy.getType()) || !"SOD".equals(policy.getType())
+        && !"EntitlementSOD".equals(policy.getType())) {
+      // Repair shell policies created without Role/Entitlement SOD metadata (UI blank rules table).
+      if (template != null && "SOD".equals(template.getType())) {
+        applyRoleSodMetadata(policy);
+      } else if (template != null && "EntitlementSOD".equals(template.getType())) {
+        applyEntitlementSodMetadata(policy);
+      } else {
+        applyRoleSodMetadata(policy);
+      }
     }
     String description = MnbAgentSupport.str(body.get("description"));
     if (!Util.isNullOrEmpty(description)) {
       policy.setDescription(description);
+    }
+    String state = MnbAgentSupport.str(body.get("state"));
+    if (!Util.isNullOrEmpty(state)) {
+      try {
+        policy.setState(Policy.State.valueOf(state));
+      } catch (IllegalArgumentException ex) {
+        throw MnbAgentSupport.error(
+            400, "invalid_request", "state must be Active or Inactive", "UIAPI-32", null);
+      }
     }
     ctx.saveObject(policy);
     ctx.commitTransaction();
@@ -319,8 +374,28 @@ public class MnbAgentCoverageResource extends BasePluginResource {
     data.put("name", policy.getName());
     data.put("id", policy.getId());
     data.put("created", created);
-    data.put("template", template != null ? template.getName() : null);
+    data.put("template", templateName);
+    data.put("type", policy.getType());
+    data.put("configPage", policy.getConfigPage());
+    data.put("executor", policy.getExecutor());
+    data.put("state", policy.getState() != null ? policy.getState().name() : null);
     return MnbAgentSupport.ok("UIAPI-32", data);
+  }
+
+  private static void applyRoleSodMetadata(Policy policy) {
+    policy.setType("SOD");
+    policy.setTypeKey("policy_type_sod");
+    policy.setConfigPage("sodpolicy.xhtml");
+    policy.setExecutor("sailpoint.policy.SODPolicyExecutor");
+    policy.setCertificationActions("Remediated,Mitigated,Delegated");
+  }
+
+  private static void applyEntitlementSodMetadata(Policy policy) {
+    policy.setType("EntitlementSOD");
+    policy.setTypeKey("policy_type_entitlement_sod");
+    policy.setConfigPage("entitlementPolicy.xhtml");
+    policy.setExecutor("sailpoint.policy.EntitlementSODPolicyExecutor");
+    policy.setCertificationActions("Remediated,Mitigated,Delegated");
   }
 
   @POST
@@ -510,16 +585,31 @@ public class MnbAgentCoverageResource extends BasePluginResource {
         MnbAgentSupport.firstNonEmpty(
             MnbAgentSupport.str(body.get("identityName")),
             MnbAgentSupport.str(body.get("identity")));
-    if (Util.isNullOrEmpty(appName) || Util.isNullOrEmpty(nativeId) || Util.isNullOrEmpty(identityName)) {
+    boolean breakCorr =
+        Boolean.TRUE.equals(body.get("break"))
+            || Boolean.TRUE.equals(body.get("breakCorrelation"))
+            || Boolean.TRUE.equals(body.get("uncorrelate"));
+    if (Util.isNullOrEmpty(appName) || Util.isNullOrEmpty(nativeId)) {
       throw MnbAgentSupport.error(
           400,
           "invalid_request",
-          "application, nativeIdentity, identityName required",
+          "application and nativeIdentity required",
+          "UIAPI-37",
+          null);
+    }
+    if (!breakCorr && Util.isNullOrEmpty(identityName)) {
+      throw MnbAgentSupport.error(
+          400,
+          "invalid_request",
+          "identityName required unless break/uncorrelate=true",
           "UIAPI-37",
           null);
     }
     SailPointContext ctx = getContext();
-    Identity identity = MnbAgentSupport.resolveIdentity(ctx, identityName, "UIAPI-37");
+    Identity identity =
+        !Util.isNullOrEmpty(identityName)
+            ? MnbAgentSupport.resolveIdentity(ctx, identityName, "UIAPI-37")
+            : null;
     Application app = MnbAgentSupport.requireByIdOrName(ctx, Application.class, appName, "UIAPI-37");
     QueryOptions qo = new QueryOptions();
     qo.addFilter(Filter.eq("application", app));
@@ -530,7 +620,6 @@ public class MnbAgentCoverageResource extends BasePluginResource {
           404, "not_found", "Link not found for " + appName + "/" + nativeId, "UIAPI-37", null);
     }
     Link link = links.get(0);
-    boolean breakCorr = Boolean.TRUE.equals(body.get("break"));
     if (breakCorr) {
       link.setIdentity(null);
     } else {
@@ -541,7 +630,7 @@ public class MnbAgentCoverageResource extends BasePluginResource {
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("application", app.getName());
     data.put("nativeIdentity", nativeId);
-    data.put("identityName", breakCorr ? null : identity.getName());
+    data.put("identityName", breakCorr ? null : (identity != null ? identity.getName() : null));
     data.put("broken", breakCorr);
     data.put("linkId", link.getId());
     return MnbAgentSupport.ok("UIAPI-37", data);
@@ -703,7 +792,7 @@ public class MnbAgentCoverageResource extends BasePluginResource {
     return MnbAgentSupport.ok("UIAPI-42", data);
   }
 
-  // —— UIAPI-43 Form submit (metadata only / limited) ——
+  // —— UIAPI-43 Form submit (launch workflow when workflowName provided) ——
   @POST
   @Path("forms/{name}/submit")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -711,14 +800,69 @@ public class MnbAgentCoverageResource extends BasePluginResource {
   public Map<String, Object> submitForm(@PathParam("name") String name, Map<String, Object> body)
       throws GeneralException {
     MnbAgentSupport.requireMutateGov(this, "UIAPI-43");
-    Form form = MnbAgentSupport.requireByIdOrName(getContext(), Form.class, name, "UIAPI-43");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Form form = MnbAgentSupport.requireByIdOrName(ctx, Form.class, name, "UIAPI-43");
+    Map<String, Object> fields = new LinkedHashMap<>();
+    if (body.get("fields") instanceof Map) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> f = (Map<String, Object>) body.get("fields");
+      fields.putAll(f);
+    } else {
+      for (Map.Entry<String, Object> e : body.entrySet()) {
+        String k = e.getKey();
+        if ("workflowName".equals(k)
+            || "workflow".equals(k)
+            || "identity".equals(k)
+            || "identityName".equals(k)
+            || "dryRun".equals(k)) {
+          continue;
+        }
+        fields.put(k, e.getValue());
+      }
+    }
+    String workflowName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("workflowName")),
+            MnbAgentSupport.str(body.get("workflow")));
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("form", form.getName());
+    data.put("fields", fields);
     data.put("accepted", true);
-    data.put("fields", body != null ? body : new LinkedHashMap<>());
+    if (Util.isNullOrEmpty(workflowName) || Boolean.TRUE.equals(body.get("dryRun"))) {
+      data.put("launched", false);
+      data.put(
+          "guidance",
+          "Pass workflowName to launch; otherwise pair with run_jml_event / grant_access");
+      return MnbAgentSupport.ok("UIAPI-43", data);
+    }
+    Workflow wf = ctx.getObjectByName(Workflow.class, workflowName);
+    if (wf == null) {
+      throw MnbAgentSupport.error(
+          404, "not_found", "Workflow not found: " + workflowName, "UIAPI-43", null);
+    }
+    Map<String, Object> vars = new HashMap<>();
+    vars.put("formName", form.getName());
+    vars.put("formAnswers", fields);
+    vars.putAll(fields);
+    String identityName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("identityName")),
+            MnbAgentSupport.str(body.get("identity")));
+    if (!Util.isNullOrEmpty(identityName)) {
+      Identity idn = MnbAgentSupport.resolveIdentity(ctx, identityName, "UIAPI-43");
+      vars.put("identityName", idn.getName());
+      vars.put("identity", idn.getName());
+    }
+    WorkflowLaunch launch =
+        new Workflower(ctx).launch(wf, "mnb-form-" + System.currentTimeMillis(), vars);
+    ctx.commitTransaction();
+    data.put("launched", true);
+    data.put("workflowName", workflowName);
     data.put(
-        "guidance",
-        "Form field persistence is workflow-specific; pair with run_jml_event or grant_access for effects");
+        "workflowCaseId",
+        launch.getWorkflowCase() != null ? launch.getWorkflowCase().getId() : null);
+    data.put("launchStatus", launch.getStatus() != null ? String.valueOf(launch.getStatus()) : null);
     return MnbAgentSupport.ok("UIAPI-43", data);
   }
 
@@ -810,13 +954,80 @@ public class MnbAgentCoverageResource extends BasePluginResource {
     if (!Util.isNullOrEmpty(description)) {
       cap.setDescription(description);
     }
+    Object rightsObj = body.get("rights");
+    if (rightsObj instanceof List) {
+      List<SPRight> rights = resolveSpRights(ctx, (List<?>) rightsObj, "UIAPI-46");
+      cap.setRights(rights);
+    }
     ctx.saveObject(cap);
     ctx.commitTransaction();
     Map<String, Object> data = new LinkedHashMap<>();
     data.put("name", cap.getName());
     data.put("id", cap.getId());
     data.put("created", created);
+    data.put("rights", rightNames(cap));
     return MnbAgentSupport.ok("UIAPI-46", data);
+  }
+
+  // —— UIAPI-84 Capability rights matrix ——
+  @POST
+  @Path("capabilities/{name}/rights")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> setCapabilityRights(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-84");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Capability cap = MnbAgentSupport.requireByIdOrName(ctx, Capability.class, name, "UIAPI-84");
+    Object rightsObj = body.get("rights");
+    if (!(rightsObj instanceof List)) {
+      throw MnbAgentSupport.error(
+          400, "invalid_request", "rights list required", "UIAPI-84", null);
+    }
+    String op = MnbAgentSupport.firstNonEmpty(MnbAgentSupport.str(body.get("op")), "replace").toLowerCase();
+    List<SPRight> incoming = resolveSpRights(ctx, (List<?>) rightsObj, "UIAPI-84");
+    if ("add".equals(op)) {
+      List<SPRight> current = cap.getRights() != null ? new ArrayList<>(cap.getRights()) : new ArrayList<>();
+      Set<String> have = new HashSet<>();
+      for (SPRight r : current) {
+        if (r != null && r.getName() != null) {
+          have.add(r.getName());
+        }
+      }
+      for (SPRight r : incoming) {
+        if (r != null && r.getName() != null && !have.contains(r.getName())) {
+          current.add(r);
+          have.add(r.getName());
+        }
+      }
+      cap.setRights(current);
+    } else if ("remove".equals(op)) {
+      Set<String> remove = new HashSet<>();
+      for (SPRight r : incoming) {
+        if (r != null && r.getName() != null) {
+          remove.add(r.getName());
+        }
+      }
+      List<SPRight> next = new ArrayList<>();
+      if (cap.getRights() != null) {
+        for (SPRight r : cap.getRights()) {
+          if (r != null && r.getName() != null && !remove.contains(r.getName())) {
+            next.add(r);
+          }
+        }
+      }
+      cap.setRights(next);
+    } else {
+      cap.setRights(incoming);
+    }
+    ctx.saveObject(cap);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", cap.getName());
+    data.put("op", op);
+    data.put("rights", rightNames(cap));
+    return MnbAgentSupport.ok("UIAPI-84", data);
   }
 
   // —— UIAPI-47 Object validate ——
@@ -1386,6 +1597,1311 @@ public class MnbAgentCoverageResource extends BasePluginResource {
     data.put("count", rows.size());
     data.put("results", rows);
     return MnbAgentSupport.ok("UIAPI-59", data);
+  }
+
+  // —— UIAPI-73 Schema apply ——
+  @POST
+  @Path("applications/{name}/schema/apply")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> applyApplicationSchema(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-73");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Application app = MnbAgentSupport.requireByIdOrName(ctx, Application.class, name, "UIAPI-73");
+    Schema schema = app.getSchema(Application.SCHEMA_ACCOUNT);
+    if (schema == null) {
+      schema = new Schema(Application.SCHEMA_ACCOUNT, "account");
+      app.addSchema(schema);
+    }
+    String identityAttr =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("identityAttribute")),
+            MnbAgentSupport.str(body.get("identityAttr")));
+    String displayAttr =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("displayAttribute")),
+            MnbAgentSupport.str(body.get("displayAttr")));
+    if (!Util.isNullOrEmpty(identityAttr)) {
+      schema.setIdentityAttribute(identityAttr);
+    }
+    if (!Util.isNullOrEmpty(displayAttr)) {
+      schema.setDisplayAttribute(displayAttr);
+    }
+    Object attrsObj = body.get("attributes");
+    int added = 0;
+    if (attrsObj instanceof List) {
+      for (Object o : (List<?>) attrsObj) {
+        if (o instanceof String) {
+          String attrName = (String) o;
+          if (schema.getAttributeDefinition(attrName) == null) {
+            schema.addAttributeDefinition(attrName, AttributeDefinition.TYPE_STRING);
+            added++;
+          }
+        } else if (o instanceof Map) {
+          @SuppressWarnings("unchecked")
+          Map<String, Object> m = (Map<String, Object>) o;
+          String attrName = MnbAgentSupport.str(m.get("name"));
+          String type =
+              MnbAgentSupport.firstNonEmpty(
+                  MnbAgentSupport.str(m.get("type")), AttributeDefinition.TYPE_STRING);
+          if (!Util.isNullOrEmpty(attrName) && schema.getAttributeDefinition(attrName) == null) {
+            schema.addAttributeDefinition(attrName, type);
+            added++;
+          }
+        }
+      }
+    }
+    ctx.saveObject(app);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("application", app.getName());
+    data.put("identityAttribute", schema.getIdentityAttribute());
+    data.put("displayAttribute", schema.getDisplayAttribute());
+    data.put("attributesAdded", added);
+    return MnbAgentSupport.ok("UIAPI-73", data);
+  }
+
+  // —— UIAPI-74 Correlation config write ——
+  @POST
+  @Path("applications/{name}/correlationConfig")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> updateCorrelationConfig(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-74");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Application app = MnbAgentSupport.requireByIdOrName(ctx, Application.class, name, "UIAPI-74");
+    String accountAttr =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("accountAttribute")),
+            MnbAgentSupport.str(body.get("accountAttr")));
+    String identityAttr =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("identityAttribute")),
+            MnbAgentSupport.str(body.get("identityAttr")));
+    if (Util.isNullOrEmpty(accountAttr) || Util.isNullOrEmpty(identityAttr)) {
+      throw MnbAgentSupport.error(
+          400,
+          "invalid_request",
+          "accountAttribute and identityAttribute required",
+          "UIAPI-74",
+          null);
+    }
+    String cfgName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("name")),
+            app.getName() + " Correlation");
+    CorrelationConfig cfg = ctx.getObjectByName(CorrelationConfig.class, cfgName);
+    boolean created = false;
+    if (cfg == null) {
+      cfg = new CorrelationConfig();
+      cfg.setName(cfgName);
+      created = true;
+    }
+    Filter assignment = Filter.eq(accountAttr, identityAttr);
+    List<Filter> assignments = new ArrayList<>();
+    assignments.add(assignment);
+    cfg.setAttributeAssignments(assignments);
+    ctx.saveObject(cfg);
+    app.setAccountCorrelationConfig(cfg);
+    ctx.saveObject(app);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("application", app.getName());
+    data.put("correlationConfig", cfg.getName());
+    data.put("created", created);
+    data.put("accountAttribute", accountAttr);
+    data.put("identityAttribute", identityAttr);
+    return MnbAgentSupport.ok("UIAPI-74", data);
+  }
+
+  // —— UIAPI-75 Provisioning cancel ——
+  @POST
+  @Path("provisioning/{id}/cancel")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> cancelProvisioning(@PathParam("id") String id) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-75");
+    SailPointContext ctx = getContext();
+    ProvisioningTransaction tx =
+        MnbAgentSupport.requireByIdOrName(ctx, ProvisioningTransaction.class, id, "UIAPI-75");
+    Attributes<String, Object> attrs = tx.getAttributes();
+    if (attrs == null) {
+      attrs = new Attributes<>();
+      tx.setAttributes(attrs);
+    }
+    attrs.put("cancelled", true);
+    attrs.put("cancelledBy", ctx.getUserName());
+    attrs.put("cancelledAt", new Date().toString());
+    tx.setStatus(ProvisioningTransaction.Status.Failed);
+    ctx.saveObject(tx);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("id", tx.getId());
+    data.put("cancelled", true);
+    data.put("status", String.valueOf(tx.getStatus()));
+    data.put("application", tx.getApplicationName());
+    data.put("identityName", tx.getIdentityName());
+    return MnbAgentSupport.ok("UIAPI-75", data);
+  }
+
+  // —— UIAPI-76 Lifecycle events (IdentityTrigger) ——
+  @GET
+  @Path("lifecycleEvents")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> listLifecycleEvents(@QueryParam("limit") Integer limit)
+      throws GeneralException {
+    MnbAgentSupport.requireAgentEnabled(this, "UIAPI-76");
+    QueryOptions qo = new QueryOptions();
+    qo.setResultLimit(limit == null ? 50 : Math.min(limit, 200));
+    List<IdentityTrigger> triggers = getContext().getObjects(IdentityTrigger.class, qo);
+    List<Map<String, Object>> rows = new ArrayList<>();
+    if (triggers != null) {
+      for (IdentityTrigger t : triggers) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", t.getId());
+        m.put("name", t.getName());
+        m.put("type", t.getType() != null ? String.valueOf(t.getType()) : null);
+        m.put("inactive", t.isInactive());
+        m.put("workflowName", t.getWorkflowName());
+        m.put("attributeName", t.getAttributeName());
+        rows.add(m);
+      }
+    }
+    return MnbAgentSupport.ok("UIAPI-76", rows);
+  }
+
+  @POST
+  @Path("lifecycleEvents")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> upsertLifecycleEvent(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-76");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String name = MnbAgentSupport.str(body.get("name"));
+    if (Util.isNullOrEmpty(name)) {
+      throw MnbAgentSupport.error(400, "invalid_request", "name required", "UIAPI-76", null);
+    }
+    SailPointContext ctx = getContext();
+    IdentityTrigger trigger = ctx.getObjectByName(IdentityTrigger.class, name);
+    boolean created = false;
+    if (trigger == null) {
+      trigger = new IdentityTrigger();
+      trigger.setName(name);
+      created = true;
+    }
+    String typeName =
+        MnbAgentSupport.firstNonEmpty(MnbAgentSupport.str(body.get("type")), "Create");
+    try {
+      trigger.setType(IdentityTrigger.Type.valueOf(typeName));
+    } catch (IllegalArgumentException e) {
+      throw MnbAgentSupport.error(
+          400,
+          "invalid_request",
+          "type must be Create|Delete|AttributeChange|Rule|ManagerTransfer|NativeChange|Alert|RapidSetup",
+          "UIAPI-76",
+          null);
+    }
+    String workflowName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("workflowName")),
+            MnbAgentSupport.str(body.get("workflow")));
+    if (!Util.isNullOrEmpty(workflowName)) {
+      trigger.setWorkflowName(workflowName);
+    }
+    String attrName = MnbAgentSupport.str(body.get("attributeName"));
+    if (!Util.isNullOrEmpty(attrName)) {
+      trigger.setAttributeName(attrName);
+    }
+    if (body.containsKey("inactive")) {
+      // IdentityTrigger uses disabled via selector in some builds; persist as attribute when present
+      trigger.setAttribute("inactive", Boolean.TRUE.equals(body.get("inactive")));
+    }
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      trigger.setDescription(description);
+    }
+    ctx.saveObject(trigger);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", trigger.getName());
+    data.put("id", trigger.getId());
+    data.put("created", created);
+    data.put("type", trigger.getType() != null ? String.valueOf(trigger.getType()) : null);
+    data.put("workflowName", trigger.getWorkflowName());
+    return MnbAgentSupport.ok("UIAPI-76", data);
+  }
+
+  // —— UIAPI-77 ObjectConfig attribute patch (searchable via extendedNumber) ——
+  @POST
+  @Path("objectConfigs/{name}/attributes")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> patchObjectConfigAttribute(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-77");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String attrName = MnbAgentSupport.str(body.get("attribute"));
+    if (Util.isNullOrEmpty(attrName)) {
+      throw MnbAgentSupport.error(400, "invalid_request", "attribute required", "UIAPI-77", null);
+    }
+    SailPointContext ctx = getContext();
+    ObjectConfig oc = ctx.getObjectByName(ObjectConfig.class, name);
+    if (oc == null) {
+      oc = ObjectConfig.getObjectConfig(name);
+    }
+    if (oc == null) {
+      throw MnbAgentSupport.error(404, "not_found", "ObjectConfig not found: " + name, "UIAPI-77", null);
+    }
+    ObjectAttribute oa = null;
+    if (oc.getObjectAttributeMap() != null) {
+      oa = oc.getObjectAttributeMap().get(attrName);
+    }
+    if (oa == null && oc.getObjectAttributes() != null) {
+      for (ObjectAttribute cand : oc.getObjectAttributes()) {
+        if (cand != null && attrName.equals(cand.getName())) {
+          oa = cand;
+          break;
+        }
+      }
+    }
+    boolean createdAttr = false;
+    if (oa == null) {
+      oa = new ObjectAttribute();
+      oa.setName(attrName);
+      oa.setDisplayName(attrName);
+      List<ObjectAttribute> list = oc.getObjectAttributes();
+      if (list == null) {
+        list = new ArrayList<>();
+        oc.setObjectAttributes(list);
+      }
+      list.add(oa);
+      createdAttr = true;
+    }
+    if (body.get("extendedNumber") instanceof Number) {
+      oa.setExtendedNumber(((Number) body.get("extendedNumber")).intValue());
+    } else if (Boolean.TRUE.equals(body.get("searchable"))) {
+      if (oa.getExtendedNumber() <= 0) {
+        oa.setExtendedNumber(1);
+      }
+    }
+    if (body.containsKey("displayName")) {
+      oa.setDisplayName(MnbAgentSupport.str(body.get("displayName")));
+    }
+    if (body.containsKey("namedColumn")) {
+      oa.setNamedColumn(Boolean.TRUE.equals(body.get("namedColumn")));
+    }
+    ctx.saveObject(oc);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("objectConfig", oc.getName());
+    data.put("attribute", oa.getName());
+    data.put("created", createdAttr);
+    data.put("extendedNumber", oa.getExtendedNumber());
+    data.put("searchable", oa.isSearchable());
+    return MnbAgentSupport.ok("UIAPI-77", data);
+  }
+
+  // —— UIAPI-78 PasswordPolicy upsert ——
+  @POST
+  @Path("passwordPolicies")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> upsertPasswordPolicy(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-78");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String name = MnbAgentSupport.str(body.get("name"));
+    if (Util.isNullOrEmpty(name)) {
+      throw MnbAgentSupport.error(400, "invalid_request", "name required", "UIAPI-78", null);
+    }
+    SailPointContext ctx = getContext();
+    PasswordPolicy policy = ctx.getObjectByName(PasswordPolicy.class, name);
+    boolean created = false;
+    if (policy == null) {
+      policy = new PasswordPolicy();
+      policy.setName(name);
+      created = true;
+    }
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      policy.setDescription(description);
+    }
+    if (body.get("constraints") instanceof Map) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> constraints = (Map<String, Object>) body.get("constraints");
+      policy.setPasswordConstraints(constraints);
+    }
+    ctx.saveObject(policy);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", policy.getName());
+    data.put("id", policy.getId());
+    data.put("created", created);
+    data.put("constraints", policy.getPasswordConstraints());
+    return MnbAgentSupport.ok("UIAPI-78", data);
+  }
+
+  // —— UIAPI-79 Role required-roles ——
+  @POST
+  @Path("roles/{name}/requirements")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> setRoleRequirements(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-79");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Bundle role = MnbAgentSupport.requireByIdOrName(ctx, Bundle.class, name, "UIAPI-79");
+    String op =
+        MnbAgentSupport.firstNonEmpty(MnbAgentSupport.str(body.get("op")), "add").toLowerCase();
+    Object reqObj = body.get("requiredRoles");
+    if (reqObj == null) {
+      reqObj = body.get("roles");
+    }
+    if (!(reqObj instanceof List) || ((List<?>) reqObj).isEmpty()) {
+      String one =
+          MnbAgentSupport.firstNonEmpty(
+              MnbAgentSupport.str(body.get("requiredRole")),
+              MnbAgentSupport.str(body.get("role")));
+      if (Util.isNullOrEmpty(one)) {
+        throw MnbAgentSupport.error(
+            400, "invalid_request", "requiredRoles list or requiredRole required", "UIAPI-79", null);
+      }
+      reqObj = java.util.Collections.singletonList(one);
+    }
+    List<String> applied = new ArrayList<>();
+    for (Object o : (List<?>) reqObj) {
+      if (o == null) {
+        continue;
+      }
+      String reqName = String.valueOf(o);
+      Bundle req = MnbAgentSupport.requireByIdOrName(ctx, Bundle.class, reqName, "UIAPI-79");
+      if ("remove".equals(op)) {
+        role.removeRequirement(req);
+      } else {
+        role.addRequirement(req);
+      }
+      applied.add(req.getName());
+    }
+    ctx.saveObject(role);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("role", role.getName());
+    data.put("op", op);
+    data.put("requiredRoles", applied);
+    List<String> current = new ArrayList<>();
+    if (role.getRequirements() != null) {
+      for (Bundle b : role.getRequirements()) {
+        if (b != null) {
+          current.add(b.getName());
+        }
+      }
+    }
+    data.put("requirements", current);
+    return MnbAgentSupport.ok("UIAPI-79", data);
+  }
+
+  // —— UIAPI-80 SoD left/right role constraint ——
+  @POST
+  @Path("policies/sod/{name}/constraints")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> updateSodConstraints(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-80");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Policy policy = MnbAgentSupport.requireByIdOrName(ctx, Policy.class, name, "UIAPI-80");
+    String constraintName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("constraintName")),
+            MnbAgentSupport.str(body.get("name")),
+            policy.getName() + " Constraint");
+    SODConstraint constraint = null;
+    if (policy.getSODConstraints() != null) {
+      for (SODConstraint c : policy.getSODConstraints()) {
+        if (c != null && constraintName.equals(c.getName())) {
+          constraint = c;
+          break;
+        }
+      }
+    }
+    boolean created = false;
+    if (constraint == null) {
+      constraint = new SODConstraint();
+      constraint.setName(constraintName);
+      policy.addConstraint(constraint);
+      created = true;
+    }
+    Object left = body.get("leftRoles");
+    if (left == null) {
+      left = body.get("left");
+    }
+    Object right = body.get("rightRoles");
+    if (right == null) {
+      right = body.get("right");
+    }
+    if (left instanceof List) {
+      for (Object o : (List<?>) left) {
+        if (o == null) {
+          continue;
+        }
+        Bundle b = MnbAgentSupport.requireByIdOrName(ctx, Bundle.class, String.valueOf(o), "UIAPI-80");
+        constraint.addLeft(b);
+      }
+    }
+    if (right instanceof List) {
+      for (Object o : (List<?>) right) {
+        if (o == null) {
+          continue;
+        }
+        Bundle b = MnbAgentSupport.requireByIdOrName(ctx, Bundle.class, String.valueOf(o), "UIAPI-80");
+        constraint.addRight(b);
+      }
+    }
+    ctx.saveObject(policy);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("policy", policy.getName());
+    data.put("constraintName", constraint.getName());
+    data.put("created", created);
+    List<String> leftNames = new ArrayList<>();
+    if (constraint.getLeftBundles() != null) {
+      for (Bundle b : constraint.getLeftBundles()) {
+        if (b != null) {
+          leftNames.add(b.getName());
+        }
+      }
+    }
+    List<String> rightNames = new ArrayList<>();
+    if (constraint.getRightBundles() != null) {
+      for (Bundle b : constraint.getRightBundles()) {
+        if (b != null) {
+          rightNames.add(b.getName());
+        }
+      }
+    }
+    data.put("leftRoles", leftNames);
+    data.put("rightRoles", rightNames);
+    return MnbAgentSupport.ok("UIAPI-80", data);
+  }
+
+  // —— UIAPI-81 Application provisioning policies (Forms / Templates) ——
+  @GET
+  @Path("applications/{name}/provisioningPolicies")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> listProvisioningPolicies(@PathParam("name") String name)
+      throws GeneralException {
+    MnbAgentSupport.requireAgentEnabled(this, "UIAPI-81");
+    SailPointContext ctx = getContext();
+    Application app = MnbAgentSupport.requireByIdOrName(ctx, Application.class, name, "UIAPI-81");
+    List<Map<String, Object>> policies = new ArrayList<>();
+    List<Form> forms = app.getProvisioningForms();
+    if (forms != null) {
+      for (Form form : forms) {
+        if (form == null) {
+          continue;
+        }
+        policies.add(summarizeProvisioningForm(form));
+      }
+    }
+    List<Template> templates = app.getTemplates();
+    if (templates != null) {
+      for (Template t : templates) {
+        if (t == null) {
+          continue;
+        }
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("kind", "template");
+        m.put("name", t.getName());
+        m.put("usage", t.getUsage() != null ? String.valueOf(t.getUsage()) : null);
+        m.put("schemaObjectType", t.getSchemaObjectType());
+        List<String> fieldNames = new ArrayList<>();
+        if (t.getFields() != null) {
+          for (Field f : t.getFields()) {
+            if (f != null && f.getName() != null) {
+              fieldNames.add(f.getName());
+            }
+          }
+        }
+        m.put("fields", fieldNames);
+        policies.add(m);
+      }
+    }
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("application", app.getName());
+    data.put("count", policies.size());
+    data.put("policies", policies);
+    return MnbAgentSupport.ok("UIAPI-81", data);
+  }
+
+  @POST
+  @Path("applications/{name}/provisioningPolicies")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> upsertProvisioningPolicy(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-81");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Application app = MnbAgentSupport.requireByIdOrName(ctx, Application.class, name, "UIAPI-81");
+    String policyName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("name")),
+            MnbAgentSupport.str(body.get("policyName")),
+            "Create");
+    String typeStr =
+        MnbAgentSupport.firstNonEmpty(MnbAgentSupport.str(body.get("type")), "Create");
+    Form.Type formType;
+    try {
+      formType = Form.Type.valueOf(typeStr);
+    } catch (IllegalArgumentException ex) {
+      throw MnbAgentSupport.error(
+          400,
+          "invalid_request",
+          "type must be a Form.Type (Create, Update, Delete, …)",
+          "UIAPI-81",
+          null);
+    }
+    String objectType =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("objectType")),
+            MnbAgentSupport.str(body.get("schemaObjectType")),
+            "account");
+    List<Form> forms = app.getProvisioningForms();
+    if (forms == null) {
+      forms = new ArrayList<>();
+    } else {
+      forms = new ArrayList<>(forms);
+    }
+    Form form = null;
+    for (Form existing : forms) {
+      if (existing != null
+          && policyName.equals(existing.getName())
+          && formType.equals(existing.getType())) {
+        form = existing;
+        break;
+      }
+    }
+    boolean created = form == null;
+    if (form == null) {
+      form = new Form();
+      form.setName(policyName);
+      form.setType(formType);
+      forms.add(form);
+    } else {
+      form.setType(formType);
+    }
+    form.setObjectType(objectType);
+    form.setApplication(app);
+    Object fieldsObj = body.get("fields");
+    if (fieldsObj instanceof List) {
+      // Replace fields when provided
+      if (form.getFields() != null) {
+        for (Field existing : new ArrayList<>(form.getFields())) {
+          if (existing != null && existing.getName() != null) {
+            form.removeField(existing.getName());
+          }
+        }
+      }
+      for (Object o : (List<?>) fieldsObj) {
+        if (!(o instanceof Map)) {
+          continue;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> fm = (Map<String, Object>) o;
+        String fieldName = MnbAgentSupport.str(fm.get("name"));
+        if (Util.isNullOrEmpty(fieldName)) {
+          continue;
+        }
+        Field field = new Field();
+        field.setName(fieldName);
+        field.setType(
+            MnbAgentSupport.firstNonEmpty(
+                MnbAgentSupport.str(fm.get("type")), AttributeDefinition.TYPE_STRING));
+        if (fm.get("required") instanceof Boolean) {
+          field.setRequired((Boolean) fm.get("required"));
+        } else if ("true".equalsIgnoreCase(String.valueOf(fm.get("required")))) {
+          field.setRequired(true);
+        }
+        Object value = fm.get("value");
+        if (value != null) {
+          field.setValue(value);
+        }
+        String scriptSrc = MnbAgentSupport.str(fm.get("script"));
+        if (!Util.isNullOrEmpty(scriptSrc)) {
+          field.setScript(new Script(scriptSrc));
+        }
+        form.add(field);
+      }
+    }
+    app.setProvisioningForms(forms);
+    ctx.saveObject(app);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("application", app.getName());
+    data.put("created", created);
+    data.put("policy", summarizeProvisioningForm(form));
+    return MnbAgentSupport.ok("UIAPI-81", data);
+  }
+
+  // —— UIAPI-82 SoD simulate / impact ——
+  @POST
+  @Path("policies/sod/{name}/simulate")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> simulateSodPolicy(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAgentEnabled(this, "UIAPI-82");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Policy policy = MnbAgentSupport.requireByIdOrName(ctx, Policy.class, name, "UIAPI-82");
+    String identityName =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("identity")),
+            MnbAgentSupport.str(body.get("identityName")));
+    Set<String> roleNames = new HashSet<>();
+    if (!Util.isNullOrEmpty(identityName)) {
+      Identity idn = MnbAgentSupport.requireByIdOrName(ctx, Identity.class, identityName, "UIAPI-82");
+      if (idn.getAssignedRoles() != null) {
+        for (Bundle b : idn.getAssignedRoles()) {
+          if (b != null && b.getName() != null) {
+            roleNames.add(b.getName());
+          }
+        }
+      }
+      if (idn.getBundles() != null) {
+        for (Bundle b : idn.getBundles()) {
+          if (b != null && b.getName() != null) {
+            roleNames.add(b.getName());
+          }
+        }
+      }
+    }
+    Object proposed = body.get("proposedRoles");
+    if (proposed == null) {
+      proposed = body.get("roles");
+    }
+    if (proposed instanceof List) {
+      for (Object o : (List<?>) proposed) {
+        if (o != null) {
+          roleNames.add(String.valueOf(o));
+        }
+      }
+    }
+    Object remove = body.get("removeRoles");
+    if (remove instanceof List) {
+      for (Object o : (List<?>) remove) {
+        if (o != null) {
+          roleNames.remove(String.valueOf(o));
+        }
+      }
+    }
+    List<Map<String, Object>> hits = new ArrayList<>();
+    if (policy.getSODConstraints() != null) {
+      for (SODConstraint c : policy.getSODConstraints()) {
+        if (c == null) {
+          continue;
+        }
+        Set<String> leftHit = new HashSet<>();
+        Set<String> rightHit = new HashSet<>();
+        if (c.getLeftBundles() != null) {
+          for (Bundle b : c.getLeftBundles()) {
+            if (b != null && roleNames.contains(b.getName())) {
+              leftHit.add(b.getName());
+            }
+          }
+        }
+        if (c.getRightBundles() != null) {
+          for (Bundle b : c.getRightBundles()) {
+            if (b != null && roleNames.contains(b.getName())) {
+              rightHit.add(b.getName());
+            }
+          }
+        }
+        if (!leftHit.isEmpty() && !rightHit.isEmpty()) {
+          Map<String, Object> hit = new LinkedHashMap<>();
+          hit.put("constraintName", c.getName());
+          hit.put("leftRoles", new ArrayList<>(leftHit));
+          hit.put("rightRoles", new ArrayList<>(rightHit));
+          hits.add(hit);
+        }
+      }
+    }
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("policy", policy.getName());
+    data.put("identity", identityName);
+    data.put("effectiveRoles", new ArrayList<>(roleNames));
+    data.put("wouldViolate", !hits.isEmpty());
+    data.put("violations", hits);
+    data.put(
+        "note",
+        "Static role-set intersection against SODConstraint left/right bundles (not full IIQ PolicyExecutor).");
+    return MnbAgentSupport.ok("UIAPI-82", data);
+  }
+
+  // —— UIAPI-83 GroupFactory upsert + run ——
+  @POST
+  @Path("groupFactories")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> upsertGroupFactory(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-83");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String name = MnbAgentSupport.str(body.get("name"));
+    String attr =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("factoryAttribute")),
+            MnbAgentSupport.str(body.get("attribute")));
+    if (Util.isNullOrEmpty(name) || Util.isNullOrEmpty(attr)) {
+      throw MnbAgentSupport.error(
+          400, "invalid_request", "name and factoryAttribute required", "UIAPI-83", null);
+    }
+    SailPointContext ctx = getContext();
+    GroupFactory factory = ctx.getObjectByName(GroupFactory.class, name);
+    boolean created = factory == null;
+    if (factory == null) {
+      factory = new GroupFactory();
+      factory.setName(name);
+    }
+    factory.setFactoryAttribute(attr);
+    if (body.containsKey("enabled")) {
+      Object en = body.get("enabled");
+      factory.setEnabled(en instanceof Boolean ? (Boolean) en : !"false".equalsIgnoreCase(String.valueOf(en)));
+    } else if (created) {
+      factory.setEnabled(true);
+    }
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      factory.setDescription(description);
+    }
+    ctx.saveObject(factory);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", factory.getName());
+    data.put("id", factory.getId());
+    data.put("factoryAttribute", factory.getFactoryAttribute());
+    data.put("enabled", factory.isEnabled());
+    data.put("created", created);
+    return MnbAgentSupport.ok("UIAPI-83", data);
+  }
+
+  @POST
+  @Path("groupFactories/{name}/run")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> runGroupFactory(@PathParam("name") String name)
+      throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-83");
+    SailPointContext ctx = getContext();
+    GroupFactory factory = MnbAgentSupport.requireByIdOrName(ctx, GroupFactory.class, name, "UIAPI-83");
+    Grouper grouper = new Grouper(ctx);
+    grouper.refreshFactory(factory);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", factory.getName());
+    data.put("factoryAttribute", factory.getFactoryAttribute());
+    data.put("ran", true);
+    data.put("lastRefresh", factory.getLastRefresh() != null ? factory.getLastRefresh().toString() : null);
+    return MnbAgentSupport.ok("UIAPI-83", data);
+  }
+
+  // —— UIAPI-85 Role assignment selector ——
+  @POST
+  @Path("roles/{name}/selector")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> setRoleSelector(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-85");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Bundle role = MnbAgentSupport.requireByIdOrName(ctx, Bundle.class, name, "UIAPI-85");
+    if (Boolean.TRUE.equals(body.get("clear")) || "clear".equalsIgnoreCase(MnbAgentSupport.str(body.get("op")))) {
+      role.setSelector(null);
+      ctx.saveObject(role);
+      ctx.commitTransaction();
+      Map<String, Object> cleared = new LinkedHashMap<>();
+      cleared.put("role", role.getName());
+      cleared.put("cleared", true);
+      return MnbAgentSupport.ok("UIAPI-85", cleared);
+    }
+    IdentitySelector selector = new IdentitySelector();
+    String population =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("population")),
+            MnbAgentSupport.str(body.get("populationName")));
+    String scriptSrc = MnbAgentSupport.str(body.get("script"));
+    Object matchTerms = body.get("matchTerms");
+    if (matchTerms == null) {
+      matchTerms = body.get("terms");
+    }
+    if (!Util.isNullOrEmpty(population)) {
+      GroupDefinition pop =
+          MnbAgentSupport.requireByIdOrName(ctx, GroupDefinition.class, population, "UIAPI-85");
+      selector.setPopulation(pop);
+    } else if (!Util.isNullOrEmpty(scriptSrc)) {
+      selector.setScript(new Script(scriptSrc));
+    } else if (matchTerms instanceof List) {
+      IdentitySelector.MatchExpression expr = new IdentitySelector.MatchExpression();
+      expr.setAnd(
+          body.get("and") instanceof Boolean
+              ? (Boolean) body.get("and")
+              : !"false".equalsIgnoreCase(String.valueOf(body.get("and"))));
+      for (Object o : (List<?>) matchTerms) {
+        if (!(o instanceof Map)) {
+          continue;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> tm = (Map<String, Object>) o;
+        IdentitySelector.MatchTerm term = new IdentitySelector.MatchTerm();
+        term.setName(MnbAgentSupport.str(tm.get("name")));
+        term.setValue(MnbAgentSupport.str(tm.get("value")));
+        if (tm.get("negative") instanceof Boolean) {
+          term.setNegative((Boolean) tm.get("negative"));
+        }
+        expr.addTerm(term);
+      }
+      selector.setMatchExpression(expr);
+    } else {
+      throw MnbAgentSupport.error(
+          400,
+          "invalid_request",
+          "Provide population, script, matchTerms, or clear=true",
+          "UIAPI-85",
+          null);
+    }
+    role.setSelector(selector);
+    ctx.saveObject(role);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("role", role.getName());
+    data.put("selectorSummary", selector.generateSummary());
+    data.put(
+        "selectorType",
+        !Util.isNullOrEmpty(population)
+            ? "population"
+            : (!Util.isNullOrEmpty(scriptSrc) ? "script" : "matchList"));
+    return MnbAgentSupport.ok("UIAPI-85", data);
+  }
+
+  // —— UIAPI-86 CertificationDefinition thin update ——
+  @POST
+  @Path("certifications/definitions/{name}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> updateCertificationDefinition(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-86");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    CertificationDefinition def =
+        MnbAgentSupport.requireByIdOrName(ctx, CertificationDefinition.class, name, "UIAPI-86");
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      def.setDescription(description);
+    }
+    String nameTemplate =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("nameTemplate")),
+            MnbAgentSupport.str(body.get("certificationNameTemplate")));
+    if (!Util.isNullOrEmpty(nameTemplate)) {
+      def.setNameTemplate(nameTemplate);
+      def.setCertificationNameTemplate(nameTemplate);
+    }
+    String owner =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("owner")),
+            MnbAgentSupport.str(body.get("certificationOwner")));
+    if (!Util.isNullOrEmpty(owner)) {
+      Identity ownerId = ctx.getObjectByName(Identity.class, owner);
+      if (ownerId != null) {
+        def.setCertificationOwner(ownerId);
+      } else {
+        def.setCertificationOwner(owner);
+      }
+    }
+    Object certifiers = body.get("certifiers");
+    if (certifiers instanceof List) {
+      List<String> names = new ArrayList<>();
+      for (Object o : (List<?>) certifiers) {
+        if (o != null) {
+          names.add(String.valueOf(o));
+        }
+      }
+      def.setCertifiers(names);
+    }
+    String type = MnbAgentSupport.str(body.get("type"));
+    if (!Util.isNullOrEmpty(type)) {
+      def.setType(type);
+    }
+    ctx.saveObject(def);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", def.getName());
+    data.put("id", def.getId());
+    data.put("description", def.getDescription());
+    data.put("nameTemplate", def.getNameTemplate());
+    data.put("type", def.getType() != null ? String.valueOf(def.getType()) : null);
+    data.put("certificationOwner", def.getCertificationOwner());
+    data.put("certifiers", def.getCertifiers());
+    return MnbAgentSupport.ok("UIAPI-86", data);
+  }
+
+  // —— UIAPI-87 Identity forwarding / OOO ——
+  @POST
+  @Path("identities/{name}/forwarding")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> setIdentityForwarding(
+      @PathParam("name") String name, Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireMutateGov(this, "UIAPI-87");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    Identity idn = MnbAgentSupport.requireByIdOrName(ctx, Identity.class, name, "UIAPI-87");
+    if (Boolean.TRUE.equals(body.get("clear")) || "clear".equalsIgnoreCase(MnbAgentSupport.str(body.get("op")))) {
+      idn.setPreference(Identity.PRF_FORWARD, null);
+      idn.setPreference(Identity.PRF_FORWARD_START_DATE, null);
+      idn.setPreference(Identity.PRF_FORWARD_END_DATE, null);
+      ctx.saveObject(idn);
+      ctx.commitTransaction();
+      Map<String, Object> cleared = new LinkedHashMap<>();
+      cleared.put("identity", idn.getName());
+      cleared.put("cleared", true);
+      return MnbAgentSupport.ok("UIAPI-87", cleared);
+    }
+    String forwardTo =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("forwardTo")),
+            MnbAgentSupport.str(body.get("delegate")),
+            MnbAgentSupport.str(body.get("forward")));
+    if (Util.isNullOrEmpty(forwardTo)) {
+      throw MnbAgentSupport.error(
+          400, "invalid_request", "forwardTo required (or clear=true)", "UIAPI-87", null);
+    }
+    Identity target = MnbAgentSupport.requireByIdOrName(ctx, Identity.class, forwardTo, "UIAPI-87");
+    idn.setPreference(Identity.PRF_FORWARD, target.getName());
+    String start =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("startDate")), MnbAgentSupport.str(body.get("start")));
+    String end =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("endDate")), MnbAgentSupport.str(body.get("end")));
+    if (!Util.isNullOrEmpty(start)) {
+      Date d = parseFlexibleDateLocal(start);
+      if (d != null) {
+        idn.setPreference(Identity.PRF_FORWARD_START_DATE, d);
+      }
+    }
+    if (!Util.isNullOrEmpty(end)) {
+      Date d = parseFlexibleDateLocal(end);
+      if (d != null) {
+        idn.setPreference(Identity.PRF_FORWARD_END_DATE, d);
+      }
+    }
+    ctx.saveObject(idn);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("identity", idn.getName());
+    data.put("forwardTo", target.getName());
+    data.put("startDate", start);
+    data.put("endDate", end);
+    return MnbAgentSupport.ok("UIAPI-87", data);
+  }
+
+  // —— UIAPI-88 Risk score weight patch ——
+  @POST
+  @Path("risk/scoreConfig")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> updateRiskScoreConfig(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-88");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    ScoreConfig cfg = ctx.getObjectByName(ScoreConfig.class, ScoreConfig.OBJ_NAME);
+    if (cfg == null) {
+      throw MnbAgentSupport.error(404, "not_found", "ScoreConfig not found", "UIAPI-88", null);
+    }
+    List<Map<String, Object>> updated = new ArrayList<>();
+    Object weights = body.get("identityScores");
+    if (weights == null) {
+      weights = body.get("weights");
+    }
+    if (weights instanceof List) {
+      for (Object o : (List<?>) weights) {
+        if (!(o instanceof Map)) {
+          continue;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> m = (Map<String, Object>) o;
+        String scoreName =
+            MnbAgentSupport.firstNonEmpty(
+                MnbAgentSupport.str(m.get("name")), MnbAgentSupport.str(m.get("score")));
+        if (Util.isNullOrEmpty(scoreName)) {
+          continue;
+        }
+        ScoreDefinition def = cfg.getIdentityScore(scoreName);
+        if (def == null) {
+          throw MnbAgentSupport.error(
+              404, "not_found", "Identity score not found: " + scoreName, "UIAPI-88", null);
+        }
+        if (m.get("weight") != null) {
+          def.setWeight(Integer.parseInt(String.valueOf(m.get("weight"))));
+        }
+        if (m.get("range") != null) {
+          def.setRange(Integer.parseInt(String.valueOf(m.get("range"))));
+        }
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("name", def.getName());
+        row.put("weight", def.getWeight());
+        row.put("range", def.getRange());
+        updated.add(row);
+      }
+    } else if (body.get("score") != null && body.get("weight") != null) {
+      String scoreName = MnbAgentSupport.str(body.get("score"));
+      ScoreDefinition def = cfg.getIdentityScore(scoreName);
+      if (def == null) {
+        throw MnbAgentSupport.error(
+            404, "not_found", "Identity score not found: " + scoreName, "UIAPI-88", null);
+      }
+      def.setWeight(Integer.parseInt(String.valueOf(body.get("weight"))));
+      Map<String, Object> row = new LinkedHashMap<>();
+      row.put("name", def.getName());
+      row.put("weight", def.getWeight());
+      updated.add(row);
+    } else {
+      throw MnbAgentSupport.error(
+          400,
+          "invalid_request",
+          "Provide identityScores:[{name,weight}] or score+weight",
+          "UIAPI-88",
+          null);
+    }
+    if (body.get("maximumScore") != null) {
+      cfg.setMaximumScore(Integer.parseInt(String.valueOf(body.get("maximumScore"))));
+    }
+    ctx.saveObject(cfg);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("updated", updated);
+    data.put("maximumScore", cfg.getMaximumScore());
+    return MnbAgentSupport.ok("UIAPI-88", data);
+  }
+
+  // —— UIAPI-89 TaskDefinition upsert (clone template) ——
+  @POST
+  @Path("taskDefinitions")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> upsertTaskDefinition(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-89");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    String name = MnbAgentSupport.str(body.get("name"));
+    if (Util.isNullOrEmpty(name)) {
+      throw MnbAgentSupport.error(400, "invalid_request", "name required", "UIAPI-89", null);
+    }
+    SailPointContext ctx = getContext();
+    TaskDefinition existing = ctx.getObjectByName(TaskDefinition.class, name);
+    boolean created = existing == null;
+    TaskDefinition td;
+    if (existing != null) {
+      td = existing;
+    } else {
+      String templateName =
+          MnbAgentSupport.firstNonEmpty(
+              MnbAgentSupport.str(body.get("template")),
+              MnbAgentSupport.str(body.get("parent")),
+              "Account Aggregation");
+      TaskDefinition template = ctx.getObjectByName(TaskDefinition.class, templateName);
+      if (template == null) {
+        throw MnbAgentSupport.error(
+            404, "not_found", "TaskDefinition template not found: " + templateName, "UIAPI-89", null);
+      }
+      td = (TaskDefinition) template.deepCopy((XMLReferenceResolver) ctx);
+      td.setId(null);
+      td.setName(name);
+      td.setTemplate(false);
+    }
+    String description = MnbAgentSupport.str(body.get("description"));
+    if (!Util.isNullOrEmpty(description)) {
+      td.setDescription(description);
+    }
+    Object argsObj = body.get("arguments");
+    if (argsObj instanceof Map) {
+      Attributes<String, Object> args = td.getArguments();
+      if (args == null) {
+        args = new Attributes<>();
+      }
+      @SuppressWarnings("unchecked")
+      Map<String, Object> am = (Map<String, Object>) argsObj;
+      for (Map.Entry<String, Object> e : am.entrySet()) {
+        if (e.getKey() != null) {
+          args.put(e.getKey(), e.getValue());
+        }
+      }
+      td.setArguments(args);
+    }
+    ctx.saveObject(td);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("name", td.getName());
+    data.put("id", td.getId());
+    data.put("created", created);
+    data.put("type", td.getType() != null ? String.valueOf(td.getType()) : null);
+    return MnbAgentSupport.ok("UIAPI-89", data);
+  }
+
+  // —— UIAPI-90 Stop aggregation / terminate running task by app ——
+  @POST
+  @Path("connectors/aggregate/stop")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Map<String, Object> stopAggregation(Map<String, Object> body) throws GeneralException {
+    MnbAgentSupport.requireAdvancedOps(this, "UIAPI-90");
+    body = MnbAgentSupport.bodyOrEmpty(body);
+    SailPointContext ctx = getContext();
+    String taskResultId =
+        MnbAgentSupport.firstNonEmpty(
+            MnbAgentSupport.str(body.get("taskResultId")), MnbAgentSupport.str(body.get("id")));
+    TaskResult target = null;
+    if (!Util.isNullOrEmpty(taskResultId)) {
+      target = ctx.getObject(TaskResult.class, taskResultId);
+      if (target == null) {
+        target = ctx.getObjectByName(TaskResult.class, taskResultId);
+      }
+    } else {
+      String appName =
+          MnbAgentSupport.firstNonEmpty(
+              MnbAgentSupport.str(body.get("application")), MnbAgentSupport.str(body.get("app")));
+      String nameContains =
+          MnbAgentSupport.firstNonEmpty(
+              MnbAgentSupport.str(body.get("taskNameContains")), "Aggregation");
+      QueryOptions qo = new QueryOptions();
+      qo.addFilter(Filter.isnull("completed"));
+      qo.setResultLimit(50);
+      List<TaskResult> running = ctx.getObjects(TaskResult.class, qo);
+      if (running != null) {
+        for (TaskResult tr : running) {
+          if (tr == null || tr.getName() == null) {
+            continue;
+          }
+          String n = tr.getName();
+          if (!n.toLowerCase(Locale.ROOT).contains(nameContains.toLowerCase(Locale.ROOT))) {
+            continue;
+          }
+          if (!Util.isNullOrEmpty(appName)) {
+            Object apps = tr.getAttribute("applications");
+            String hay = String.valueOf(apps) + " " + n;
+            if (!hay.toLowerCase(Locale.ROOT).contains(appName.toLowerCase(Locale.ROOT))) {
+              continue;
+            }
+          }
+          target = tr;
+          break;
+        }
+      }
+    }
+    if (target == null) {
+      throw MnbAgentSupport.error(
+          404,
+          "not_found",
+          "No matching running task result",
+          "UIAPI-90",
+          "Pass taskResultId or application (+ optional taskNameContains)");
+    }
+    TaskManager tm = new TaskManager(ctx);
+    boolean terminated = tm.terminate(target);
+    ctx.commitTransaction();
+    Map<String, Object> data = new LinkedHashMap<>();
+    data.put("taskResultId", target.getId());
+    data.put("taskResultName", target.getName());
+    data.put("terminated", terminated);
+    return MnbAgentSupport.ok("UIAPI-90", data);
+  }
+
+  private static Date parseFlexibleDateLocal(String raw) {
+    if (Util.isNullOrEmpty(raw)) {
+      return null;
+    }
+    try {
+      long epoch = Long.parseLong(raw.trim());
+      if (raw.trim().length() <= 10) {
+        epoch = epoch * 1000L;
+      }
+      return new Date(epoch);
+    } catch (NumberFormatException ignored) {
+      // fall through
+    }
+    String[] patterns =
+        new String[] {"yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"};
+    for (String p : patterns) {
+      try {
+        return new java.text.SimpleDateFormat(p).parse(raw.trim());
+      } catch (Exception ignored) {
+        // try next
+      }
+    }
+    return null;
+  }
+
+  private static List<SPRight> resolveSpRights(SailPointContext ctx, List<?> rightsObj, String gapId)
+      throws GeneralException {
+    List<SPRight> rights = new ArrayList<>();
+    for (Object o : rightsObj) {
+      if (o == null) {
+        continue;
+      }
+      String rightName = String.valueOf(o);
+      SPRight right = ctx.getObjectByName(SPRight.class, rightName);
+      if (right == null) {
+        throw MnbAgentSupport.error(
+            404, "not_found", "SPRight not found: " + rightName, gapId, null);
+      }
+      rights.add(right);
+    }
+    return rights;
+  }
+
+  private static List<String> rightNames(Capability cap) {
+    List<String> names = new ArrayList<>();
+    if (cap.getRights() != null) {
+      for (SPRight r : cap.getRights()) {
+        if (r != null && r.getName() != null) {
+          names.add(r.getName());
+        }
+      }
+    }
+    return names;
+  }
+
+  private static Map<String, Object> summarizeProvisioningForm(Form form) {
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("kind", "form");
+    m.put("name", form.getName());
+    m.put("type", form.getType() != null ? String.valueOf(form.getType()) : null);
+    m.put("objectType", form.getObjectType());
+    List<Map<String, Object>> fields = new ArrayList<>();
+    if (form.getFields() != null) {
+      for (Field f : form.getFields()) {
+        if (f == null) {
+          continue;
+        }
+        Map<String, Object> fm = new LinkedHashMap<>();
+        fm.put("name", f.getName());
+        fm.put("type", f.getType());
+        fm.put("required", f.isRequired());
+        if (f.getValue() != null) {
+          fm.put("value", String.valueOf(f.getValue()));
+        }
+        if (f.getScript() != null && f.getScript().getSource() != null) {
+          fm.put("hasScript", true);
+        }
+        fields.add(fm);
+      }
+    }
+    m.put("fields", fields);
+    return m;
   }
 
   private static boolean isTechnicalIdentity(Identity idn) {

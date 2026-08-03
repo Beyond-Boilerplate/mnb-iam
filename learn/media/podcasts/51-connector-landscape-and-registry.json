@@ -1,0 +1,62 @@
+{
+  "stem": "51-connector-landscape-and-registry",
+  "title": "Lesson 51 \u2014 Connector Landscape & Registry",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 641952,
+  "durationMin": 10.7,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 114,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 53328
+    },
+    {
+      "id": "why-this-matters",
+      "words": 122,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 64343
+    },
+    {
+      "id": "concepts-what-connectorregistry-actually",
+      "words": 158,
+      "audio": "02-concepts-what-connectorregistry-actually.mp3",
+      "durationMs": 100152
+    },
+    {
+      "id": "concepts-delimitedfile-vs-direct-vs-web-",
+      "words": 243,
+      "audio": "03-concepts-delimitedfile-vs-direct-vs-web-.mp3",
+      "durationMs": 141624
+    },
+    {
+      "id": "concepts-why-featuresstring-is-a-promise",
+      "words": 201,
+      "audio": "04-concepts-why-featuresstring-is-a-promise.mp3",
+      "durationMs": 120912
+    },
+    {
+      "id": "concepts-template-vs-mnb-the-bank-s-nami",
+      "words": 97,
+      "audio": "05-concepts-template-vs-mnb-the-bank-s-nami.mp3",
+      "durationMs": 60408
+    },
+    {
+      "id": "how-it-works",
+      "words": 75,
+      "audio": "06-how-it-works.mp3",
+      "durationMs": 50496
+    },
+    {
+      "id": "close",
+      "words": 86,
+      "audio": "07-close.mp3",
+      "durationMs": 46512
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/51-connector-landscape-and-registry.md",
+  "audio": "learn/media/podcasts/51-connector-landscape-and-registry.mp3"
+}

@@ -3,7 +3,7 @@
 **Level:** Intermediate  
 **Track:** Core Path · Mid-capstone  
 **Time:** 25–40 minutes  
-**Prereq:** Lessons 29–34; scenario runners under `tools/lab/scripts/scenarios/`  
+**Prereq:** Lessons 29–34 (+ **34b** LCM automation if available); scenario runners under `tools/lab/scripts/scenarios/`  
 **Path:** Core (01–50)
 
 ---
@@ -80,5 +80,5 @@ Then Aggregate **MNB-HR** and run **Refresh MNB Attributes** / Managers / Roles 
 - Lifecycle track closed with runner-backed HR deltas
 - Ready for requests / SoD / certifications
 
-**Previous:** [Lesson 34 — Rapid Offboarding Drill](34-rapid-offboarding-drill.md)  
+**Previous:** [Lesson 34b — LCM Automation in Action](34b-lcm-automation-in-action.md) · [Lesson 34 — Rapid Offboarding Drill](34-rapid-offboarding-drill.md)  
 **Next:** [Lesson 35 — Access Request Catalog](35-access-request-catalog.md)

@@ -1,0 +1,62 @@
+{
+  "stem": "38-identity-request-tracking",
+  "title": "Lesson 38 \u2014 IdentityRequest Tracking & Auditing",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 320280,
+  "durationMin": 5.3,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 119,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 58920
+    },
+    {
+      "id": "why-this-matters",
+      "words": 81,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 45768
+    },
+    {
+      "id": "concepts-evidence-spine",
+      "words": 2,
+      "audio": "02-concepts-evidence-spine.mp3",
+      "durationMs": 1776
+    },
+    {
+      "id": "concepts-pack-contents-meridian-minimum",
+      "words": 52,
+      "audio": "03-concepts-pack-contents-meridian-minimum.mp3",
+      "durationMs": 45696
+    },
+    {
+      "id": "concepts-three-stories-this-pack-should-",
+      "words": 47,
+      "audio": "04-concepts-three-stories-this-pack-should-.mp3",
+      "durationMs": 39384
+    },
+    {
+      "id": "concepts-the-wrong-way",
+      "words": 26,
+      "audio": "05-concepts-the-wrong-way.mp3",
+      "durationMs": 13896
+    },
+    {
+      "id": "how-it-works",
+      "words": 103,
+      "audio": "06-how-it-works.mp3",
+      "durationMs": 72696
+    },
+    {
+      "id": "close",
+      "words": 64,
+      "audio": "07-close.mp3",
+      "durationMs": 37968
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/38-identity-request-tracking.md",
+  "audio": "learn/media/podcasts/38-identity-request-tracking.mp3"
+}

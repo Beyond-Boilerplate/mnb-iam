@@ -60,5 +60,10 @@ On the public site, Verify now checks the **homelab IIQ** in-cluster (`identityi
 
 ```bash
 python3 tools/generate-mnb-curriculum.py   # lab-data only
-python3 learn/build.py                     # HTML
+# Optional: Meridian IAM Audio (multi-agent conversational podcasts)
+# cd tools/podcast-studio && source .venv/bin/activate && ./run.py E01
+python3 learn/build.py                     # HTML (+ copies learn/media/audio when present)
 ```
+
+**Audio hub:** [`audio.html`](./dist/audio.html) after build — thematic two-host episodes
+(not per-lesson TTS). Pipeline: [`tools/podcast-studio/README.md`](../tools/podcast-studio/README.md).

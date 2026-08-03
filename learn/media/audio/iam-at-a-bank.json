@@ -1,0 +1,258 @@
+{
+  "id": "E01",
+  "slug": "iam-at-a-bank",
+  "title": "What IAM Actually Is (At a Bank)",
+  "season": 1,
+  "themes": [
+    "iam-fundamentals",
+    "bank-controls",
+    "sailpoint-role"
+  ],
+  "source_lessons": [
+    "01-bank-briefing-and-ui",
+    "02-meridian-org-model"
+  ],
+  "audio": "learn/media/audio/iam-at-a-bank.mp3",
+  "script": "tools/podcast-studio/out/E01/03-dialogue.md",
+  "hosts": {
+    "interviewer": "Alex",
+    "expert": "Jordan",
+    "voices": {
+      "ALEX": "en-US-BrianNeural",
+      "JORDAN": "en-US-JennyNeural"
+    }
+  },
+  "turns": 38,
+  "durationMs": 353424,
+  "durationMin": 5.9,
+  "turnMeta": [
+    {
+      "i": 0,
+      "speaker": "ALEX",
+      "chars": 100,
+      "durationMs": 7560
+    },
+    {
+      "i": 1,
+      "speaker": "JORDAN",
+      "chars": 84,
+      "durationMs": 6264
+    },
+    {
+      "i": 2,
+      "speaker": "ALEX",
+      "chars": 63,
+      "durationMs": 4632
+    },
+    {
+      "i": 3,
+      "speaker": "JORDAN",
+      "chars": 99,
+      "durationMs": 9552
+    },
+    {
+      "i": 4,
+      "speaker": "ALEX",
+      "chars": 51,
+      "durationMs": 3552
+    },
+    {
+      "i": 5,
+      "speaker": "JORDAN",
+      "chars": 121,
+      "durationMs": 9912
+    },
+    {
+      "i": 6,
+      "speaker": "ALEX",
+      "chars": 103,
+      "durationMs": 13032
+    },
+    {
+      "i": 7,
+      "speaker": "JORDAN",
+      "chars": 124,
+      "durationMs": 11064
+    },
+    {
+      "i": 8,
+      "speaker": "ALEX",
+      "chars": 30,
+      "durationMs": 2496
+    },
+    {
+      "i": 9,
+      "speaker": "JORDAN",
+      "chars": 119,
+      "durationMs": 11856
+    },
+    {
+      "i": 10,
+      "speaker": "ALEX",
+      "chars": 58,
+      "durationMs": 6360
+    },
+    {
+      "i": 11,
+      "speaker": "JORDAN",
+      "chars": 120,
+      "durationMs": 11160
+    },
+    {
+      "i": 12,
+      "speaker": "ALEX",
+      "chars": 64,
+      "durationMs": 6768
+    },
+    {
+      "i": 13,
+      "speaker": "JORDAN",
+      "chars": 106,
+      "durationMs": 9120
+    },
+    {
+      "i": 14,
+      "speaker": "ALEX",
+      "chars": 29,
+      "durationMs": 2376
+    },
+    {
+      "i": 15,
+      "speaker": "JORDAN",
+      "chars": 208,
+      "durationMs": 18624
+    },
+    {
+      "i": 16,
+      "speaker": "ALEX",
+      "chars": 77,
+      "durationMs": 6864
+    },
+    {
+      "i": 17,
+      "speaker": "JORDAN",
+      "chars": 366,
+      "durationMs": 29352
+    },
+    {
+      "i": 18,
+      "speaker": "ALEX",
+      "chars": 61,
+      "durationMs": 4896
+    },
+    {
+      "i": 19,
+      "speaker": "JORDAN",
+      "chars": 190,
+      "durationMs": 17208
+    },
+    {
+      "i": 20,
+      "speaker": "ALEX",
+      "chars": 47,
+      "durationMs": 4080
+    },
+    {
+      "i": 21,
+      "speaker": "JORDAN",
+      "chars": 124,
+      "durationMs": 12648
+    },
+    {
+      "i": 22,
+      "speaker": "ALEX",
+      "chars": 71,
+      "durationMs": 5928
+    },
+    {
+      "i": 23,
+      "speaker": "JORDAN",
+      "chars": 170,
+      "durationMs": 14256
+    },
+    {
+      "i": 24,
+      "speaker": "ALEX",
+      "chars": 41,
+      "durationMs": 3960
+    },
+    {
+      "i": 25,
+      "speaker": "JORDAN",
+      "chars": 84,
+      "durationMs": 8760
+    },
+    {
+      "i": 26,
+      "speaker": "ALEX",
+      "chars": 44,
+      "durationMs": 3648
+    },
+    {
+      "i": 27,
+      "speaker": "JORDAN",
+      "chars": 146,
+      "durationMs": 12456
+    },
+    {
+      "i": 28,
+      "speaker": "ALEX",
+      "chars": 50,
+      "durationMs": 4608
+    },
+    {
+      "i": 29,
+      "speaker": "JORDAN",
+      "chars": 124,
+      "durationMs": 10872
+    },
+    {
+      "i": 30,
+      "speaker": "ALEX",
+      "chars": 135,
+      "durationMs": 9840
+    },
+    {
+      "i": 31,
+      "speaker": "JORDAN",
+      "chars": 90,
+      "durationMs": 7776
+    },
+    {
+      "i": 32,
+      "speaker": "ALEX",
+      "chars": 138,
+      "durationMs": 9840
+    },
+    {
+      "i": 33,
+      "speaker": "JORDAN",
+      "chars": 129,
+      "durationMs": 9408
+    },
+    {
+      "i": 34,
+      "speaker": "ALEX",
+      "chars": 156,
+      "durationMs": 12432
+    },
+    {
+      "i": 35,
+      "speaker": "JORDAN",
+      "chars": 133,
+      "durationMs": 10416
+    },
+    {
+      "i": 36,
+      "speaker": "ALEX",
+      "chars": 48,
+      "durationMs": 4080
+    },
+    {
+      "i": 37,
+      "speaker": "JORDAN",
+      "chars": 75,
+      "durationMs": 6912
+    }
+  ]
+}

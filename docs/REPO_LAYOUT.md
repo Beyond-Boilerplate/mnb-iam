@@ -22,13 +22,13 @@ Host Tomcat path (alternate): `./tools/lab/up.sh`
 | `docker/` + `docker-compose.iiq.yml` | Lab stack images / Compose |
 | `tools/lab/` | Lab bootstrap (Docker + host) |
 | `tools/iiq-mcp/` | IdentityIQ MCP server |
-| `tools/iiq-chat/` | Teller chatbot (+ `eval/` blackbox suite) |
+| `tools/iiq-chat/` | Teller chatbot (+ Auto-story UI at `/auto-story.html`, `eval/` suite) |
 | `tools/iiq-verify/` | Lesson verify helpers |
 | `docs/` | Lessons, LOCAL_SETUP, MCP tools, SSD |
 | `learn/` | Academy site builder |
 | `deploy/` | Helm / CD |
 | `jira-stories/` | Offline ticket fixtures for agents |
-| `scripts/` | Stock SSB Ant scripts (+ `iiq-delivery/`, `jira/`) |
+| `scripts/` | Stock SSB Ant scripts (+ `iiq-delivery/`, `jira/`, `auto_story/`) |
 
 ## Archive (not runtime)
 

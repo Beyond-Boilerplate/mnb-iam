@@ -1,0 +1,11 @@
+{
+  "key": "MNB-119",
+  "id": "11901",
+  "fields": {
+    "summary": "Create population Kathmandu Hub risk reviewers",
+    "status": { "name": "To Do" },
+    "issuetype": { "name": "Story" },
+    "labels": ["governance-admin", "agent-ready"],
+    "description": "Create IIQ population 'Kathmandu Hub risk reviewers' with a filter suitable for hub risk reviewers. Verify via get_population."
+  }
+}

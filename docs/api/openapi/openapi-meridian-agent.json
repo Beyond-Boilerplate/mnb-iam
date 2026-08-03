@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Meridian Custom APIs",
-    "version": "1.3.0",
-    "description": "Bank-owned IdentityIQ Custom APIs for MCP / ITSM orchestration. Closes UI-VS-API gaps (UIAPI-01\u202627). High-risk ops require plugin settings (mutateGovernanceEnabled, passwordResetEnabled, advancedOpsEnabled). See docs/api/UI-VS-API-GAPS.md and docs/api/MCP-TOOLS.md.",
+    "version": "1.3.15",
+    "description": "Bank-owned IdentityIQ Custom APIs for MCP / ITSM orchestration. Closes UI-VS-API gaps (UIAPI-01\u202690). High-risk ops require plugin settings (mutateGovernanceEnabled, passwordResetEnabled, advancedOpsEnabled). See docs/api/UI-VS-API-GAPS.md and docs/api/MCP-TOOLS.md.",
     "x-gap-register": [
       {
         "id": "UIAPI-01",
@@ -220,6 +220,198 @@
         "primaryPath": "GET /mnbToolkit/ping",
         "notes": "Toolkit health ping",
         "mcpTool": "iiq_uiapi_27"
+      },
+      {
+        "id": "UIAPI-28",
+        "category": "entitlements",
+        "status": "implemented",
+        "primaryPath": "GET|POST /mnbToolkit/agent/entitlements*",
+        "notes": "Managed entitlements list/upsert/promote",
+        "mcpTool": "iiq_uiapi_28"
+      },
+      {
+        "id": "UIAPI-29",
+        "category": "roles",
+        "status": "implemented",
+        "primaryPath": "GET|POST /mnbToolkit/agent/roles*",
+        "notes": "Role list/create/profiles/delete",
+        "mcpTool": "iiq_uiapi_29"
+      },
+      {
+        "id": "UIAPI-30",
+        "category": "jml",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/jml/{event}",
+        "notes": "Run JML lifecycle event",
+        "mcpTool": "iiq_uiapi_30"
+      },
+      {
+        "id": "UIAPI-31",
+        "category": "certifications",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/certifications/campaigns",
+        "notes": "Create certification campaign",
+        "mcpTool": "iiq_uiapi_31"
+      },
+      {
+        "id": "UIAPI-32",
+        "category": "sod",
+        "status": "implemented",
+        "primaryPath": "GET|POST /mnbToolkit/agent/policies/sod*",
+        "notes": "SoD policy list/create/delete",
+        "mcpTool": "iiq_uiapi_32"
+      },
+      {
+        "id": "UIAPI-60",
+        "category": "console",
+        "status": "implemented",
+        "primaryPath": "GET /mnbToolkit/agent/console/*",
+        "notes": "Teller console desks (summary/orphans/\u2026)",
+        "mcpTool": "iiq_uiapi_60"
+      },
+      {
+        "id": "UIAPI-73",
+        "category": "applications",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/applications/{name}/schema/apply",
+        "notes": "Apply discovered schema attrs",
+        "mcpTool": "iiq_uiapi_73"
+      },
+      {
+        "id": "UIAPI-74",
+        "category": "applications",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/applications/{name}/correlationConfig",
+        "notes": "Write correlation config",
+        "mcpTool": "iiq_uiapi_74"
+      },
+      {
+        "id": "UIAPI-75",
+        "category": "provisioning",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/provisioning/{id}/cancel",
+        "notes": "Cancel provisioning transaction",
+        "mcpTool": "iiq_uiapi_75"
+      },
+      {
+        "id": "UIAPI-76",
+        "category": "jml",
+        "status": "implemented",
+        "primaryPath": "GET|POST /mnbToolkit/agent/lifecycleEvents",
+        "notes": "LifecycleEvent list/upsert",
+        "mcpTool": "iiq_uiapi_76"
+      },
+      {
+        "id": "UIAPI-77",
+        "category": "config",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/objectConfigs/{name}/attributes",
+        "notes": "Patch ObjectConfig attribute",
+        "mcpTool": "iiq_uiapi_77"
+      },
+      {
+        "id": "UIAPI-78",
+        "category": "passwords",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/passwordPolicies",
+        "notes": "Upsert PasswordPolicy",
+        "mcpTool": "iiq_uiapi_78"
+      },
+      {
+        "id": "UIAPI-79",
+        "category": "roles",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/roles/{name}/requirements",
+        "notes": "Set required roles on Bundle",
+        "mcpTool": "iiq_uiapi_79"
+      },
+      {
+        "id": "UIAPI-80",
+        "category": "sod",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/policies/sod/{name}/constraints",
+        "notes": "Update SoD left/right constraints",
+        "mcpTool": "iiq_uiapi_80"
+      },
+      {
+        "id": "UIAPI-81",
+        "category": "applications",
+        "status": "implemented",
+        "primaryPath": "GET|POST /mnbToolkit/agent/applications/{name}/provisioningPolicies",
+        "notes": "Provisioning policy Forms",
+        "mcpTool": "iiq_uiapi_81"
+      },
+      {
+        "id": "UIAPI-82",
+        "category": "sod",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/policies/sod/{name}/simulate",
+        "notes": "Simulate SoD role conflicts",
+        "mcpTool": "iiq_uiapi_82"
+      },
+      {
+        "id": "UIAPI-83",
+        "category": "groups",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/groupFactories*",
+        "notes": "GroupFactory upsert/run",
+        "mcpTool": "iiq_uiapi_83"
+      },
+      {
+        "id": "UIAPI-84",
+        "category": "capabilities",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/capabilities/{name}/rights",
+        "notes": "Set Capability SPRights",
+        "mcpTool": "iiq_uiapi_84"
+      },
+      {
+        "id": "UIAPI-85",
+        "category": "roles",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/roles/{name}/selector",
+        "notes": "Set Bundle assignment selector",
+        "mcpTool": "iiq_uiapi_85"
+      },
+      {
+        "id": "UIAPI-86",
+        "category": "certifications",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/certifications/definitions/{name}",
+        "notes": "Patch CertificationDefinition",
+        "mcpTool": "iiq_uiapi_86"
+      },
+      {
+        "id": "UIAPI-87",
+        "category": "work-items",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/identities/{name}/forwarding",
+        "notes": "Identity forwarding/OOO",
+        "mcpTool": "iiq_uiapi_87"
+      },
+      {
+        "id": "UIAPI-88",
+        "category": "risk",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/risk/scoreConfig",
+        "notes": "Patch risk score weights",
+        "mcpTool": "iiq_uiapi_88"
+      },
+      {
+        "id": "UIAPI-89",
+        "category": "tasks",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/taskDefinitions",
+        "notes": "TaskDefinition upsert",
+        "mcpTool": "iiq_uiapi_89"
+      },
+      {
+        "id": "UIAPI-90",
+        "category": "aggregation",
+        "status": "implemented",
+        "primaryPath": "POST /mnbToolkit/agent/connectors/aggregate/stop",
+        "notes": "Stop running aggregation",
+        "mcpTool": "iiq_uiapi_90"
       }
     ]
   },
@@ -345,6 +537,102 @@
     {
       "name": "UIAPI-27",
       "description": "Toolkit health ping"
+    },
+    {
+      "name": "UIAPI-28",
+      "description": "Managed entitlements list/upsert/promote"
+    },
+    {
+      "name": "UIAPI-29",
+      "description": "Role list/create/profiles/delete"
+    },
+    {
+      "name": "UIAPI-30",
+      "description": "Run JML lifecycle event"
+    },
+    {
+      "name": "UIAPI-31",
+      "description": "Create certification campaign"
+    },
+    {
+      "name": "UIAPI-32",
+      "description": "SoD policy list/create/delete"
+    },
+    {
+      "name": "UIAPI-60",
+      "description": "Teller console desks (summary/orphans/\u2026)"
+    },
+    {
+      "name": "UIAPI-73",
+      "description": "Apply discovered schema attrs"
+    },
+    {
+      "name": "UIAPI-74",
+      "description": "Write correlation config"
+    },
+    {
+      "name": "UIAPI-75",
+      "description": "Cancel provisioning transaction"
+    },
+    {
+      "name": "UIAPI-76",
+      "description": "LifecycleEvent list/upsert"
+    },
+    {
+      "name": "UIAPI-77",
+      "description": "Patch ObjectConfig attribute"
+    },
+    {
+      "name": "UIAPI-78",
+      "description": "Upsert PasswordPolicy"
+    },
+    {
+      "name": "UIAPI-79",
+      "description": "Set required roles on Bundle"
+    },
+    {
+      "name": "UIAPI-80",
+      "description": "Update SoD left/right constraints"
+    },
+    {
+      "name": "UIAPI-81",
+      "description": "Provisioning policy Forms"
+    },
+    {
+      "name": "UIAPI-82",
+      "description": "Simulate SoD role conflicts"
+    },
+    {
+      "name": "UIAPI-83",
+      "description": "GroupFactory upsert/run"
+    },
+    {
+      "name": "UIAPI-84",
+      "description": "Set Capability SPRights"
+    },
+    {
+      "name": "UIAPI-85",
+      "description": "Set Bundle assignment selector"
+    },
+    {
+      "name": "UIAPI-86",
+      "description": "Patch CertificationDefinition"
+    },
+    {
+      "name": "UIAPI-87",
+      "description": "Identity forwarding/OOO"
+    },
+    {
+      "name": "UIAPI-88",
+      "description": "Patch risk score weights"
+    },
+    {
+      "name": "UIAPI-89",
+      "description": "TaskDefinition upsert"
+    },
+    {
+      "name": "UIAPI-90",
+      "description": "Stop running aggregation"
     }
   ],
   "paths": {
@@ -1752,6 +2040,64 @@
             "basicAuth": []
           }
         ]
+      },
+      "post": {
+        "tags": [
+          "UIAPI-10",
+          "meridian-agent"
+        ],
+        "summary": "Create workgroup",
+        "operationId": "post_mnbToolkit_agent_workgroups",
+        "x-uiapi-id": "UIAPI-10",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_10_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
       }
     },
     "/mnbToolkit/agent/workgroups/{name}/members": {
@@ -2290,6 +2636,64 @@
             "basicAuth": []
           }
         ]
+      },
+      "post": {
+        "tags": [
+          "UIAPI-16",
+          "meridian-agent"
+        ],
+        "summary": "Create quicklink",
+        "operationId": "post_mnbToolkit_agent_quicklinks",
+        "x-uiapi-id": "UIAPI-16",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_16_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
       }
     },
     "/mnbToolkit/agent/emailTemplates": {
@@ -2400,6 +2804,74 @@
             }
           }
         ]
+      },
+      "post": {
+        "tags": [
+          "UIAPI-17",
+          "meridian-agent"
+        ],
+        "summary": "Update email template",
+        "operationId": "post_mnbToolkit_agent_emailTemplates_name",
+        "x-uiapi-id": "UIAPI-17",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_17_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
       }
     },
     "/mnbToolkit/agent/audit/events": {
@@ -3068,6 +3540,1550 @@
             "basicAuth": []
           }
         ]
+      }
+    },
+    "/mnbToolkit/agent/console/summary": {
+      "get": {
+        "tags": [
+          "UIAPI-60",
+          "meridian-agent"
+        ],
+        "summary": "Console summary desk",
+        "operationId": "get_mnbToolkit_agent_console_summary",
+        "x-uiapi-id": "UIAPI-60",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_60_get",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/console/orphans": {
+      "get": {
+        "tags": [
+          "UIAPI-60",
+          "meridian-agent"
+        ],
+        "summary": "Console orphans desk",
+        "operationId": "get_mnbToolkit_agent_console_orphans",
+        "x-uiapi-id": "UIAPI-60",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_60_get",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/console/menu": {
+      "get": {
+        "tags": [
+          "UIAPI-60",
+          "meridian-agent"
+        ],
+        "summary": "Console menu",
+        "operationId": "get_mnbToolkit_agent_console_menu",
+        "x-uiapi-id": "UIAPI-60",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_60_get",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/policies/sod": {
+      "get": {
+        "tags": [
+          "UIAPI-32",
+          "meridian-agent"
+        ],
+        "summary": "List SoD policies",
+        "operationId": "get_mnbToolkit_agent_policies_sod",
+        "x-uiapi-id": "UIAPI-32",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_32_get",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "UIAPI-32",
+          "meridian-agent"
+        ],
+        "summary": "Create/update SoD policy",
+        "operationId": "post_mnbToolkit_agent_policies_sod",
+        "x-uiapi-id": "UIAPI-32",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_32_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/policies/sod/{name}/delete": {
+      "post": {
+        "tags": [
+          "UIAPI-32",
+          "meridian-agent"
+        ],
+        "summary": "Delete SoD policy",
+        "operationId": "post_mnbToolkit_agent_policies_sod_name_delete",
+        "x-uiapi-id": "UIAPI-32",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_32_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/policies/sod/{name}/constraints": {
+      "post": {
+        "tags": [
+          "UIAPI-80",
+          "meridian-agent"
+        ],
+        "summary": "Update SoD constraints",
+        "operationId": "post_mnbToolkit_agent_policies_sod_name_constraints",
+        "x-uiapi-id": "UIAPI-80",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_80_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/policies/sod/{name}/simulate": {
+      "post": {
+        "tags": [
+          "UIAPI-82",
+          "meridian-agent"
+        ],
+        "summary": "Simulate SoD conflicts",
+        "operationId": "post_mnbToolkit_agent_policies_sod_name_simulate",
+        "x-uiapi-id": "UIAPI-82",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_82_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/applications/{name}/schema/apply": {
+      "post": {
+        "tags": [
+          "UIAPI-73",
+          "meridian-agent"
+        ],
+        "summary": "Apply schema attributes",
+        "operationId": "post_mnbToolkit_agent_applications_name_schema_apply",
+        "x-uiapi-id": "UIAPI-73",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_73_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/applications/{name}/correlationConfig": {
+      "post": {
+        "tags": [
+          "UIAPI-74",
+          "meridian-agent"
+        ],
+        "summary": "Update correlation config",
+        "operationId": "post_mnbToolkit_agent_applications_name_correlationConfig",
+        "x-uiapi-id": "UIAPI-74",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_74_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/applications/{name}/provisioningPolicies": {
+      "get": {
+        "tags": [
+          "UIAPI-81",
+          "meridian-agent"
+        ],
+        "summary": "List provisioning policies",
+        "operationId": "get_mnbToolkit_agent_applications_name_provisioningPolicies",
+        "x-uiapi-id": "UIAPI-81",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_81_get",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "UIAPI-81",
+          "meridian-agent"
+        ],
+        "summary": "Upsert provisioning policy Form",
+        "operationId": "post_mnbToolkit_agent_applications_name_provisioningPolicies",
+        "x-uiapi-id": "UIAPI-81",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_81_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/provisioning/{id}/cancel": {
+      "post": {
+        "tags": [
+          "UIAPI-75",
+          "meridian-agent"
+        ],
+        "summary": "Cancel provisioning transaction",
+        "operationId": "post_mnbToolkit_agent_provisioning_id_cancel",
+        "x-uiapi-id": "UIAPI-75",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_75_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/lifecycleEvents": {
+      "get": {
+        "tags": [
+          "UIAPI-76",
+          "meridian-agent"
+        ],
+        "summary": "List lifecycle events",
+        "operationId": "get_mnbToolkit_agent_lifecycleEvents",
+        "x-uiapi-id": "UIAPI-76",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_76_get",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "UIAPI-76",
+          "meridian-agent"
+        ],
+        "summary": "Upsert lifecycle event",
+        "operationId": "post_mnbToolkit_agent_lifecycleEvents",
+        "x-uiapi-id": "UIAPI-76",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_76_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/objectConfigs/{name}/attributes": {
+      "post": {
+        "tags": [
+          "UIAPI-77",
+          "meridian-agent"
+        ],
+        "summary": "Patch ObjectConfig attribute",
+        "operationId": "post_mnbToolkit_agent_objectConfigs_name_attributes",
+        "x-uiapi-id": "UIAPI-77",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_77_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/passwordPolicies": {
+      "post": {
+        "tags": [
+          "UIAPI-78",
+          "meridian-agent"
+        ],
+        "summary": "Upsert password policy",
+        "operationId": "post_mnbToolkit_agent_passwordPolicies",
+        "x-uiapi-id": "UIAPI-78",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_78_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/roles/{name}/requirements": {
+      "post": {
+        "tags": [
+          "UIAPI-79",
+          "meridian-agent"
+        ],
+        "summary": "Set role requirements",
+        "operationId": "post_mnbToolkit_agent_roles_name_requirements",
+        "x-uiapi-id": "UIAPI-79",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_79_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/groupFactories": {
+      "post": {
+        "tags": [
+          "UIAPI-83",
+          "meridian-agent"
+        ],
+        "summary": "Upsert group factory",
+        "operationId": "post_mnbToolkit_agent_groupFactories",
+        "x-uiapi-id": "UIAPI-83",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_83_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/groupFactories/{name}/run": {
+      "post": {
+        "tags": [
+          "UIAPI-83",
+          "meridian-agent"
+        ],
+        "summary": "Run group factory refresh",
+        "operationId": "post_mnbToolkit_agent_groupFactories_name_run",
+        "x-uiapi-id": "UIAPI-83",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_83_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/workgroups/{name}/delete": {
+      "post": {
+        "tags": [
+          "UIAPI-10",
+          "meridian-agent"
+        ],
+        "summary": "Delete workgroup",
+        "operationId": "post_mnbToolkit_agent_workgroups_name_delete",
+        "x-uiapi-id": "UIAPI-10",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_10_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/quicklinks/{name}/delete": {
+      "post": {
+        "tags": [
+          "UIAPI-16",
+          "meridian-agent"
+        ],
+        "summary": "Delete quicklink",
+        "operationId": "post_mnbToolkit_agent_quicklinks_name_delete",
+        "x-uiapi-id": "UIAPI-16",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_16_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/mnbToolkit/agent/capabilities/{name}/rights": {
+      "post": {
+        "tags": [
+          "UIAPI-84",
+          "meridian-agent"
+        ],
+        "summary": "Set capability rights",
+        "operationId": "post_mnbToolkit_agent_capabilities_name_rights",
+        "x-uiapi-id": "UIAPI-84",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_84_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/roles/{name}/selector": {
+      "post": {
+        "tags": [
+          "UIAPI-85",
+          "meridian-agent"
+        ],
+        "summary": "Set role assignment selector",
+        "operationId": "post_mnbToolkit_agent_roles_name_selector",
+        "x-uiapi-id": "UIAPI-85",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_85_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mnbToolkit/agent/certifications/definitions/{name}": {
+      "post": {
+        "tags": [
+          "UIAPI-86",
+          "meridian-agent"
+        ],
+        "summary": "Update certification definition",
+        "operationId": "post_mnbToolkit_agent_certifications_definitions_name",
+        "x-uiapi-id": "UIAPI-86",
+        "x-agent-status": "implemented",
+        "x-mcp-tool": "iiq_uiapi_86_post",
+        "responses": {
+          "200": {
+            "description": "Success envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Denied / feature flag off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Rejected or deferred for agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        }
       }
     }
   },

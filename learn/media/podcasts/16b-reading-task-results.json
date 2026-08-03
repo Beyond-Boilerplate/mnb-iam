@@ -1,0 +1,56 @@
+{
+  "stem": "16b-reading-task-results",
+  "title": "Lesson 16b \u2014 Reading Task Results & Early Provisioning Signals",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 227832,
+  "durationMin": 3.8,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 134,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 59400
+    },
+    {
+      "id": "why-this-matters",
+      "words": 86,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 40176
+    },
+    {
+      "id": "concepts-aggregation-result-vs-refresh-r",
+      "words": 58,
+      "audio": "02-concepts-aggregation-result-vs-refresh-r.mp3",
+      "durationMs": 43008
+    },
+    {
+      "id": "concepts-success-with-zero-updates-is-st",
+      "words": 36,
+      "audio": "03-concepts-success-with-zero-updates-is-st.mp3",
+      "durationMs": 21936
+    },
+    {
+      "id": "concepts-provisioning-preview-forward-li",
+      "words": 50,
+      "audio": "04-concepts-provisioning-preview-forward-li.mp3",
+      "durationMs": 26568
+    },
+    {
+      "id": "how-it-works",
+      "words": 1,
+      "audio": "05-how-it-works.mp3",
+      "durationMs": 528
+    },
+    {
+      "id": "close",
+      "words": 58,
+      "audio": "06-close.mp3",
+      "durationMs": 32640
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/16b-reading-task-results.md",
+  "audio": "learn/media/podcasts/16b-reading-task-results.mp3"
+}

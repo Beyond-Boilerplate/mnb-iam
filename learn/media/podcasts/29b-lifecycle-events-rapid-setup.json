@@ -1,0 +1,56 @@
+{
+  "stem": "29b-lifecycle-events-rapid-setup",
+  "title": "Lesson 29b \u2014 Lifecycle Events & Rapid Setup Joiner (Optional)",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 248640,
+  "durationMin": 4.1,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 126,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 61560
+    },
+    {
+      "id": "why-this-matters",
+      "words": 81,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 42432
+    },
+    {
+      "id": "concepts-two-joiner-implementations-one-",
+      "words": 59,
+      "audio": "02-concepts-two-joiner-implementations-one-.mp3",
+      "durationMs": 39480
+    },
+    {
+      "id": "concepts-lifecycle-event-plain-english",
+      "words": 41,
+      "audio": "03-concepts-lifecycle-event-plain-english.mp3",
+      "durationMs": 25200
+    },
+    {
+      "id": "concepts-wrong-way",
+      "words": 23,
+      "audio": "04-concepts-wrong-way.mp3",
+      "durationMs": 14472
+    },
+    {
+      "id": "how-it-works",
+      "words": 31,
+      "audio": "05-how-it-works.mp3",
+      "durationMs": 28824
+    },
+    {
+      "id": "close",
+      "words": 62,
+      "audio": "06-close.mp3",
+      "durationMs": 33096
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/29b-lifecycle-events-rapid-setup.md",
+  "audio": "learn/media/podcasts/29b-lifecycle-events-rapid-setup.mp3"
+}

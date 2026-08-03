@@ -13,6 +13,7 @@
 #   Teller    http://localhost:4180/  (chatbot; set OPENROUTER_API_KEY for free-text)
 #   Console   http://localhost:4180/console.html  (Waves 1–3 operator desks)
 #   Org chart http://localhost:4180/orgchart.html
+#   Auto-story http://localhost:4180/auto-story.html  (Jira runner ledger / dry-run)
 #   OpenLDAP  ldap://localhost:389  (cn=admin,dc=meridiannb,dc=com / admin)
 #   LDAP UI   http://localhost:8090/  (phpLDAPadmin; same admin bind)
 #   JDBC lab  localhost:5435  (mnb/mnb @ mnb_apps) — Lessons 63–64
@@ -316,12 +317,20 @@ services:
         condition: service_healthy
     ports:
       - "${CHAT_PORT:-4180}:4180"
+    volumes:
+      # Live UI + ledger browser + fixture dry-runs from the host tree
+      - ./tools/iiq-chat:/app/tools/iiq-chat
+      - ./scripts:/app/scripts
+      - ./jira-stories:/app/jira-stories
+      - ./.ai-delivery:/app/.ai-delivery
     env_file:
       - path: tools/iiq-chat/.env
         required: false
     environment:
       CHAT_HOST: "0.0.0.0"
       CHAT_PORT: "4180"
+      SAILPOINT_ROOT: /app
+      PYTHONPATH: /app
       IIQ_MCP_URL: http://iiq-mcp:8766/mcp
       MCP_API_KEY: ${MCP_API_KEY:-mnb-lab-mcp-key}
       IIQ_BASE_URL: http://identityiq:8080/identityiq

@@ -1,0 +1,32 @@
+{
+  "stem": "50b-choose-your-stack",
+  "title": "After Capstone 50 \u2014 Choose Your Stack",
+  "engine": "edge",
+  "voice": "en-US-BrianNeural",
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "durationMs": 128928,
+  "durationMin": 2.1,
+  "segments": [
+    {
+      "id": "cold-open",
+      "words": 111,
+      "audio": "00-cold-open.mp3",
+      "durationMs": 47208
+    },
+    {
+      "id": "why-this-matters",
+      "words": 65,
+      "audio": "01-why-this-matters.mp3",
+      "durationMs": 33888
+    },
+    {
+      "id": "close",
+      "words": 79,
+      "audio": "02-close.mp3",
+      "durationMs": 46656
+    }
+  ],
+  "script": "tools/lesson-podcast/scripts/50b-choose-your-stack.md",
+  "audio": "learn/media/podcasts/50b-choose-your-stack.mp3"
+}

@@ -1,0 +1,543 @@
+{
+  "id": "E02",
+  "slug": "language-of-access",
+  "title": "The Language of Access \u2014 Identity, Account, Entitlement",
+  "season": 1,
+  "themes": [
+    "identity-cube",
+    "account",
+    "entitlement",
+    "application"
+  ],
+  "source_lessons": [
+    "01-bank-briefing-and-ui",
+    "06-identity-cubes-and-refresh",
+    "09-it-access-inventory-app",
+    "10-entitlement-dictionary"
+  ],
+  "audio": "learn/media/audio/language-of-access.mp3",
+  "script": "tools/podcast-studio/out/E02/03-dialogue.md",
+  "hosts": {
+    "interviewer": "Alex",
+    "expert": "Jordan",
+    "voices": {
+      "ALEX": "en-US-BrianNeural",
+      "JORDAN": "en-US-JennyNeural"
+    }
+  },
+  "turns": 85,
+  "durationMs": 1302720,
+  "durationMin": 21.7,
+  "turnMeta": [
+    {
+      "i": 0,
+      "speaker": "ALEX",
+      "chars": 223,
+      "durationMs": 17736
+    },
+    {
+      "i": 1,
+      "speaker": "JORDAN",
+      "chars": 259,
+      "durationMs": 18600
+    },
+    {
+      "i": 2,
+      "speaker": "ALEX",
+      "chars": 264,
+      "durationMs": 19992
+    },
+    {
+      "i": 3,
+      "speaker": "JORDAN",
+      "chars": 40,
+      "durationMs": 5040
+    },
+    {
+      "i": 4,
+      "speaker": "ALEX",
+      "chars": 123,
+      "durationMs": 10056
+    },
+    {
+      "i": 5,
+      "speaker": "JORDAN",
+      "chars": 412,
+      "durationMs": 34848
+    },
+    {
+      "i": 6,
+      "speaker": "ALEX",
+      "chars": 98,
+      "durationMs": 6624
+    },
+    {
+      "i": 7,
+      "speaker": "JORDAN",
+      "chars": 252,
+      "durationMs": 25056
+    },
+    {
+      "i": 8,
+      "speaker": "ALEX",
+      "chars": 112,
+      "durationMs": 8208
+    },
+    {
+      "i": 9,
+      "speaker": "JORDAN",
+      "chars": 219,
+      "durationMs": 19152
+    },
+    {
+      "i": 10,
+      "speaker": "ALEX",
+      "chars": 87,
+      "durationMs": 7320
+    },
+    {
+      "i": 11,
+      "speaker": "JORDAN",
+      "chars": 107,
+      "durationMs": 11424
+    },
+    {
+      "i": 12,
+      "speaker": "ALEX",
+      "chars": 115,
+      "durationMs": 9168
+    },
+    {
+      "i": 13,
+      "speaker": "JORDAN",
+      "chars": 324,
+      "durationMs": 27720
+    },
+    {
+      "i": 14,
+      "speaker": "ALEX",
+      "chars": 60,
+      "durationMs": 4704
+    },
+    {
+      "i": 15,
+      "speaker": "JORDAN",
+      "chars": 180,
+      "durationMs": 15816
+    },
+    {
+      "i": 16,
+      "speaker": "ALEX",
+      "chars": 32,
+      "durationMs": 2904
+    },
+    {
+      "i": 17,
+      "speaker": "JORDAN",
+      "chars": 229,
+      "durationMs": 18696
+    },
+    {
+      "i": 18,
+      "speaker": "ALEX",
+      "chars": 102,
+      "durationMs": 8352
+    },
+    {
+      "i": 19,
+      "speaker": "JORDAN",
+      "chars": 280,
+      "durationMs": 26760
+    },
+    {
+      "i": 20,
+      "speaker": "ALEX",
+      "chars": 33,
+      "durationMs": 3480
+    },
+    {
+      "i": 21,
+      "speaker": "JORDAN",
+      "chars": 291,
+      "durationMs": 26976
+    },
+    {
+      "i": 22,
+      "speaker": "ALEX",
+      "chars": 21,
+      "durationMs": 1776
+    },
+    {
+      "i": 23,
+      "speaker": "JORDAN",
+      "chars": 319,
+      "durationMs": 28416
+    },
+    {
+      "i": 24,
+      "speaker": "ALEX",
+      "chars": 76,
+      "durationMs": 6744
+    },
+    {
+      "i": 25,
+      "speaker": "JORDAN",
+      "chars": 412,
+      "durationMs": 34056
+    },
+    {
+      "i": 26,
+      "speaker": "ALEX",
+      "chars": 63,
+      "durationMs": 4848
+    },
+    {
+      "i": 27,
+      "speaker": "JORDAN",
+      "chars": 383,
+      "durationMs": 31440
+    },
+    {
+      "i": 28,
+      "speaker": "ALEX",
+      "chars": 66,
+      "durationMs": 5184
+    },
+    {
+      "i": 29,
+      "speaker": "JORDAN",
+      "chars": 258,
+      "durationMs": 20928
+    },
+    {
+      "i": 30,
+      "speaker": "ALEX",
+      "chars": 41,
+      "durationMs": 4272
+    },
+    {
+      "i": 31,
+      "speaker": "JORDAN",
+      "chars": 347,
+      "durationMs": 31728
+    },
+    {
+      "i": 32,
+      "speaker": "ALEX",
+      "chars": 28,
+      "durationMs": 2352
+    },
+    {
+      "i": 33,
+      "speaker": "JORDAN",
+      "chars": 257,
+      "durationMs": 26088
+    },
+    {
+      "i": 34,
+      "speaker": "ALEX",
+      "chars": 105,
+      "durationMs": 7752
+    },
+    {
+      "i": 35,
+      "speaker": "JORDAN",
+      "chars": 213,
+      "durationMs": 18528
+    },
+    {
+      "i": 36,
+      "speaker": "ALEX",
+      "chars": 322,
+      "durationMs": 22992
+    },
+    {
+      "i": 37,
+      "speaker": "JORDAN",
+      "chars": 418,
+      "durationMs": 34656
+    },
+    {
+      "i": 38,
+      "speaker": "ALEX",
+      "chars": 78,
+      "durationMs": 6480
+    },
+    {
+      "i": 39,
+      "speaker": "JORDAN",
+      "chars": 244,
+      "durationMs": 22872
+    },
+    {
+      "i": 40,
+      "speaker": "ALEX",
+      "chars": 33,
+      "durationMs": 3312
+    },
+    {
+      "i": 41,
+      "speaker": "JORDAN",
+      "chars": 188,
+      "durationMs": 16680
+    },
+    {
+      "i": 42,
+      "speaker": "ALEX",
+      "chars": 58,
+      "durationMs": 5328
+    },
+    {
+      "i": 43,
+      "speaker": "JORDAN",
+      "chars": 363,
+      "durationMs": 36288
+    },
+    {
+      "i": 44,
+      "speaker": "ALEX",
+      "chars": 96,
+      "durationMs": 8064
+    },
+    {
+      "i": 45,
+      "speaker": "JORDAN",
+      "chars": 346,
+      "durationMs": 29088
+    },
+    {
+      "i": 46,
+      "speaker": "ALEX",
+      "chars": 69,
+      "durationMs": 5928
+    },
+    {
+      "i": 47,
+      "speaker": "JORDAN",
+      "chars": 242,
+      "durationMs": 22080
+    },
+    {
+      "i": 48,
+      "speaker": "ALEX",
+      "chars": 165,
+      "durationMs": 11928
+    },
+    {
+      "i": 49,
+      "speaker": "JORDAN",
+      "chars": 358,
+      "durationMs": 31152
+    },
+    {
+      "i": 50,
+      "speaker": "ALEX",
+      "chars": 61,
+      "durationMs": 5280
+    },
+    {
+      "i": 51,
+      "speaker": "JORDAN",
+      "chars": 370,
+      "durationMs": 30984
+    },
+    {
+      "i": 52,
+      "speaker": "ALEX",
+      "chars": 140,
+      "durationMs": 10560
+    },
+    {
+      "i": 53,
+      "speaker": "JORDAN",
+      "chars": 266,
+      "durationMs": 26160
+    },
+    {
+      "i": 54,
+      "speaker": "ALEX",
+      "chars": 38,
+      "durationMs": 3216
+    },
+    {
+      "i": 55,
+      "speaker": "JORDAN",
+      "chars": 244,
+      "durationMs": 22248
+    },
+    {
+      "i": 56,
+      "speaker": "ALEX",
+      "chars": 265,
+      "durationMs": 20712
+    },
+    {
+      "i": 57,
+      "speaker": "JORDAN",
+      "chars": 114,
+      "durationMs": 10704
+    },
+    {
+      "i": 58,
+      "speaker": "ALEX",
+      "chars": 72,
+      "durationMs": 6912
+    },
+    {
+      "i": 59,
+      "speaker": "JORDAN",
+      "chars": 433,
+      "durationMs": 36288
+    },
+    {
+      "i": 60,
+      "speaker": "ALEX",
+      "chars": 90,
+      "durationMs": 6792
+    },
+    {
+      "i": 61,
+      "speaker": "JORDAN",
+      "chars": 287,
+      "durationMs": 21960
+    },
+    {
+      "i": 62,
+      "speaker": "ALEX",
+      "chars": 50,
+      "durationMs": 4848
+    },
+    {
+      "i": 63,
+      "speaker": "JORDAN",
+      "chars": 309,
+      "durationMs": 28488
+    },
+    {
+      "i": 64,
+      "speaker": "ALEX",
+      "chars": 93,
+      "durationMs": 7440
+    },
+    {
+      "i": 65,
+      "speaker": "JORDAN",
+      "chars": 411,
+      "durationMs": 30936
+    },
+    {
+      "i": 66,
+      "speaker": "ALEX",
+      "chars": 95,
+      "durationMs": 7944
+    },
+    {
+      "i": 67,
+      "speaker": "JORDAN",
+      "chars": 290,
+      "durationMs": 25176
+    },
+    {
+      "i": 68,
+      "speaker": "ALEX",
+      "chars": 155,
+      "durationMs": 11472
+    },
+    {
+      "i": 69,
+      "speaker": "JORDAN",
+      "chars": 94,
+      "durationMs": 8424
+    },
+    {
+      "i": 70,
+      "speaker": "ALEX",
+      "chars": 165,
+      "durationMs": 11232
+    },
+    {
+      "i": 71,
+      "speaker": "JORDAN",
+      "chars": 189,
+      "durationMs": 13560
+    },
+    {
+      "i": 72,
+      "speaker": "ALEX",
+      "chars": 4,
+      "durationMs": 1776
+    },
+    {
+      "i": 73,
+      "speaker": "JORDAN",
+      "chars": 288,
+      "durationMs": 26736
+    },
+    {
+      "i": 74,
+      "speaker": "ALEX",
+      "chars": 6,
+      "durationMs": 1776
+    },
+    {
+      "i": 75,
+      "speaker": "JORDAN",
+      "chars": 378,
+      "durationMs": 33360
+    },
+    {
+      "i": 76,
+      "speaker": "ALEX",
+      "chars": 61,
+      "durationMs": 5880
+    },
+    {
+      "i": 77,
+      "speaker": "JORDAN",
+      "chars": 99,
+      "durationMs": 7656
+    },
+    {
+      "i": 78,
+      "speaker": "ALEX",
+      "chars": 79,
+      "durationMs": 5520
+    },
+    {
+      "i": 79,
+      "speaker": "JORDAN",
+      "chars": 98,
+      "durationMs": 8424
+    },
+    {
+      "i": 80,
+      "speaker": "ALEX",
+      "chars": 79,
+      "durationMs": 6888
+    },
+    {
+      "i": 81,
+      "speaker": "JORDAN",
+      "chars": 15,
+      "durationMs": 2016
+    },
+    {
+      "i": 82,
+      "speaker": "ALEX",
+      "chars": 121,
+      "durationMs": 8424
+    },
+    {
+      "i": 83,
+      "speaker": "JORDAN",
+      "chars": 10,
+      "durationMs": 1920
+    },
+    {
+      "i": 84,
+      "speaker": "ALEX",
+      "chars": 191,
+      "durationMs": 11280
+    }
+  ]
+}

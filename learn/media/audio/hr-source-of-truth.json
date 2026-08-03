@@ -1,0 +1,290 @@
+{
+  "id": "E03",
+  "slug": "hr-source-of-truth",
+  "title": "HR as Source of Truth \u2014 Authoritative Identity",
+  "season": 1,
+  "themes": [
+    "authoritative-source",
+    "correlation",
+    "data-quality"
+  ],
+  "source_lessons": [
+    "04-authoritative-hr-source",
+    "05-hr-schema-and-identity-attrs",
+    "17-correlation-basics",
+    "19-uncorrelated-remediation"
+  ],
+  "audio": "learn/media/audio/hr-source-of-truth.mp3",
+  "script": "tools/podcast-studio/out/E03/03-dialogue.md",
+  "hosts": {
+    "interviewer": "Alex",
+    "expert": "Jordan",
+    "voices": {
+      "ALEX": "en-US-BrianNeural",
+      "JORDAN": "en-US-JennyNeural"
+    }
+  },
+  "turns": 43,
+  "durationMs": 549912,
+  "durationMin": 9.2,
+  "turnMeta": [
+    {
+      "i": 0,
+      "speaker": "ALEX",
+      "chars": 354,
+      "durationMs": 24168
+    },
+    {
+      "i": 1,
+      "speaker": "JORDAN",
+      "chars": 288,
+      "durationMs": 22152
+    },
+    {
+      "i": 2,
+      "speaker": "ALEX",
+      "chars": 138,
+      "durationMs": 9096
+    },
+    {
+      "i": 3,
+      "speaker": "JORDAN",
+      "chars": 204,
+      "durationMs": 17232
+    },
+    {
+      "i": 4,
+      "speaker": "ALEX",
+      "chars": 113,
+      "durationMs": 7344
+    },
+    {
+      "i": 5,
+      "speaker": "JORDAN",
+      "chars": 379,
+      "durationMs": 27840
+    },
+    {
+      "i": 6,
+      "speaker": "ALEX",
+      "chars": 53,
+      "durationMs": 4488
+    },
+    {
+      "i": 7,
+      "speaker": "JORDAN",
+      "chars": 201,
+      "durationMs": 16392
+    },
+    {
+      "i": 8,
+      "speaker": "ALEX",
+      "chars": 84,
+      "durationMs": 6480
+    },
+    {
+      "i": 9,
+      "speaker": "JORDAN",
+      "chars": 345,
+      "durationMs": 25416
+    },
+    {
+      "i": 10,
+      "speaker": "ALEX",
+      "chars": 13,
+      "durationMs": 1776
+    },
+    {
+      "i": 11,
+      "speaker": "JORDAN",
+      "chars": 207,
+      "durationMs": 19584
+    },
+    {
+      "i": 12,
+      "speaker": "ALEX",
+      "chars": 70,
+      "durationMs": 5304
+    },
+    {
+      "i": 13,
+      "speaker": "JORDAN",
+      "chars": 234,
+      "durationMs": 19728
+    },
+    {
+      "i": 14,
+      "speaker": "ALEX",
+      "chars": 59,
+      "durationMs": 4200
+    },
+    {
+      "i": 15,
+      "speaker": "JORDAN",
+      "chars": 383,
+      "durationMs": 32952
+    },
+    {
+      "i": 16,
+      "speaker": "ALEX",
+      "chars": 135,
+      "durationMs": 9336
+    },
+    {
+      "i": 17,
+      "speaker": "JORDAN",
+      "chars": 67,
+      "durationMs": 8568
+    },
+    {
+      "i": 18,
+      "speaker": "ALEX",
+      "chars": 61,
+      "durationMs": 5376
+    },
+    {
+      "i": 19,
+      "speaker": "JORDAN",
+      "chars": 286,
+      "durationMs": 25920
+    },
+    {
+      "i": 20,
+      "speaker": "ALEX",
+      "chars": 69,
+      "durationMs": 4968
+    },
+    {
+      "i": 21,
+      "speaker": "JORDAN",
+      "chars": 235,
+      "durationMs": 16512
+    },
+    {
+      "i": 22,
+      "speaker": "ALEX",
+      "chars": 87,
+      "durationMs": 6024
+    },
+    {
+      "i": 23,
+      "speaker": "JORDAN",
+      "chars": 232,
+      "durationMs": 17328
+    },
+    {
+      "i": 24,
+      "speaker": "ALEX",
+      "chars": 98,
+      "durationMs": 6000
+    },
+    {
+      "i": 25,
+      "speaker": "JORDAN",
+      "chars": 381,
+      "durationMs": 29688
+    },
+    {
+      "i": 26,
+      "speaker": "ALEX",
+      "chars": 120,
+      "durationMs": 7776
+    },
+    {
+      "i": 27,
+      "speaker": "JORDAN",
+      "chars": 190,
+      "durationMs": 15432
+    },
+    {
+      "i": 28,
+      "speaker": "ALEX",
+      "chars": 22,
+      "durationMs": 1800
+    },
+    {
+      "i": 29,
+      "speaker": "JORDAN",
+      "chars": 158,
+      "durationMs": 13704
+    },
+    {
+      "i": 30,
+      "speaker": "ALEX",
+      "chars": 78,
+      "durationMs": 6528
+    },
+    {
+      "i": 31,
+      "speaker": "JORDAN",
+      "chars": 261,
+      "durationMs": 17592
+    },
+    {
+      "i": 32,
+      "speaker": "ALEX",
+      "chars": 24,
+      "durationMs": 4272
+    },
+    {
+      "i": 33,
+      "speaker": "JORDAN",
+      "chars": 277,
+      "durationMs": 18480
+    },
+    {
+      "i": 34,
+      "speaker": "ALEX",
+      "chars": 35,
+      "durationMs": 3000
+    },
+    {
+      "i": 35,
+      "speaker": "JORDAN",
+      "chars": 233,
+      "durationMs": 18024
+    },
+    {
+      "i": 36,
+      "speaker": "ALEX",
+      "chars": 66,
+      "durationMs": 5064
+    },
+    {
+      "i": 37,
+      "speaker": "JORDAN",
+      "chars": 342,
+      "durationMs": 24912
+    },
+    {
+      "i": 38,
+      "speaker": "ALEX",
+      "chars": 30,
+      "durationMs": 2256
+    },
+    {
+      "i": 39,
+      "speaker": "JORDAN",
+      "chars": 181,
+      "durationMs": 11760
+    },
+    {
+      "i": 40,
+      "speaker": "ALEX",
+      "chars": 61,
+      "durationMs": 4680
+    },
+    {
+      "i": 41,
+      "speaker": "JORDAN",
+      "chars": 42,
+      "durationMs": 5400
+    },
+    {
+      "i": 42,
+      "speaker": "ALEX",
+      "chars": 58,
+      "durationMs": 5304
+    }
+  ]
+}

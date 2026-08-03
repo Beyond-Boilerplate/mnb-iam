@@ -1,0 +1,122 @@
+{
+  "title": "Meridian IAM Audio",
+  "tagline": "Real-world identity governance — SailPoint, security posture, and the standards that matter.",
+  "hosts": {
+    "interviewer": "Alex",
+    "expert": "Jordan"
+  },
+  "episodes": [
+    {
+      "id": "E01",
+      "slug": "iam-at-a-bank",
+      "title": "What IAM Actually Is (At a Bank)",
+      "season": 1,
+      "themes": ["iam-fundamentals", "bank-controls", "sailpoint-role"],
+      "blurb": "IAM vs directories, why banks buy governance platforms, and the six constructs in plain English."
+    },
+    {
+      "id": "E02",
+      "slug": "language-of-access",
+      "title": "The Language of Access — Identity, Account, Entitlement",
+      "season": 1,
+      "themes": ["identity-cube", "account", "entitlement", "application"],
+      "blurb": "Identity → account → entitlement with Meridian stories — why cubes beat spreadsheets."
+    },
+    {
+      "id": "E03",
+      "slug": "hr-source-of-truth",
+      "title": "HR as Source of Truth — Authoritative Identity",
+      "season": 1,
+      "themes": ["authoritative-source", "correlation", "data-quality"],
+      "blurb": "Why HR wins as people truth, what correlation means, and dirty data as a control failure."
+    },
+    {
+      "id": "E04",
+      "slug": "roles-and-birthright",
+      "title": "Roles, Birthright, and Not Giving Away the Kingdom",
+      "season": 2,
+      "themes": ["roles", "birthright", "privileged-access"],
+      "blurb": "IT vs business roles, birthright boundaries, dual-control wire packs, privileged never automatic."
+    },
+    {
+      "id": "E05",
+      "slug": "jml-lifecycle",
+      "title": "Joiner, Mover, Leaver — The Access Lifecycle",
+      "season": 2,
+      "themes": ["jml", "joiner", "mover", "leaver"],
+      "blurb": "Lifecycle as business risk stories — what good JML looks like before you touch workflows."
+    },
+    {
+      "id": "E06",
+      "slug": "request-approve-prove",
+      "title": "Request, Approve, Prove — Access That Survives an Exam",
+      "season": 2,
+      "themes": ["access-request", "approvals", "audit"],
+      "blurb": "Catalogs, approval chains, break-glass, and the request trail examiners ask for."
+    },
+    {
+      "id": "E07",
+      "slug": "sod-and-risk",
+      "title": "Toxic Combos — SoD, Dual Control, and Risk Scores",
+      "season": 3,
+      "themes": ["sod", "dual-control", "risk"],
+      "blurb": "Segregation of duties as fraud prevention — payment dual control without theater."
+    },
+    {
+      "id": "E08",
+      "slug": "certifications",
+      "title": "Access Reviews That Aren't Rubber Stamps",
+      "season": 3,
+      "themes": ["certifications", "remediation", "evidence"],
+      "blurb": "Manager vs app-owner campaigns, remediation evidence, audit-ready habits."
+    },
+    {
+      "id": "E09",
+      "slug": "sailpoint-essentials",
+      "title": "SailPoint IdentityIQ Essentials — What the Platform Actually Does",
+      "season": 1,
+      "themes": ["sailpoint", "iiq-surfaces", "tasks"],
+      "blurb": "IIQ as governance brain: cubes, tasks, work items, aggregation vs refresh."
+    },
+    {
+      "id": "E10",
+      "slug": "connector-landscape",
+      "title": "Connectors & Tooling — How IIQ Talks to the World",
+      "season": 4,
+      "themes": ["connectors", "iqservice", "provisioning"],
+      "blurb": "Connector types, IQService reality, provisioning honesty, directory vs SaaS."
+    },
+    {
+      "id": "E11",
+      "slug": "security-posture",
+      "title": "Security Posture — Least Privilege, Break-Glass, Hardening Mindset",
+      "season": 3,
+      "themes": ["least-privilege", "break-glass", "hardening"],
+      "blurb": "Privileged roles, break-glass discipline, admin hygiene, audit/SIEM signals."
+    },
+    {
+      "id": "E12",
+      "slug": "standards-and-exams",
+      "title": "Standards, Examiners, and Speaking Audit Fluently",
+      "season": 3,
+      "themes": ["ffiec", "nist", "exam-readiness"],
+      "blurb": "How FFIEC / NIST / SOX-style expectations show up — evidence without panic."
+    },
+    {
+      "id": "E13",
+      "slug": "industry-tooling",
+      "title": "The Wider Stack — IdP, PAM, ITSM, and Where IIQ Fits",
+      "season": 4,
+      "themes": ["idp", "pam", "itsm", "architecture"],
+      "blurb": "IIQ vs IdP vs PAM vs ITSM — why SSO alone is not governance."
+    },
+    {
+      "id": "E14",
+      "slug": "from-theory-to-craft",
+      "title": "From Theory to Craft — How Pros Think About Meridian",
+      "season": 4,
+      "themes": ["mental-models", "craft"],
+      "blurb": "Naming discipline, promotion mindset, and how to keep learning after the show."
+    }
+  ]
+}

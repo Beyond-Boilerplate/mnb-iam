@@ -305,4 +305,4 @@ Honest drills end with gaps, not victory slides.
 ---
 
 **Previous:** [Lesson 33 — Leave of Absence Controls](33-leave-of-absence.md)  
-**Next:** [Mid-capstone — JML](mid-34-jml-capstone.md) · [Lesson 35 — Access Request Catalog](35-access-request-catalog.md)
+**Next:** [Lesson 34b — LCM Automation in Action](34b-lcm-automation-in-action.md) · [Mid-capstone — JML](mid-34-jml-capstone.md)
