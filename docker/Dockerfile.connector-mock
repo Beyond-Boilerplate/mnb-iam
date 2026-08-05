@@ -1,14 +1,28 @@
-# Meridian connector mock (Lessons 68–69)
+# Meridian connector mock (Wire + SCIM + HCM + CRM + ITSM + Entra-shaped)
 FROM python:3.12-alpine
 WORKDIR /app
 COPY tools/connector-mock/serve.py /app/serve.py
 COPY lab-data/connectors/webservices/sample-users.json /app/lab-data/connectors/webservices/sample-users.json
 COPY lab-data/connectors/scim/Users.json /app/lab-data/connectors/scim/Users.json
+COPY lab-data/connectors/hcm/ /app/lab-data/connectors/hcm/
+COPY lab-data/connectors/crm/ /app/lab-data/connectors/crm/
+COPY lab-data/connectors/itsm/ /app/lab-data/connectors/itsm/
+COPY lab-data/connectors/entra/ /app/lab-data/connectors/entra/
 # serve.py resolves ROOT as parents[2] from tools/connector-mock — fake layout:
-RUN mkdir -p /opt/mnb/tools/connector-mock /opt/mnb/lab-data/connectors/webservices /opt/mnb/lab-data/connectors/scim \
+RUN mkdir -p /opt/mnb/tools/connector-mock \
+    /opt/mnb/lab-data/connectors/webservices \
+    /opt/mnb/lab-data/connectors/scim \
+    /opt/mnb/lab-data/connectors/hcm \
+    /opt/mnb/lab-data/connectors/crm \
+    /opt/mnb/lab-data/connectors/itsm \
+    /opt/mnb/lab-data/connectors/entra \
  && cp /app/serve.py /opt/mnb/tools/connector-mock/serve.py \
  && cp /app/lab-data/connectors/webservices/sample-users.json /opt/mnb/lab-data/connectors/webservices/ \
- && cp /app/lab-data/connectors/scim/Users.json /opt/mnb/lab-data/connectors/scim/
+ && cp /app/lab-data/connectors/scim/Users.json /opt/mnb/lab-data/connectors/scim/ \
+ && cp -r /app/lab-data/connectors/hcm/. /opt/mnb/lab-data/connectors/hcm/ \
+ && cp -r /app/lab-data/connectors/crm/. /opt/mnb/lab-data/connectors/crm/ \
+ && cp -r /app/lab-data/connectors/itsm/. /opt/mnb/lab-data/connectors/itsm/ \
+ && cp -r /app/lab-data/connectors/entra/. /opt/mnb/lab-data/connectors/entra/
 WORKDIR /opt/mnb
 ENV MOCK_HOST=0.0.0.0 MOCK_PORT=8091
 EXPOSE 8091

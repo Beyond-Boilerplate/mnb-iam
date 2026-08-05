@@ -62,6 +62,12 @@ GAPS = [
     ("UIAPI-88", "risk", "implemented", "POST /mnbToolkit/agent/risk/scoreConfig", "Patch risk score weights"),
     ("UIAPI-89", "tasks", "implemented", "POST /mnbToolkit/agent/taskDefinitions", "TaskDefinition upsert"),
     ("UIAPI-90", "aggregation", "implemented", "POST /mnbToolkit/agent/connectors/aggregate/stop", "Stop running aggregation"),
+    ("UIAPI-97", "workflows", "implemented", "GET|POST /mnbToolkit/agent/workflows*", "List/get/patch Workflow (not visual designer)"),
+    ("UIAPI-98", "forms", "implemented", "POST /mnbToolkit/agent/forms", "Upsert top-level Form + fields"),
+    ("UIAPI-105", "connectors", "implemented", "POST /mnbToolkit/agent/applications/{name}/connector/ad", "AD/IQService deep attribute config"),
+    ("UIAPI-106", "connectors", "implemented", "POST /mnbToolkit/agent/applications/{name}/connector/jdbc", "JDBC URL/SQL map attribute config"),
+    ("UIAPI-107", "connectors", "implemented", "POST /mnbToolkit/agent/applications/{name}/connector/oauth", "OAuth/SCIM attribute config"),
+    ("UIAPI-139", "sod", "implemented", "POST /mnbToolkit/agent/policies/sod/matrix/import", "SoD matrix CSV/rows → policy constraints"),
 ]
 
 
@@ -222,6 +228,16 @@ def main():
     add("/mnbToolkit/agent/roles/{name}/selector", "post", "UIAPI-85", "Set role assignment selector", "implemented", True)
     add("/mnbToolkit/agent/certifications/definitions/{name}", "post", "UIAPI-86", "Update certification definition", "implemented", True)
 
+    # High-ROI Wave (1.3.16)
+    add("/mnbToolkit/agent/workflows", "get", "UIAPI-97", "List workflows", "implemented")
+    add("/mnbToolkit/agent/workflows/{name}", "get", "UIAPI-97", "Get workflow detail", "implemented")
+    add("/mnbToolkit/agent/workflows/{name}/patch", "post", "UIAPI-97", "Patch workflow meta/step", "implemented", True)
+    add("/mnbToolkit/agent/forms", "post", "UIAPI-98", "Upsert form", "implemented", True)
+    add("/mnbToolkit/agent/policies/sod/matrix/import", "post", "UIAPI-139", "Import SoD matrix", "implemented", True)
+    add("/mnbToolkit/agent/applications/{name}/connector/ad", "post", "UIAPI-105", "Configure AD/IQService attrs", "implemented", True)
+    add("/mnbToolkit/agent/applications/{name}/connector/jdbc", "post", "UIAPI-106", "Configure JDBC/SQL map attrs", "implemented", True)
+    add("/mnbToolkit/agent/applications/{name}/connector/oauth", "post", "UIAPI-107", "Configure OAuth/SCIM attrs", "implemented", True)
+
     gap_table = [
         {
             "id": g[0],
@@ -238,10 +254,11 @@ def main():
         "openapi": "3.0.3",
         "info": {
             "title": "Meridian Custom APIs",
-            "version": "1.3.15",
+            "version": "1.3.16",
             "description": (
                 "Bank-owned IdentityIQ Custom APIs for MCP / ITSM orchestration. "
-                "Closes UI-VS-API gaps (UIAPI-01…90). "
+                "Closes UI-VS-API gaps (UIAPI-01…90 + ROI 97/98/105–107/139). "
+                "Open register UIAPI-91…167 advertised via GET /agent/gaps. "
                 "High-risk ops require plugin settings (mutateGovernanceEnabled, passwordResetEnabled, advancedOpsEnabled). "
                 "See docs/api/UI-VS-API-GAPS.md and docs/api/MCP-TOOLS.md."
             ),

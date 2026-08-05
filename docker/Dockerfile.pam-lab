@@ -1,0 +1,10 @@
+FROM python:3.12-alpine
+WORKDIR /app
+COPY tools/pam-lab/serve.py /app/serve.py
+COPY lab-data/enterprise/pam/safes.json /opt/mnb/pam-seed.json
+ENV PAM_HOST=0.0.0.0 PAM_PORT=8097 \
+    VAULT_ADDR=http://vault:8200 \
+    VAULT_TOKEN=mnb-lab-vault-root \
+    PAM_SEED=/opt/mnb/pam-seed.json
+EXPOSE 8097
+CMD ["python3", "/app/serve.py"]

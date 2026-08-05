@@ -1,0 +1,90 @@
+{
+  "$schema": "mnb-lesson-spec/v1",
+  "lesson": "38b",
+  "stem": "38b-approval-flows-lab",
+  "title": "Configure Approval Flows in IdentityIQ",
+  "verifyMode": "lab",
+  "description": "Configure LCM Provisioning Process Variables: approvalScheme, approvalMode, securityOfficerName, escalation hours. Soft-fails until LCM/HR personas exist.",
+  "path": "core",
+  "checks": [
+    {
+      "type": "http.ok",
+      "path": "/login.jsf",
+      "id": "http-ok",
+      "message": "IIQ login page reachable"
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-HR",
+      "id": "app-hr",
+      "message": "Application MNB-HR exists"
+    },
+    {
+      "type": "identity.exists",
+      "name": "amelia.brooks",
+      "id": "id-amelia",
+      "message": "amelia.brooks exists for manager-only CRM flow",
+      "softFail": true,
+      "hint": "Aggregate MNB-HR; Amelia is the Flow A target (manager emily.bennett)."
+    },
+    {
+      "type": "identity.exists",
+      "name": "emily.bennett",
+      "id": "id-emily",
+      "message": "Manager emily.bennett exists",
+      "softFail": true
+    },
+    {
+      "type": "identity.exists",
+      "name": "owen.morris",
+      "id": "id-owen",
+      "message": "owen.morris exists for AWS dual / break-glass flows",
+      "softFail": true,
+      "hint": "Cloud engineer persona — manager sanjay.kapoor, tech owner christopher.hayes."
+    },
+    {
+      "type": "identity.exists",
+      "name": "sanjay.kapoor",
+      "id": "id-sanjay",
+      "message": "sanjay.kapoor exists (AWS dual Vote 1)",
+      "softFail": true
+    },
+    {
+      "type": "identity.exists",
+      "name": "christopher.hayes",
+      "id": "id-chris",
+      "message": "christopher.hayes exists (AWS dual Vote 2 / tech owner)",
+      "softFail": true
+    },
+    {
+      "type": "identity.exists",
+      "name": "helen.ross",
+      "id": "id-helen",
+      "message": "helen.ross exists (Security / break-glass / escalation)",
+      "softFail": true
+    },
+    {
+      "type": "identity.exists",
+      "name": "raj.external",
+      "id": "id-raj",
+      "message": "raj.external exists for manager=owner conflict drill",
+      "softFail": true
+    },
+    {
+      "type": "object.exists",
+      "objectClass": "Application",
+      "name": "MNB-AWS-Cloud",
+      "id": "app-aws",
+      "message": "AWS app exists for privileged dual path",
+      "softFail": true,
+      "hint": "Lesson 13 onboard MNB-AWS-Cloud — document alternate name in binder if lab differs."
+    },
+    {
+      "type": "host.file.exists",
+      "path": "lab-data/reference/entitlement-dictionary.csv",
+      "id": "file-dict",
+      "message": "Entitlement dictionary present for catalog alignment"
+    }
+  ]
+}

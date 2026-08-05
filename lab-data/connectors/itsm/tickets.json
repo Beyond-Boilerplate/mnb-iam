@@ -1,0 +1,20 @@
+{
+  "catalog": [
+    {
+      "id": "REQ-LAPTOP",
+      "name": "Laptop Access",
+      "fulfillment": "manual"
+    },
+    {
+      "id": "REQ-VPN",
+      "name": "VPN Access",
+      "fulfillment": "group"
+    },
+    {
+      "id": "REQ-WIRE",
+      "name": "Wire Portal Entitlement",
+      "fulfillment": "iiq"
+    }
+  ],
+  "tickets": []
+}

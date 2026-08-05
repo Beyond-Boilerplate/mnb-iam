@@ -1,0 +1,507 @@
+# Generated from identity-master.json — merge/reference for OpenLDAP seed
+# Primary seed remains lab-data/connectors/ldap/mnb-openldap.ldif
+
+dn: uid=helen.ross,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: helen.ross
+cn: Helen Ross
+sn: Ross
+givenName: Helen
+mail: helen.ross@meridiannb.com
+employeeNumber: MNB00001
+title: Head of Identity & Access
+userPassword: LabUser1!
+
+dn: uid=christopher.hayes,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: christopher.hayes
+cn: Christopher Hayes
+sn: Hayes
+givenName: Christopher
+mail: christopher.hayes@meridiannb.com
+employeeNumber: MNB00002
+title: Director of Technology
+userPassword: LabUser1!
+
+dn: uid=deepa.nair,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: deepa.nair
+cn: Deepa Nair
+sn: Nair
+givenName: Deepa
+mail: deepa.nair@meridiannb.com
+employeeNumber: MNB00003
+title: Director of Finance
+userPassword: LabUser1!
+
+dn: uid=anthony.powell,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: anthony.powell
+cn: Anthony Powell
+sn: Powell
+givenName: Anthony
+mail: anthony.powell@meridiannb.com
+employeeNumber: MNB00004
+title: Chief Risk Officer
+userPassword: LabUser1!
+
+dn: uid=rachel.evans,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: rachel.evans
+cn: Rachel Evans
+sn: Evans
+givenName: Rachel
+mail: rachel.evans@meridiannb.com
+employeeNumber: MNB00005
+title: Payments Operations Manager
+userPassword: LabUser1!
+
+dn: uid=sanjay.kapoor,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: sanjay.kapoor
+cn: Sanjay Kapoor
+sn: Kapoor
+givenName: Sanjay
+mail: sanjay.kapoor@meridiannb.com
+employeeNumber: MNB00006
+title: Commercial Banking Manager
+userPassword: LabUser1!
+
+dn: uid=emily.bennett,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: emily.bennett
+cn: Emily Bennett
+sn: Bennett
+givenName: Emily
+mail: emily.bennett@meridiannb.com
+employeeNumber: MNB00007
+title: Retail Branch Manager
+userPassword: LabUser1!
+
+dn: uid=daniel.griffin,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: daniel.griffin
+cn: Daniel Griffin
+sn: Griffin
+givenName: Daniel
+mail: daniel.griffin@meridiannb.com
+employeeNumber: MNB00008
+title: Operations Manager
+userPassword: LabUser1!
+
+dn: uid=anthony.rao,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: anthony.rao
+cn: Anthony Rao
+sn: Rao
+givenName: Anthony
+mail: anthony.rao@meridiannb.com
+employeeNumber: MNB00011
+title: Chief Risk Officer
+userPassword: LabUser1!
+
+dn: uid=priya.wire,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: priya.wire
+cn: Priya Mehta
+sn: Mehta
+givenName: Priya
+mail: priya.wire@meridiannb.com
+employeeNumber: MNB00090
+title: Relationship Manager
+userPassword: LabUser1!
+
+dn: uid=marcus.approve,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: marcus.approve
+cn: Marcus Coleman
+sn: Coleman
+givenName: Marcus
+mail: marcus.approve@meridiannb.com
+employeeNumber: MNB00091
+title: Wire Approver
+userPassword: LabUser1!
+
+dn: uid=chloe.adhikari,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: chloe.adhikari
+cn: Chloe Adhikari
+sn: Adhikari
+givenName: Chloe
+mail: chloe.adhikari@meridiannb.com
+employeeNumber: MNB00009
+title: SOC Analyst
+userPassword: LabUser1!
+
+dn: uid=meera.torres,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: meera.torres
+cn: Meera Torres
+sn: Torres
+givenName: Meera
+mail: meera.torres@meridiannb.com
+employeeNumber: MNB00012
+title: Directory Administrator
+userPassword: LabUser1!
+
+dn: uid=aisha.murphy,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: aisha.murphy
+cn: Aisha Murphy
+sn: Murphy
+givenName: Aisha
+mail: aisha.murphy@meridiannb.com
+employeeNumber: MNB00013
+title: Operations Analyst
+userPassword: LabUser1!
+
+dn: uid=sofia.andersson,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: sofia.andersson
+cn: Sofia Andersson
+sn: Andersson
+givenName: Sofia
+mail: sofia.andersson@meridiannb.com
+employeeNumber: MNB00014
+title: Customer Service Rep
+userPassword: LabUser1!
+
+dn: uid=michael.ross,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: michael.ross
+cn: Michael Ross
+sn: Ross
+givenName: Michael
+mail: michael.ross@meridiannb.com
+employeeNumber: MNB00015
+title: Wire Specialist
+userPassword: LabUser1!
+
+dn: uid=isaac.lambert,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: isaac.lambert
+cn: Isaac Lambert
+sn: Lambert
+givenName: Isaac
+mail: isaac.lambert@meridiannb.com
+employeeNumber: MNB00016
+title: People Manager
+userPassword: LabUser1!
+
+dn: uid=anthony.bennett,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: anthony.bennett
+cn: Anthony Bennett
+sn: Bennett
+givenName: Anthony
+mail: anthony.bennett@meridiannb.com
+employeeNumber: MNB00017
+title: Finance Director
+userPassword: LabUser1!
+
+dn: uid=kai.khatri,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: kai.khatri
+cn: Kai Khatri
+sn: Khatri
+givenName: Kai
+mail: kai.khatri@meridiannb.com
+employeeNumber: MNB00018
+title: Cloud Platform Engineer
+userPassword: LabUser1!
+
+dn: uid=chloe.joshi,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: chloe.joshi
+cn: Chloe Joshi
+sn: Joshi
+givenName: Chloe
+mail: chloe.joshi@meridiannb.com
+employeeNumber: MNB00019
+title: Relationship Manager
+userPassword: LabUser1!
+
+dn: uid=zoe.okoro,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: zoe.okoro
+cn: Zoe Okoro
+sn: Okoro
+givenName: Zoe
+mail: zoe.okoro@meridiannb.com
+employeeNumber: MNB00020
+title: Customer Service Rep
+userPassword: LabUser1!
+
+dn: uid=noah.ibrahim,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: noah.ibrahim
+cn: Noah Ibrahim
+sn: Ibrahim
+givenName: Noah
+mail: noah.ibrahim@meridiannb.com
+employeeNumber: MNB00021
+title: Wire Specialist
+userPassword: LabUser1!
+
+dn: uid=rachel.khatri,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: rachel.khatri
+cn: Rachel Khatri
+sn: Khatri
+givenName: Rachel
+mail: rachel.khatri@meridiannb.com
+employeeNumber: MNB00022
+title: Relationship Manager
+userPassword: LabUser1!
+
+dn: uid=james.nguyen,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: james.nguyen
+cn: James Nguyen
+sn: Nguyen
+givenName: James
+mail: james.nguyen@meridiannb.com
+employeeNumber: MNB00023
+title: Wire Specialist
+userPassword: LabUser1!
+
+dn: uid=meera.brooks,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: meera.brooks
+cn: Meera Brooks
+sn: Brooks
+givenName: Meera
+mail: meera.brooks@meridiannb.com
+employeeNumber: MNB00025
+title: SOC Analyst
+userPassword: LabUser1!
+
+dn: uid=raj.ross,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: raj.ross
+cn: Raj Ross
+sn: Ross
+givenName: Raj
+mail: raj.ross@meridiannb.com
+employeeNumber: MNB00026
+title: Technology Director
+userPassword: LabUser1!
+
+dn: uid=leo.powell,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: leo.powell
+cn: Leo Powell
+sn: Powell
+givenName: Leo
+mail: leo.powell@meridiannb.com
+employeeNumber: MNB00027
+title: Digital Product Analyst
+userPassword: LabUser1!
+
+dn: uid=benjamin.desai,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: benjamin.desai
+cn: Benjamin Desai
+sn: Desai
+givenName: Benjamin
+mail: benjamin.desai@meridiannb.com
+employeeNumber: MNB00028
+title: Database Administrator
+userPassword: LabUser1!
+
+dn: uid=sofia.murphy,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: sofia.murphy
+cn: Sofia Murphy
+sn: Murphy
+givenName: Sofia
+mail: sofia.murphy@meridiannb.com
+employeeNumber: MNB00029
+title: SOC Analyst
+userPassword: LabUser1!
+
+dn: uid=rohan.singh,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: rohan.singh
+cn: Rohan Singh
+sn: Singh
+givenName: Rohan
+mail: rohan.singh@meridiannb.com
+employeeNumber: MNB00031
+title: Operations Analyst
+userPassword: LabUser1!
+
+dn: uid=maya.desai,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: maya.desai
+cn: Maya Desai
+sn: Desai
+givenName: Maya
+mail: maya.desai@meridiannb.com
+employeeNumber: MNB00032
+title: Relationship Manager
+userPassword: LabUser1!
+
+dn: uid=raj.morris,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: raj.morris
+cn: Raj Morris
+sn: Morris
+givenName: Raj
+mail: raj.morris@meridiannb.com
+employeeNumber: MNB00033
+title: SOC Analyst
+userPassword: LabUser1!
+
+dn: uid=rachel.thapa,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: rachel.thapa
+cn: Rachel Thapa
+sn: Thapa
+givenName: Rachel
+mail: rachel.thapa@meridiannb.com
+employeeNumber: MNB00035
+title: Wire Specialist
+userPassword: LabUser1!
+
+dn: uid=michael.watson,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: michael.watson
+cn: Michael Watson
+sn: Watson
+givenName: Michael
+mail: michael.watson@meridiannb.com
+employeeNumber: MNB00036
+title: People Manager
+userPassword: LabUser1!
+
+dn: uid=samir.hughes,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: samir.hughes
+cn: Samir Hughes
+sn: Hughes
+givenName: Samir
+mail: samir.hughes@meridiannb.com
+employeeNumber: MNB00037
+title: Site Reliability Engineer
+userPassword: LabUser1!
+
+dn: uid=samir.hassan,ou=people,dc=meridiannb,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+uid: samir.hassan
+cn: Samir Hassan
+sn: Hassan
+givenName: Samir
+mail: samir.hassan@meridiannb.com
+employeeNumber: MNB00094
+title: Staff Accountant
+userPassword: LabUser1!
+

@@ -283,4 +283,4 @@ Read the pack aloud against this question: *“Produce the evidence pack for req
 ---
 
 **Previous:** [Lesson 37 — Emergency / Break-Glass Access](37-break-glass-access.md)  
-**Next:** [Lesson 39 — SoD Fundamentals for Banking](39-sod-fundamentals.md)
+**Next:** [Lesson 38b — Configure Approval Flows in IdentityIQ](38b-approval-flows-lab.md) · [Lesson 39 — SoD Fundamentals for Banking](39-sod-fundamentals.md)

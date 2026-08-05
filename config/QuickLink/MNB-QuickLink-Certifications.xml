@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="external" category="Custom" messageKey="Certifications" name="MNB-QuickLink-Certifications" ordering="3">
+  <Attributes>
+    <Map>
+      <entry key="url" value="/identityiq/certification/certifications.jsf"/>
+      <entry key="window" value="_self"/>
+    </Map>
+  </Attributes>
+  <Description>Open certification campaigns.</Description>
+  <QuickLinkOptions allowSelf="true">
+    <DynamicScopeRef>
+      <Reference class="sailpoint.object.DynamicScope" name="Self Service"/>
+    </DynamicScopeRef>
+  </QuickLinkOptions>
+</QuickLink>

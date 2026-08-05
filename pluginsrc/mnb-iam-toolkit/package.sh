@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLUGIN="$ROOT/pluginsrc/mnb-iam-toolkit"
 DIST="$PLUGIN/dist"
 NAME="mnb_iam_toolkit"
-VER="1.3.15"
+VER="1.3.17"
 
 "$PLUGIN/compile.sh"
 

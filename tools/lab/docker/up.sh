@@ -7,6 +7,7 @@
 #
 # Usage:
 #   ./tools/lab/docker/up.sh
+#   ./tools/lab/docker/up.sh --enterprise
 #   ./tools/lab/docker/up.sh --check
 #   ./tools/lab/docker/up.sh --rebuild
 #   ./tools/lab/docker/up.sh --skip-seed
@@ -22,6 +23,7 @@ CHECK_ONLY=0
 KILL_HOST_SIDECARS=0
 DO_SEED=1
 FORCE_REBUILD=0
+ENTERPRISE=0
 for arg in "$@"; do
   case "$arg" in
     --check) CHECK_ONLY=1 ;;
@@ -29,11 +31,13 @@ for arg in "$@"; do
     --skip-seed) DO_SEED=0 ;;
     --seed) DO_SEED=1 ;;
     --rebuild|--build) FORCE_REBUILD=1 ;;
+    --enterprise) ENTERPRISE=1 ;;
     -h|--help)
       cat <<'EOF'
 Usage: ./tools/lab/docker/up.sh [options]
 
   (default)               Start stack, verify, install/enable plugin, seed lab apps
+  --enterprise            Samba, Keycloak, Portal, Mailpit, Gitea, Vault/PAM (Enterprise Lab)
   --check                 Preflight ports only
   --rebuild               Force docker compose build (slower)
   --kill-host-sidecars    Stop host listeners on MCP/OpenAPI ports, then start
@@ -49,6 +53,10 @@ EOF
   esac
 done
 
+if [[ "$ENTERPRISE" -eq 1 ]]; then
+  COMPOSE=(docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml --profile enterprise)
+fi
+
 IIQ_HTTP_PORT="${IIQ_HTTP_PORT:-8080}"
 MCP_PORT="${MCP_PORT:-8766}"
 API_DOCS_PORT="${API_DOCS_PORT:-8765}"
@@ -60,6 +68,18 @@ PHPLDAPADMIN_PORT="${PHPLDAPADMIN_PORT:-8090}"
 PG_PORT="${PG_PORT:-5433}"
 JDBC_PG_PORT="${JDBC_PG_PORT:-5435}"
 CONNECTOR_MOCK_PORT="${CONNECTOR_MOCK_PORT:-8091}"
+KEYCLOAK_PORT="${KEYCLOAK_PORT:-8085}"
+EMPLOYEE_PORTAL_PORT="${EMPLOYEE_PORTAL_PORT:-8092}"
+SAMBA_LDAP_PORT="${SAMBA_LDAP_PORT:-3890}"
+MAILPIT_UI_PORT="${MAILPIT_UI_PORT:-8025}"
+# Host SMTP publish (IIQ → mailpit:1025 on Docker network; host default 1026 avoids LMS/maildev clash)
+MAILPIT_SMTP_PORT="${MAILPIT_SMTP_PORT:-1026}"
+GITEA_HTTP_PORT="${GITEA_HTTP_PORT:-8093}"
+WORKSTATION_PORTAL_PORT="${WORKSTATION_PORTAL_PORT:-8094}"
+HR_INTRANET_PORT="${HR_INTRANET_PORT:-8095}"
+FINANCE_PORTAL_PORT="${FINANCE_PORTAL_PORT:-8096}"
+VAULT_HTTP_PORT="${VAULT_HTTP_PORT:-8200}"
+PAM_LAB_PORT="${PAM_LAB_PORT:-8097}"
 
 PORTS=(
   "IIQ:${IIQ_HTTP_PORT}"
@@ -75,6 +95,22 @@ PORTS=(
   "connector-mock:${CONNECTOR_MOCK_PORT}"
 )
 
+if [[ "$ENTERPRISE" -eq 1 ]]; then
+  PORTS+=(
+    "Keycloak:${KEYCLOAK_PORT}"
+    "EmployeePortal:${EMPLOYEE_PORTAL_PORT}"
+    "SambaLDAP:${SAMBA_LDAP_PORT}"
+    "MailpitUI:${MAILPIT_UI_PORT}"
+    "MailpitSMTP:${MAILPIT_SMTP_PORT}"
+    "Gitea:${GITEA_HTTP_PORT}"
+    "Workstation:${WORKSTATION_PORTAL_PORT}"
+    "HRIntranet:${HR_INTRANET_PORT}"
+    "FinancePortal:${FINANCE_PORTAL_PORT}"
+    "Vault:${VAULT_HTTP_PORT}"
+    "PamLab:${PAM_LAB_PORT}"
+  )
+fi
+
 # Images we build locally (pull-only IIQ image is separate).
 LOCAL_IMAGES=(
   "${MCP_IMAGE:-mnb-iiq-mcp:local}"
@@ -84,6 +120,12 @@ LOCAL_IMAGES=(
   "${ACADEMY_IMAGE:-mnb-academy:local}"
   "${CONNECTOR_MOCK_IMAGE:-mnb-connector-mock:local}"
 )
+
+if [[ "$ENTERPRISE" -eq 1 ]]; then
+  LOCAL_IMAGES+=("${EMPLOYEE_PORTAL_IMAGE:-mnb-employee-portal:local}")
+  LOCAL_IMAGES+=("${SSO_GATE_IMAGE:-mnb-sso-gate:local}")
+  LOCAL_IMAGES+=("${PAM_LAB_IMAGE:-mnb-pam-lab:local}")
+fi
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 info() { echo "==> $*"; }
@@ -445,8 +487,25 @@ print_ready() {
   echo "            bind cn=admin,dc=meridiannb,dc=com / admin"
   echo "  LDAP UI:  http://localhost:${PHPLDAPADMIN_PORT}/  (phpLDAPadmin)"
   echo "            login DN cn=admin,dc=meridiannb,dc=com / admin"
+  echo "  API mock: http://localhost:${CONNECTOR_MOCK_PORT}/  (Wire + SCIM + HCM + CRM + ITSM)"
+  if [[ "$ENTERPRISE" -eq 1 ]]; then
+    echo "  Keycloak: http://localhost:${KEYCLOAK_PORT}/  (admin / admin) realm=meridian"
+    echo "  Portal:   http://localhost:${EMPLOYEE_PORTAL_PORT}/  (helen.ross / LabUser1!)"
+    echo "  Mailpit:  http://localhost:${MAILPIT_UI_PORT}/  (SMTP host mailpit:${MAILPIT_SMTP_PORT} from IIQ)"
+    echo "  Gitea:    http://localhost:${GITEA_HTTP_PORT}/  (OIDC via Keycloak — Lesson 213)"
+    echo "  Workstation: http://localhost:${WORKSTATION_PORTAL_PORT}/  (group mnb-workstation-users)"
+    echo "  HR Intranet: http://localhost:${HR_INTRANET_PORT}/  · Finance: http://localhost:${FINANCE_PORTAL_PORT}/"
+    echo "  Vault:    http://localhost:${VAULT_HTTP_PORT}/ui  (token mnb-lab-vault-root — lab only)"
+    echo "  PAM lab:  http://localhost:${PAM_LAB_PORT}/  (CyberArk-shaped safes/checkout)"
+    echo "  Samba AD: ldap://localhost:${SAMBA_LDAP_PORT}  (see lab-data/enterprise/samba/README.md)"
+    echo "  Guide:    docs/ENTERPRISE-LAB-V2.md"
+    echo "  Path:     docs/lessons/_CATALOG_201_250.md  (Enterprise Sandbox Path)"
+  fi
   if [[ "$DO_SEED" -eq 1 ]]; then
     echo "  Seed:     MNB-HR + MNB-OpenLDAP (ran during up)"
+    if [[ "$ENTERPRISE" -eq 1 ]]; then
+      echo "            + enterprise pack (seed-enterprise.sh)"
+    fi
   else
     echo
     echo "Next (seed skipped):"
@@ -481,8 +540,12 @@ fi
 # Overlap: package plugin while compose brings services up
 start_plugin_package_bg
 
-info "Starting Meridian stack (IIQ + OpenLDAP + Academy + MCP + OpenAPI + Teller)"
+info "Starting Meridian stack (IIQ + OpenLDAP + Academy + MCP + OpenAPI + Teller${ENTERPRISE:+ + Enterprise})"
 echo "    IIQ_IMAGE=${IIQ_IMAGE:-ghcr.io/beyond-boilerplate/identityiq:0.1.0}"
+if [[ "$ENTERPRISE" -eq 1 ]]; then
+  info "Enterprise profile: Samba AD + Keycloak + Employee Portal"
+  python3 "$ROOT/tools/lab/enterprise/generate-identity-artifacts.py" || true
+fi
 if need_image_build; then
   if [[ "$FORCE_REBUILD" -eq 1 ]]; then
     info "Building images (--rebuild)..."
@@ -515,6 +578,10 @@ post_ready_checks
 if [[ "$DO_SEED" -eq 1 ]]; then
   ensure_plugin_ready
   seed_lab_data
+  if [[ "$ENTERPRISE" -eq 1 ]]; then
+    info "Seeding Enterprise Lab pack..."
+    "$ROOT/tools/lab/enterprise/seed-enterprise.sh" || true
+  fi
 fi
 
 print_ready

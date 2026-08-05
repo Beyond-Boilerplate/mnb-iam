@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <Plugin certificationLevel="None" displayName="Meridian Custom APIs"
-	minSystemVersion="8.0" name="mnb_iam_toolkit" version="1.3.15"
+	minSystemVersion="8.0" name="mnb_iam_toolkit" version="1.3.17"
 	rightRequired="MNBToolkitAccess">
 	<Attributes>
 		<Map>
@@ -18,7 +18,9 @@
 						<String>com.meridianbank.iiq.plugin.rest.MnbToolkitTaskResource</String>
 						<String>com.meridianbank.iiq.plugin.rest.MnbAgentResource</String>
 						<String>com.meridianbank.iiq.plugin.rest.MnbAgentCoverageResource</String>
+						<String>com.meridianbank.iiq.plugin.rest.MnbAgentRoiResource</String>
 						<String>com.meridianbank.iiq.plugin.rest.MnbConsoleResource</String>
+						<String>com.meridianbank.iiq.plugin.rest.MnbEnterpriseResource</String>
 					</List>
 				</value>
 			</entry>

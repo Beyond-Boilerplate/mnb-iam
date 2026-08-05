@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CertificationDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<CertificationDefinition name="MNB-Cert-App-Owner-Wire" certifierName="applicationOwner">
+  <Attributes>
+    <Map>
+      <entry key="nameTemplate" value="MNB App Owner Review - Wire - $(date)"/>
+      <entry key="shortNameTemplate" value="MNB-Wire-Owner-$(date)"/>
+      <entry key="descriptionTemplate" value="Enterprise Lab application-owner certification for Wire Portal access."/>
+      <entry key="certificationType" value="Application"/>
+      <entry key="processRevokesImmediately">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="App-owner certification template for Wire (Enterprise Lab)."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</CertificationDefinition>

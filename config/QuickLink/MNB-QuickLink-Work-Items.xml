@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="external" category="Custom" messageKey="My Work Items" name="MNB-QuickLink-Work-Items" ordering="2">
+  <Attributes>
+    <Map>
+      <entry key="url" value="/identityiq/workitem/workItems.jsf"/>
+      <entry key="window" value="_self"/>
+    </Map>
+  </Attributes>
+  <Description>Approvals and work items inbox.</Description>
+  <QuickLinkOptions allowSelf="true">
+    <DynamicScopeRef>
+      <Reference class="sailpoint.object.DynamicScope" name="Self Service"/>
+    </DynamicScopeRef>
+  </QuickLinkOptions>
+</QuickLink>

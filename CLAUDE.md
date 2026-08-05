@@ -16,6 +16,7 @@ SailPoint IdentityIQ **8.5** SSD repo. Be **agentic**: pursue the user’s goal 
 | --- | --- |
 | Live IIQ | MCP `identityiq` — `docs/api/MCP-TOOLS.md`; start via `./tools/lab/docker/up.sh` or `tools/iiq-mcp/./run.sh` |
 | Lab CSV paths (Docker) | Inside IIQ: `/opt/iiq-lab-data/…` (repo `lab-data/` mount) — not Mac `/Users/…`; see `lab-data/README.md` |
+| Enterprise Lab v2 | `./tools/lab/docker/up.sh --enterprise` — `docs/ENTERPRISE-LAB-V2.md` · Sandbox Path `docs/lessons/_CATALOG_201_250.md` · Vault/PAM `:8200`/`:8097` |
 | IIQ chatbot | Teller at http://localhost:4180 — `tools/iiq-chat/` (35+ pre-baked MCP + OpenRouter) |
 | Durable XML / branding overlays | `config/` + `%%TOKENS%%` + `./build.sh`; UI under `web/` |
 | Plugins | `pluginsrc/mnb-iam-toolkit/` |

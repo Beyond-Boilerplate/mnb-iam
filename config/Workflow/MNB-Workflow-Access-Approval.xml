@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="MNB-Workflow-Access-Approval" type="LCMProvisioning">
+  <Description>Enterprise Lab access request approval skeleton — manager then app owner (customize in Lesson 38b patterns).</Description>
+  <Variable input="true" name="identityName"/>
+  <Variable input="true" name="approvalSet"/>
+  <Variable input="true" name="plan"/>
+  <Step icon="Start" name="Start" posX="20" posY="20">
+    <Transition to="Manager Approval"/>
+  </Step>
+  <Step icon="Approval" name="Manager Approval" posX="180" posY="20">
+    <Approval mode="serial" owner="ref:launcher" renderer="lcmApprovalRenderer">
+      <Arg name="workItemDescription" value="string:Manager approval for $(identityName)"/>
+    </Approval>
+    <Transition to="Owner Approval"/>
+  </Step>
+  <Step icon="Approval" name="Owner Approval" posX="360" posY="20">
+    <Approval mode="serial" owner="spadmin" renderer="lcmApprovalRenderer">
+      <Arg name="workItemDescription" value="string:App owner approval for $(identityName)"/>
+    </Approval>
+    <Transition to="Provision"/>
+  </Step>
+  <Step action="call:provisionProject" icon="Task" name="Provision" posX="540" posY="20">
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="700" posY="20"/>
+</Workflow>

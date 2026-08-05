@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IdentityTrigger PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IdentityTrigger disabled="false" handler="sailpoint.api.WorkflowTriggerHandler" name="MNB-IdentityTrigger-Leaver" type="attributeChange">
+  <Description>Enterprise Lab: fire leaver workflow on identity attribute change (wire inactive/status in selector or rule as needed).</Description>
+  <HandlerAttributes>
+    <Map>
+      <entry key="workflow" value="MNB-Workflow-Leaver"/>
+    </Map>
+  </HandlerAttributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</IdentityTrigger>

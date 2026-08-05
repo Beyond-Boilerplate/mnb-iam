@@ -2,9 +2,9 @@
 
 **Related:** [`MCP-TOOLS.md`](MCP-TOOLS.md) · [`AUTO-STORY-BOARD-BACKLOG.md`](AUTO-STORY-BOARD-BACKLOG.md) · [`OOTB-IIQ-UX-GAPS.md`](OOTB-IIQ-UX-GAPS.md) (50 operator UX discoverability gaps) · [`openapi/openapi-meridian-agent.yaml`](openapi/openapi-meridian-agent.yaml) · plugin `mnb_iam_toolkit`.
 
-Register IDs **UIAPI-01…90** are **implemented** in toolkit **1.3.15** under `/plugin/rest/mnbToolkit/{tasks,agent,agent/console}/*`, gated by feature flags. Waves A–F MCP wrappers cover console desks, SoD, workgroup/QL/email, schema/correlation/lifecycle/ObjectConfig/PasswordPolicy/provisioning policies, GroupFactory, role requirements/selector, capability rights, cert definition patch, access-request sunset/formAnswers, identity forwarding, risk weights, TaskDefinition upsert, aggregation stop — see [`MCP-TOOLS.md`](MCP-TOOLS.md).
+Register IDs **UIAPI-01…90** plus ROI **97 / 98 / 105–107 / 139** are **implemented** in toolkit **1.3.16** under `/plugin/rest/mnbToolkit/{tasks,agent,agent/console}/*`, gated by feature flags. Waves A–F MCP wrappers cover console desks, SoD, workgroup/QL/email, schema/correlation/lifecycle/ObjectConfig/PasswordPolicy/provisioning policies, GroupFactory, role requirements/selector, capability rights, cert definition patch, access-request sunset/formAnswers, identity forwarding, risk weights, TaskDefinition upsert, aggregation stop, workflow patch, form upsert, connector deep config, SoD matrix import — see [`MCP-TOOLS.md`](MCP-TOOLS.md).
 
-**UIAPI-91…167** = **not implemented** (or intentionally out of IIQ MCP scope). Sourced from a board-back pass: 40 auto-story-capable tickets vs 200 real-life IAM tickets that cannot be fully closed by the automated processor. Full story lists: [`AUTO-STORY-BOARD-BACKLOG.md`](AUTO-STORY-BOARD-BACKLOG.md).
+**Remaining open / hybrid / excluded** IDs in **UIAPI-91…167** (minus the ROI closings above) stay advertised on `GET /agent/gaps`. Sourced from a board-back pass: 40 auto-story-capable tickets vs 200 real-life IAM tickets that cannot be fully closed by the automated processor. Full story lists: [`AUTO-STORY-BOARD-BACKLOG.md`](AUTO-STORY-BOARD-BACKLOG.md).
 
 ## Feature flags
 
@@ -37,6 +37,12 @@ Register IDs **UIAPI-01…90** are **implemented** in toolkit **1.3.15** under `
 | UIAPI-26 | implemented | `GET .../study/catalog` |
 | UIAPI-27 | implemented | `GET /mnbToolkit/ping` |
 | UIAPI-28…90 | implemented | entitlements, roles, JML, certs campaigns, SoD CRUD/constraints/simulate, plugins, orgchart, console desks, schema/correlation, lifecycle, ObjectConfig, password policy, provisioning policies, GroupFactory, capability rights, role selector/requirements, cert definition patch, forwarding, risk config, TaskDefinition, aggregation stop — see MCP-TOOLS.md |
+| UIAPI-97 | implemented | `GET\|POST .../workflows*` (list/get/patch; not visual designer) |
+| UIAPI-98 | implemented | `POST .../forms` (upsert + fields) |
+| UIAPI-105 | implemented | `POST .../applications/{name}/connector/ad` |
+| UIAPI-106 | implemented | `POST .../applications/{name}/connector/jdbc` |
+| UIAPI-107 | implemented | `POST .../applications/{name}/connector/oauth` |
+| UIAPI-139 | implemented | `POST .../policies/sod/matrix/import` |
 
 Discovery: `GET /plugin/rest/mnbToolkit/agent/gaps`.
 
@@ -71,8 +77,8 @@ Priority is informational for roadmap triage — not a delivery commitment.
 | ID | Gap | Why MCP insufficient | Example stories |
 | --- | --- | --- | --- |
 | UIAPI-96 | Live Rule source authoring | **Denylisted** `update_rule_source`; SSD-only | 56–57, 60, 63, 66, 68–71, 74, 81, 83 |
-| UIAPI-97 | Workflow visual designer / LCM clone | Export/import XML only; no step editor MCP | 58–59, 64–65, 72–73, 78, 84 |
-| UIAPI-98 | Forms designer (drag/drop, multi-page) | `list_forms`/`get_form`/`submit_form` ≠ authoring | 61–62, 85 |
+| UIAPI-97 | Workflow visual designer / LCM clone | **Implemented (partial):** `list_workflows` / `get_workflow` / `patch_workflow` for meta/variables/named step — not a visual designer | 58–59, 64–65, 72–73, 78, 84 |
+| UIAPI-98 | Forms designer (drag/drop, multi-page) | **Implemented (partial):** `upsert_form` for top-level Form + fields; not drag/drop UX | 61–62, 85 |
 | UIAPI-99 | Policy violation owner Rule wiring | Partial policy CRUD; owner Rule UX | 67 |
 | UIAPI-100 | QuickLink DynamicScope Rule | Denylist `update_scope` | 75 |
 | UIAPI-101 | Lifecycle Event advanced wizard | Partial `upsert_lifecycle_event` | 76–77 |
@@ -84,9 +90,9 @@ Priority is informational for roadmap triage — not a delivery commitment.
 
 | ID | Gap | Why MCP insufficient | Example stories |
 | --- | --- | --- | --- |
-| UIAPI-105 | AD forest / IQService / proxy wizards | Partial app config; not full connector UI | 86–87, 104 |
-| UIAPI-106 | JDBC SQL map builder | Partial attributes only | 88 |
-| UIAPI-107 | OAuth interactive / SCIM deep auth | Token dance is browser/IdP | 89–91 |
+| UIAPI-105 | AD forest / IQService / proxy wizards | **Implemented (partial):** `configure_ad_connector` attribute pack | 86–87, 104 |
+| UIAPI-106 | JDBC SQL map builder | **Implemented (partial):** `configure_jdbc_connector` + `sqlMap` | 88 |
+| UIAPI-107 | OAuth interactive / SCIM deep auth | **Implemented (partial):** `configure_oauth_connector` attrs; token dance still IdP | 89–91 |
 | UIAPI-108 | SAP JCo destination UI | Proprietary connector UI | 92 |
 | UIAPI-109 | Mainframe RACF connector | Out of lab product scope | 93 |
 | UIAPI-110 | Logical / composite app editor | Partial wizard; no graph UI | 94–95, 107 |
@@ -131,7 +137,7 @@ Priority is informational for roadmap triage — not a delivery commitment.
 | UIAPI-136 | Preferred vs legal name UX | ObjectConfig partial; UX HYBRID | 171–172 |
 | UIAPI-137 | Vacant / matrix manager models | Org design | 173–174 |
 | UIAPI-138 | Job-code / birthright Excel codegen | Offline planning | 176–177 |
-| UIAPI-139 | SoD matrix Excel → policy codegen | Offline; MCP can apply results | 178 |
+| UIAPI-139 | SoD matrix Excel → policy codegen | **Implemented:** `import_sod_matrix` (CSV/rows → constraints) | 178 |
 | UIAPI-140 | Orphan owner campaign (business) | Process; console_orphans is read assist | 180 |
 
 ### Platform / DevOps / multi-product
@@ -177,7 +183,7 @@ Priority is informational for roadmap triage — not a delivery commitment.
 | Tier | Gaps | Rationale |
 | --- | --- | --- |
 | Do not automate | UIAPI-96, 100, 103 | Safety denylist / Debug |
-| High ROI if built | UIAPI-97 (workflow patch), 98 (form upsert richer), 105–107 (connector deep config), 139 (SoD matrix import) | Common bank tickets; MCP-shaped |
+| High ROI if built | _(closed in 1.3.16)_ UIAPI-97/98/105–107/139 | Workflow patch, form upsert, connector deep config, SoD matrix import |
 | Keep HYBRID | UIAPI-91 branding, 126 exam packs, 133 HR ETL | Human artifacts are the deliverable |
 | Out of product | UIAPI-119 PAM, 125 SIEM, 141–150 platform/migration | Wrong control plane |
 
@@ -189,4 +195,4 @@ python3 tools/iiq-api-mine/generate_meridian_agent_openapi.py
 ./docs/api/serve.py   # Swagger → Meridian Custom APIs
 ```
 
-_Last updated: toolkit 1.3.15 + auto-story board-back gaps UIAPI-91…167 (40 possible / 200 impossible stories)._
+_Last updated: toolkit 1.3.16 — ROI closings UIAPI-97/98/105–107/139 + gaps honesty for remaining 91…167._

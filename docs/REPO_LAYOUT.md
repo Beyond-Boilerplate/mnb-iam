@@ -18,9 +18,14 @@ Host Tomcat path (alternate): `./tools/lab/up.sh`
 | `web/` | UI branding / custom CSS |
 | `pluginsrc/mnb-iam-toolkit/` | Meridian Custom APIs plugin source |
 | `ssdplugins/mnb_iam_toolkit/` | Built plugin ZIP drop (from `package.sh`) |
-| `lab-data/` | HR CSV, OpenLDAP LDIF, connector notes |
+| `lab-data/` | HR CSV, OpenLDAP LDIF, connector notes, **enterprise/** identity master |
 | `docker/` + `docker-compose.iiq.yml` | Lab stack images / Compose |
+| `docker-compose.enterprise.yml` | Opt-in Samba AD + Keycloak + Employee Portal |
 | `tools/lab/` | Lab bootstrap (Docker + host) |
+| `tools/lab/enterprise/` | Enterprise generate / seed / e2e / contracts |
+| `tools/employee-portal/` | OIDC login-proof portal |
+| `docs/ENTERPRISE-LAB-V2.md` | Enterprise Lab operator guide |
+| `docs/adr/` | Architecture decision records |
 | `tools/iiq-mcp/` | IdentityIQ MCP server |
 | `tools/iiq-chat/` | Teller chatbot (+ Auto-story UI at `/auto-story.html`, `eval/` suite) |
 | `tools/iiq-verify/` | Lesson verify helpers |

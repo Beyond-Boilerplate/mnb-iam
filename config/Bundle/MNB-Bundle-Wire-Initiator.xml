@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="MNB Wire Initiator Pack" name="MNB-Bundle-Wire-Initiator" type="it">
+  <Attributes>
+    <Map>
+      <entry key="requestable">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Requestable Wire Portal initiate access (Enterprise Lab)."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</Bundle>

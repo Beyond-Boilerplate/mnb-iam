@@ -9,6 +9,7 @@
 - Repo: `lab-data/connectors/connector-selection-matrix.csv` (Privileged vault row)
 - Repo: `lab-data/connectors/features-string-glossary.md`
 - Runtime: `~/iiq-lab-data/connectors/pam/`
+- **Live enterprise path:** `./tools/lab/docker/up.sh --enterprise` → Vault `:8200` + pam-lab `:8097` — Sandbox Lesson [255](255-privileged-vault-checkout.md) / [`lab-data/enterprise/pam/README.md`](../../lab-data/enterprise/pam/README.md)
 
 ---
 
@@ -111,7 +112,7 @@ CyberArk PVWA / API
 | Rotate password | CyberArk platform policy | Rotation logs / reconcile reports |
 | Inventory | Account Aggregation | Cube entitlements + Task Result |
 
-**Lab-without-live-target:** You will not call a live CyberArk API. You will create the Application shell, a safe catalog stub, policy forms, RACI, connection worksheet, and examiner answers that reference which artifact proves rotation and checkout.
+**Lab-without-live-target:** Classic track can still complete offline (Application shell, safe catalog stub, policy forms, RACI, connection worksheet). Prefer the **enterprise stack** when available: HashiCorp Vault + CyberArk-shaped pam-lab give real checkout/deny proofs (Lesson 255) without a licensed CyberArk tenant.
 
 ---
 
@@ -339,7 +340,7 @@ Draft IdentityRequest acceptance criteria for closing a privileged ticket: (1) a
 
 - PAM/CyberArk is Meridian’s privileged credential control plane; `MNB-PAM-CyberArk` is how IIQ inventories and requests safe membership.
 - CloudAdmin and BreakGlass roles only become real when mapped to safes with approval evidence, rotation, and checkout audit.
-- Advanced lab completes offline with RACI, safe catalog stub, worksheets, and examiner answers for rotation and checkout.
+- Classic track can finish offline with worksheets; enterprise Lab v3 adds live Vault + pam-lab checkout (Lesson 255).
 
 ---
 

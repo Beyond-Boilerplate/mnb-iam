@@ -34,6 +34,25 @@ See prior sections in git history / Academy: naming drift, Core TOC filter, mid-
 
 ---
 
+## Iteration N+4 — Enterprise Lab v2 (**shipped design + stack**)
+
+Opt-in production simulation (local Docker only). Does **not** replace Core CSV pedagogy.
+
+| ID | Work item | Location |
+| --- | --- | --- |
+| E0 | ADR + operator guide | `docs/adr/001-enterprise-lab-v2.md`, `docs/ENTERPRISE-LAB-V2.md` |
+| E1 | Identity master + Samba/Keycloak/Portal | `lab-data/enterprise/`, `docker-compose.enterprise.yml` |
+| E2 | HCM/CRM/ITSM mock APIs | `tools/connector-mock/serve.py` |
+| E3 | Governance pack (LCM, QL, certs, roles) | `config/**/MNB-*` |
+| E4 | Seed / e2e / contracts | `tools/lab/enterprise/` |
+| E5 | Toolkit enterprise status/JML | `MnbEnterpriseResource` |
+| E6 | Mailpit + Gitea (second SSO app) | compose profile + `lab-data/enterprise/mail/` |
+| E7 | Enterprise Sandbox Path 201–250 | `docs/lessons/_CATALOG_201_250.md` |
+
+Start: `./tools/lab/docker/up.sh --enterprise` → lessons **201–250**
+
+---
+
 ## Verify / product hardening (parallel)
 
 | ID | Work item | Notes |
@@ -51,6 +70,7 @@ Packaging  → done
 N+1        → done
 N+2        → done (live Directory / JDBC / API mock + bridge)
 N+3 (next) → S1–S4 selective specialist depth
+N+4        → Enterprise Lab v2 + Sandbox Path 201–250 — docs/ENTERPRISE-LAB-V2.md
 Parallel   → V1, V3–V4
 ```
 

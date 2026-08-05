@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "description": "Meridian privileged safes — passwords live in Vault, not tickets or spreadsheets",
+  "safes": [
+    {
+      "name": "MNB-Safe-DomainAdmin",
+      "description": "Shared Domain Admin / root-equivalent on-prem",
+      "dualControl": true,
+      "sessionRecording": true,
+      "members": ["helen.ross"],
+      "accounts": [
+        {
+          "name": "domain-admin",
+          "username": "MERIDIANNB\\\\Administrator",
+          "password": "LabDomAdmin!ChangeMe",
+          "platform": "WinDomain",
+          "address": "dc1.meridiannb.com",
+          "notes": "Standing DA — checkout only via PAM; rotate every 24h in production"
+        }
+      ]
+    },
+    {
+      "name": "MNB-Safe-CloudBreakGlass",
+      "description": "Emergency cloud admin (Entra/AWS root-equivalent narrative)",
+      "dualControl": true,
+      "sessionRecording": true,
+      "members": ["helen.ross"],
+      "accounts": [
+        {
+          "name": "cloud-breakglass",
+          "username": "breakglass-cloud@meridiannb.com",
+          "password": "LabCloudBG!ChangeMe",
+          "platform": "CloudConsole",
+          "address": "console.lab.meridiannb.com",
+          "notes": "Break-glass only — require INC id on checkout"
+        }
+      ]
+    },
+    {
+      "name": "MNB-Safe-PaymentSwitch",
+      "description": "Payment switch / wire infrastructure privileged login",
+      "dualControl": true,
+      "sessionRecording": true,
+      "members": ["helen.ross", "marcus.approve"],
+      "accounts": [
+        {
+          "name": "payment-switch-root",
+          "username": "pswitch-root",
+          "password": "LabPaySwitch!ChangeMe",
+          "platform": "UnixSSH",
+          "address": "paymentswitch.lab.meridiannb.com",
+          "notes": "Highest risk — dual control + recording mandatory"
+        }
+      ]
+    },
+    {
+      "name": "MNB-Safe-SharedRoot",
+      "description": "Shared root on jump / bastion hosts",
+      "dualControl": true,
+      "sessionRecording": true,
+      "members": ["helen.ross"],
+      "accounts": [
+        {
+          "name": "bastion-root",
+          "username": "root",
+          "password": "LabBastionRoot!ChangeMe",
+          "platform": "UnixSSH",
+          "address": "bastion.lab.meridiannb.com",
+          "notes": "No team password managers / Slack DMs"
+        }
+      ]
+    }
+  ]
+}

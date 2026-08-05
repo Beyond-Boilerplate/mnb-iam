@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Meridian Custom APIs
-  version: 1.3.15
-  description: "Bank-owned IdentityIQ Custom APIs for MCP / ITSM orchestration. Closes UI-VS-API gaps (UIAPI-01\u202690). High-risk ops require plugin settings (mutateGovernanceEnabled, passwordResetEnabled, advancedOpsEnabled). See docs/api/UI-VS-API-GAPS.md and docs/api/MCP-TOOLS.md."
+  version: 1.3.16
+  description: "Bank-owned IdentityIQ Custom APIs for MCP / ITSM orchestration. Closes UI-VS-API gaps (UIAPI-01\u202690 + ROI 97/98/105\u2013107/139). Open register UIAPI-91\u2026167 advertised via GET /agent/gaps. High-risk ops require plugin settings (mutateGovernanceEnabled, passwordResetEnabled, advancedOpsEnabled). See docs/api/UI-VS-API-GAPS.md and docs/api/MCP-TOOLS.md."
   x-gap-register:
     - id: UIAPI-01
       category: tasks
@@ -310,6 +310,42 @@ info:
       primaryPath: POST /mnbToolkit/agent/connectors/aggregate/stop
       notes: Stop running aggregation
       mcpTool: iiq_uiapi_90
+    - id: UIAPI-97
+      category: workflows
+      status: implemented
+      primaryPath: "GET|POST /mnbToolkit/agent/workflows*"
+      notes: List/get/patch Workflow (not visual designer)
+      mcpTool: iiq_uiapi_97
+    - id: UIAPI-98
+      category: forms
+      status: implemented
+      primaryPath: POST /mnbToolkit/agent/forms
+      notes: Upsert top-level Form + fields
+      mcpTool: iiq_uiapi_98
+    - id: UIAPI-105
+      category: connectors
+      status: implemented
+      primaryPath: "POST /mnbToolkit/agent/applications/{name}/connector/ad"
+      notes: AD/IQService deep attribute config
+      mcpTool: iiq_uiapi_105
+    - id: UIAPI-106
+      category: connectors
+      status: implemented
+      primaryPath: "POST /mnbToolkit/agent/applications/{name}/connector/jdbc"
+      notes: JDBC URL/SQL map attribute config
+      mcpTool: iiq_uiapi_106
+    - id: UIAPI-107
+      category: connectors
+      status: implemented
+      primaryPath: "POST /mnbToolkit/agent/applications/{name}/connector/oauth"
+      notes: OAuth/SCIM attribute config
+      mcpTool: iiq_uiapi_107
+    - id: UIAPI-139
+      category: sod
+      status: implemented
+      primaryPath: POST /mnbToolkit/agent/policies/sod/matrix/import
+      notes: SoD matrix CSV/rows → policy constraints
+      mcpTool: iiq_uiapi_139
 servers:
   - url: /identityiq/plugin/rest
     description: Via docs/api/serve.py proxy
@@ -420,6 +456,18 @@ tags:
     description: TaskDefinition upsert
   - name: UIAPI-90
     description: Stop running aggregation
+  - name: UIAPI-97
+    description: List/get/patch Workflow (not visual designer)
+  - name: UIAPI-98
+    description: Upsert top-level Form + fields
+  - name: UIAPI-105
+    description: AD/IQService deep attribute config
+  - name: UIAPI-106
+    description: JDBC URL/SQL map attribute config
+  - name: UIAPI-107
+    description: OAuth/SCIM attribute config
+  - name: UIAPI-139
+    description: SoD matrix CSV/rows → policy constraints
 paths:
   /mnbToolkit/agent/gaps:
     get:
@@ -1589,6 +1637,42 @@ paths:
                 $ref: "#/components/schemas/AgentError"
       security:
         - basicAuth: []
+    post:
+      tags:
+        - UIAPI-98
+        - meridian-agent
+      summary: Upsert form
+      operationId: post_mnbToolkit_agent_forms
+      x-uiapi-id: UIAPI-98
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_98_post
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRequest"
   "/mnbToolkit/agent/forms/{name}":
     get:
       tags:
@@ -3135,6 +3219,283 @@ paths:
       x-uiapi-id: UIAPI-86
       x-agent-status: implemented
       x-mcp-tool: iiq_uiapi_86_post
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRequest"
+  /mnbToolkit/agent/workflows:
+    get:
+      tags:
+        - UIAPI-97
+        - meridian-agent
+      summary: List workflows
+      operationId: get_mnbToolkit_agent_workflows
+      x-uiapi-id: UIAPI-97
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_97_get
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+  "/mnbToolkit/agent/workflows/{name}":
+    get:
+      tags:
+        - UIAPI-97
+        - meridian-agent
+      summary: Get workflow detail
+      operationId: get_mnbToolkit_agent_workflows_name
+      x-uiapi-id: UIAPI-97
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_97_get
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+  "/mnbToolkit/agent/workflows/{name}/patch":
+    post:
+      tags:
+        - UIAPI-97
+        - meridian-agent
+      summary: Patch workflow meta/step
+      operationId: post_mnbToolkit_agent_workflows_name_patch
+      x-uiapi-id: UIAPI-97
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_97_post
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRequest"
+  /mnbToolkit/agent/policies/sod/matrix/import:
+    post:
+      tags:
+        - UIAPI-139
+        - meridian-agent
+      summary: Import SoD matrix
+      operationId: post_mnbToolkit_agent_policies_sod_matrix_import
+      x-uiapi-id: UIAPI-139
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_139_post
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRequest"
+  "/mnbToolkit/agent/applications/{name}/connector/ad":
+    post:
+      tags:
+        - UIAPI-105
+        - meridian-agent
+      summary: Configure AD/IQService attrs
+      operationId: post_mnbToolkit_agent_applications_name_connector_ad
+      x-uiapi-id: UIAPI-105
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_105_post
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRequest"
+  "/mnbToolkit/agent/applications/{name}/connector/jdbc":
+    post:
+      tags:
+        - UIAPI-106
+        - meridian-agent
+      summary: Configure JDBC/SQL map attrs
+      operationId: post_mnbToolkit_agent_applications_name_connector_jdbc
+      x-uiapi-id: UIAPI-106
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_106_post
+      responses:
+        "200":
+          description: Success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentEnvelope"
+        "403":
+          description: Denied / feature flag off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+        "501":
+          description: Rejected or deferred for agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentError"
+      security:
+        - basicAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRequest"
+  "/mnbToolkit/agent/applications/{name}/connector/oauth":
+    post:
+      tags:
+        - UIAPI-107
+        - meridian-agent
+      summary: Configure OAuth/SCIM attrs
+      operationId: post_mnbToolkit_agent_applications_name_connector_oauth
+      x-uiapi-id: UIAPI-107
+      x-agent-status: implemented
+      x-mcp-tool: iiq_uiapi_107_post
       responses:
         "200":
           description: Success envelope

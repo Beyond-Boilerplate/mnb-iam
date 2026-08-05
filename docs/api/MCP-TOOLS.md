@@ -101,6 +101,12 @@ Maps **UIAPI** gaps → MCP tools → OpenAPI ops in
 | UIAPI-88 | **`update_risk_score_config`** | `/agent/risk/scoreConfig` |
 | UIAPI-89 | **`upsert_task_definition`** | `/agent/taskDefinitions` |
 | UIAPI-90 | **`stop_aggregation`** | `/agent/connectors/aggregate/stop` |
+| UIAPI-97 | **`list_workflows`**, **`get_workflow`**, **`patch_workflow`** | `/agent/workflows*` |
+| UIAPI-98 | **`upsert_form`** (list/get remain UIAPI-15) | `POST /agent/forms` |
+| UIAPI-105 | **`configure_ad_connector`** | `/agent/applications/*/connector/ad` |
+| UIAPI-106 | **`configure_jdbc_connector`** | `/agent/applications/*/connector/jdbc` |
+| UIAPI-107 | **`configure_oauth_connector`** | `/agent/applications/*/connector/oauth` |
+| UIAPI-139 | **`import_sod_matrix`** | `/agent/policies/sod/matrix/import` |
 | UIAPI-03 | access request also accepts **`sunsetDate` / `sunriseDate` / `formAnswers` / `policyScheme`** | `/agent/accessRequests` |
 
 Teller Console UI: `http://localhost:4180/console.html` (Waves 1–3 central menu). Org chart risk badges: inactive / brokenManager / privileged.
@@ -117,7 +123,7 @@ Governance/ops: `list_work_item_archive`, `list_electronic_signature_meanings`, 
 
 **Still excluded (no Custom API / unsafe):** `update_rule_source`, `update_scope`, legacy name `grant_capability`.
 
-**Auto-story board-back:** 40 MCP_E2E stories + 200 real-life gaps → [`AUTO-STORY-BOARD-BACKLOG.md`](AUTO-STORY-BOARD-BACKLOG.md) · open IDs **UIAPI-91…167** in [`UI-VS-API-GAPS.md`](UI-VS-API-GAPS.md).
+**Auto-story board-back:** 40 MCP_E2E stories + 200 real-life gaps → [`AUTO-STORY-BOARD-BACKLOG.md`](AUTO-STORY-BOARD-BACKLOG.md) · remaining open IDs in [`UI-VS-API-GAPS.md`](UI-VS-API-GAPS.md) (ROI 97/98/105–107/139 closed in toolkit **1.3.16**).
 
 Teller UI (`tools/iiq-chat/`, :4180) discovers tools via live MCP `tools/list` + native OpenRouter tool-calling (no static catalog).
 

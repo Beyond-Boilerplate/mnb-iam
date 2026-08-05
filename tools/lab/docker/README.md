@@ -5,6 +5,8 @@ installs/enables the Meridian plugin, and seeds **MNB-HR** + **MNB-OpenLDAP**:
 
 ```bash
 ./tools/lab/docker/up.sh
+# Enterprise Lab v2 (Samba AD + Keycloak + Employee Portal):
+./tools/lab/docker/up.sh --enterprise
 # preflight only (fail-fast on occupied ports):
 ./tools/lab/docker/up.sh --check
 # force rebuild images (slower):
@@ -30,7 +32,14 @@ Startup **fails fast** if required host ports are taken by something other than 
 | http://localhost:8090/ | **phpLDAPadmin** (browse OpenLDAP; `cn=admin,dc=meridiannb,dc=com` / `admin`) |
 | ldap://localhost:389 | **OpenLDAP** (`cn=admin,dc=meridiannb,dc=com` / `admin`) |
 | localhost:5435 | **jdbc-pg** Meridian apps DB (`mnb` / `mnb` / `mnb_apps`) — Lessons 63–64 |
-| http://localhost:8091/health | **connector-mock** Wire Portal + SCIM — Lessons 68–69 |
+| http://localhost:8091/health | **connector-mock** Wire + SCIM + HCM + CRM + ITSM |
+| http://localhost:8085/ | **Keycloak** (`--enterprise`) realm `meridian` |
+| http://localhost:8092/ | **Employee Portal** OIDC login proof (`--enterprise`) |
+| http://localhost:8025/ | **Mailpit** catch-all mail UI (`--enterprise`) |
+| http://localhost:8093/ | **Gitea** second SSO app (`--enterprise`) |
+| ldap://localhost:3890 | **Samba AD** LDAP (`--enterprise`) |
+
+Enterprise Lab guide: [`docs/ENTERPRISE-LAB-V2.md`](../../docs/ENTERPRISE-LAB-V2.md)
 
 ### Lab file paths (Delimited File connectors)
 

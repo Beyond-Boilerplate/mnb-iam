@@ -1,0 +1,872 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 36,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00001",
+      "userName": "helen.ross",
+      "name": {
+        "givenName": "Helen",
+        "familyName": "Ross"
+      },
+      "emails": [
+        {
+          "value": "helen.ross@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00001",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00002",
+      "userName": "christopher.hayes",
+      "name": {
+        "givenName": "Christopher",
+        "familyName": "Hayes"
+      },
+      "emails": [
+        {
+          "value": "christopher.hayes@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00002",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00003",
+      "userName": "deepa.nair",
+      "name": {
+        "givenName": "Deepa",
+        "familyName": "Nair"
+      },
+      "emails": [
+        {
+          "value": "deepa.nair@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00003",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00004",
+      "userName": "anthony.powell",
+      "name": {
+        "givenName": "Anthony",
+        "familyName": "Powell"
+      },
+      "emails": [
+        {
+          "value": "anthony.powell@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00004",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00005",
+      "userName": "rachel.evans",
+      "name": {
+        "givenName": "Rachel",
+        "familyName": "Evans"
+      },
+      "emails": [
+        {
+          "value": "rachel.evans@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00005",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00006",
+      "userName": "sanjay.kapoor",
+      "name": {
+        "givenName": "Sanjay",
+        "familyName": "Kapoor"
+      },
+      "emails": [
+        {
+          "value": "sanjay.kapoor@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00006",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00007",
+      "userName": "emily.bennett",
+      "name": {
+        "givenName": "Emily",
+        "familyName": "Bennett"
+      },
+      "emails": [
+        {
+          "value": "emily.bennett@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00007",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00008",
+      "userName": "daniel.griffin",
+      "name": {
+        "givenName": "Daniel",
+        "familyName": "Griffin"
+      },
+      "emails": [
+        {
+          "value": "daniel.griffin@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00008",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00011",
+      "userName": "anthony.rao",
+      "name": {
+        "givenName": "Anthony",
+        "familyName": "Rao"
+      },
+      "emails": [
+        {
+          "value": "anthony.rao@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00011",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00090",
+      "userName": "priya.wire",
+      "name": {
+        "givenName": "Priya",
+        "familyName": "Mehta"
+      },
+      "emails": [
+        {
+          "value": "priya.wire@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00090",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00091",
+      "userName": "marcus.approve",
+      "name": {
+        "givenName": "Marcus",
+        "familyName": "Coleman"
+      },
+      "emails": [
+        {
+          "value": "marcus.approve@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00091",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00009",
+      "userName": "chloe.adhikari",
+      "name": {
+        "givenName": "Chloe",
+        "familyName": "Adhikari"
+      },
+      "emails": [
+        {
+          "value": "chloe.adhikari@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00009",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00012",
+      "userName": "meera.torres",
+      "name": {
+        "givenName": "Meera",
+        "familyName": "Torres"
+      },
+      "emails": [
+        {
+          "value": "meera.torres@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00012",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00013",
+      "userName": "aisha.murphy",
+      "name": {
+        "givenName": "Aisha",
+        "familyName": "Murphy"
+      },
+      "emails": [
+        {
+          "value": "aisha.murphy@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00013",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00014",
+      "userName": "sofia.andersson",
+      "name": {
+        "givenName": "Sofia",
+        "familyName": "Andersson"
+      },
+      "emails": [
+        {
+          "value": "sofia.andersson@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00014",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00015",
+      "userName": "michael.ross",
+      "name": {
+        "givenName": "Michael",
+        "familyName": "Ross"
+      },
+      "emails": [
+        {
+          "value": "michael.ross@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00015",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00016",
+      "userName": "isaac.lambert",
+      "name": {
+        "givenName": "Isaac",
+        "familyName": "Lambert"
+      },
+      "emails": [
+        {
+          "value": "isaac.lambert@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00016",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00017",
+      "userName": "anthony.bennett",
+      "name": {
+        "givenName": "Anthony",
+        "familyName": "Bennett"
+      },
+      "emails": [
+        {
+          "value": "anthony.bennett@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00017",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00018",
+      "userName": "kai.khatri",
+      "name": {
+        "givenName": "Kai",
+        "familyName": "Khatri"
+      },
+      "emails": [
+        {
+          "value": "kai.khatri@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00018",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00019",
+      "userName": "chloe.joshi",
+      "name": {
+        "givenName": "Chloe",
+        "familyName": "Joshi"
+      },
+      "emails": [
+        {
+          "value": "chloe.joshi@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00019",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00020",
+      "userName": "zoe.okoro",
+      "name": {
+        "givenName": "Zoe",
+        "familyName": "Okoro"
+      },
+      "emails": [
+        {
+          "value": "zoe.okoro@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00020",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00021",
+      "userName": "noah.ibrahim",
+      "name": {
+        "givenName": "Noah",
+        "familyName": "Ibrahim"
+      },
+      "emails": [
+        {
+          "value": "noah.ibrahim@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00021",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00022",
+      "userName": "rachel.khatri",
+      "name": {
+        "givenName": "Rachel",
+        "familyName": "Khatri"
+      },
+      "emails": [
+        {
+          "value": "rachel.khatri@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00022",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00023",
+      "userName": "james.nguyen",
+      "name": {
+        "givenName": "James",
+        "familyName": "Nguyen"
+      },
+      "emails": [
+        {
+          "value": "james.nguyen@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00023",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00025",
+      "userName": "meera.brooks",
+      "name": {
+        "givenName": "Meera",
+        "familyName": "Brooks"
+      },
+      "emails": [
+        {
+          "value": "meera.brooks@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00025",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00026",
+      "userName": "raj.ross",
+      "name": {
+        "givenName": "Raj",
+        "familyName": "Ross"
+      },
+      "emails": [
+        {
+          "value": "raj.ross@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00026",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00027",
+      "userName": "leo.powell",
+      "name": {
+        "givenName": "Leo",
+        "familyName": "Powell"
+      },
+      "emails": [
+        {
+          "value": "leo.powell@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00027",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00028",
+      "userName": "benjamin.desai",
+      "name": {
+        "givenName": "Benjamin",
+        "familyName": "Desai"
+      },
+      "emails": [
+        {
+          "value": "benjamin.desai@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00028",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00029",
+      "userName": "sofia.murphy",
+      "name": {
+        "givenName": "Sofia",
+        "familyName": "Murphy"
+      },
+      "emails": [
+        {
+          "value": "sofia.murphy@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00029",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00031",
+      "userName": "rohan.singh",
+      "name": {
+        "givenName": "Rohan",
+        "familyName": "Singh"
+      },
+      "emails": [
+        {
+          "value": "rohan.singh@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00031",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00032",
+      "userName": "maya.desai",
+      "name": {
+        "givenName": "Maya",
+        "familyName": "Desai"
+      },
+      "emails": [
+        {
+          "value": "maya.desai@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00032",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00033",
+      "userName": "raj.morris",
+      "name": {
+        "givenName": "Raj",
+        "familyName": "Morris"
+      },
+      "emails": [
+        {
+          "value": "raj.morris@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00033",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00035",
+      "userName": "rachel.thapa",
+      "name": {
+        "givenName": "Rachel",
+        "familyName": "Thapa"
+      },
+      "emails": [
+        {
+          "value": "rachel.thapa@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00035",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00036",
+      "userName": "michael.watson",
+      "name": {
+        "givenName": "Michael",
+        "familyName": "Watson"
+      },
+      "emails": [
+        {
+          "value": "michael.watson@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00036",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00037",
+      "userName": "samir.hughes",
+      "name": {
+        "givenName": "Samir",
+        "familyName": "Hughes"
+      },
+      "emails": [
+        {
+          "value": "samir.hughes@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00037",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    },
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "crm-MNB00094",
+      "userName": "samir.hassan",
+      "name": {
+        "givenName": "Samir",
+        "familyName": "Hassan"
+      },
+      "emails": [
+        {
+          "value": "samir.hassan@meridiannb.com",
+          "primary": true
+        }
+      ],
+      "active": true,
+      "externalId": "MNB00094",
+      "groups": [
+        {
+          "display": "CRM-Users"
+        }
+      ]
+    }
+  ]
+}

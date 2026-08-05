@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="external" category="Custom" messageKey="IAM Toolkit Console" name="MNB-QuickLink-Toolkit-Console" ordering="5">
+  <Attributes>
+    <Map>
+      <entry key="url" value="http://localhost:4180/console.html"/>
+      <entry key="window" value="_blank"/>
+    </Map>
+  </Attributes>
+  <Description>Meridian Teller operator console.</Description>
+  <QuickLinkOptions allowSelf="true">
+    <DynamicScopeRef>
+      <Reference class="sailpoint.object.DynamicScope" name="Self Service"/>
+    </DynamicScopeRef>
+  </QuickLinkOptions>
+</QuickLink>

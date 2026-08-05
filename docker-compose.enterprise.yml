@@ -1,0 +1,370 @@
+# Meridian Enterprise Lab v2 — additive services (Samba AD, Keycloak, Employee Portal)
+#
+# Usage:
+#   docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml --profile enterprise up -d
+#   ./tools/lab/docker/up.sh --enterprise
+#
+# Does not replace Core Path stack. See docs/ENTERPRISE-LAB-V2.md
+
+name: mnb-iiq-lab
+
+services:
+  samba-ad:
+    profiles: ["enterprise"]
+    image: ${SAMBA_AD_IMAGE:-nowsci/samba-domain:latest}
+    platform: ${SAMBA_PLATFORM:-linux/amd64}
+    container_name: mnb-samba-ad
+    hostname: dc1
+    privileged: true
+    environment:
+      DOMAIN: "MERIDIANNB.COM"
+      DOMAINPASS: "Password1!"
+      DNSFORWARDER: "8.8.8.8"
+    ports:
+      - "${SAMBA_LDAP_PORT:-3890}:389"
+      - "${SAMBA_SMB_PORT:-445}:445"
+    volumes:
+      - mnb-samba-data:/var/lib/samba
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "samba-tool domain info 127.0.0.1 >/dev/null 2>&1 || ldapsearch -x -H ldap://127.0.0.1 -b '' -s base namingContexts >/dev/null 2>&1",
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+
+  keycloak:
+    profiles: ["enterprise"]
+    image: ${KEYCLOAK_IMAGE:-quay.io/keycloak/keycloak:24.0}
+    container_name: mnb-keycloak
+    command:
+      [
+        "start-dev",
+        "--import-realm",
+        "--http-enabled=true",
+        "--hostname=localhost",
+        "--hostname-port=8085",
+        "--hostname-strict=false",
+        "--hostname-strict-https=false",
+      ]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8080"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: "localhost"
+      KC_HOSTNAME_PORT: "8085"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_PROXY: "edge"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "${KEYCLOAK_PORT:-8085}:8080"
+    volumes:
+      - ./lab-data/enterprise/keycloak/meridian-realm.json:/opt/keycloak/data/import/meridian-realm.json:ro
+      - mnb-keycloak-data:/opt/keycloak/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/8080",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  # One-shot: master realm still defaults to HTTPS — relax for local lab admin console
+  keycloak-http-relax:
+    profiles: ["enterprise"]
+    image: ${KEYCLOAK_IMAGE:-quay.io/keycloak/keycloak:24.0}
+    container_name: mnb-keycloak-http-relax
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      KEYCLOAK_INTERNAL_URL: "http://keycloak:8080"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./tools/lab/enterprise/keycloak-allow-http.sh:/opt/mnb/keycloak-allow-http.sh:ro
+    entrypoint: ["/bin/bash", "/opt/mnb/keycloak-allow-http.sh"]
+    restart: "no"
+
+  employee-portal:
+    profiles: ["enterprise"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.employee-portal
+    image: ${EMPLOYEE_PORTAL_IMAGE:-mnb-employee-portal:local}
+    container_name: mnb-employee-portal
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      keycloak-http-relax:
+        condition: service_completed_successfully
+    environment:
+      PORTAL_HOST: "0.0.0.0"
+      PORTAL_PORT: "8092"
+      KEYCLOAK_INTERNAL_URL: "http://host.docker.internal:8085"
+      KEYCLOAK_PUBLIC_URL: "http://localhost:8085"
+      KEYCLOAK_REALM: "meridian"
+      OIDC_CLIENT_ID: "employee-portal"
+      PORTAL_PUBLIC_URL: "http://localhost:8092"
+      GITEA_PUBLIC_URL: "http://localhost:8093"
+      MAILPIT_PUBLIC_URL: "http://localhost:8025"
+      WORKSTATION_PUBLIC_URL: "http://localhost:8094"
+      HR_INTRANET_PUBLIC_URL: "http://localhost:8095"
+      FINANCE_PUBLIC_URL: "http://localhost:8096"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${EMPLOYEE_PORTAL_PORT:-8092}:8092"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8092/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # Workstation login gate — grant group → login; revoke → deny (Enterprise Lab v3)
+  workstation-portal:
+    profiles: ["enterprise"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sso-gate
+    image: ${SSO_GATE_IMAGE:-mnb-sso-gate:local}
+    container_name: mnb-workstation-portal
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      PORTAL_HOST: "0.0.0.0"
+      PORTAL_PORT: "8094"
+      KEYCLOAK_INTERNAL_URL: "http://host.docker.internal:8085"
+      KEYCLOAK_PUBLIC_URL: "http://localhost:8085"
+      KEYCLOAK_REALM: "meridian"
+      OIDC_CLIENT_ID: "workstation-portal"
+      PORTAL_PUBLIC_URL: "http://localhost:8094"
+      APP_TITLE: "Meridian Workstation"
+      APP_KIND: "workstation"
+      REQUIRED_GROUPS: "mnb-workstation-users"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${WORKSTATION_PORTAL_PORT:-8094}:8094"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8094/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  hr-intranet:
+    profiles: ["enterprise"]
+    image: ${SSO_GATE_IMAGE:-mnb-sso-gate:local}
+    container_name: mnb-hr-intranet
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      workstation-portal:
+        condition: service_started
+    environment:
+      PORTAL_HOST: "0.0.0.0"
+      PORTAL_PORT: "8095"
+      KEYCLOAK_INTERNAL_URL: "http://host.docker.internal:8085"
+      KEYCLOAK_PUBLIC_URL: "http://localhost:8085"
+      KEYCLOAK_REALM: "meridian"
+      OIDC_CLIENT_ID: "hr-intranet"
+      PORTAL_PUBLIC_URL: "http://localhost:8095"
+      APP_TITLE: "Meridian HR Self-Service"
+      APP_KIND: "hr"
+      REQUIRED_GROUPS: "mnb-hr-intranet"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${HR_INTRANET_PORT:-8095}:8095"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8095/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  finance-portal:
+    profiles: ["enterprise"]
+    image: ${SSO_GATE_IMAGE:-mnb-sso-gate:local}
+    container_name: mnb-finance-portal
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      workstation-portal:
+        condition: service_started
+    environment:
+      PORTAL_HOST: "0.0.0.0"
+      PORTAL_PORT: "8096"
+      KEYCLOAK_INTERNAL_URL: "http://host.docker.internal:8085"
+      KEYCLOAK_PUBLIC_URL: "http://localhost:8085"
+      KEYCLOAK_REALM: "meridian"
+      OIDC_CLIENT_ID: "finance-portal"
+      PORTAL_PUBLIC_URL: "http://localhost:8096"
+      APP_TITLE: "Meridian Finance Portal"
+      APP_KIND: "finance"
+      REQUIRED_GROUPS: "mnb-finance-portal"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${FINANCE_PORTAL_PORT:-8096}:8096"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8096/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  # Privileged credential vault (HashiCorp Vault) — CyberArk-shaped ops via pam-lab
+  vault:
+    profiles: ["enterprise"]
+    image: ${VAULT_IMAGE:-hashicorp/vault:1.17}
+    container_name: mnb-vault
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: mnb-lab-vault-root
+      VAULT_ADDR: "http://127.0.0.1:8200"
+    command:
+      [
+        "server",
+        "-dev",
+        "-dev-root-token-id=mnb-lab-vault-root",
+        "-dev-listen-address=0.0.0.0:8200",
+      ]
+    ports:
+      - "${VAULT_HTTP_PORT:-8200}:8200"
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://127.0.0.1:8200"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  pam-lab:
+    profiles: ["enterprise"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.pam-lab
+    image: ${PAM_LAB_IMAGE:-mnb-pam-lab:local}
+    container_name: mnb-pam-lab
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      PAM_HOST: "0.0.0.0"
+      PAM_PORT: "8097"
+      VAULT_ADDR: "http://vault:8200"
+      VAULT_TOKEN: "mnb-lab-vault-root"
+      PAM_SEED: "/opt/mnb/pam-seed.json"
+    ports:
+      - "${PAM_LAB_PORT:-8097}:8097"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8097/health')\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+
+  # Catch IIQ / workflow notification email (SMTP :1025, UI :8025)
+  mailpit:
+    profiles: ["enterprise"]
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:v1.21}
+    container_name: mnb-mailpit
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      # Host publish defaults to 1026 — host :1025 is often taken by other lab stacks.
+      # IIQ still uses Docker DNS mailpit:1025.
+      - "${MAILPIT_SMTP_PORT:-1026}:1025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:8025/api/v1/info >/dev/null || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # Second SSO app (OIDC via Keycloak) — developer portal stand-in
+  gitea:
+    profiles: ["enterprise"]
+    image: ${GITEA_IMAGE:-gitea/gitea:1.22.3}
+    container_name: mnb-gitea
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__server__DOMAIN: localhost
+      GITEA__server__ROOT_URL: http://localhost:8093/
+      GITEA__server__HTTP_PORT: "3000"
+      GITEA__server__DISABLE_SSH: "true"
+      GITEA__database__DB_TYPE: sqlite3
+      GITEA__database__PATH: /data/gitea/gitea.db
+      GITEA__service__DISABLE_REGISTRATION: "false"
+      # Allow local admin bootstrap; prefer OIDC for personas (Lesson 213)
+      GITEA__service__ALLOW_ONLY_EXTERNAL_REGISTRATION: "false"
+      GITEA__service__SHOW_REGISTRATION_BUTTON: "false"
+      GITEA__openid__ENABLE_OPENID_SIGNIN: "true"
+      GITEA__openid__ENABLE_OPENID_SIGNUP: "true"
+      GITEA__oauth2_client__ENABLE_AUTO_REGISTRATION: "true"
+      GITEA__oauth2_client__USERNAME: userid
+      GITEA__session__PROVIDER: memory
+      GITEA__log__MODE: console
+      GITEA__log__LEVEL: info
+    ports:
+      - "${GITEA_HTTP_PORT:-8093}:3000"
+    volumes:
+      - mnb-gitea-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api/v1/version >/dev/null || exit 1",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+volumes:
+  mnb-samba-data:
+  mnb-keycloak-data:
+  mnb-gitea-data:

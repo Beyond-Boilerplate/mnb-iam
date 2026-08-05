@@ -1,6 +1,6 @@
 # Meridian Custom APIs (`mnb_iam_toolkit`)
 
-Version **1.3.15** · Plugin **name** must be letters/numbers/`_` only (`mnb_iam_toolkit`).  
+Version **1.3.17** · Plugin **name** must be letters/numbers/`_` only (`mnb_iam_toolkit`).  
 Display name: **Meridian Custom APIs**. Repo folder may stay `pluginsrc/mnb-iam-toolkit/`.
 
 Owner: **helen.ross** / `MNB-WG-IAM-Ops`
@@ -15,6 +15,7 @@ Owner: **helen.ross** / `MNB-WG-IAM-Ops`
 | 1.3.12 | UIAPI-60…80 MCP parity wave: console desks, SoD list/delete/constraints, workgroup/QL/email CRUD, schema/correlation, lifecycle, ObjectConfig/PasswordPolicy, role requirements, form→workflow |
 | 1.3.13 | UIAPI-81…83: provisioning policy Forms, SoD simulate, GroupFactory upsert/run |
 | 1.3.14 | UIAPI-84…86 + accessRequest sunset/formAnswers: capability rights, role selector, cert definition patch |
+| 1.3.16 | UIAPI-97/98/105–107/139: workflow patch, form upsert, connector deep config, SoD matrix import; gaps honesty for 91–167 |
 | 1.3.15 | UIAPI-87…90: identity forwarding/OOO, risk score weights, TaskDefinition upsert, aggregation stop |
 
 ## Build + install

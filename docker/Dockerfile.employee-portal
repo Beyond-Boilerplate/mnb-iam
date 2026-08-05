@@ -1,0 +1,11 @@
+FROM python:3.12-alpine
+WORKDIR /app
+COPY tools/employee-portal/app.py /app/app.py
+ENV PORTAL_HOST=0.0.0.0 PORTAL_PORT=8092 \
+    KEYCLOAK_INTERNAL_URL=http://host.docker.internal:8085 \
+    KEYCLOAK_PUBLIC_URL=http://localhost:8085 \
+    KEYCLOAK_REALM=meridian \
+    OIDC_CLIENT_ID=employee-portal \
+    PORTAL_PUBLIC_URL=http://localhost:8092
+EXPOSE 8092
+CMD ["python3", "/app/app.py"]

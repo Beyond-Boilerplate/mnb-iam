@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CertificationDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<CertificationDefinition name="MNB-Cert-Manager-Access-Review" certifierName="manager">
+  <Attributes>
+    <Map>
+      <entry key="nameTemplate" value="MNB Manager Access Review - $(date)"/>
+      <entry key="shortNameTemplate" value="MNB-Mgr-$(date)"/>
+      <entry key="descriptionTemplate" value="Enterprise Lab manager certification of direct reports."/>
+      <entry key="certificationType" value="Identity"/>
+      <entry key="processRevokesImmediately">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Manager access review campaign template (Enterprise Lab)."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</CertificationDefinition>

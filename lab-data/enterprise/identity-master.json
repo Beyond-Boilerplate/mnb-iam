@@ -1,0 +1,759 @@
+{
+  "version": 1,
+  "realm": "meridian",
+  "domain": "meridiannb.com",
+  "defaultPassword": "LabUser1!",
+  "groups": [
+    {
+      "id": "mnb-employees",
+      "name": "MNB-Employees",
+      "description": "All workforce"
+    },
+    {
+      "id": "mnb-managers",
+      "name": "MNB-Managers",
+      "description": "People managers"
+    },
+    {
+      "id": "wire-initiators",
+      "name": "Wire-Initiators",
+      "description": "Wire Portal initiate"
+    },
+    {
+      "id": "wire-approvers",
+      "name": "Wire-Approvers",
+      "description": "Wire Portal approve"
+    },
+    {
+      "id": "portal-users",
+      "name": "Portal-Users",
+      "description": "Employee Portal access"
+    },
+    {
+      "id": "mnb-workstation-users",
+      "name": "Workstation-Users",
+      "description": "Workstation login gate"
+    },
+    {
+      "id": "mnb-hr-intranet",
+      "name": "HR-Intranet",
+      "description": "HR Self-Service SSO"
+    },
+    {
+      "id": "mnb-finance-portal",
+      "name": "Finance-Portal",
+      "description": "Finance Portal SSO"
+    }
+  ],
+  "identities": [
+    {
+      "userId": "MNB00001",
+      "username": "helen.ross",
+      "firstName": "Helen",
+      "lastName": "Ross",
+      "email": "helen.ross@meridiannb.com",
+      "department": "Identity & Access",
+      "title": "Head of Identity & Access",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "mnb-workstation-users",
+        "mnb-hr-intranet",
+        "mnb-finance-portal"
+      ]
+    },
+    {
+      "userId": "MNB00002",
+      "username": "christopher.hayes",
+      "firstName": "Christopher",
+      "lastName": "Hayes",
+      "email": "christopher.hayes@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Director of Technology",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00003",
+      "username": "deepa.nair",
+      "firstName": "Deepa",
+      "lastName": "Nair",
+      "email": "deepa.nair@meridiannb.com",
+      "department": "Finance & Controllership",
+      "title": "Director of Finance",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00004",
+      "username": "anthony.powell",
+      "firstName": "Anthony",
+      "lastName": "Powell",
+      "email": "anthony.powell@meridiannb.com",
+      "department": "Enterprise Risk",
+      "title": "Chief Risk Officer",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00005",
+      "username": "rachel.evans",
+      "firstName": "Rachel",
+      "lastName": "Evans",
+      "email": "rachel.evans@meridiannb.com",
+      "department": "Treasury & Payments",
+      "title": "Payments Operations Manager",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00006",
+      "username": "sanjay.kapoor",
+      "firstName": "Sanjay",
+      "lastName": "Kapoor",
+      "email": "sanjay.kapoor@meridiannb.com",
+      "department": "Commercial Banking",
+      "title": "Commercial Banking Manager",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00007",
+      "username": "emily.bennett",
+      "firstName": "Emily",
+      "lastName": "Bennett",
+      "email": "emily.bennett@meridiannb.com",
+      "department": "Retail Banking",
+      "title": "Retail Branch Manager",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00008",
+      "username": "daniel.griffin",
+      "firstName": "Daniel",
+      "lastName": "Griffin",
+      "email": "daniel.griffin@meridiannb.com",
+      "department": "Bank Operations",
+      "title": "Operations Manager",
+      "managerUserId": null,
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-12",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00011",
+      "username": "anthony.rao",
+      "firstName": "Anthony",
+      "lastName": "Rao",
+      "email": "anthony.rao@meridiannb.com",
+      "department": "Enterprise Risk",
+      "title": "Chief Risk Officer",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2016-06-06",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees",
+        "mnb-managers"
+      ]
+    },
+    {
+      "userId": "MNB00090",
+      "username": "priya.wire",
+      "firstName": "Priya",
+      "lastName": "Mehta",
+      "email": "priya.wire@meridiannb.com",
+      "department": "Commercial Banking",
+      "title": "Relationship Manager",
+      "managerUserId": "MNB00006",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2022-06-01",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00091",
+      "username": "marcus.approve",
+      "firstName": "Marcus",
+      "lastName": "Coleman",
+      "email": "marcus.approve@meridiannb.com",
+      "department": "Treasury & Payments",
+      "title": "Wire Approver",
+      "managerUserId": "MNB00005",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2021-02-14",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00010",
+      "username": "anita.ross",
+      "firstName": "Anita",
+      "lastName": "Ross",
+      "email": "anita.ross@meridiannb.com",
+      "department": "Finance & Controllership",
+      "title": "Staff Accountant",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "terminated",
+      "hireDate": "2023-02-14",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00024",
+      "username": "kai.howard",
+      "firstName": "Kai",
+      "lastName": "Howard",
+      "email": "kai.howard@meridiannb.com",
+      "department": "Finance & Controllership",
+      "title": "SOX Controls Analyst",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "terminated",
+      "hireDate": "2022-06-07",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00030",
+      "username": "theo.foster",
+      "firstName": "Theo",
+      "lastName": "Foster",
+      "email": "theo.foster@meridiannb.com",
+      "department": "HRP",
+      "title": "HR Business Partner",
+      "managerUserId": "MNB00006",
+      "employeeType": "Employee",
+      "status": "terminated",
+      "hireDate": "2022-11-19",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00034",
+      "username": "benjamin.mehta",
+      "firstName": "Benjamin",
+      "lastName": "Mehta",
+      "email": "benjamin.mehta@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Site Reliability Engineer",
+      "managerUserId": "MNB00006",
+      "employeeType": "Employee",
+      "status": "terminated",
+      "hireDate": "2022-09-25",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00092",
+      "username": "jordan.reed",
+      "firstName": "Jordan",
+      "lastName": "Reed",
+      "email": "jordan.reed@meridiannb.com",
+      "department": "Finance & Controllership",
+      "title": "Staff Accountant",
+      "managerUserId": "MNB00003",
+      "employeeType": "Employee",
+      "status": "terminated",
+      "hireDate": "2020-09-09",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00009",
+      "username": "chloe.adhikari",
+      "firstName": "Chloe",
+      "lastName": "Adhikari",
+      "email": "chloe.adhikari@meridiannb.com",
+      "department": "Identity & Access",
+      "title": "SOC Analyst",
+      "managerUserId": "MNB00001",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2020-10-08",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00012",
+      "username": "meera.torres",
+      "firstName": "Meera",
+      "lastName": "Torres",
+      "email": "meera.torres@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Directory Administrator",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2017-01-09",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00013",
+      "username": "aisha.murphy",
+      "firstName": "Aisha",
+      "lastName": "Murphy",
+      "email": "aisha.murphy@meridiannb.com",
+      "department": "Bank Operations",
+      "title": "Operations Analyst",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2017-05-05",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00014",
+      "username": "sofia.andersson",
+      "firstName": "Sofia",
+      "lastName": "Andersson",
+      "email": "sofia.andersson@meridiannb.com",
+      "department": "Retail Banking",
+      "title": "Customer Service Rep",
+      "managerUserId": "MNB00003",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2015-06-13",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00015",
+      "username": "michael.ross",
+      "firstName": "Michael",
+      "lastName": "Ross",
+      "email": "michael.ross@meridiannb.com",
+      "department": "Treasury & Payments",
+      "title": "Wire Specialist",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2019-03-18",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00016",
+      "username": "isaac.lambert",
+      "firstName": "Isaac",
+      "lastName": "Lambert",
+      "email": "isaac.lambert@meridiannb.com",
+      "department": "Retail Banking",
+      "title": "People Manager",
+      "managerUserId": "MNB00001",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2024-05-08",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00017",
+      "username": "anthony.bennett",
+      "firstName": "Anthony",
+      "lastName": "Bennett",
+      "email": "anthony.bennett@meridiannb.com",
+      "department": "Finance & Controllership",
+      "title": "Finance Director",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2021-10-22",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00018",
+      "username": "kai.khatri",
+      "firstName": "Kai",
+      "lastName": "Khatri",
+      "email": "kai.khatri@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Cloud Platform Engineer",
+      "managerUserId": "MNB00003",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-03-07",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00019",
+      "username": "chloe.joshi",
+      "firstName": "Chloe",
+      "lastName": "Joshi",
+      "email": "chloe.joshi@meridiannb.com",
+      "department": "Commercial Banking",
+      "title": "Relationship Manager",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2015-11-05",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00020",
+      "username": "zoe.okoro",
+      "firstName": "Zoe",
+      "lastName": "Okoro",
+      "email": "zoe.okoro@meridiannb.com",
+      "department": "Retail Banking",
+      "title": "Customer Service Rep",
+      "managerUserId": "MNB00001",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2015-01-06",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00021",
+      "username": "noah.ibrahim",
+      "firstName": "Noah",
+      "lastName": "Ibrahim",
+      "email": "noah.ibrahim@meridiannb.com",
+      "department": "Treasury & Payments",
+      "title": "Wire Specialist",
+      "managerUserId": "MNB00001",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2020-03-10",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00022",
+      "username": "rachel.khatri",
+      "firstName": "Rachel",
+      "lastName": "Khatri",
+      "email": "rachel.khatri@meridiannb.com",
+      "department": "Commercial Banking",
+      "title": "Relationship Manager",
+      "managerUserId": "MNB00003",
+      "employeeType": "Contractor",
+      "status": "active",
+      "hireDate": "2020-03-04",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00023",
+      "username": "james.nguyen",
+      "firstName": "James",
+      "lastName": "Nguyen",
+      "email": "james.nguyen@meridiannb.com",
+      "department": "Treasury & Payments",
+      "title": "Wire Specialist",
+      "managerUserId": "MNB00004",
+      "employeeType": "Contractor",
+      "status": "active",
+      "hireDate": "2018-02-26",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00025",
+      "username": "meera.brooks",
+      "firstName": "Meera",
+      "lastName": "Brooks",
+      "email": "meera.brooks@meridiannb.com",
+      "department": "Identity & Access",
+      "title": "SOC Analyst",
+      "managerUserId": "MNB00005",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2021-10-16",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00026",
+      "username": "raj.ross",
+      "firstName": "Raj",
+      "lastName": "Ross",
+      "email": "raj.ross@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Technology Director",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-06-07",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00027",
+      "username": "leo.powell",
+      "firstName": "Leo",
+      "lastName": "Powell",
+      "email": "leo.powell@meridiannb.com",
+      "department": "DIG",
+      "title": "Digital Product Analyst",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2017-05-19",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00028",
+      "username": "benjamin.desai",
+      "firstName": "Benjamin",
+      "lastName": "Desai",
+      "email": "benjamin.desai@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Database Administrator",
+      "managerUserId": "MNB00003",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2017-08-03",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00029",
+      "username": "sofia.murphy",
+      "firstName": "Sofia",
+      "lastName": "Murphy",
+      "email": "sofia.murphy@meridiannb.com",
+      "department": "Identity & Access",
+      "title": "SOC Analyst",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2018-01-02",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00031",
+      "username": "rohan.singh",
+      "firstName": "Rohan",
+      "lastName": "Singh",
+      "email": "rohan.singh@meridiannb.com",
+      "department": "Bank Operations",
+      "title": "Operations Analyst",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2022-05-13",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00032",
+      "username": "maya.desai",
+      "firstName": "Maya",
+      "lastName": "Desai",
+      "email": "maya.desai@meridiannb.com",
+      "department": "Commercial Banking",
+      "title": "Relationship Manager",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2020-01-23",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00033",
+      "username": "raj.morris",
+      "firstName": "Raj",
+      "lastName": "Morris",
+      "email": "raj.morris@meridiannb.com",
+      "department": "Identity & Access",
+      "title": "SOC Analyst",
+      "managerUserId": "MNB00003",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2015-09-25",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00035",
+      "username": "rachel.thapa",
+      "firstName": "Rachel",
+      "lastName": "Thapa",
+      "email": "rachel.thapa@meridiannb.com",
+      "department": "Treasury & Payments",
+      "title": "Wire Specialist",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2023-11-22",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00036",
+      "username": "michael.watson",
+      "firstName": "Michael",
+      "lastName": "Watson",
+      "email": "michael.watson@meridiannb.com",
+      "department": "Retail Banking",
+      "title": "People Manager",
+      "managerUserId": "MNB00005",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2024-03-10",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00037",
+      "username": "samir.hughes",
+      "firstName": "Samir",
+      "lastName": "Hughes",
+      "email": "samir.hughes@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Site Reliability Engineer",
+      "managerUserId": "MNB00004",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2020-06-07",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    },
+    {
+      "userId": "MNB00094",
+      "username": "samir.hassan",
+      "firstName": "Samir",
+      "lastName": "Hassan",
+      "email": "samir.hassan@meridiannb.com",
+      "department": "Technology Platforms",
+      "title": "Staff Accountant",
+      "managerUserId": "MNB00002",
+      "employeeType": "Employee",
+      "status": "active",
+      "hireDate": "2026-08-01",
+      "password": "LabUser1!",
+      "groups": [
+        "mnb-employees"
+      ]
+    }
+  ]
+}

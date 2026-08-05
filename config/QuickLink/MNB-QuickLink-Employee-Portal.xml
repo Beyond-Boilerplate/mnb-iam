@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="external" category="Custom" messageKey="Employee Portal" name="MNB-QuickLink-Employee-Portal" ordering="4">
+  <Attributes>
+    <Map>
+      <entry key="url" value="http://localhost:8092/"/>
+      <entry key="window" value="_blank"/>
+    </Map>
+  </Attributes>
+  <Description>OIDC Employee Portal login proof (Enterprise Lab).</Description>
+  <QuickLinkOptions allowSelf="true">
+    <DynamicScopeRef>
+      <Reference class="sailpoint.object.DynamicScope" name="Self Service"/>
+    </DynamicScopeRef>
+  </QuickLinkOptions>
+</QuickLink>

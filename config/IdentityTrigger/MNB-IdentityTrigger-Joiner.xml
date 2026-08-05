@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IdentityTrigger PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IdentityTrigger disabled="false" handler="sailpoint.api.WorkflowTriggerHandler" name="MNB-IdentityTrigger-Joiner" type="create">
+  <Description>Enterprise Lab: fire joiner workflow when a new identity cube is created from HCM/HR aggregation.</Description>
+  <HandlerAttributes>
+    <Map>
+      <entry key="workflow" value="MNB-Workflow-Joiner"/>
+    </Map>
+  </HandlerAttributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</IdentityTrigger>

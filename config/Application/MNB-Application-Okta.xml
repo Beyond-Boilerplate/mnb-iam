@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Enterprise Lab: Okta-shaped IdP via Keycloak SCIM (not native Okta connector). -->
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE, SYNC_PROVISIONING" icon="directory2Icon" name="MNB-Okta" type="SCIM 2.0">
+  <Attributes>
+    <Map>
+      <entry key="host" value="http://keycloak:8080"/>
+      <entry key="port" value=""/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Meridian Okta-shaped workforce IdP (Keycloak). Use SCIM admin API after enabling realm SCIM; lab also seeds users via realm import."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SCIM 2.0 Template"/>
+      <entry key="scimProvider" value="generic"/>
+      <entry key="connTimeout" value="60"/>
+      <entry key="pageSize" value="50"/>
+      <!-- Keycloak SCIM often needs admin token; seed-enterprise documents manual bind.
+           Aggregation may use connector-mock CRM path as interim for labs without Keycloak SCIM plugin. -->
+      <entry key="schemaDiscovery" value="true"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="userName" identityAttribute="id" nativeObjectType="User" objectType="account">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="userName" type="string"/>
+      <AttributeDefinition name="active" type="boolean"/>
+      <AttributeDefinition name="emails" type="string"/>
+      <AttributeDefinition name="externalId" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

@@ -13,14 +13,17 @@ Both use the same curriculum, `lab-data/`, and lesson verifier ([LESSON_VERIFY.m
 
 ```bash
 ./tools/lab/docker/up.sh
+# Enterprise Lab v2 (Samba + Keycloak + Portal + Mailpit + Gitea):
+./tools/lab/docker/up.sh --enterprise
 # Academy: http://localhost:4173/   (lessons + Verify now)
 # IIQ:     http://localhost:8080/identityiq  (spadmin / admin)
+# Portal:  http://localhost:8092/   Mailpit: :8025   Gitea: :8093
 # OpenAPI: http://localhost:8765/swagger/
 # MCP:     http://127.0.0.1:8766/mcp  (Bearer mnb-lab-mcp-key)
 # Teller:  http://localhost:4180/  (chatbot; OPENROUTER_API_KEY for free-text)
 ```
 
-See [`tools/lab/docker/README.md`](../tools/lab/docker/README.md).
+Enterprise guide: [`ENTERPRISE-LAB-V2.md`](ENTERPRISE-LAB-V2.md). Sandbox lessons **201–250**: [`lessons/_CATALOG_201_250.md`](lessons/_CATALOG_201_250.md). See [`tools/lab/docker/README.md`](../tools/lab/docker/README.md).
 
 ### Path B — Tomcat + MySQL (one command)
 

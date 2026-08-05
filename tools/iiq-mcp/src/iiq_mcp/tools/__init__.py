@@ -15,6 +15,7 @@ from iiq_mcp.tools import (
     impl_lifecycle,
     impl_ops_ext,
     impl_parity,
+    impl_roi,
     impl_scim_catalog,
     phase1_apps,
     phase1_certs,
@@ -41,6 +42,7 @@ def register_all(mcp: FastMCP, client: IiqHttpClient, **ctx: Any) -> None:
     impl_coverage.register(mcp, client, **ctx)
     impl_console.register(mcp, client, **ctx)
     impl_parity.register(mcp, client, **ctx)
+    impl_roi.register(mcp, client, **ctx)
     stubs_catalog.register(mcp, client, **ctx)
     # Auto-derive implemented name set from registration (no hand-maintained frozenset).
     stubs_catalog.refresh_implemented_from_mcp(mcp)

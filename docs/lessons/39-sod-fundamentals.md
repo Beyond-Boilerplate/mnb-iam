@@ -293,5 +293,5 @@ Re: Initial SoD policy scan
 
 ---
 
-**Previous:** [Lesson 38 — IdentityRequest Tracking & Auditing](38-identity-request-tracking.md)  
+**Previous:** [Lesson 38b — Configure Approval Flows in IdentityIQ](38b-approval-flows-lab.md) · [Lesson 38 — IdentityRequest Tracking & Auditing](38-identity-request-tracking.md)  
 **Next:** [Lesson 40 — Payment Dual-Control Policy Deep Dive](40-payment-dual-control-policy.md)

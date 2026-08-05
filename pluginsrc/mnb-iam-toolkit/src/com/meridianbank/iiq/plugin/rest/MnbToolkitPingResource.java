@@ -26,7 +26,7 @@ public class MnbToolkitPingResource extends BasePluginResource {
   private static final Logger log = Logger.getLogger(MnbToolkitPingResource.class);
 
   public static final String PLUGIN_NAME = "mnb_iam_toolkit";
-  public static final String PLUGIN_VERSION = "1.3.15";
+  public static final String PLUGIN_VERSION = "1.3.17";
   public static final String BANK_CODE = "MNB";
 
   @Override

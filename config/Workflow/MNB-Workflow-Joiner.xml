@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="MNB-Workflow-Joiner" type="IdentityLifecycle">
+  <Description>Enterprise Lab joiner: refresh identity and launch LCM provisioning plan for birthright.</Description>
+  <Variable initializer="true" name="transient"/>
+  <Variable input="true" name="identityName"/>
+  <Variable input="true" name="identity"/>
+  <Step icon="Start" name="Start" posX="20" posY="20">
+    <Transition to="Log Joiner"/>
+  </Step>
+  <Step icon="Default" name="Log Joiner" posX="160" posY="20">
+    <Script>
+      <Source><![CDATA[
+        import org.apache.commons.logging.LogFactory;
+        LogFactory.getLog("meridian.lcm").warn("MNB Joiner workflow for " + identityName);
+      ]]></Source>
+    </Script>
+    <Transition to="Refresh"/>
+  </Step>
+  <Step action="call:refreshIdentity" icon="Task" name="Refresh" posX="320" posY="20">
+    <Arg name="identity" value="ref:identityName"/>
+    <Arg name="promoteAttributes" value="true"/>
+    <Arg name="provision" value="true"/>
+    <Arg name="correlateEntitlements" value="true"/>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="480" posY="20"/>
+</Workflow>

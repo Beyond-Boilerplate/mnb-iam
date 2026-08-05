@@ -1,0 +1,47 @@
+{
+  "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+  "totalResults": 3,
+  "Resources": [
+    {
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+      "id": "entra-helen",
+      "userName": "helen.ross",
+      "active": true,
+      "displayName": "Helen Ross",
+      "externalId": "MNB00001",
+      "emails": [{ "value": "helen.ross@meridiannb.com", "primary": true }],
+      "groups": [
+        { "value": "mnb-workstation-users", "display": "Workstation Users" },
+        { "value": "mnb-hr-intranet", "display": "HR Intranet" },
+        { "value": "mnb-finance-portal", "display": "Finance Portal" }
+      ]
+    },
+    {
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+      "id": "entra-priya",
+      "userName": "priya.wire",
+      "active": true,
+      "displayName": "Priya Wire",
+      "externalId": "MNB00090",
+      "emails": [{ "value": "priya.wire@meridiannb.com", "primary": true }],
+      "groups": []
+    },
+    {
+      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+      "id": "entra-marcus",
+      "userName": "marcus.approve",
+      "active": true,
+      "displayName": "Marcus Approve",
+      "externalId": "MNB00091",
+      "emails": [{ "value": "marcus.approve@meridiannb.com", "primary": true }],
+      "groups": [
+        { "value": "mnb-workstation-users", "display": "Workstation Users" }
+      ]
+    }
+  ],
+  "groups": [
+    { "id": "grp-ws", "displayName": "mnb-workstation-users" },
+    { "id": "grp-hr", "displayName": "mnb-hr-intranet" },
+    { "id": "grp-fin", "displayName": "mnb-finance-portal" }
+  ]
+}

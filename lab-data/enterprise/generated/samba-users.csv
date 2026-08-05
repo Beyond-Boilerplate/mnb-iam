@@ -1,0 +1,42 @@
+sAMAccountName,givenName,sn,mail,employeeNumber,department,title,userAccountControl,password
+helen.ross,Helen,Ross,helen.ross@meridiannb.com,MNB00001,Identity & Access,Head of Identity & Access,512,LabUser1!
+christopher.hayes,Christopher,Hayes,christopher.hayes@meridiannb.com,MNB00002,Technology Platforms,Director of Technology,512,LabUser1!
+deepa.nair,Deepa,Nair,deepa.nair@meridiannb.com,MNB00003,Finance & Controllership,Director of Finance,512,LabUser1!
+anthony.powell,Anthony,Powell,anthony.powell@meridiannb.com,MNB00004,Enterprise Risk,Chief Risk Officer,512,LabUser1!
+rachel.evans,Rachel,Evans,rachel.evans@meridiannb.com,MNB00005,Treasury & Payments,Payments Operations Manager,512,LabUser1!
+sanjay.kapoor,Sanjay,Kapoor,sanjay.kapoor@meridiannb.com,MNB00006,Commercial Banking,Commercial Banking Manager,512,LabUser1!
+emily.bennett,Emily,Bennett,emily.bennett@meridiannb.com,MNB00007,Retail Banking,Retail Branch Manager,512,LabUser1!
+daniel.griffin,Daniel,Griffin,daniel.griffin@meridiannb.com,MNB00008,Bank Operations,Operations Manager,512,LabUser1!
+anthony.rao,Anthony,Rao,anthony.rao@meridiannb.com,MNB00011,Enterprise Risk,Chief Risk Officer,512,LabUser1!
+priya.wire,Priya,Mehta,priya.wire@meridiannb.com,MNB00090,Commercial Banking,Relationship Manager,512,LabUser1!
+marcus.approve,Marcus,Coleman,marcus.approve@meridiannb.com,MNB00091,Treasury & Payments,Wire Approver,512,LabUser1!
+anita.ross,Anita,Ross,anita.ross@meridiannb.com,MNB00010,Finance & Controllership,Staff Accountant,514,LabUser1!
+kai.howard,Kai,Howard,kai.howard@meridiannb.com,MNB00024,Finance & Controllership,SOX Controls Analyst,514,LabUser1!
+theo.foster,Theo,Foster,theo.foster@meridiannb.com,MNB00030,HRP,HR Business Partner,514,LabUser1!
+benjamin.mehta,Benjamin,Mehta,benjamin.mehta@meridiannb.com,MNB00034,Technology Platforms,Site Reliability Engineer,514,LabUser1!
+jordan.reed,Jordan,Reed,jordan.reed@meridiannb.com,MNB00092,Finance & Controllership,Staff Accountant,514,LabUser1!
+chloe.adhikari,Chloe,Adhikari,chloe.adhikari@meridiannb.com,MNB00009,Identity & Access,SOC Analyst,512,LabUser1!
+meera.torres,Meera,Torres,meera.torres@meridiannb.com,MNB00012,Technology Platforms,Directory Administrator,512,LabUser1!
+aisha.murphy,Aisha,Murphy,aisha.murphy@meridiannb.com,MNB00013,Bank Operations,Operations Analyst,512,LabUser1!
+sofia.andersson,Sofia,Andersson,sofia.andersson@meridiannb.com,MNB00014,Retail Banking,Customer Service Rep,512,LabUser1!
+michael.ross,Michael,Ross,michael.ross@meridiannb.com,MNB00015,Treasury & Payments,Wire Specialist,512,LabUser1!
+isaac.lambert,Isaac,Lambert,isaac.lambert@meridiannb.com,MNB00016,Retail Banking,People Manager,512,LabUser1!
+anthony.bennett,Anthony,Bennett,anthony.bennett@meridiannb.com,MNB00017,Finance & Controllership,Finance Director,512,LabUser1!
+kai.khatri,Kai,Khatri,kai.khatri@meridiannb.com,MNB00018,Technology Platforms,Cloud Platform Engineer,512,LabUser1!
+chloe.joshi,Chloe,Joshi,chloe.joshi@meridiannb.com,MNB00019,Commercial Banking,Relationship Manager,512,LabUser1!
+zoe.okoro,Zoe,Okoro,zoe.okoro@meridiannb.com,MNB00020,Retail Banking,Customer Service Rep,512,LabUser1!
+noah.ibrahim,Noah,Ibrahim,noah.ibrahim@meridiannb.com,MNB00021,Treasury & Payments,Wire Specialist,512,LabUser1!
+rachel.khatri,Rachel,Khatri,rachel.khatri@meridiannb.com,MNB00022,Commercial Banking,Relationship Manager,512,LabUser1!
+james.nguyen,James,Nguyen,james.nguyen@meridiannb.com,MNB00023,Treasury & Payments,Wire Specialist,512,LabUser1!
+meera.brooks,Meera,Brooks,meera.brooks@meridiannb.com,MNB00025,Identity & Access,SOC Analyst,512,LabUser1!
+raj.ross,Raj,Ross,raj.ross@meridiannb.com,MNB00026,Technology Platforms,Technology Director,512,LabUser1!
+leo.powell,Leo,Powell,leo.powell@meridiannb.com,MNB00027,DIG,Digital Product Analyst,512,LabUser1!
+benjamin.desai,Benjamin,Desai,benjamin.desai@meridiannb.com,MNB00028,Technology Platforms,Database Administrator,512,LabUser1!
+sofia.murphy,Sofia,Murphy,sofia.murphy@meridiannb.com,MNB00029,Identity & Access,SOC Analyst,512,LabUser1!
+rohan.singh,Rohan,Singh,rohan.singh@meridiannb.com,MNB00031,Bank Operations,Operations Analyst,512,LabUser1!
+maya.desai,Maya,Desai,maya.desai@meridiannb.com,MNB00032,Commercial Banking,Relationship Manager,512,LabUser1!
+raj.morris,Raj,Morris,raj.morris@meridiannb.com,MNB00033,Identity & Access,SOC Analyst,512,LabUser1!
+rachel.thapa,Rachel,Thapa,rachel.thapa@meridiannb.com,MNB00035,Treasury & Payments,Wire Specialist,512,LabUser1!
+michael.watson,Michael,Watson,michael.watson@meridiannb.com,MNB00036,Retail Banking,People Manager,512,LabUser1!
+samir.hughes,Samir,Hughes,samir.hughes@meridiannb.com,MNB00037,Technology Platforms,Site Reliability Engineer,512,LabUser1!
+samir.hassan,Samir,Hassan,samir.hassan@meridiannb.com,MNB00094,Technology Platforms,Staff Accountant,512,LabUser1!

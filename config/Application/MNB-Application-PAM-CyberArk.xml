@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Enterprise Lab: CyberArk-shaped PAM via mnb-pam-lab (HashiCorp Vault backend). Not a real CyberArk tenant. -->
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE" icon="lockIcon" name="MNB-PAM-CyberArk" type="SCIM 2.0">
+  <Attributes>
+    <Map>
+      <entry key="host" value="http://pam-lab:8097"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Privileged vault facade: safes/checkout over HashiCorp Vault. Aggregate /scim/v2/Users for SAFE:* entitlements. Checkout via PAM API — secrets never in tickets."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SCIM 2.0 Template"/>
+      <entry key="scimProvider" value="generic"/>
+      <entry key="scimBasePath" value="/scim/v2"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="userName" identityAttribute="id" nativeObjectType="User" objectType="account">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="userName" type="string"/>
+      <AttributeDefinition name="active" type="boolean"/>
+      <AttributeDefinition name="entitlements" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

@@ -26,7 +26,7 @@ Use this one-pager to connect **Academy lessons** to the **ticket types** you wi
 | 3 | 17–19 + **19b** + 20–22 | Uncorrelated + orphan war room, false-merge risk, manager hierarchy, attr sync |
 | 4 | 23–28 | Birthright design, dept/job packs, privileged role guardrails |
 | 5 | 29 + **29b** + 30–34 + **34b** + **mid-34** | Joiner/mover/leaver/LoA via runners; LCM design then practical events; emergency offboard |
-| 6 | 35–36 + **36b** + 37–38 | Catalog + **be the approver** (approve/reject), break-glass, IdentityRequest audit |
+| 6 | 35–36 + **36b** + 37–38 + **38b** | Catalog + **be the approver**, break-glass, IdentityRequest audit, **configure LCM approval schemes** in IIQ |
 | 7 | 39–46 + **mid-46** | SoD triage, dual-control, cert campaigns, remediation evidence |
 | 8 | 47–50 | Provisioning plan failures, audit reports, Capstone go-live checklist |
 

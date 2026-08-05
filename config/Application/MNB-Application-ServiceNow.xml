@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Enterprise Lab: ServiceNow-shaped ITSM ticket stub via connector-mock. -->
+<Application connector="sailpoint.connector.webservices.WebServicesConnector" featuresString="PROVISIONING" icon="enterpriseIcon" name="MNB-ServiceNow" type="Web Services">
+  <Attributes>
+    <Map>
+      <entry key="genericWebServiceBaseUrl" value="http://connector-mock:8091/itsm/v1"/>
+      <entry key="authenticationMethod" value="No Auth"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Meridian ITSM ticket catalog mock for request/fulfill patterns."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="WebService Template"/>
+      <entry key="connectionParameters">
+        <value>
+          <List>
+            <Map>
+              <entry key="httpMethodType" value="GET"/>
+              <entry key="operationType" value="Test Connection"/>
+              <entry key="contextUrl" value="/catalog"/>
+              <entry key="sequenceNumberForEndpoint" value="1"/>
+              <entry key="uniqueNameForEndPoint" value="Test Connection"/>
+            </Map>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="name" identityAttribute="id" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="name" type="string"/>
+      <AttributeDefinition name="fulfillment" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

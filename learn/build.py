@@ -218,9 +218,9 @@ SHELL = """<!DOCTYPE html>
       </label>
       <div class="path-toggle" role="group" aria-label="Learning path">
         <button type="button" class="path-btn is-active" data-path="core" id="pathCore">Core Path</button>
-        <button type="button" class="path-btn" data-path="all" id="pathAll">Show specialist</button>
+        <button type="button" class="path-btn" data-path="all" id="pathAll">Show all tracks</button>
       </div>
-      <p class="path-hint" id="pathHint">Entry-level: Lessons 01–50 + mid-capstones. Specialist tracks stay hidden until you opt in.</p>
+      <p class="path-hint" id="pathHint">Entry-level: Lessons 01–50 + mid-capstones. Specialist (51–110) and Sandbox (201–250) stay hidden until you opt in.</p>
       <nav class="toc" id="toc" aria-label="Lessons">
         {toc}
       </nav>
@@ -260,23 +260,31 @@ def parse_lesson_meta(path: Path) -> dict:
         return ""
 
     track = field("Track")
-    level = field("Level")
+    level = field("Level") or field("Time")
     why = ""
     mw = re.search(r"## Why this matters\n\n(.+?)(?:\n\n---|\n\n## )", text, re.S)
     if mw:
         why = mw.group(1).strip().split("\n")[0]
+    if not why:
+        mw = re.search(r"\*\*Why(?: \(1 line\))?:\*\*\s*(.+)", text)
+        if mw:
+            why = mw.group(1).strip()
     return {"title": title, "track": track, "level": level, "why": why, "text": text, "stem": path.stem}
 
 
 def lesson_path_kind(stem: str) -> str:
-    """core = entry path (01–50 + inserts/mid-caps + guides); specialist = 51–110."""
+    """core=01–50; specialist=51–110; sandbox=201–250 (Enterprise Sandbox Path)."""
     if stem.startswith("mid-") or stem in {"first-90-days", "50b-choose-your-stack"}:
         return "core"
     m = re.match(r"^(\d{2,3})[a-z]?-", stem)
     if not m:
         return "core"
     n = int(m.group(1))
-    return "core" if n <= 50 else "specialist"
+    if n <= 50:
+        return "core"
+    if 201 <= n <= 255:
+        return "sandbox"
+    return "specialist"
 
 
 def lesson_sort_key(stem: str) -> tuple:
@@ -319,6 +327,12 @@ def load_verify_meta(stem: str) -> dict:
     """Read verifyMode / paperworkNote from lesson-spec JSON when present."""
     path = SPECS / f"{stem}.json"
     if not path.is_file():
+        m = re.match(r"^(\d{3})-", stem)
+        if m and 201 <= int(m.group(1)) <= 255:
+            return {
+                "verifyMode": "paperwork",
+                "paperworkNote": "Enterprise Sandbox Path — mark binder complete when the lesson Done When criteria pass (no classic Verify specs).",
+            }
         return {"verifyMode": "lab", "paperworkNote": ""}
     try:
         spec = json.loads(path.read_text(encoding="utf-8"))
@@ -480,6 +494,7 @@ def build() -> None:
 
     core_count = sum(1 for m in metas if m["path"] == "core")
     specialist_count = sum(1 for m in metas if m["path"] == "specialist")
+    sandbox_count = sum(1 for m in metas if m["path"] == "sandbox")
 
     # Group TOC by track
     toc_parts: list[str] = []
@@ -517,37 +532,51 @@ def build() -> None:
 
     core_cards = "".join(card_html(m) for m in metas if m["path"] == "core")
     specialist_cards = "".join(card_html(m) for m in metas if m["path"] == "specialist")
+    sandbox_cards = "".join(card_html(m) for m in metas if m["path"] == "sandbox")
     start = next(m for m in metas if m["stem"].startswith("01-"))
+    sandbox_start = next((m for m in metas if m["stem"].startswith("201-")), None)
     hub = load_audio_hub()
     audio_ready = sum(1 for ep in hub.get("episodes") or [] if audio_episode_ready(ep["slug"]))
     audio_planned = len(hub.get("episodes") or [])
+    sandbox_cta = (
+        f'<a class="btn ghost" href="{sandbox_start["stem"]}.html">Sandbox Path 201</a>'
+        if sandbox_start
+        else ""
+    )
 
     index_body = f"""
     <p class="eyebrow">SailPoint IdentityIQ 8.5 · Core Path for new IIQ engineers</p>
     <h1 class="display">Govern access like a bank that expects an exam.</h1>
-    <p class="lede">Interactive tutorials for <strong>Meridian National Bank</strong>. Start with the <strong>Core Path</strong> (Lessons 01–50 + mid-capstones)—HR through JML, SoD, and certifications. Specialist connector and hardening tracks stay optional until Capstone 50. Prefer listening first? Open <a href="audio.html"><strong>Meridian IAM Audio</strong></a> — conversational episodes on essentials, security posture, and standards.</p>
+    <p class="lede">Interactive tutorials for <strong>Meridian National Bank</strong>. Start with the <strong>Core Path</strong> (Lessons 01–50 + mid-capstones)—HR through JML, SoD, and certifications. Specialist connector and hardening tracks stay optional until Capstone 50. After the classic 110, run the <strong>Enterprise Sandbox Path</strong> (201–250) on <code>./tools/lab/docker/up.sh --enterprise</code>. Prefer listening first? Open <a href="audio.html"><strong>Meridian IAM Audio</strong></a>.</p>
     <div class="hero-actions">
       <a class="btn primary" href="{start['stem']}.html">Start lesson 01</a>
+      {sandbox_cta}
       <a class="btn ghost" href="audio.html">Listen · Audio hub</a>
       <a class="btn ghost" href="first-90-days.html">First 90 days map</a>
     </div>
     <section class="stats" aria-label="Curriculum snapshot">
       <div><span>{core_count}</span> Core Path modules</div>
       <div><span>{specialist_count}</span> specialist (opt-in)</div>
+      <div><span>{sandbox_count}</span> sandbox (201–250)</div>
       <div><span>{audio_ready}/{audio_planned}</span> audio episodes</div>
-      <div><span>@meridiannb.com</span> corp domain</div>
     </section>
     <h2 id="path">Core Path (entry-level)</h2>
-    <p class="lede-sm">Hide noise: the TOC defaults to Core. Use <em>Show specialist</em> only when you pick a post-50 track.</p>
+    <p class="lede-sm">TOC defaults to Core. Use <em>Show all tracks</em> for specialist (51–110) and Enterprise Sandbox (201–250).</p>
     <div class="card-grid" id="coreGrid">{core_cards}</div>
     <h2 id="specialist">Specialist tracks (51–110)</h2>
     <p class="lede-sm">Directory, JDBC, SaaS, ERP, rules, plugins, hardening — after Capstone 50.</p>
     <div class="card-grid specialist-grid" id="specialistGrid">{specialist_cards}</div>
+    <h2 id="sandbox">Enterprise Sandbox Path (201–250)</h2>
+    <p class="lede-sm">Production-like local estate — Mailpit, Samba, Keycloak, Portal, Gitea. Practical only; requires <code>--enterprise</code>.</p>
+    <div class="card-grid specialist-grid sandbox-grid" id="sandboxGrid">{sandbox_cards}</div>
     """
 
     index_html = SHELL.format(
         title="Curriculum",
-        description=f"Meridian National Bank IdentityIQ Core Path + {specialist_count} specialist modules",
+        description=(
+            f"Meridian National Bank IdentityIQ Core Path + {specialist_count} specialist "
+            f"+ {sandbox_count} sandbox modules"
+        ),
         root="",
         toc=toc,
         crumb="<span>Curriculum</span>",

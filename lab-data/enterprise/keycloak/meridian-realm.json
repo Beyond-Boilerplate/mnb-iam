@@ -1,0 +1,244 @@
+{
+  "realm": "meridian",
+  "enabled": true,
+  "displayName": "Meridian National Bank",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      { "name": "employee", "description": "Workforce" },
+      { "name": "manager", "description": "People manager" },
+      { "name": "wire-initiator", "description": "Wire initiate" },
+      { "name": "wire-approver", "description": "Wire approve" }
+    ]
+  },
+  "groups": [
+    { "name": "mnb-employees", "path": "/mnb-employees" },
+    { "name": "mnb-managers", "path": "/mnb-managers" },
+    { "name": "wire-initiators", "path": "/wire-initiators" },
+    { "name": "wire-approvers", "path": "/wire-approvers" },
+    { "name": "portal-users", "path": "/portal-users" },
+    { "name": "mnb-workstation-users", "path": "/mnb-workstation-users" },
+    { "name": "mnb-hr-intranet", "path": "/mnb-hr-intranet" },
+    { "name": "mnb-finance-portal", "path": "/mnb-finance-portal" }
+  ],
+  "clients": [
+    {
+      "clientId": "employee-portal",
+      "name": "Meridian Employee Portal",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:8092/*",
+        "http://employee-portal:8092/*"
+      ],
+      "webOrigins": ["http://localhost:8092", "+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "iiq-scim",
+      "name": "IIQ SCIM provisioner",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "mnb-iiq-scim-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "wire-portal",
+      "name": "Wire Portal OIDC",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["http://localhost:8091/*", "*"],
+      "webOrigins": ["+"],
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "gitea",
+      "name": "Meridian Gitea (Dev Portal)",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "mnb-gitea-oidc-secret",
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:8093/user/oauth2/meridian/callback",
+        "http://gitea:3000/user/oauth2/meridian/callback"
+      ],
+      "webOrigins": ["http://localhost:8093", "+"],
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "workstation-portal",
+      "name": "Meridian Workstation Gate",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:8094/*",
+        "http://workstation-portal:8094/*"
+      ],
+      "webOrigins": ["http://localhost:8094", "+"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "hr-intranet",
+      "name": "Meridian HR Self-Service",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:8095/*",
+        "http://hr-intranet:8095/*"
+      ],
+      "webOrigins": ["http://localhost:8095", "+"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "finance-portal",
+      "name": "Meridian Finance Portal",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:8096/*",
+        "http://finance-portal:8096/*"
+      ],
+      "webOrigins": ["http://localhost:8096", "+"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "helen.ross",
+      "enabled": true,
+      "email": "helen.ross@meridiannb.com",
+      "emailVerified": true,
+      "firstName": "Helen",
+      "lastName": "Ross",
+      "credentials": [
+        { "type": "password", "value": "LabUser1!", "temporary": false }
+      ],
+      "attributes": { "employeeId": ["MNB00001"] },
+      "groups": [
+        "/mnb-employees",
+        "/mnb-managers",
+        "/portal-users",
+        "/mnb-workstation-users",
+        "/mnb-hr-intranet",
+        "/mnb-finance-portal"
+      ]
+    },
+    {
+      "username": "priya.wire",
+      "enabled": true,
+      "email": "priya.wire@meridiannb.com",
+      "emailVerified": true,
+      "firstName": "Priya",
+      "lastName": "Wire",
+      "credentials": [
+        { "type": "password", "value": "LabUser1!", "temporary": false }
+      ],
+      "attributes": { "employeeId": ["MNB00090"] },
+      "groups": ["/mnb-employees", "/wire-initiators", "/portal-users"]
+    },
+    {
+      "username": "marcus.approve",
+      "enabled": true,
+      "email": "marcus.approve@meridiannb.com",
+      "emailVerified": true,
+      "firstName": "Marcus",
+      "lastName": "Approve",
+      "credentials": [
+        { "type": "password", "value": "LabUser1!", "temporary": false }
+      ],
+      "attributes": { "employeeId": ["MNB00091"] },
+      "groups": ["/mnb-employees", "/wire-approvers", "/portal-users", "/mnb-workstation-users"]
+    }
+  ],
+  "browserSecurityHeaders": {
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';"
+  }
+}

@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Enterprise Lab: Corporate AD via Samba LDAP (not AD Direct + IQService). -->
+<Application connector="sailpoint.connector.LDAPConnector" featuresString="AUTHENTICATE, PROVISIONING, SYNC_PROVISIONING, PASSWORD, SEARCH" icon="directory2Icon" name="MNB-ActiveDirectory-Live" profileClass="" type="OpenLDAP - Direct">
+  <Attributes>
+    <Map>
+      <entry key="LDAPApplicationVersion" value="2.0"/>
+      <entry key="aggregationType" value="account"/>
+      <entry key="authSearchAttributes">
+        <value>
+          <List>
+            <String>sAMAccountName</String>
+            <String>cn</String>
+            <String>uid</String>
+            <String>mail</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="authorizationType" value="simple"/>
+      <entry key="host" value="samba-ad"/>
+      <entry key="port" value="389"/>
+      <entry key="password" value="Password1!"/>
+      <entry key="passwordAttr" value="userPassword"/>
+      <entry key="user" value="CN=Administrator,CN=Users,DC=meridiannb,DC=com"/>
+      <entry key="pageSize" value="100"/>
+      <entry key="searchDNs">
+        <value>
+          <List>
+            <Map>
+              <entry key="iterateSearchFilter" value="(|(objectClass=person)(objectClass=user))"/>
+              <entry key="searchDN" value="OU=People,DC=meridiannb,DC=com"/>
+              <entry key="searchScope" value="SUBTREE"/>
+            </Map>
+          </List>
+        </value>
+      </entry>
+      <entry key="group.searchDNs">
+        <value>
+          <List>
+            <Map>
+              <entry key="iterateSearchFilter" value="(objectClass=group)"/>
+              <entry key="objectType" value="group"/>
+              <entry key="searchDN" value="CN=Users,DC=meridiannb,DC=com"/>
+              <entry key="searchScope" value="SUBTREE"/>
+            </Map>
+          </List>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Meridian Corporate AD (Samba DC) — Enterprise Lab. IQService out of scope."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="OpenLDAP Template"/>
+      <entry key="useSSL">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="cn" identityAttribute="dn" nativeObjectType="person" objectType="account">
+      <AttributeDefinition name="dn" type="string"/>
+      <AttributeDefinition name="cn" type="string"/>
+      <AttributeDefinition name="sAMAccountName" type="string"/>
+      <AttributeDefinition name="uid" type="string"/>
+      <AttributeDefinition name="mail" type="string"/>
+      <AttributeDefinition name="givenName" type="string"/>
+      <AttributeDefinition name="sn" type="string"/>
+      <AttributeDefinition name="employeeNumber" type="string"/>
+      <AttributeDefinition name="department" type="string"/>
+      <AttributeDefinition name="title" type="string"/>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="memberOf" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

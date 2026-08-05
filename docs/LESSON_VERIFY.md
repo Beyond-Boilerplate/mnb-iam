@@ -78,6 +78,7 @@ Per-lesson JSON under [`tools/iiq-verify/lesson-specs/`](../tools/iiq-verify/les
 | `29b-lifecycle-events-rapid-setup` | After Lesson 29 |
 | `34b-lcm-automation-in-action` | After Lesson 34 (MNB-LE-* IdentityTriggers + LCM workflows) |
 | `36b-be-the-approver` | After Lesson 36 |
+| `38b-approval-flows-lab` | After Lesson 38 (LCM Process Variables: manager / dual / Security / escalation) |
 | `mid-16-apps-capstone` | After Lesson 16 |
 | `mid-34-jml-capstone` | After Lesson 34b (persona checks: Nina / Priya / Jordan / Sofia) |
 | `mid-46-certs-capstone` | After Lesson 46 |

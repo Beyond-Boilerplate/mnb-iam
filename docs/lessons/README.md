@@ -1,6 +1,8 @@
-# Meridian National Bank — IdentityIQ 110-Lesson Enterprise Bundle
+# Meridian National Bank — IdentityIQ Curriculum
 
-One-stop **SailPoint IdentityIQ 8.5** curriculum for enterprise IAM engineers: governance basics **and** the full connector / customization surface (AD, LDAP, JDBC, Web Services, SCIM, SAP, Workday, mainframe, rules, workflows, plugins, SSB, hardening).
+**Classic track:** 110 lessons (01–110). **Enterprise Sandbox Path:** 50 practical lessons (201–250) on the production-like local estate.
+
+One-stop **SailPoint IdentityIQ 8.5** curriculum for enterprise IAM engineers: governance basics **and** the full connector / customization surface (AD, LDAP, JDBC, Web Services, SCIM, SAP, Workday, mainframe, rules, workflows, plugins, SSB, hardening) — plus a live enterprise stack path after Capstone.
 
 | | |
 | --- | --- |
@@ -11,6 +13,7 @@ One-stop **SailPoint IdentityIQ 8.5** curriculum for enterprise IAM engineers: g
 | **Learn site** | https://sailpoint.lmsapp.us/ |
 | **Style guide** | [_STYLE.md](_STYLE.md) |
 | **Part II catalog** | [_CATALOG_51_110.md](_CATALOG_51_110.md) |
+| **Sandbox Path (201–250)** | [_CATALOG_201_250.md](_CATALOG_201_250.md) · [_SANDBOX_STYLE.md](_SANDBOX_STYLE.md) |
 
 ---
 
@@ -88,7 +91,7 @@ See [_STYLE.md](_STYLE.md). Lessons are written as true tutorials: concepts and 
 - **Correlation:** 17–19 → **[19b Dirty data war room](19b-dirty-data-war-room.md)** → 20–22
 - **Roles:** 23–28
 - **Lifecycle:** 29 → **[29b LCM design](29b-lifecycle-events-rapid-setup.md)** → 30–34 → **[34b LCM in action](34b-lcm-automation-in-action.md)** → **[mid-34](mid-34-jml-capstone.md)**
-- **Requests:** 35–36 → **[36b Be the approver](36b-be-the-approver.md)** → 37–38
+- **Requests:** 35–36 → **[36b Be the approver](36b-be-the-approver.md)** → 37–38 → **[38b Configure approval flows](38b-approval-flows-lab.md)**
 - **Policies:** 39–42
 - **Certifications:** 43–46 → **[mid-46](mid-46-certs-capstone.md)**
 - **Ops:** 47–49
@@ -185,6 +188,7 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 | 36 | [Approval Chains & Escalations](36-approval-chains.md) | Requests | Intermediate | 60–75 minutes |
 | 37 | [Emergency / Break-Glass Access](37-break-glass-access.md) | Requests | Advanced | 60–75 minutes |
 | 38 | [IdentityRequest Tracking & Auditing](38-identity-request-tracking.md) | Requests | Intermediate | 45–60 minutes |
+| 38b | [Configure Approval Flows in IdentityIQ](38b-approval-flows-lab.md) | Requests | Intermediate | 75–90 minutes |
 | 39 | [SoD Fundamentals for Banking](39-sod-fundamentals.md) | Policies | Intermediate | 60–75 minutes |
 | 40 | [Payment Dual-Control Policy Deep Dive](40-payment-dual-control-policy.md) | Policies | Advanced | 60–75 minutes |
 | 41 | [Policy Violations & Mitigation](41-policy-violations-mitigation.md) | Policies | Intermediate | 60–75 |
@@ -266,7 +270,7 @@ OOTB types from this repo’s `ConnectorRegistry` are mapped in `lab-data/connec
 | --- | --- | --- |
 | Weeks 1–2 | 01–08b, 09–16, mid-16, 16b | Foundations, ticket triage, file apps, Task Results |
 | Weeks 3–4 | 17–19b–22, 23–28, 29–29b–34–34b, mid-34 | Correlation war room, roles, JML (+ practical LCM events) |
-| Weeks 5–6 | 35–36b–38, 39–46, mid-46, 47–50 | Approver chair, SoD, certs, ops, Capstone I |
+| Weeks 5–6 | 35–36b–38–38b, 39–46, mid-46, 47–50 | Approver chair, configure IIQ approval schemes, SoD, certs, ops, Capstone I |
 | Weeks 7+ | Specialist opt-in | Pick Directory/JDBC or SaaS/ERP after Capstone 50 |
 
 Full catalog (if you unlock specialist tracks):
@@ -282,9 +286,88 @@ Self-paced: ~45–60 lab hours for Core Path; ~90–120 for the full 110.
 
 ---
 
+## Enterprise Sandbox Path (lessons 201–250)
+
+**After** the classic 110-lesson bundle: a production-like local estate with Mailpit, Samba AD, Keycloak, Employee Portal, Gitea, HCM/CRM/ITSM mocks, and live JDBC/LDAP — practical instructions only (no worksheets).
+
+| | |
+| --- | --- |
+| **Catalog** | [_CATALOG_201_250.md](_CATALOG_201_250.md) |
+| **Style** | [_SANDBOX_STYLE.md](_SANDBOX_STYLE.md) |
+| **Stack** | [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · `./tools/lab/docker/up.sh --enterprise` |
+| **Start → finish** | [201 Boot](201-boot-enterprise-stack.md) → [250 Capstone: Full Bank Day](250-capstone-bank-day.md) |
+
+Covers the governance + connector surface from 01–110 **hands-on on the live stack**, plus advanced drills the CSV Core path cannot (SSO proof apps, catch-all mail, HCM API joiners, dual SSO apps).
+
+| Block | Lessons | Focus |
+| --- | --- | --- |
+| Boot & mail | 201–203 | Enterprise up, seed, Mailpit |
+| Directories & SSO | 204–213 | LDAP/AD, pass-through, HCM/JDBC/WS/SCIM, Keycloak, Portal, Gitea |
+| Birthright & JML | 214–220 | Correlation, sync, roles, joiner/mover/leaver/contractor |
+| Requests & certs | 221–232 | Approvals+mail, SoD, certs, remediation, reports, templates |
+| Depth & build | 233–249 | Connector stretch, rules/workflows/forms/QL, APIs, SSD, hardening |
+| Capstone | 250 | Full bank day + Enterprise Lab DoD |
+| v3 add-ons | 251–255 | Workstation, Entra, intranet SSO, password reset, PAM vault |
+
+| # | Title | Time |
+| --- | --- | --- |
+| 201 | [Boot the Enterprise Sandbox](201-boot-enterprise-stack.md) | ~25 min |
+| 202 | [Identity Master & Enterprise Seed](202-identity-master-and-seed.md) | ~30 min |
+| 203 | [Catch All Mail in Mailpit](203-mailpit-iiq-email.md) | ~20 min |
+| 204 | [Operate Live OpenLDAP](204-openldap-live-ops.md) | ~35 min |
+| 205 | [Operate Samba AD](205-samba-ad-live-ops.md) | ~40 min |
+| 206 | [Pass-Through Login to IIQ](206-passthrough-iiq-login.md) | ~25 min |
+| 207 | [Authoritative HCM (Workday-Shaped)](207-hcm-workday-shaped.md) | ~35 min |
+| 208 | [JDBC Core Banking Live](208-jdbc-core-banking.md) | ~35 min |
+| 209 | [Wire Portal Web Services](209-wire-webservices.md) | ~30 min |
+| 210 | [CRM via SCIM Mock](210-crm-scim.md) | ~25 min |
+| 211 | [Keycloak as Workforce IdP](211-keycloak-okta-shaped.md) | ~30 min |
+| 212 | [Employee Portal SSO Proof](212-employee-portal-sso.md) | ~20 min |
+| 213 | [Second App: Gitea via OIDC](213-gitea-sso-app.md) | ~35 min |
+| 214 | [Nail Correlation Across Live Apps](214-correlation-standard-live.md) | ~30 min |
+| 215 | [Attribute Sync on Live Targets](215-attribute-sync-live.md) | ~30 min |
+| 216 | [Birthright Roles Against Live Apps](216-birthright-roles-live.md) | ~35 min |
+| 217 | [Joiner LCM End-to-End](217-joiner-lcm-live.md) | ~45 min |
+| 218 | [Mover LCM End-to-End](218-mover-lcm-live.md) | ~35 min |
+| 219 | [Leaver LCM End-to-End](219-leaver-lcm-live.md) | ~40 min |
+| 220 | [Contractor & LOA Controls Live](220-contractor-loa-live.md) | ~35 min |
+| 221 | [Build a Live Request Catalog](221-access-catalog-live.md) | ~35 min |
+| 222 | [Approvals With Mailpit Proof](222-approvals-and-mail.md) | ~40 min |
+| 223 | [Break-Glass Access Drill](223-break-glass-live.md) | ~30 min |
+| 224 | [SoD: Wire Dual Control Live](224-sod-wire-live.md) | ~35 min |
+| 225 | [Work Violations & Mitigations](225-policy-violations-live.md) | ~30 min |
+| 226 | [Manager Cert + Email](226-manager-cert-mail.md) | ~45 min |
+| 227 | [App-Owner Certification Live](227-app-owner-cert-live.md) | ~40 min |
+| 228 | [Targeted / Focused Campaign](228-targeted-cert-live.md) | ~30 min |
+| 229 | [Certification Remediation Proof](229-cert-remediation-live.md) | ~35 min |
+| 230 | [Troubleshoot a Failed Provision](230-provisioning-troubleshoot-live.md) | ~40 min |
+| 231 | [Audit-Ready Reports Live](231-audit-reports-live.md) | ~30 min |
+| 232 | [Tune Email Templates Live](232-email-templates-live.md) | ~30 min |
+| 233 | [Live Aggregation Runbook](233-aggregation-strategy-live.md) | ~25 min |
+| 234 | [AD Groups & OUs on Samba](234-ad-groups-ous-live.md) | ~35 min |
+| 235 | [OpenLDAP Provision Stretch](235-ldap-provision-stretch.md) | ~30 min |
+| 236 | [JDBC Create/Disable Policies](236-jdbc-provision-policies.md) | ~35 min |
+| 237 | [Web Services Connector Depth](237-ws-connector-deep.md) | ~35 min |
+| 238 | [SCIM Connector Depth](238-scim-connector-deep.md) | ~30 min |
+| 239 | [ITSM Ticket Mock Fulfillment](239-itsm-ticket-mock.md) | ~30 min |
+| 240 | [Logical Application Over Live Apps](240-logical-application-live.md) | ~30 min |
+| 241 | [Before/After Provisioning Rules](241-rules-before-after-live.md) | ~40 min |
+| 242 | [Customize an LCM Workflow](242-workflow-lcm-customize.md) | ~45 min |
+| 243 | [Forms & Field Validation](243-forms-live.md) | ~30 min |
+| 244 | [QuickLinks That Operators Use](244-quicklinks-live.md) | ~25 min |
+| 245 | [Workgroups, Capabilities, Scopes](245-workgroups-scopes-live.md) | ~35 min |
+| 246 | [Toolkit / MCP Operator APIs](246-toolkit-apis-live.md) | ~35 min |
+| 247 | [IIQ REST & SCIM Live](247-iiq-rest-scim-live.md) | ~35 min |
+| 248 | [SSD Export & Promote](248-ssd-promote-live.md) | ~40 min |
+| 249 | [Hardening & Perf Lite](249-hardening-perf-lite.md) | ~35 min |
+| 250 | [Capstone: Full Bank Day E2E](250-capstone-bank-day.md) | ~60 min |
+
+---
+
 ## Need help?
 
 - Setup → [LOCAL_SETUP.md](../LOCAL_SETUP.md)
 - Homelab / public site → [HOMELAB-CD.md](../HOMELAB-CD.md), [LEARN-SITE.md](../LEARN-SITE.md)
 - SSD build → [SSD.md](../SSD.md)
 - Connector fixtures → [../../lab-data/connectors/README.md](../../lab-data/connectors/README.md)
+- Enterprise sandbox → [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · [_CATALOG_201_250.md](_CATALOG_201_250.md)

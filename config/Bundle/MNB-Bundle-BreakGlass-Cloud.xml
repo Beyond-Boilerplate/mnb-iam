@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="MNB BreakGlass Cloud Admin" name="MNB-Bundle-BreakGlass-Cloud" type="it" requestable="true">
+  <Attributes>
+    <Map>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Time-bound emergency cloud admin — provisions PAM safe membership MNB-Safe-CloudBreakGlass. Require INC id. Checkout via PAM lab — never Slack/spreadsheet."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="helen.ross"/>
+  </Owner>
+</Bundle>

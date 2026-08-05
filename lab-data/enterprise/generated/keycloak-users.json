@@ -1,0 +1,880 @@
+{
+  "users": [
+    {
+      "username": "helen.ross",
+      "email": "helen.ross@meridiannb.com",
+      "firstName": "Helen",
+      "lastName": "Ross",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00001"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "mnb-workstation-users",
+        "mnb-hr-intranet",
+        "mnb-finance-portal",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "christopher.hayes",
+      "email": "christopher.hayes@meridiannb.com",
+      "firstName": "Christopher",
+      "lastName": "Hayes",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00002"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "deepa.nair",
+      "email": "deepa.nair@meridiannb.com",
+      "firstName": "Deepa",
+      "lastName": "Nair",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00003"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "anthony.powell",
+      "email": "anthony.powell@meridiannb.com",
+      "firstName": "Anthony",
+      "lastName": "Powell",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00004"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "rachel.evans",
+      "email": "rachel.evans@meridiannb.com",
+      "firstName": "Rachel",
+      "lastName": "Evans",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00005"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "sanjay.kapoor",
+      "email": "sanjay.kapoor@meridiannb.com",
+      "firstName": "Sanjay",
+      "lastName": "Kapoor",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00006"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "emily.bennett",
+      "email": "emily.bennett@meridiannb.com",
+      "firstName": "Emily",
+      "lastName": "Bennett",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00007"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "daniel.griffin",
+      "email": "daniel.griffin@meridiannb.com",
+      "firstName": "Daniel",
+      "lastName": "Griffin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00008"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "anthony.rao",
+      "email": "anthony.rao@meridiannb.com",
+      "firstName": "Anthony",
+      "lastName": "Rao",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00011"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "mnb-managers",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "priya.wire",
+      "email": "priya.wire@meridiannb.com",
+      "firstName": "Priya",
+      "lastName": "Mehta",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00090"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "marcus.approve",
+      "email": "marcus.approve@meridiannb.com",
+      "firstName": "Marcus",
+      "lastName": "Coleman",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00091"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "chloe.adhikari",
+      "email": "chloe.adhikari@meridiannb.com",
+      "firstName": "Chloe",
+      "lastName": "Adhikari",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00009"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "meera.torres",
+      "email": "meera.torres@meridiannb.com",
+      "firstName": "Meera",
+      "lastName": "Torres",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00012"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "aisha.murphy",
+      "email": "aisha.murphy@meridiannb.com",
+      "firstName": "Aisha",
+      "lastName": "Murphy",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00013"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "sofia.andersson",
+      "email": "sofia.andersson@meridiannb.com",
+      "firstName": "Sofia",
+      "lastName": "Andersson",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00014"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "michael.ross",
+      "email": "michael.ross@meridiannb.com",
+      "firstName": "Michael",
+      "lastName": "Ross",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00015"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "isaac.lambert",
+      "email": "isaac.lambert@meridiannb.com",
+      "firstName": "Isaac",
+      "lastName": "Lambert",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00016"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "anthony.bennett",
+      "email": "anthony.bennett@meridiannb.com",
+      "firstName": "Anthony",
+      "lastName": "Bennett",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00017"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "kai.khatri",
+      "email": "kai.khatri@meridiannb.com",
+      "firstName": "Kai",
+      "lastName": "Khatri",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00018"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "chloe.joshi",
+      "email": "chloe.joshi@meridiannb.com",
+      "firstName": "Chloe",
+      "lastName": "Joshi",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00019"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "zoe.okoro",
+      "email": "zoe.okoro@meridiannb.com",
+      "firstName": "Zoe",
+      "lastName": "Okoro",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00020"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "noah.ibrahim",
+      "email": "noah.ibrahim@meridiannb.com",
+      "firstName": "Noah",
+      "lastName": "Ibrahim",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00021"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "rachel.khatri",
+      "email": "rachel.khatri@meridiannb.com",
+      "firstName": "Rachel",
+      "lastName": "Khatri",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00022"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "james.nguyen",
+      "email": "james.nguyen@meridiannb.com",
+      "firstName": "James",
+      "lastName": "Nguyen",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00023"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "meera.brooks",
+      "email": "meera.brooks@meridiannb.com",
+      "firstName": "Meera",
+      "lastName": "Brooks",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00025"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "raj.ross",
+      "email": "raj.ross@meridiannb.com",
+      "firstName": "Raj",
+      "lastName": "Ross",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00026"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "leo.powell",
+      "email": "leo.powell@meridiannb.com",
+      "firstName": "Leo",
+      "lastName": "Powell",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00027"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "benjamin.desai",
+      "email": "benjamin.desai@meridiannb.com",
+      "firstName": "Benjamin",
+      "lastName": "Desai",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00028"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "sofia.murphy",
+      "email": "sofia.murphy@meridiannb.com",
+      "firstName": "Sofia",
+      "lastName": "Murphy",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00029"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "rohan.singh",
+      "email": "rohan.singh@meridiannb.com",
+      "firstName": "Rohan",
+      "lastName": "Singh",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00031"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "maya.desai",
+      "email": "maya.desai@meridiannb.com",
+      "firstName": "Maya",
+      "lastName": "Desai",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00032"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "raj.morris",
+      "email": "raj.morris@meridiannb.com",
+      "firstName": "Raj",
+      "lastName": "Morris",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00033"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "rachel.thapa",
+      "email": "rachel.thapa@meridiannb.com",
+      "firstName": "Rachel",
+      "lastName": "Thapa",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00035"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "michael.watson",
+      "email": "michael.watson@meridiannb.com",
+      "firstName": "Michael",
+      "lastName": "Watson",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00036"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "samir.hughes",
+      "email": "samir.hughes@meridiannb.com",
+      "firstName": "Samir",
+      "lastName": "Hughes",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00037"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    },
+    {
+      "username": "samir.hassan",
+      "email": "samir.hassan@meridiannb.com",
+      "firstName": "Samir",
+      "lastName": "Hassan",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "LabUser1!",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "employeeId": [
+          "MNB00094"
+        ]
+      },
+      "groups": [
+        "mnb-employees",
+        "portal-users"
+      ]
+    }
+  ]
+}

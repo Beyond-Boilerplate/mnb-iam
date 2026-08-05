@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- Enterprise Lab v3: Entra-shaped Graph/SCIM via connector-mock (not a real Entra tenant).
+     Browser SSO still uses Keycloak. This app is for IIQ account lifecycle / agg labs. -->
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE, SYNC_PROVISIONING" icon="directory2Icon" name="MNB-EntraID" type="SCIM 2.0">
+  <Attributes>
+    <Map>
+      <entry key="host" value="http://connector-mock:8091"/>
+      <entry key="port" value=""/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Entra-shaped SCIM/Graph mock at /entra/scim/v2 and /entra/v1. SSO login proofs use Keycloak groups, not this mock alone."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SCIM 2.0 Template"/>
+      <entry key="scimProvider" value="generic"/>
+      <entry key="connTimeout" value="60"/>
+      <entry key="pageSize" value="50"/>
+      <entry key="schemaDiscovery" value="true"/>
+      <!-- Point SCIM base path at Entra-shaped mock (configure in connector UI if host alone is insufficient) -->
+      <entry key="scimBasePath" value="/entra/scim/v2"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="userName" identityAttribute="id" nativeObjectType="User" objectType="account">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="userName" type="string"/>
+      <AttributeDefinition name="active" type="boolean"/>
+      <AttributeDefinition name="emails" type="string"/>
+      <AttributeDefinition name="externalId" type="string"/>
+      <AttributeDefinition name="displayName" type="string"/>
+    </Schema>
+    <Schema displayAttribute="displayName" identityAttribute="id" nativeObjectType="Group" objectType="group">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="displayName" type="string"/>
+    </Schema>
+  </Schemas>
+</Application>

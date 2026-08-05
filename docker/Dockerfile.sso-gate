@@ -1,0 +1,14 @@
+FROM python:3.12-alpine
+WORKDIR /app
+COPY tools/sso-gate/app.py /app/app.py
+ENV PORTAL_HOST=0.0.0.0 PORTAL_PORT=8094 \
+    KEYCLOAK_INTERNAL_URL=http://host.docker.internal:8085 \
+    KEYCLOAK_PUBLIC_URL=http://localhost:8085 \
+    KEYCLOAK_REALM=meridian \
+    OIDC_CLIENT_ID=workstation-portal \
+    PORTAL_PUBLIC_URL=http://localhost:8094 \
+    APP_TITLE="Meridian Workstation" \
+    APP_KIND=workstation \
+    REQUIRED_GROUPS=mnb-workstation-users
+EXPOSE 8094
+CMD ["python3", "/app/app.py"]

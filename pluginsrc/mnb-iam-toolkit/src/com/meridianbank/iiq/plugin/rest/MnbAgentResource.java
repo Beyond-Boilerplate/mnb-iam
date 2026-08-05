@@ -187,6 +187,15 @@ public class MnbAgentResource extends BasePluginResource {
     rows.add(gap("UIAPI-88", "implemented", "risk/scoreConfig", "update_risk_score_config"));
     rows.add(gap("UIAPI-89", "implemented", "taskDefinitions", "upsert_task_definition"));
     rows.add(gap("UIAPI-90", "implemented", "connectors/aggregate/stop", "stop_aggregation"));
+    // High-ROI closings (1.3.16)
+    rows.add(gap("UIAPI-97", "implemented", "workflows|workflows/*/patch", "patch_workflow"));
+    rows.add(gap("UIAPI-98", "implemented", "forms (upsert)", "upsert_form"));
+    rows.add(gap("UIAPI-105", "implemented", "applications/*/connector/ad", "configure_ad_connector"));
+    rows.add(gap("UIAPI-106", "implemented", "applications/*/connector/jdbc", "configure_jdbc_connector"));
+    rows.add(gap("UIAPI-107", "implemented", "applications/*/connector/oauth", "configure_oauth_connector"));
+    rows.add(gap("UIAPI-139", "implemented", "policies/sod/matrix/import", "import_sod_matrix"));
+    // Open / intentional keep-outs (UIAPI-91…167 minus implemented ROI above)
+    addOpenGaps(rows);
     Map<String, Object> flags = new LinkedHashMap<>();
     flags.put("agentApiEnabled", MnbAgentSupport.flag(this, "agentApiEnabled"));
     flags.put("mutateGovernanceEnabled", MnbAgentSupport.flag(this, "mutateGovernanceEnabled"));
@@ -212,6 +221,94 @@ public class MnbAgentResource extends BasePluginResource {
         "mcpTool",
         mcpTool != null ? mcpTool : "iiq_" + id.toLowerCase().replace('-', '_'));
     return m;
+  }
+
+  private static Map<String, Object> openGap(String id, String status, String note) {
+    Map<String, Object> m = gap(id, status, null, null);
+    m.put("note", note);
+    m.remove("path");
+    m.put("path", "n/a");
+    return m;
+  }
+
+  /** UIAPI-91…167 minus ROI IDs implemented in MnbAgentRoiResource. */
+  private static void addOpenGaps(List<Map<String, Object>> rows) {
+    String[][] open =
+        new String[][] {
+          {"UIAPI-91", "hybrid", "IIQ web branding / CSS / war static assets"},
+          {"UIAPI-92", "excluded", "Full UI i18n / locale packs"},
+          {"UIAPI-93", "hybrid", "Home dashboard widget layout editor"},
+          {"UIAPI-94", "partial", "Email chrome beyond template body"},
+          {"UIAPI-95", "hybrid", "SAML/OIDC/WebAuthn/MFA login UX"},
+          {"UIAPI-96", "excluded", "Live Rule source authoring (denylist)"},
+          {"UIAPI-99", "partial", "Policy violation owner Rule wiring"},
+          {"UIAPI-100", "excluded", "QuickLink DynamicScope Rule (denylist)"},
+          {"UIAPI-101", "partial", "Lifecycle Event advanced wizard"},
+          {"UIAPI-102", "excluded", "Workflow unit test harness"},
+          {"UIAPI-103", "excluded", "Debug Beanshell / connector trace consoles"},
+          {"UIAPI-104", "excluded", "Rule revision diff UI"},
+          {"UIAPI-108", "excluded", "SAP JCo destination UI"},
+          {"UIAPI-109", "excluded", "Mainframe RACF connector"},
+          {"UIAPI-110", "partial", "Logical / composite app editor"},
+          {"UIAPI-111", "partial", "Schema attribute drag UX"},
+          {"UIAPI-112", "partial", "Aggregation partitioning / watermark UX"},
+          {"UIAPI-113", "open", "App maintenance calendar"},
+          {"UIAPI-114", "excluded", "Custom connector JAR deploy"},
+          {"UIAPI-115", "excluded", "Keystore upload test-connection UI"},
+          {"UIAPI-116", "partial", "Risk weight designer UI"},
+          {"UIAPI-117", "open", "Unstructured / file targets"},
+          {"UIAPI-118", "excluded", "Secrets vault / SFTP credential UX"},
+          {"UIAPI-119", "excluded", "PAM brokers (external)"},
+          {"UIAPI-120", "excluded", "SMS firecall / paging"},
+          {"UIAPI-121", "excluded", "Cloud privilege brokers"},
+          {"UIAPI-122", "excluded", "Entra/SCIM inbound federation"},
+          {"UIAPI-123", "excluded", "mTLS / cert-based API auth"},
+          {"UIAPI-125", "excluded", "SIEM stream / UEBA / WORM"},
+          {"UIAPI-126", "hybrid", "Exam binder / control frameworks"},
+          {"UIAPI-127", "excluded", "GDPR DSAR / erasure / legal hold"},
+          {"UIAPI-128", "excluded", "Jasper Studio pixel layout"},
+          {"UIAPI-129", "excluded", "Executive slide / CCM dashboards"},
+          {"UIAPI-130", "excluded", "AI/ML model risk / IdentityAI"},
+          {"UIAPI-131", "open", "Data classification glossary"},
+          {"UIAPI-132", "excluded", "Retention purge / archive warehouse"},
+          {"UIAPI-133", "hybrid", "HR ETL / bad-row remediation outside IIQ"},
+          {"UIAPI-134", "excluded", "Workday/position/cost-center masters"},
+          {"UIAPI-135", "partial", "Merge/cutover/M&A identity programs"},
+          {"UIAPI-136", "partial", "Preferred vs legal name UX"},
+          {"UIAPI-137", "open", "Vacant / matrix manager models"},
+          {"UIAPI-138", "hybrid", "Job-code / birthright Excel codegen"},
+          {"UIAPI-140", "partial", "Orphan owner campaign (business)"},
+          {"UIAPI-141", "excluded", "IIQ version upgrades / hotfixes"},
+          {"UIAPI-142", "excluded", "Cluster / JVM / scale"},
+          {"UIAPI-143", "excluded", "Database DBA work"},
+          {"UIAPI-144", "excluded", "Backup / DR drills"},
+          {"UIAPI-145", "excluded", "Container image / CVE / Helm"},
+          {"UIAPI-146", "excluded", "WAF / API rate limits"},
+          {"UIAPI-147", "excluded", "Chaos / soak performance"},
+          {"UIAPI-148", "excluded", "Full OTel for IIQ core"},
+          {"UIAPI-149", "excluded", "Multi-tenant IIQ"},
+          {"UIAPI-150", "excluded", "Migrate off IIQ / to ISC"},
+          {"UIAPI-151", "excluded", "ServiceNow CMDB/RITM"},
+          {"UIAPI-152", "excluded", "ChatOps / mobile approvals"},
+          {"UIAPI-153", "excluded", "CAB / change-freeze process"},
+          {"UIAPI-154", "excluded", "Incident tabletop / ransomware"},
+          {"UIAPI-155", "excluded", "Physical badge / door SoD"},
+          {"UIAPI-156", "excluded", "Vendor / fourth-party risk portals"},
+          {"UIAPI-157", "hybrid", "Rapid Setup full click-path"},
+          {"UIAPI-158", "partial", "Access History analytics UI"},
+          {"UIAPI-159", "partial", "AI role mining / peer outlier UX"},
+          {"UIAPI-160", "open", "Activity monitoring policy UI"},
+          {"UIAPI-161", "open", "Advanced Analytics saved-search share"},
+          {"UIAPI-162", "open", "Identity snapshot compare UI"},
+          {"UIAPI-163", "open", "Account group inheritance visualizer"},
+          {"UIAPI-164", "partial", "Business request portal UX"},
+          {"UIAPI-165", "excluded", "Password sync interceptor / DPR client"},
+          {"UIAPI-166", "partial", "E-signature legal meaning authoring"},
+          {"UIAPI-167", "partial", "Policy simulation campaign UI mode"},
+        };
+    for (String[] row : open) {
+      rows.add(openGap(row[0], row[1], row[2]));
+    }
   }
 
   // —— Work items (UIAPI-04) ——

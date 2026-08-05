@@ -137,6 +137,13 @@ def test_server_registers_all_catalog_tools() -> None:
             "upsert_lifecycle_event",
             "patch_object_config_attribute",
             "upsert_password_policy",
+            "patch_workflow",
+            "upsert_form",
+            "import_sod_matrix",
+            "configure_ad_connector",
+            "configure_jdbc_connector",
+            "configure_oauth_connector",
+            "list_workflows",
         ):
             assert coverage in registered, coverage
     finally:
