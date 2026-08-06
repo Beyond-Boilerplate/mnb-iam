@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 48 / 104
 
-> **Why (1–2 lines):** Examiners want exports, not stories — a report row that ties to a specific decision, identity, and timestamp.
+> **Why (1–2 lines):** Ops needs exports, not stories — a report row that ties to a specific decision, identity, and timestamp when someone asks why access changed.
 
 ## What this is
 
@@ -75,7 +75,7 @@ Three exports exist and one row in each is traced to a real Mailpit message and 
 
 - **Control:** Audit reporting and evidence traceability.  
 - **Owner:** Compliance/Audit + IAM Ops (report definitions).  
-- **SLA (lab):** Same session; production audit report packages are typically generated on-demand per examiner request.  
+- **SLA (lab):** Same session; production audit report packages are typically generated on-demand when ops or incident response needs a decision trail.  
 - **Evidence:** `~/iiq-lab-evidence/sandbox/231/` — three exports, matched-row note.
 
 ## Quick check

@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 94
 
-> **Why:** Forms stop requesters from submitting garbage. A blank or one-word "business justification" is useless to an examiner reviewing why access was granted.
+> **Why:** Forms stop requesters from submitting garbage. A blank or one-word "business justification" is useless when someone later asks why access was granted.
 
 ## What this is
 

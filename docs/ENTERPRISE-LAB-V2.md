@@ -17,10 +17,12 @@ Production-like **local** IdentityIQ ecosystem. Design + implementation live in-
 
 | Service | Host port | Role |
 | --- | --- | --- |
+| **lab-hub** | 9000 | Static TOC of all local service URLs |
+| **db-viewer** | 9001 | Adminer — IIQ Postgres + JDBC lab (baked-in Auto Sign-In) |
 | IIQ + Postgres + Academy + MCP + Teller | 8080, 5433, 4173, 8766, 4180 | Core stack (always) |
 | OpenLDAP + phpLDAPadmin | 389, 8090 | Corp directory |
 | jdbc-pg | 5435 | Core banking JDBC |
-| connector-mock | 8091 | Wire + SCIM + **HCM** + CRM + ITSM APIs |
+| connector-mock | 8091 | Wire + SCIM + **HCM** + CRM + ITSM APIs; **MNB Workday** UI at `/hcm/ui` |
 | **samba-ad** | 3890 (LDAP), 445 | Corporate AD (Samba DC) |
 | **keycloak** | 8085 | Okta-shaped IdP (OIDC + SCIM) |
 | **employee-portal** | 8092 | OIDC app for login proof |
@@ -75,7 +77,8 @@ Tear down: `./tools/lab/docker/down.sh` (add `-v` to wipe volumes including Samb
 
 | Meridian name | Backend | IIQ connector type |
 | --- | --- | --- |
-| MNB-HR / MNB-Workday | connector-mock `/hcm/v1/*` | Web Services (enterprise) or DelimitedFile (Core) |
+| MNB-HR | DelimitedFile CSV (enterprise: **non-authoritative** contrast) | Core Path authoritative; Enterprise Sandbox does not mint cubes from it |
+| MNB-Workday | connector-mock `/hcm/v1/*` (+ UI `:8091/hcm/ui`) | Web Services — **authoritative** HCM; cubes in Lesson 207 |
 | MNB-OpenLDAP | OpenLDAP | OpenLDAP - Direct |
 | MNB-ActiveDirectory | Samba LDAP `:3890` | LDAP / OpenLDAP - Direct (enterprise pack) |
 | MNB-Okta | Keycloak SCIM | SCIM 2.0 |
@@ -106,6 +109,12 @@ Import enterprise objects after stack is healthy:
 ./tools/lab/enterprise/seed-enterprise.sh
 ```
 
+`./tools/lab/docker/up.sh --enterprise` already runs backup→wipe→**definitions-only** core apps (`MNB-HR` **non-authoritative**, `MNB-OpenLDAP` definition, no account aggregation)→this pack.
+
+**Workforce cubes are not created at seed.** Learners create the first Identity Warehouse population in Lesson **207** by aggregating authoritative `MNB-Workday` and running Identity Refresh (create identities). Use **MNB Workday** UI at http://localhost:8091/hcm/ui to browse/hire/terminate against the same HCM feed.
+
+Use `--keep-existing` on `up.sh` (or `MNB_LAB_KEEP_EXISTING=1`) to overlay without wipe.
+
 ## Success criteria (DoD)
 
 1. Log into IIQ as a directory user (OpenLDAP or Samba pass-through).
@@ -133,7 +142,12 @@ Automated checks:
 ```bash
 ./tools/lab/enterprise/e2e-smoke.sh
 ./tools/lab/enterprise/contract-tests.sh
+# Per-lesson PASS/FAIL asserts (SMTP config, apps, identities, …)
+./tools/lab/enterprise/verify-lesson.sh 203
+./tools/lab/enterprise/verify-lesson.sh --all
 ```
+
+Assert specs: [`tools/lab/enterprise/lesson-asserts/`](../tools/lab/enterprise/lesson-asserts/).
 
 ## Feasibility boundaries
 

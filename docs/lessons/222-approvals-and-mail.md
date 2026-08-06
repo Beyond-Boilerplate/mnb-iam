@@ -69,7 +69,7 @@ Submit request → Manager Approval (owner="ref:launcher" — BROKEN, self-appro
    **Expect:** Entitlement live, tied to this `IdentityRequest`, not leftover seed data.
 
 10. Open the `IdentityRequest` detail and confirm the full trail — requester, manager approval timestamp/comment, owner approval timestamp/comment, provisioning status — is visible in one place.  
-    **Expect:** This trail, not the entitlement alone, is what an examiner asks for.
+    **Expect:** This trail, not the entitlement alone, is what ops needs when someone later asks why access was granted.
 
 ## If it fails
 

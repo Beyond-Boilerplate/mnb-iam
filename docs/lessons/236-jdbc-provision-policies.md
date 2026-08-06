@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 64
 
-> **Why:** Policies turn plans into SQL. A core banking row is evidence for exams — deleting it on leaver destroys the audit trail an examiner will ask for.
+> **Why:** Policies turn plans into SQL. Keep the core banking row on leaver — deleting it destroys the audit trail and breaks rehire/reconciliation when you need the row later.
 
 ## What this is
 
@@ -51,7 +51,7 @@
    **Expect:** Leaver workflow completes.
 6. Re-run the same `psql` query.  
    **Expect:** `status = DISABLED`, row still exists with all original columns intact.
-7. Write one line explaining why Disable is a status flip, not a Delete — the row is exam/reconciliation evidence; deleting it breaks re-correlation on rehire.  
+7. Write one line explaining why Disable is a status flip, not a Delete — the row is ops/reconciliation evidence; deleting it breaks re-correlation on rehire.  
    **Expect:** Note saved with your evidence.
 8. Save the two `psql` outputs (post-create, post-disable) and your note under `~/iiq-lab-evidence/sandbox/236/`.
 

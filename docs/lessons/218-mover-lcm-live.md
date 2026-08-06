@@ -7,17 +7,22 @@
 
 **Maps to classic track:** 30
 
-> **Why (1–2 lines):** Movers change what birthright *should* look like — stale entitlements left behind after a transfer are exactly what a bank audit flags. Unlike joiner/leaver, this cleanup never fires on its own.
+> **Why:** Movers change what birthright *should* look like — stale entitlements left after a transfer are exactly what audits flag. Unlike joiner/leaver, this cleanup never fires on its own.
 
 ## What this is
 
-There is no `MNB-IdentityTrigger-Mover` in `config/` — the pack only ships `create` (joiner) and `attributeChange` (leaver) triggers. That's a deliberate gap: department/title moves run through the same `PATCH /hcm/v1/workers/{id}` as Lesson 215's attribute sync, and the *role* consequences (losing an entitlement tied to the old department) only happen when you explicitly run Identity Refresh with role detection **after** the attribute lands — nothing watches for it automatically. This lesson makes you feel that gap: move someone out of Treasury & Payments and confirm wire access doesn't clean itself up until you refresh on purpose.
+There is no mover IdentityTrigger in this pack — only `create` (joiner) and `attributeChange` (leaver). Department/title moves use the same `PATCH /hcm/v1/workers/{id}` as Lesson 215’s attribute sync.
+
+Role consequences (losing an entitlement tied to the old department) only happen when you explicitly run Identity Refresh with role detection **after** the attribute lands. Nothing watches for it automatically.
+
+This lesson makes you feel that gap: move someone out of Treasury & Payments and confirm wire access doesn’t clean itself up until you refresh on purpose.
 
 ## Know these
 
 ```text
-HCM PATCH department/title → Aggregate MNB-Workday → cube attribute updates
-  (no mover trigger fires — role/entitlement state untouched)
+HCM PATCH department/title
+  → Aggregate MNB-Workday → cube attributes update
+  (no mover trigger — roles untouched)
   → Identity Refresh + role detection + provisioning
   → stale role un-detected → live entitlement removed
 ```
@@ -26,75 +31,124 @@ HCM PATCH department/title → Aggregate MNB-Workday → cube attribute updates
 | --- | --- | --- |
 | Joiner (create) | Yes | Trigger fires automatically |
 | Leaver (attributeChange) | Yes | Trigger fires automatically |
-| Mover (department/title change) | **No** | Only when someone runs role-detection refresh |
+| Mover (department/title) | **No** | Only when someone runs role-detection refresh |
 
-**Wrong way:** Assuming a department change alone revokes anything — without a second, role-aware refresh, the stale entitlement just sits there.
+- **Wrong way:** Assuming a department change alone revokes anything — without a second, role-aware refresh, the stale entitlement just sits there.
 
 ## Intent
 
 - Move a real persona between departments through the live HCM API.
-- Run role detection/provisioning refresh and confirm stale entitlements are removed, not just new ones added.
-- Prove wire access is revoked specifically when someone transfers out of a wire-eligible department.
-- State, in one sentence, the operational risk this refresh-driven (not trigger-driven) cleanup creates.
+- Run role detection/provisioning refresh and confirm stale entitlements are removed.
+- Prove wire access is revoked when someone leaves a wire-eligible department.
+- State the operational risk of refresh-driven (not trigger-driven) cleanup.
 
 ## Before you start
 
 - [ ] Lesson 216 birthright/wire roles wired to a live target
-- [ ] A wire-eligible persona identified: `noah.ibrahim` (`MNB00021`) or `rachel.thapa` (`MNB00035`), both Treasury & Payments
+- [ ] Wire-eligible persona identified: `noah.ibrahim` (`MNB00021`) or `rachel.thapa` (`MNB00035`), both Treasury & Payments — or `priya.wire` if she holds Wire Initiator from 216
 - [ ] HCM mock healthy: `curl -sf http://localhost:8091/health`
-- [ ] Evidence: `mkdir -p ~/iiq-lab-evidence/sandbox/218`
+- [ ] Evidence dir ready:
+
+```bash
+mkdir -p ~/iiq-lab-evidence/sandbox/218
+```
 
 ## Do this
 
-1. Pick a mover with a real access consequence — a wire-eligible persona leaving Treasury & Payments (`MNB00021` or `MNB00035`; or `priya.wire` if she holds `MNB-Bundle-Wire-Initiator` from Lesson 216).  
-   **Expect:** Persona currently shows wire-tied entitlement on a live app.
+### Task 1 — Pick a mover with a real access consequence
 
-2. Trigger the mover live: `./tools/lab/enterprise/hcm-scenario.sh mover MNB00021 'Retail Banking' 'Customer Service Rep'`.  
-   **Expect:** Script exits 0 with updated worker JSON.
+Choose a wire-eligible persona who currently shows a wire-tied entitlement on a live app (`MNB00021`, `MNB00035`, or `priya.wire` with `MNB-Bundle-Wire-Initiator`).
 
-3. Confirm it landed at the source: `curl -s http://localhost:8091/hcm/v1/workers/MNB00021 | python3 -m json.tool | grep -E 'department|title'`.  
-   **Expect:** New department/title values present.
+- **Why:** a department change with no entitlement to lose teaches nothing about stale access.
+- **Expect:** persona currently shows wire-tied entitlement before the move.
 
-4. Run **Account Aggregation** on `MNB-Workday`, then **Identity Refresh** with attribute promotion only — same two-step pattern as Lesson 215.  
-   **Why:** Isolates that attribute promotion alone touches nothing role-related.  
-   **Expect:** Cube's `department` updated; Roles tab still shows pre-move state.
+Screenshot the “before” Roles / Application Accounts state under evidence.
 
-5. Run Identity Refresh **again**, this time with role detection **and** provisioning enabled.  
-   **Why:** This is the step that re-evaluates every role's selector against the new department and computes/executes a plan for anything no longer matching.  
-   **Expect:** Task Result shows a detection/de-provision event for the wire role.
+### Task 2 — Trigger the mover in live HCM
 
-6. Confirm the live consequence: re-aggregate `MNB-WirePortal`/`MNB-CoreBanking` (whichever you provisioned in Lessons 208/209/216) and confirm the moved persona's wire entitlement link is actually gone, not pending.  
-   **Expect:** Entitlement absent after re-aggregation, not just "flagged" in IIQ.
+```bash
+./tools/lab/enterprise/hcm-scenario.sh mover MNB00021 \
+  'Retail Banking' 'Customer Service Rep'
+```
 
-7. If you moved `priya.wire`, confirm her `MNB-Bundle-Wire-Initiator` assignment itself is un-detected/revoked, not just the raw entitlement.  
-   **Expect:** Role no longer listed on her cube.
+(Substitute your chosen worker id.)
+
+- **Why:** same live PATCH path as attribute sync — movers are HR events, not Debug edits.
+- **Expect:** script exits 0 with updated worker JSON.
+
+### Task 3 — Confirm the source
+
+```bash
+curl -s http://localhost:8091/hcm/v1/workers/MNB00021 \
+  | python3 -m json.tool | grep -E 'department|title'
+```
+
+- **Why:** ground truth before IIQ — wrong id here wastes the rest of the lab.
+- **Expect:** new department/title values present.
+
+### Task 4 — Aggregate and promote attributes only
+
+1. Run **Account Aggregation** on `MNB-Workday`
+2. Run **Identity Refresh** with attribute promotion **only** (no role detection yet)
+
+- **Why:** isolates that attribute promotion alone touches nothing role-related.
+- **Expect:** cube `department` updated; Roles tab still shows pre-move state.
+
+### Task 5 — Role-detection refresh (the cleanup step)
+
+Run Identity Refresh **again**, this time with role detection **and** provisioning enabled.
+
+- **Why:** this re-evaluates every role’s selector against the new department and executes a plan for anything no longer matching.
+- **Expect:** Task Result shows a detection/de-provision event for the wire role.
+
+### Task 6 — Prove the live entitlement is gone
+
+Re-aggregate `MNB-WirePortal` / `MNB-CoreBanking` (whichever you provisioned in 208/209/216) and confirm the moved persona’s wire entitlement link is actually gone.
+
+- **Why:** IIQ “flagged” is not the same as the target account changed.
+- **Expect:** entitlement absent after re-aggregation.
+
+### Task 7 — If you moved Priya, confirm role revocation
+
+If you moved `priya.wire`, confirm `MNB-Bundle-Wire-Initiator` itself is un-detected/revoked — not just the raw entitlement.
+
+- **Why:** role assignment and entitlement link can diverge if detection didn’t run.
+- **Expect:** role no longer listed on her cube.
 
 ## If it fails
 
-- **Department changes but no role change after two refreshes** — check the wire role's selector is actually keyed off department; a manually-assigned (not detected) role never auto-revokes regardless of refresh.
-- **Wire entitlement shows removed in IIQ but still active on the live app** — refresh ran without provisioning enabled, or you didn't re-aggregate the target after the plan executed.
-- **`hcm-scenario.sh mover` errors "usage"** — exact form is `mover <username|workerId> <newDepartment> [newTitle]`; quote departments with spaces.
-- **Wrong persona moved** — the script accepts HCM `id` or `userName`; confirm you passed `MNB00021`, not a plain username.
+| Symptom | Fix |
+| --- | --- |
+| Department changes, no role change after two refreshes | Wire role selector may not key off department; a *manually assigned* (not detected) role never auto-revokes |
+| IIQ shows removed, live app still has it | Refresh without provisioning, or you didn’t re-aggregate the target after the plan |
+| `hcm-scenario.sh mover` usage error | Form is `mover <username\|workerId> <newDepartment> [newTitle]`; quote departments with spaces |
+| Wrong persona moved | Script accepts HCM `id` or `userName` — confirm you passed `MNB00021`, not a colliding name |
 
 ## You are done when
 
-The chosen persona's department/title reflects the mover on their cube, their wire-tied entitlement is gone from the live app after a role-detection-and-provision refresh, and you can state from memory why cleanup didn't happen automatically.
+- [ ] Chosen persona’s department/title reflects the mover on their cube
+- [ ] Wire-tied entitlement gone from the live app after role-detection + provision refresh
+- [ ] You can state why cleanup didn’t happen automatically
 
 ## Control note
 
-- **Control:** Mover access re-certification (implicit, refresh-driven).  
-- **Owner:** IAM Ops (must schedule/trigger refresh) + HR Ops (source event).  
-- **SLA (lab):** Manual, same session; production risk is exactly the gap between move date and next refresh.  
-- **Evidence:** `~/iiq-lab-evidence/sandbox/218/` — HCM curl output, before/after Roles tab, live app re-aggregation proof.
+- **Control:** Mover access re-evaluation (refresh-driven, not trigger-driven)
+- **Owner:** IAM Ops (must schedule/trigger refresh) + HR Ops (source event)
+- **SLA (lab):** manual, same session; production risk is the gap between move date and next refresh
+- **Evidence:** `~/iiq-lab-evidence/sandbox/218/` — HCM curl, before/after Roles tab, live app re-agg proof
 
 ## Quick check
 
-1. Which IIQ trigger fires on a department change? → None — no `MNB-IdentityTrigger-Mover` exists.  
-2. What refresh option actually revokes the stale role? → Role detection + provisioning enabled.  
-3. What's the operational risk this lesson demonstrates? → A mover with no follow-up refresh leaves stale access live indefinitely.
+1. Which IIQ trigger fires on a department change? → none — no mover trigger in this pack
+2. What refresh options revoke the stale role? → role detection + provisioning
+3. What’s the operational risk? → a mover with no follow-up refresh leaves stale access live indefinitely
+
+## Feedback
+
+Could you explain why joiner/leaver have triggers but mover doesn’t — and what ops must schedule instead? If roles didn’t change after Task 5, note whether the Wire role was *detected* or *manually assigned* — only detection auto-revokes.
 
 ## Navigate
 
-- Previous: Lesson 217  
-- Next: Lesson 219  
+- Previous: [Lesson 217](217-joiner-lcm-live.md)
+- Next: [Lesson 219](219-leaver-lcm-live.md)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

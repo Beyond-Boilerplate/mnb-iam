@@ -212,7 +212,7 @@ This map is examiner evidence that IAM understood the API.
 
 ### Task 5 — Aggregation against connector-mock (primary)
 
-**Primary (live mock):** configure iterate op to `GET /users`; **Test Connection**; run Account Aggregation `MNB-Wire-Portal-WS-Account-Aggregation`; expect `priya.wire` and `marcus.approve`.
+**Primary (live mock):** configure iterate op to `GET /users` with `rootPath` `$.users`; add **Response Mapping** on Account Aggregation (`id`→`id`, `username`→`username`, `email`→`email`, `employeeId`→`employeeId`, `active`→`active`, `entitlements`→`entitlements`); set Enable Has More = false; **Test Connection**; run Account Aggregation `MNB-Wire-Portal-WS-Account-Aggregation`; expect `priya.wire` and `marcus.approve`.
 
 **Fallback only if Docker/mock impossible (lab-without-live-target):** flatten `sample-users.json` to CSV and create Shadow DelimitedFile `MNB-Wire-Portal-WS-Shadow`; binder must say live path was *unavailable*, not skipped.
 
@@ -266,7 +266,7 @@ CHANGELOG: “Lesson 68 Web Services connector MNB-Wire-Portal-WS mapped from wi
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | 401/403 on Test Connection | Bad token / header name | Fix auth; rotate lab key; do not log secrets |
-| Empty aggregation | Wrong JSON root | Align parse to `users` in sample-users.json |
+| Empty aggregation / Preview empty but Test Connection OK | Wrong JSON root **or** missing Response Mapping | Align `rootPath` to `$.users`; map every schema attr on Account Aggregation; Enable Has More = false |
 | Entitlements not managed | Array not marked entitlement | Multi-value entitlement attr; re-agg |
 | Shadow left as prod | Naming error | Retire `-Shadow` before non-lab |
 | PATCH vs PUT confusion | Guessing REST style | Use PATCH per OpenAPI |

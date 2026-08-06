@@ -1,103 +1,435 @@
 # Lesson 214 — Nail Correlation Across Live Apps
 
 **Track:** Enterprise Sandbox Path (production-like local estate)  
-**Time:** ~55 minutes  
-**Prereq:** Lessons 204–210  
+**Time:** ~70 minutes  
+**Prereq:** Lessons 207, 204–210 (Workday cubes + live apps aggregated at least once)  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
-**Maps to classic track:** 17–19
+**Maps to classic track:** 05 (identity attrs / manager corr), 06 (refresh), 09 (create-identities OFF), 16 (agg order), 17–19 (correlation + remediation), 21–22 (manager / attr hygiene)
 
-> **Why (1–2 lines):** Bad correlation quietly creates permanent orphans and duplicate cubes — the single most expensive mistake in any real IIQ deployment. Examiners ask how employee id stays stable when a username is reissued.
+> **Why:** Bad correlation quietly creates permanent orphans and duplicate cubes — the most expensive mistake in a real IIQ deployment. You need a stable employee-id story before username reissue, or rehire will mint duplicates.
 
 ## What this is
 
-By this point you've aggregated six live applications (`MNB-OpenLDAP`, `MNB-ActiveDirectory-Live`, `MNB-Workday`, `MNB-CoreBanking`, `MNB-WirePortal`, `MNB-Salesforce-CRM-Live`), each with its own native key. The Enterprise Lab correlation standard ([`ENTERPRISE-LAB-V2.md`](../ENTERPRISE-LAB-V2.md#identity-correlation-standard)): **every employee-id-shaped attribute correlates to identity `userId`; every username-shaped attribute is the login/display key.** HCM `userId` (`MNB00001`), OpenLDAP `employeeNumber`, Samba AD `employeeNumber`, Keycloak `employeeId`, JDBC `employee_id`, CRM `externalId` — six names, one rule. Classic Lessons 17–18 taught that on CSV; here you prove it holds across live connectors and practice the uncorrelated-account repair loop (classic 19).
+By this point you’ve aggregated six live applications, each with its own native key. Classic Lessons **17–19** taught the Meridian correlation standard on CSV; this lesson proves the **same standard** across live connectors and practices the uncorrelated-account repair loop.
 
-## Know these
+**Every employee-id-shaped attribute → identity `userId`. Every username-shaped attribute is login/display only.**
 
-| App | Correlation key → IIQ | Login / display key |
+| App | Correlation key → IIQ `userId` | Login / display |
 | --- | --- | --- |
-| MNB-Workday (auth) | `userId` | worker name / email |
-| MNB-OpenLDAP | `employeeNumber` | `uid` |
-| MNB-ActiveDirectory-Live | `employeeNumber` | `sAMAccountName` |
-| MNB-CoreBanking | `employee_id` | `username` |
-| MNB-WirePortal | app correlation attr | account id |
-| MNB-Salesforce-CRM-Live | `externalId` | `userName` |
+| `MNB-Workday` (authoritative) | account `id` promoted to cube `userId` | `userName` / email |
+| `MNB-OpenLDAP` | `employeeNumber` | `uid` |
+| `MNB-ActiveDirectory-Live` | `employeeNumber` | `sAMAccountName` |
+| `MNB-CoreBanking` | `employee_id` | `username` |
+| `MNB-WirePortal` | app employee-id attr | account id |
+| `MNB-Salesforce-CRM-Live` | `externalId` | `userName` |
+
+Enterprise Path **skips** classic Lesson **05**. You still need Searchable cube `userId`, UIConfig visibility, and manager correlation — Task 1 and Task 6 carry that work here.
+
+## Concept primer — vocabulary before you click
+
+If any term below is fuzzy, stop and read it. Tasks assume these meanings.
+
+### Meridian ID map
 
 ```text
-HCM agg (authoritative) → cube exists
-  → other apps agg → match employee-id → link on same cube
-  → no match → Uncorrelated Accounts (fix key, don't create a second cube)
+Workday account id / LDAP employeeNumber / JDBC employee_id / CRM externalId
+        │  (same MNB##### values)
+        ▼
+Identity cube attribute userId   ← correlation target
+Identity name / userName         ← login / search convenience only
 ```
 
-**Wrong way:** Correlating on `uid` / `sAMAccountName`. A login can change; the employment id must not — conflating them orphans the identity on rename.
+| Term | Plain English | Meridian example |
+| --- | --- | --- |
+| **`userId`** | Stable associate key on the **Identity cube** (`MNB#####`) | Helen’s cube has `userId=MNB00001` |
+| **`employeeId` / `employeeNumber` / `employee_id`** | Account-side column names for the **same** `MNB#####` values — not a second HR key | OpenLDAP `employeeNumber=MNB00001` |
+| **Schema `identityAttribute`** | Account **native key** on Application → **Schema** | Workday schema `id` |
+| **Correlation “Identity Attribute”** | Cube attribute in Correlation dropdown (Identity Mappings) | Always **`userId`** here |
+| **Authoritative / create-identities** | App flag: unmatched accounts may **mint cubes** | **Only** `MNB-Workday` |
+| **Uncorrelated account** | Real app account with **no** Link to a cube — fixable | Core Banking after you set `employee_id=BOGUS` |
+| **Orphan / ghost identity** | Cube minted from a **non**-authoritative app (often from LDAP `cn`) | `Helen Ross` beside `helen.ross` |
+
+> **Watch out:** Never invent an HR `employeeId` column. IT dumps say `employeeId`; directories say `employeeNumber`; the cube always stores **`userId`**.
+
+### Aggregation vs correlation vs refresh
+
+These are three different machines. Mixing them up is how “I ran aggregation” still leaves blank attrs and split cubes.
+
+| Process | What it does | What it does **not** do |
+| --- | --- | --- |
+| **Account Aggregation** | Reads the connector → creates/updates **Links** (accounts); runs correlation maps | Promote cube attrs; resolve managers; invent missing CorrelationConfig |
+| **Account correlation** | During agg (or reprocess): match account key → existing cube → attach Link | Create people (unless create-identities is ON — never on targets) |
+| **Identity Refresh** | Re-evaluates options on cubes: promote attrs, manager correlation, roles… | Replace the need to aggregate sources |
+
+```text
+Workday agg (authoritative) → cube exists (+ Link)
+  → Identity Refresh → promote id → cube userId; resolve managers
+  → other apps agg → match employee-id → Link on same cube
+  → no match → Uncorrelated Accounts (fix the key — don't mint a second cube)
+```
+
+**Authoritative-first order** (classic 16, live here):
+
+1. `MNB-Workday`
+2. Directories (`MNB-OpenLDAP`, `MNB-ActiveDirectory-Live`)
+3. Downstream apps (`MNB-CoreBanking`, `MNB-WirePortal`, `MNB-Salesforce-CRM-Live`)
+
+Reverse order creates **transient orphans**. Empty CorrelationConfig + create-identities ON creates **permanent ghosts**.
+
+### Three screens beginners confuse (classic 05)
+
+| Screen | Job | Example |
+| --- | --- | --- |
+| Application → **Schema** | Account columns; native identity | Workday `identityAttribute=id` |
+| **Gear → Identity Mappings** | Link attr → cube attr (promotion sources) | Workday `id` → cube `userId` (**Searchable**) |
+| Application → **Correlation** | Account attr → cube attr (match during agg) **or** Manager Correlation | `employeeNumber` → `userId`; manager ref → manager’s `userId` |
+
+### Uncorrelated vs orphan (classic 09 / 17)
+
+```text
+Uncorrelated IT / LDAP account
+  ├─ create-identities OFF → stays uncorrelated (fix key / remediate) ✓
+  └─ create-identities ON  → orphan Identity named like "Helen Ross" ✗
+```
+
+| App | Authoritative? | Creates identities? |
+| --- | --- | --- |
+| `MNB-Workday` | Yes | Yes |
+| Every other live app in this lesson | No | **No** |
+
+**Wrong way:** “Empty the uncorrelated list” by flipping create-identities ON. That manufactures ghost people with no Workday truth, no trustworthy leaver, and split app links.
+
+### Key preference order (classic 17–18)
+
+```text
+Strongest ──► employee-id-shaped account attr = identity.userId
+Next       ──► email = email (secondary only)
+Avoid      ──► uid / sAMAccountName / userName / display name / fuzzy match
+```
+
+**False merge** (wrong person gets the Link) is worse than a **false orphan** (visible, remediable). Prefer precision over “everything linked.”
+
+| Approach | Outcome |
+| --- | --- |
+| Email-only | Contractors / vendor mail fail; hidden orphans |
+| Name / `cn` matching | False merges; `Helen Ross` ghost cubes |
+| Create-identities on targets | Ghost cubes; apps split across duplicates |
+| Employee-id → `userId`; create OFF | Residuals measurable and remediable |
+
+### Manager correlation (classic 05 / 06 / 21)
+
+**Manager correlation** is not account correlation. It resolves a **manager reference on the account** into a **pointer to another Identity** during Identity Refresh.
+
+| Piece | Role |
+| --- | --- |
+| Workday / HCM `managerId` (Enterprise) | Manager’s associate id (`MNB00006` for Priya → Sanjay) |
+| Classic CSV `managersAssociateID` | Same idea on `MNB-HR` |
+| Display column `manager` / `cn` | **Display only** — never map or correlate from this |
+
+```text
+Priya’s Workday row managerId=MNB00006
+  → Refresh with manager correlation
+  → cube priya.wire.manager → sanjay.kapoor (userId MNB00006)
+```
+
+> **Watch out:** Mapping Identity `manager` from a display-name account column mints empty cubes named like people (“Helen Ross”) with blank First/Last/Email — the same ghost pattern as directory create-identities.
+
+### Identity attribute hygiene (classic 22 — preview)
+
+- **Workday owns** lifecycle identity attrs: `userId`, email, status, department, manager chain
+- Live directories / JDBC / CRM own **account** facts and entitlements on the **Link**
+- Do not promote AD title / LDAP `cn` onto cube fields that Workday already owns — that is how cubes **flip-flop** after every agg
 
 ## Intent
 
-- State the correlation standard from memory for all six live apps.
-- Re-aggregate in authoritative-first order; confirm named personas have no unexplained uncorrelated accounts.
-- Deliberately break, diagnose, and heal one bad correlation.
-- Confirm manager hierarchy for `priya.wire` after refresh.
+- Build Searchable cube `userId` (and UI visibility) the classic-05 way, then wire live-app correlation
+- Re-aggregate authoritative-first; prove personas have one cube with all intended Links
+- Detect and repair display-name duplicate cubes if you already minted them
+- Break and heal one JDBC correlation (classic 19 loop)
+- Confirm manager hierarchy for `priya.wire` after manager refresh
 
 ## Before you start
 
-- [ ] `./tools/lab/docker/up.sh --enterprise` is up; IIQ healthy on `:8080`
+- [ ] Enterprise stack up; IIQ healthy on `:8080`
+- [ ] Lesson **207** done — Warehouse has Workday cubes (`helen.ross`, …)
 - [ ] Lessons 204–210 apps exist and have aggregated at least once
-- [ ] JDBC container reachable: `mnb-jdbc-sample`
-- [ ] Evidence dir: `mkdir -p ~/iiq-lab-evidence/sandbox/214`
+- [ ] JDBC container reachable (`mnb-jdbc-sample` or your compose name)
+- [ ] Evidence dir ready:
+
+```bash
+mkdir -p ~/iiq-lab-evidence/sandbox/214
+```
 
 ## Do this
 
-1. Write the correlation table from memory, then check [`ENTERPRISE-LAB-V2.md`](../ENTERPRISE-LAB-V2.md#identity-correlation-standard).  
-   **Expect:** Your list matches HR/HCM, OpenLDAP, Samba, Keycloak, JDBC, CRM rows above. If one surprises you, revisit 204–210 before continuing.
+### Task 1 — Ensure cube `userId` is correlatable, then verify each app
 
-2. Run **Account Aggregation** in this order: `MNB-Workday` → `MNB-OpenLDAP` → `MNB-ActiveDirectory-Live` → `MNB-CoreBanking` → `MNB-WirePortal` → `MNB-Salesforce-CRM-Live`.  
-   **Why:** Authoritative source first creates cubes so later apps have something to attach to.  
-   **Expect:** Task Results succeed; reverse order often creates transient uncorrelated noise.
+Open each Application and confirm the correlation attribute maps to identity **`userId`** — don’t trust a table you memorized. First make sure `userId` can appear in the Correlation dropdown.
 
-3. Open **Identities → Identity Warehouse → helen.ross** and count Application Accounts links; repeat for `priya.wire` and `marcus.approve`.  
-   **Expect:** Each named persona shows links for every live app they should have (HCM + directories + any entitled Wire/CRM/Core rows).
+> **Double-check:** Correlation → **Identity Attribute** will never list Workday schema `id` — that name is Schema-only (account native key). You need cube **`userId`** (same `MNB#####` values). If it is missing from the dropdown: **Gear → Global Settings → Identity Mappings** → add Searchable `userId` sourced from `MNB-Workday` / `id` → **Identity Refresh** → reopen Correlation → map each app’s employee-id attr → `userId`.
 
-4. Open **Identities → Uncorrelated Accounts** (or each Application’s uncorrelated list).  
-   **Expect:** Zero unexplained hits for the three personas. Any hit is a bug to fix now (classic 19), not later.
+#### 1a — Create Searchable `userId` (classic 05 work, done here)
 
-5. Break one correlation on purpose:  
-   `docker exec -it mnb-jdbc-sample psql -U mnb -d mnb_apps -c "update mnb_app_accounts set employee_id='BOGUS' where username='helen.ross';"`  
-   Re-aggregate `MNB-CoreBanking`, confirm Helen’s Core Banking link goes uncorrelated, then restore `employee_id='MNB00001'` and re-aggregate.  
-   **Expect:** Uncorrelated after break; self-heals after fix. Note the Task Result timestamps under evidence.
+Enterprise Path never ran classic Lesson **05**, so `userId` may never have been created as a Searchable identity attribute. Without that, Correlation’s Identity Attribute list cannot offer it — and Workday schema `id` will never appear there either.
 
-6. Run Identity Refresh with manager correlation (or your build’s manager task). Open `priya.wire`.  
-   **Expect:** Manager resolves to `sanjay.kapoor` (`MNB00006` per identity master), not blank.
+1. **Gear (⚙) → Global Settings → Identity Mappings** (or System Setup → Identity Attributes)
+2. If `userId` is missing: **Add New Attribute**
+   - **Name:** `userId` (exact; no spaces — not `User ID`)
+   - **Display Name:** `User ID` is fine
+   - Turn **Searchable** **ON** (required for Correlation / manager / population dropdowns)
+3. Add an **Attribute Source**: application `MNB-Workday` → account attribute **`id`** (same `MNB#####` values as the identity master)
+4. **Save**, then run **Identity Refresh** with **promote / refresh identity attributes** enabled so existing Workday cubes promote `id` → cube `userId`
+5. Re-open any Application → **Correlation** — Identity Attribute should now list `userId`
 
-7. In one sentence (evidence note), explain why login key ≠ correlation key.  
-   **Expect:** Username may reissue; `employeeNumber` / `userId` must not for the employment relationship.
+> **Watch out — empty correlation rows after the dropdown:** If you pick Application Attribute + Identity Attribute and the grid shows **blank** cells (or Debug `CorrelationConfig` stays an empty `<CorrelationConfig name="…"/>` with no `AttributeAssignments`), `userId` is almost certainly **not Searchable**. Extended identity attrs must have **Searchable = ON** or IIQ will not persist usable AttributeAssignments — selecting from the dropdown is not enough. Fix Searchable, **Save** Identity Mappings, reopen the Application, delete the blank row, add the mapping again, click **Add**, confirm both names appear in the list, then **Save** the Application.
+
+**Prove Searchable in XML (optional):** Debug → Object Browser → `ObjectConfig` → `Identity` → find `userId`. You want `searchable="true"` (and usually no need for `editMode="ReadOnly"`):
+
+```xml
+<ObjectAttribute displayName="User Id" extendedNumber="1" name="userId" searchable="true" type="string">
+  <AttributeSource name="id">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="MNB-Workday"/>
+    </ApplicationRef>
+  </AttributeSource>
+</ObjectAttribute>
+```
+
+If `searchable="true"` is missing, add it, import the ObjectConfig, then recreate the Correlation mapping.
+
+- **Why:** correlation and manager resolution both look up cubes by Searchable `userId`. A mapped-but-not-Searchable field either disappears from dropdowns or accepts a click and then saves **empty** AttributeAssignments.
+- **Expect:** Debug on a Workday cube shows `userId=MNB#####` after refresh; Correlation dropdown lists `userId`; added rows show **both** attribute names.
+
+#### 1a-bis — Make `userId` visible on View Identity → Attributes (UIConfig XML)
+
+Searchable + mapped is enough for Correlation dropdowns. The **Attributes** tab still hides custom fields until they are on the UIConfig whitelist (classic 05).
+
+**UI path (same outcome):** Debug → Object Browser → `UIConfig` → `UIConfig` → edit `identityViewAttributes` → append `,userId` → Save → hard-refresh the browser.
+
+**XML path (lesson default — export, edit, import):**
+
+1. Debug → Object Browser → `UIConfig` → `UIConfig` → **Export** / copy the object XML (or console `get UIConfig UIConfig`)
+2. Find the `identityViewAttributes` entry. Stock looks like:
+
+```xml
+<entry key="identityViewAttributes" value="name, firstname, lastname, email, manager, type, employeeType, administrator"/>
+```
+
+3. Append `userId`:
+
+```xml
+<entry key="identityViewAttributes" value="name, firstname, lastname, email, manager, type, employeeType, administrator,userId"/>
+```
+
+4. Import the edited XML (Debug → Import, or console `import` / MCP `import_sailpoint_object`)
+5. Hard-refresh the browser; open `helen.ross` → **Attributes** and confirm **User ID** / `userId` shows `MNB00001`
+
+> **Tip:** If Debug shows `userId=MNB00001` but Attributes does not, it is only the whitelist — not a failed Identity Mapping.
+
+> **Watch out:** Do not pick Correlation Identity Attribute `name` just because Helen’s cube is searchable as `helen.ross`. Login/display can change; `userId` / Workday `id` must not.
+
+#### 1b — Verify account correlation on each live app
+
+1. **Applications → Application Definition** for each non-Workday row in the table above
+2. Open **Correlation** (Account Correlation)
+3. Map the employee-id-shaped **application** attribute → Identity Attribute **`userId`**
+   - OpenLDAP / AD-Live: account `employeeNumber` → `userId` (not `employeeId` — LDAP’s attribute is `employeeNumber`)
+   - Core Banking: `employee_id` → `userId`
+   - CRM Live: `externalId` → `userId`
+4. Confirm login attributes (`uid`, `sAMAccountName`, `userName`, …) are **not** the primary correlation key
+5. Create-identities / authoritative stays **off** on these targets — only `MNB-Workday` mints cubes
+6. **Save**, then prove the CorrelationConfig is not an empty shell:
+   - Debug → Object Browser → `CorrelationConfig` → open the config referenced by the app (e.g. `employeeId-corr`)
+   - You must see **AttributeAssignments** / Filter rows like:
+
+```xml
+<CorrelationConfig name="MNB-OpenLDAP Correlation">
+  <AttributeAssignments>
+    <Filter operation="EQ" property="userId" value="employeeNumber"/>
+  </AttributeAssignments>
+</CorrelationConfig>
+```
+
+   - `property` = **identity** attr (`userId`); `value` = **account** attr (`employeeNumber`)
+   - An empty `<CorrelationConfig name="…"/>` with no assignments correlates **nothing** — every agg will orphan or mint ghosts
+   - If the UI keeps saving empty configs: import the XML above (adjust name + account attr per app), then set Application → Correlation to reference that config
+
+- **Why:** a single mis-mapped app is how duplicates sneak in after a clean Workday cube exists; an empty named CorrelationConfig is the silent version of “I thought I configured it.”
+- **Expect:** every live app’s correlation key matches the table; Identity Attribute is `userId`, not schema `id`; CorrelationConfig XML has real AttributeAssignments.
+
+> **Watch out:** Cubes come from Lesson **207** (`MNB-Workday`). Do **not** aggregate `MNB-HR` to “fix” missing identities.
+
+### Task 2 — Re-aggregate in authoritative-first order
+
+Correlation mappings alone do not rewrite Links already glued to the wrong cube. You must re-ingest accounts so the engine re-evaluates matches (classic 17).
+
+Run **Account Aggregation** in this order:
+
+1. `MNB-Workday`
+2. `MNB-OpenLDAP`
+3. `MNB-ActiveDirectory-Live`
+4. `MNB-CoreBanking`
+5. `MNB-WirePortal`
+6. `MNB-Salesforce-CRM-Live`
+
+Then run **Identity Refresh** (promote attributes at least once after Task 1a).
+
+- **Why:** authoritative source first creates/updates cubes so later apps have something to attach to; refresh makes `userId` and managers trustworthy on the cube.
+- **Expect:** Task Results succeed. Reverse order often creates transient uncorrelated noise.
+
+> **Tip:** Aggregation lives under **Setup → Tasks**. Application Definition only has **Test Connection**.
+
+### Task 3 — Spot-check persona cubes (and catch display-name duplicates)
+
+Open **Identities → Identity Warehouse** and search each persona **twice**: by login (`helen.ross`) and by display name (`Helen Ross`).
+
+| Good cube | Bad / ghost cube |
+| --- | --- |
+| Name `helen.ross`, `userId=MNB00001`, Workday link present | Name `Helen Ross` (space, title case), **no** `userId`, often only an OpenLDAP / AD link |
+
+Count Application Accounts links on the **good** cube only.
+
+- **Why:** when CorrelationConfig is empty or create-identities was on for a directory, IIQ mints a second cube from LDAP `cn` / AD display name. Apps then **split** across the pair — Workday+CRM on `helen.ross`, OpenLDAP on `Helen Ross`. Agg + Refresh will not heal that by themselves.
+- **Expect:** one cube per persona; every live app they should have is on that cube; Warehouse search for `"Helen Ross"` / `"Priya Mehta"` style names returns **zero** workforce ghosts (or only ones you are about to delete).
+
+> **Double-check:** If you already have the split, fix config first (Task 1), then repair cubes (Task 3a) before trusting Task 2’s re-agg as “done.”
+
+### Task 3a — Repair split / duplicate cubes (only if Task 3 found ghosts)
+
+This is classic **19** remediation — not “create identity to clean the list.”
+
+1. Confirm create-identities / authoritative is **off** on every non-Workday app; fix CorrelationConfig AttributeAssignments (Task 1b step 6)
+2. On the **good** cube (`helen.ross`): note which apps are missing
+3. On the **ghost** cube (`Helen Ross`): note which apps landed there (usually OpenLDAP / AD)
+4. Prefer **uncorrelate** the ghost’s accounts, then **delete** the empty ghost identity — do **not** leave two people for one human
+5. Optional advanced: Identity merge (Debug / merge tooling) ghost → `helen.ross` if your build supports it cleanly
+6. Re-aggregate the affected apps in Task 2 order so accounts re-attach via `employeeNumber` → `userId`
+
+- **Why:** correlation only runs for accounts being aggregated; a Link already glued to the wrong cube stays there until you break that link or merge.
+- **Expect:** Warehouse has a single `helen.ross` (and peers) with all intended app links; ghost display-name identities are gone; identity **count** does not spike after re-agg.
+
+### Task 4 — Sweep Uncorrelated Accounts
+
+Open **Identities → Uncorrelated Accounts** (or each Application’s uncorrelated list).
+
+Treat unexplained hits for seeded personas as bugs. Classic **19** dispositions for real leftovers:
+
+| Disposition | When |
+| --- | --- |
+| **Correlate** | HR/Workday person exists; fix key / re-agg (or manual correlate with proof) |
+| **Disable** | No person should have this access |
+| **Exception** | Time-bounded, ticketed — never “TBD” for privileged (`WIRE_*`, `AWS_ADMIN`, core banking) |
+
+- **Why:** uncorrelated privileged access is a control metric, not UI clutter.
+- **Expect:** zero unexplained hits for Helen / Priya / Marcus.
+
+### Task 5 — Break and heal one JDBC correlation (classic 19 loop)
+
+Deliberately break Helen’s Core Banking link, then repair it — prove you can diagnose orphans without minting cubes.
+
+```bash
+docker exec -it mnb-jdbc-sample psql -U mnb -d mnb_apps -c \
+  "update mnb_app_accounts set employee_id='BOGUS' where username='helen.ross';"
+```
+
+1. Re-aggregate `MNB-CoreBanking`
+2. Confirm Helen’s Core Banking link is uncorrelated (or gone from her cube)
+3. Restore:
+
+```bash
+docker exec -it mnb-jdbc-sample psql -U mnb -d mnb_apps -c \
+  "update mnb_app_accounts set employee_id='MNB00001' where username='helen.ross';"
+```
+
+4. Re-aggregate `MNB-CoreBanking` again
+
+- **Why:** this is the classic 19 repair loop on a live target — ops proof you can diagnose orphans.
+- **Expect:** uncorrelated after break; self-heals after fix. Note Task Result timestamps under evidence.
+
+> **Tip:** If the container name differs, run `docker ps --format '{{.Names}}'` and substitute.
+
+> **Watch out:** Test Connection is not aggregation. A broken row will not show as uncorrelated until you run a full Account Aggregation.
+
+### Task 6 — Confirm manager hierarchy (classic 05 / 06 / 21)
+
+Account correlation attaches apps. **Manager correlation** builds the org chart managers and certifiers trust.
+
+1. On `MNB-Workday`, confirm **Manager attribute** (schema / manager setting) points at the HCM manager ref (`managerId` in this estate)
+2. Confirm Manager Correlation (or equivalent) matches that ref to identity **`userId`** (Searchable — same Task 1a attribute)
+3. Run Identity Refresh with **manager correlation / refresh manager** enabled (classic `Refresh MNB Managers` pattern)
+4. Open `priya.wire`
+
+- **Why:** manager blank after a clean account-correlation pass usually means the manager’s Workday row wasn’t aggregated, Searchable `userId` was missing, or you never ran the managers refresh — not “Priya has no manager in HR.”
+- **Expect:** manager resolves to `sanjay.kapoor` (`MNB00006` per identity master), not blank and not a raw id string.
+
+> **Watch out:** Do **not** add Identity Mapping Attribute Source `manager` ← account display-name column. That classic-05 anti-pattern creates empty display-name cubes.
+
+> **Tip:** Exec tops with empty `managerId` / `managersAssociateID` can be intentional. Blank manager on a mid-level Wire specialist like Priya is a broken chain.
+
+### Task 7 — Evidence note: login ≠ correlation
+
+Under `~/iiq-lab-evidence/sandbox/214/`, write one sentence explaining why the login key must not be the correlation key.
+
+- **Why:** forces the design rule into ops language you’ll reuse in every connector review.
+- **Expect:** something like: username may reissue; `employeeNumber` / `userId` must not for the employment relationship.
 
 ## If it fails
 
-- **Transient orphans after reverse-order agg** — re-run step 2 in documented order.
-- **Duplicate cubes instead of one cube with many links** — classic correlation failure; fix the key and prefer clean re-agg over destructive merge early in this path.
-- **Broken JDBC row not showing uncorrelated** — force a full Account Aggregation, not Test Connection.
-- **Manager blank after refresh** — manager’s own HCM row may be missing; re-aggregate `MNB-Workday`.
+| Symptom | Fix |
+| --- | --- |
+| No `id` under Correlation → Identity Attribute | Expected — schema `identityAttribute` is not that dropdown. Use cube `userId` (Task 1a) |
+| No `userId` in Correlation Identity Attribute list | Create Searchable `userId` in Identity Mappings; source from Workday `id`; refresh; reopen app |
+| `userId` in Debug but missing on Attributes tab | Append `userId` to UIConfig `identityViewAttributes` (Task 1a-bis XML) |
+| CorrelationConfig exists but is empty XML | Add AttributeAssignments; confirm Filters in Debug (Task 1b step 6) |
+| Correlation dropdown Add shows blank rows / won’t stick | `userId` not **Searchable** — enable Searchable on Identity Mappings, save, reopen app, re-add mapping |
+| `userId` ObjectConfig missing `searchable="true"` | Edit ObjectConfig Identity XML (Task 1a Watch out), import, recreate CorrelationConfig |
+| Duplicate cubes (`helen.ross` + `Helen Ross`) with apps split | Empty/wrong correlation + create-identities minted `cn` ghosts — Task 3a |
+| Transient orphans after reverse-order agg | Re-run Task 2 in documented order |
+| Broken JDBC row not showing uncorrelated | Force a full Account Aggregation — Test Connection is not enough |
+| Manager blank / raw id after refresh | Re-aggregate `MNB-Workday`; run managers refresh; confirm `managerId` → Searchable `userId` |
+| Empty cubes named like people, no Application Accounts | Classic manager display-name mapping or directory create-identities — delete ghosts; fix config |
+| Correlation saved but links never attach | Cube `userId` still empty — re-run Identity Refresh after Task 1a, then re-aggregate the target |
+| Identity title/email flips after directory agg | Target attrs promoted onto cube — unmap; Workday owns lifecycle attrs (classic 22) |
+| No cubes at all | Finish Lesson **207** first — this lesson correlates onto existing Workday identities |
+| Temptation to create identity from privileged orphan | Reject — use Correlate / Disable / Exception (Task 4), never mint ghosts |
 
 ## You are done when
 
-All three personas show correlated links across every live app they should have; you’ve broken and repaired one correlation by hand; `priya.wire`’s manager resolves after refresh.
+- [ ] Searchable cube `userId` exists and appears in Correlation’s Identity Attribute list
+- [ ] `userId` visible on View Identity → Attributes (UIConfig `identityViewAttributes` updated)
+- [ ] CorrelationConfigs have real AttributeAssignments (not empty named stubs)
+- [ ] One cube per persona — no `Helen Ross` / `Priya Mehta` style ghosts splitting apps
+- [ ] All three personas show correlated links across every live app they should have
+- [ ] You’ve broken and repaired one JDBC correlation by hand
+- [ ] `priya.wire`’s manager resolves to `sanjay.kapoor` after managers refresh
+- [ ] Evidence note explains login key ≠ correlation key
 
 ## Control note
 
-- **Control:** Account correlation integrity (no unexplained orphans / duplicate cubes).  
-- **Owner:** IAM Ops.  
-- **SLA (lab):** Fix deliberate break same session; production target often ≤1 business day for orphan triage.  
-- **Evidence:** `~/iiq-lab-evidence/sandbox/214/` — Task Result ids, before/after uncorrelated screenshots.
+- **Control:** Account correlation integrity (no unexplained orphans / duplicate cubes)
+- **Owner:** IAM Ops
+- **SLA (lab):** fix deliberate break same session; production orphan triage often ≤1 business day
+- **Evidence:** `~/iiq-lab-evidence/sandbox/214/` — Task Result ids, before/after uncorrelated screenshots, ghost cleanup note if Task 3a ran
 
 ## Quick check
 
-1. Which attribute on Samba must match HCM `userId`? → `employeeNumber`.  
-2. Why aggregate HCM first? → Cubes must exist before other apps can correlate.  
-3. What’s the wrong correlation key on OpenLDAP? → `uid` (login), not `employeeNumber`.
+1. Which attribute on Samba must match Workday `userId`? → `employeeNumber`
+2. Why aggregate Workday first? → cubes must exist before other apps can correlate
+3. What’s the wrong correlation key on OpenLDAP? → `uid` (login), not `employeeNumber`
+4. Why isn’t Workday schema `id` in Correlation → Identity Attribute? → that dropdown is cube attrs; map to `userId` (promote from Workday `id`)
+5. `userId` in Debug but blank on Attributes — what XML key? → UIConfig `identityViewAttributes`
+6. `helen.ross` has Workday, `Helen Ross` has OpenLDAP — root cause? → failed/empty correlation + create-identities minted a `cn` ghost
+7. Aggregation vs Refresh — which promotes `id` → cube `userId`? → Identity Refresh (with promote attributes)
+8. Why is a false merge worse than a false orphan? → wrong person owns access; orphan is visible and remediable
+9. Manager correlation uses which cube attribute as the match target? → Searchable `userId` (never display-name `manager`)
+
+## Feedback
+
+Could you name the six correlation keys without opening the table? If orphans appeared after reverse-order agg, note whether a second pass in Workday-first order cleared them. If you minted display-name duplicates, note whether CorrelationConfig XML was empty when you checked Debug — and whether Task 3a left identity count stable after cleanup.
 
 ## Navigate
 
-- Previous: Lesson 213  
-- Next: Lesson 215  
+- Previous: [Lesson 213](213-gitea-sso-app.md)
+- Next: [Lesson 215](215-attribute-sync-live.md)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

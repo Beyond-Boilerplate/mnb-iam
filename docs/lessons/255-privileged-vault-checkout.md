@@ -57,7 +57,7 @@ IIQ BreakGlass + INC → approval (Security)
    **Expect:** DomainAdmin, CloudBreakGlass, PaymentSwitch, SharedRoot.
 
 3. Skim pam README wrong-path paragraph (Slack / spreadsheet).  
-   **Expect:** You can state why those fail examiner scrutiny.
+   **Expect:** You can state why those fail ops scrutiny (no checkout trail, shared standing privilege, no time-bound reclaim).
 
 4. After simulated BreakGlass approval with `INC-LAB-001`, add membership:  
    `curl -sf -X POST http://localhost:8097/memberships -H 'Content-Type: application/json' -d '{"user":"jordan.reed","safe":"MNB-Safe-CloudBreakGlass","op":"add"}'`  

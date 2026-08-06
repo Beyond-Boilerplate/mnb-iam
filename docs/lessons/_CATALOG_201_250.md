@@ -18,14 +18,18 @@ No worksheets. One-line **Why**, then **What this is** / **Intent** / detailed *
 
 | Block | Lessons | Focus |
 | --- | --- | --- |
-| Boot & mail | 201–203 | Stack, identity master/seed, Mailpit |
-| Directories & SSO | 204–206, 211–213 | OpenLDAP, Samba AD, pass-through, Keycloak, Portal, Gitea |
-| Live apps | 207–210, 214–216 | HCM, JDBC, Wire WS, CRM SCIM, correlation, sync, birthright |
+| Boot & master | 201–202 | Stack + identity master (definitions only — **no** workforce cubes) |
+| First cubes (HCM) | **207** | Aggregate `MNB-Workday` + refresh → Warehouse; HCM UI hire |
+| Mail | 203 | Mailpit SMTP (no cubes required) |
+| Directories & SSO | 204–206, 211–213 | OpenLDAP, Samba AD, pass-through (**after** 207), Keycloak, Portal, Gitea |
+| Live apps | 208–210, 214–216 | JDBC, Wire WS, CRM SCIM, correlation, sync, birthright |
 | JML | 217–220 | Joiner / mover / leaver / contractor-LOA live |
 | Requests & governance | 221–232 | Catalog, approvals+mail, break-glass, SoD, certs, reports, templates |
 | Connectors depth | 233–240 | Agg runbook, AD groups, LDAP/JDBC/WS/SCIM stretch, ITSM, logical |
 | Build & operate | 241–249 | Rules, workflows, forms, QuickLinks, scopes, toolkit/REST, SSD, hardening |
 | Capstone | 250 | Full bank day + Enterprise Lab DoD |
+
+> **Path note:** After 202, do **207** before **204–206**. Mail (203) can slot anytime after 201.
 
 ---
 
@@ -33,17 +37,17 @@ No worksheets. One-line **Why**, then **What this is** / **Intent** / detailed *
 
 | # | Lesson | Mins | Maps (classic) |
 | --- | --- | --- | --- |
-| 201 | [Boot the Enterprise Sandbox](201-boot-enterprise-stack.md) | 40 | N+4 infra |
-| 202 | [Identity Master & Enterprise Seed](202-identity-master-and-seed.md) | 50 | Packs |
-| 203 | [Catch All Mail in Mailpit](203-mailpit-iiq-email.md) | 35 | 49 |
+| 201 | [Boot the Enterprise Sandbox](201-boot-enterprise-stack.md) | 45 | N+4 infra |
+| 202 | [Identity Master & Enterprise Seed](202-identity-master-and-seed.md) | 45 | Packs |
+| **207** | [Authoritative HCM (Workday-Shaped)](207-hcm-workday-shaped.md) | 70 | 77 — **first cubes** |
+| 203 | [Catch All Mail in Mailpit](203-mailpit-iiq-email.md) | 45 | 49 |
 | 204 | [Operate Live OpenLDAP](204-openldap-live-ops.md) | 55 | 58 |
 | 205 | [Operate Samba AD](205-samba-ad-live-ops.md) | 65 | 56–57 |
 | 206 | [Pass-Through Login to IIQ](206-passthrough-iiq-login.md) | 40 | 61 / auth |
-| 207 | [Authoritative HCM (Workday-Shaped)](207-hcm-workday-shaped.md) | 55 | 77 |
 | 208 | [JDBC Core Banking Live](208-jdbc-core-banking.md) | 55 | 63–64 |
 | 209 | [Wire Portal Web Services](209-wire-webservices.md) | 50 | 68 |
 | 210 | [CRM via SCIM Mock](210-crm-scim.md) | 40 | 69–71 |
-| 211 | [Keycloak as Workforce IdP](211-keycloak-okta-shaped.md) | 45 | 73 |
+| 211 | [Keycloak as Workforce IdP](211-keycloak-okta-shaped.md) | 70 | 73 |
 | 212 | [Employee Portal SSO Proof](212-employee-portal-sso.md) | 35 | DoD #3 |
 | 213 | [Second App: Gitea via OIDC](213-gitea-sso-app.md) | 60 | 73 / SSO |
 | 214 | [Nail Correlation Across Live Apps](214-correlation-standard-live.md) | 50 | 17–18 |

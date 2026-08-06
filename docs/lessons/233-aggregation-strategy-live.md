@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 16 / 54
 
-> **Why:** Aggregate targets before HR and you correlate accounts to identities that don't exist yet — the orphan links break Lesson 219's leaver logic and Lesson 214's correlation. Examiners ask for your documented aggregation sequence, not "we ran it eventually."
+> **Why:** Aggregate targets before HR and you correlate accounts to identities that don't exist yet — the orphan links break Lesson 219's leaver logic and Lesson 214's correlation. Document the aggregation sequence before calling refresh done — "we ran it eventually" is how silent orphans stick.
 
 ## What this is
 

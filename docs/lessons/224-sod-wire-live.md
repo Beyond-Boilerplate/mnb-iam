@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 39–40
 
-> **Why (1–2 lines):** One person who can both initiate and approve a wire is a finding every banking exam looks for on day one. SoD only matters when the policy references roles that actually exist and a scan produces a visible violation.
+> **Why (1–2 lines):** One person who can both initiate and approve a wire is a critical ops finding on day one. SoD only matters when the policy references roles that actually exist and a scan produces a visible violation.
 
 ## What this is
 

@@ -59,7 +59,7 @@ Open violation (queue-level, not just on the cube)
    **Expect:** Status distinct from both "open" and "closed."
 
 6. Pull the Policy Violation report or analytics dashboard and confirm this mitigated violation appears with its ticket id and expiry intact.  
-   **Why:** This is the artifact an examiner would actually be shown.  
+   **Why:** This is the artifact you need when proving a violation was opened, owned, and closed.  
    **Expect:** Row present with full metadata.
 
 7. Wait for the expiry to elapse, then re-run the policy scan (or the scheduled task your build uses for expired-mitigation re-evaluation).  

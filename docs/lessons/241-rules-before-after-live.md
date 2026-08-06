@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 89 / 91
 
-> **Why (1–2 lines):** Rules encode policy the connector UI cannot — department guards and compliance notify hooks. Examiners ask where dual-control is enforced besides the SoD scan (224).
+> **Why (1–2 lines):** Rules encode policy the connector UI cannot — department guards and compliance notify hooks. Prove where dual-control is enforced besides the SoD scan (224), or connector UI gaps become silent policy bypasses.
 
 ## What this is
 

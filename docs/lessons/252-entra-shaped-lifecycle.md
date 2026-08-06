@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 59 / 73 (Entra/Okta narrative)
 
-> **Why:** You need an Entra-shaped account API for IIQ labs without paying a Microsoft tenant tax — but confusing "account disabled in the directory mock" with "SSO actually dead" is exactly the mistake an examiner will catch.
+> **Why:** You need an Entra-shaped account API for IIQ labs without paying a Microsoft tenant tax — but confusing "account disabled in the directory mock" with "SSO actually dead" is exactly the silent failure that breaks leaver proof.
 
 ## What this is
 

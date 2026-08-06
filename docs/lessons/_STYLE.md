@@ -30,7 +30,7 @@ Use this for every lesson authored or rewritten. Voice: **a senior IAM engineer 
 
 - **Define before use.** Every IIQ or target-system term (aggregation, native identity, Org Unit, service principal, ARN…) gets a plain-English definition the first time it appears.
 - **2–4 concept subsections** for Intermediate+ topics, each anchored by a **real-life Meridian example** — e.g. "Sofia goes on leave; her Google account is suspended but her Shared Drive group still grants access. This is why groups are entitlements, not attributes."
-- Contrast with the wrong way: show the naive approach and why it fails at a bank under exam.
+- Contrast with the wrong way: show the naive approach and why it fails in production ops (silent orphans, broken SSO, irreversible deletes).
 - At least one comparison table and one ASCII flow per lesson; more for complex topics.
 
 ## Tutorial voice rules
@@ -44,7 +44,7 @@ Use this for every lesson authored or rewritten. Voice: **a senior IAM engineer 
 - IIQ URL: `http://localhost:8080/identityiq` (mention homelab URL only as alternate)
 - Prefer "Account Aggregation task" over vague "run aggregation"
 - Never invent UI labels you are unsure of—say "or equivalent menu path"
-- Include enterprise framing: control owner, SLA, evidence, examiner question
+- Include enterprise framing: control owner, SLA, practical evidence (what you screenshot/export to prove the step worked). Avoid examiner/examination framing — keep lessons ultra-practical (ops proof, debug, incident trail).
 
 ## Realistic onboarding rule (no more "CSV = the connector")
 

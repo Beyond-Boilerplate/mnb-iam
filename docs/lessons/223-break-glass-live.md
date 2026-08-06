@@ -66,7 +66,7 @@ Request (INC-xxx justification, not business language)
    **Expect:** Entitlement gone from the live account.
 
 9. Pull the `IdentityRequest` audit trail (same technique as Lesson 222) and confirm it shows incident reference, accelerated approval timestamp, provisioning timestamp, and revocation timestamp in one record.  
-   **Expect:** Full timeline in a single, examinable place.
+   **Expect:** Full timeline in a single place you can hand to incident response.
 
 ## If it fails
 

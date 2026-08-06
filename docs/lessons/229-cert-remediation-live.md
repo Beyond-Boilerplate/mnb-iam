@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 46
 
-> **Why (1–2 lines):** Revoke without target proof is theater — a bank examiner wants the target system row, not IIQ's word that it happened.
+> **Why (1–2 lines):** Revoke without target proof is theater — ops needs the target system row to prove revoke actually hit the target, not only IIQ's word that it happened.
 
 ## What this is
 

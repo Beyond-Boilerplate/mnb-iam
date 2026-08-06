@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 45
 
-> **Why (1–2 lines):** Targeted certs shrink blast radius — a full sweep is slow and noisy when a bank exam only cares about one population or one high-risk app.
+> **Why (1–2 lines):** Targeted certs shrink blast radius — a full sweep is slow and noisy when you only need to prove one population or one high-risk app before calling remediation done.
 
 ## What this is
 

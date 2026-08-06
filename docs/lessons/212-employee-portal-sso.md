@@ -7,90 +7,161 @@
 
 **Maps to classic track:** DoD #3
 
-> **Why (1–2 lines):** Provision-then-login is the acceptance test a cube full of correlated accounts alone can never prove. An examiner asking "does access actually work" wants a login screenshot, not a database row.
+> **Why:** A cube full of correlated accounts is not ops proof. Prove access with a real login — provision-then-login is the acceptance test correlation alone can never pass.
 
 ## What this is
 
-Employee Portal (`tools/employee-portal`, built from `docker/Dockerfile.employee-portal`) is a small OIDC relying-party web app whose entire purpose is to be a real, working login target. It authenticates against Keycloak's `meridian` realm using the `employee-portal` public client (PKCE, `S256`) you inspected in Lesson 211, and it checks that the signed-in user belongs to the `portal-users` group — every seeded persona already does. This is Success Criterion #3 from the Enterprise Lab Definition of Done: "User SSO into Employee Portal **and** Gitea via Keycloak." A correlated account link on a cube is necessary but not sufficient proof that access actually works end to end — this lesson is the sufficient part.
+Employee Portal (`tools/employee-portal`) is a small OIDC relying-party web app built to be a real login target:
+
+```text
+http://localhost:8092/
+```
+
+It authenticates against Keycloak’s `meridian` realm using the `employee-portal` public client (PKCE, `S256`) from Lesson 211, and checks that the signed-in user belongs to `portal-users`.
+
+This is Success Criterion #3 from the Enterprise Lab Definition of Done: *User SSO into Employee Portal **and** Gitea via Keycloak.* A correlated account link on a cube is necessary but not sufficient — this lesson is the sufficient part.
 
 ## Know these
 
-- Login flow: portal → redirect to Keycloak `meridian` login → back to portal already authenticated — this round trip *is* the authorization-code + PKCE flow.
-- The portal never sees or handles a persona's password itself — Keycloak owns the credential check.
-- `MAILPIT_PUBLIC_URL`/`GITEA_PUBLIC_URL` env vars are baked into the portal's own config if it surfaces links to those tools.
-- The portal's group check against `portal-users` is enforcement, not decoration — a Keycloak login that succeeds for a user *outside* that group should still fail the portal's own authorization check, distinct from failing authentication.
-- **Wrong way:** Concluding "SSO works" after signing in as one persona once — you haven't proven session isolation until you sign out fully and sign in as a *second* persona and see different content.
+| Idea | Detail |
+| --- | --- |
+| Authorization-code + PKCE | Portal → Keycloak login → back to portal with a token — that round trip *is* the flow |
+| Who checks the password | Keycloak — the portal never sees or handles credentials |
+| Group gate | `portal-users` — authentication ≠ authorization |
+| Session isolation | Sign out fully, then a *second* persona must show different content |
+
+```text
+Browser → Portal (:8092)
+       → redirect → Keycloak meridian login
+       → code + PKCE → Portal token exchange
+       → portal-users check → authenticated UI
+```
+
+- **Wrong way:** Concluding “SSO works” after one persona once — you haven’t proven session isolation until a second persona shows different content after a full sign-out.
 
 ## Intent
 
-- Complete a real OIDC authorization-code + PKCE login flow as a workforce persona, not just admin.
-- Confirm the portal enforces group membership (`portal-users`), not just "any valid Keycloak login."
-- Sign in as a second, distinct persona and confirm the portal shows persona-specific content, not a shared/cached session.
-- Know the one fix (`--force-recreate`/rebuild) for the most common local OIDC redirect-URI failure mode.
+- Complete a real OIDC login as a workforce persona (not just admin).
+- Confirm the portal enforces `portal-users`, not “any valid Keycloak login.”
+- Sign in as a second persona and prove session isolation.
+- Know the rebuild fix for the common local redirect-URI / PKCE failure mode.
 
 ## Before you start
 
-- [ ] Lesson 211 complete; `employee-portal` and `gitea` clients confirmed in Keycloak
-- [ ] Employee Portal reachable at `http://localhost:8092/`
-- [ ] Two persona credentials ready: `helen.ross` / `LabUser1!`, `priya.wire` / `LabUser1!`
-- [ ] Evidence dir: `mkdir -p ~/iiq-lab-evidence/sandbox/212`
+- [ ] Lesson 211 complete; `employee-portal` client confirmed in Keycloak
+- [ ] Portal reachable: [http://localhost:8092/](http://localhost:8092/)
+- [ ] Credentials ready: `helen.ross` / `LabUser1!`, `priya.wire` / `LabUser1!`
+- [ ] Evidence dir ready:
+
+```bash
+mkdir -p ~/iiq-lab-evidence/sandbox/212
+```
 
 ## Do this
 
-1. Open `http://localhost:8092/` and click sign in.  
-   **Why:** you should be redirected to Keycloak's own login page at `http://localhost:8085/realms/meridian/...` — the portal never handles the password itself.  
-   **Expect:** redirect lands on Keycloak's login form, not a portal-hosted one.
+### Task 1 — Start the SSO redirect
 
-2. Sign in as `helen.ross` / `LabUser1!`.  
-   **Why:** this round trip (portal → Keycloak → back to portal with a token) is the entire authorization-code flow, compressed into one click.  
-   **Expect:** redirected back to `http://localhost:8092/` already authenticated.
+Open the portal and begin sign-in. You should leave the portal domain entirely.
 
-3. Explore whatever the portal UI exposes (profile info, links out to Mailpit/Gitea).  
-   **Why:** the specific UI content matters less than the fact you got here via real SSO — this is proof, not a feature tour.  
-   **Expect:** page reflects Helen's identity somewhere (name, email, or similar).
+1. Open [http://localhost:8092/](http://localhost:8092/)
+2. Click sign in
 
-4. Sign out fully — not just closing the tab.  
-   **Why:** the portal's own sign-out should also end the Keycloak session; otherwise a second "sign in" would silently reuse Helen's still-live session.  
-   **Expect:** returning to the portal shows a logged-out state.
+- **Why:** redirect to Keycloak proves the portal is a relying party, not a local password form.
+- **Expect:** browser lands on Keycloak at `http://localhost:8085/realms/meridian/...`, not a portal-hosted login form.
 
-5. Sign in again as `priya.wire` / `LabUser1!`.  
-   **Why:** proof the session boundary is real, not a UI illusion.  
-   **Expect:** portal shows Priya's identity, not a stale cached view of Helen.
+> **Watch out:** Use `localhost`, not `127.0.0.1` — the client’s redirect URIs are `http://localhost:8092/*` (and the container hostname variant).
 
-6. If you see a PKCE error, redirect-URI mismatch, or blank page after the Keycloak redirect, rebuild the portal fresh: `docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml --profile enterprise up -d --force-recreate --build employee-portal`.  
-   **Why:** a known class of issue when Keycloak's realm import timing races the portal's own boot — a clean rebuild re-reads the current realm state.  
-   **Expect:** the flow succeeds after rebuild.
+### Task 2 — Sign in as Helen
 
-7. Compare what you just proved against Lesson 206's pass-through login to IIQ itself.  
-   **Why:** pass-through delegates a bind check to a directory; OIDC SSO delegates an entire browser redirect and token exchange to an IdP — same underlying goal ("don't check a local password"), two different mechanisms you'll see again with Gitea in Lesson 213.  
-   **Expect:** you can name which mechanism (LDAP bind vs. OIDC authorization code) each app in this path uses.
+Sign in as `helen.ross` / `LabUser1!`.
+
+- **Why:** this round trip (portal → Keycloak → back with a token) is the entire authorization-code + PKCE flow.
+- **Expect:** redirected back to `http://localhost:8092/` already authenticated; page reflects Helen’s identity (name, email, or similar).
+
+Save a screenshot under `~/iiq-lab-evidence/sandbox/212/` (no passwords).
+
+### Task 3 — Full sign-out
+
+Sign out fully — not just closing the tab.
+
+- **Why:** portal sign-out should also end the Keycloak session; otherwise a second “sign in” silently reuses Helen’s still-live SSO cookie.
+- **Expect:** returning to the portal shows a logged-out state.
+
+### Task 4 — Sign in as Priya (session isolation)
+
+Sign in again as `priya.wire` / `LabUser1!`.
+
+- **Why:** proves the session boundary is real, not a UI illusion or cached view.
+- **Expect:** portal shows Priya’s identity, not a stale Helen view.
+
+### Task 5 — Rebuild if PKCE / redirect fails
+
+If you see a PKCE error, redirect-URI mismatch, or blank page after Keycloak redirects back:
+
+```bash
+docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml \
+  --profile enterprise up -d --force-recreate --build employee-portal
+```
+
+- **Why:** known race when Keycloak’s realm import timing beats the portal’s boot — a clean rebuild re-reads current realm state.
+- **Expect:** Helen/Priya flow succeeds after recreate.
+
+### Task 6 — Contrast with pass-through (Lesson 206)
+
+Compare what you just proved with Lesson 206’s pass-through login to IIQ.
+
+| App | Mechanism |
+| --- | --- |
+| IIQ pass-through (206) | Directory bind check |
+| Employee Portal (212) | OIDC authorization-code + PKCE via Keycloak |
+
+- **Why:** same goal (“don’t check a local password”), two mechanisms you’ll see again with Gitea in Lesson 213.
+- **Expect:** you can name which mechanism each app uses.
+
+### Task 7 — Close with asserts
+
+```bash
+./tools/lab/enterprise/verify-lesson.sh 212
+```
+
+- **Why:** hard checks catch a down portal or missing IdP realm before you move on.
+- **Expect:** PASS for portal `/health` and meridian realm available.
 
 ## If it fails
 
-- **"Invalid redirect_uri" after Keycloak login** — the `employee-portal` client's redirect URIs are `http://localhost:8092/*` and `http://employee-portal:8092/*`; access the portal via `localhost`, not `127.0.0.1`.
-- **Login succeeds at Keycloak but portal shows a blank/error page** — check `docker logs mnb-employee-portal`; almost always the internal-vs-public Keycloak URL confusion from Lesson 211 (`KEYCLOAK_INTERNAL_URL=http://host.docker.internal:8085` for backend token exchange, `KEYCLOAK_PUBLIC_URL=http://localhost:8085` for browser redirects) — confirm `host.docker.internal` resolves inside the container: `docker exec mnb-employee-portal getent hosts host.docker.internal`.
-- **Portal health endpoint is down** — `curl -sf http://localhost:8092/health`; if that fails, the container needs a restart, not a login-flow fix.
-- **Priya's login shows Helen's data** — incomplete sign-out; clear the portal's session/cookies for `localhost:8092` and Keycloak's own SSO cookie for `localhost:8085` before retrying.
+| Symptom | Fix |
+| --- | --- |
+| `Invalid redirect_uri` after Keycloak login | Access via `localhost`, not `127.0.0.1`; client allows `http://localhost:8092/*` |
+| Keycloak login OK, portal blank/error | Check `docker logs mnb-employee-portal`; confirm `KEYCLOAK_INTERNAL_URL=http://host.docker.internal:8085` and `docker exec mnb-employee-portal getent hosts host.docker.internal` |
+| Portal health down | `curl -sf http://localhost:8092/health` — restart the container if that fails |
+| Priya’s login shows Helen’s data | Incomplete sign-out — clear cookies for `localhost:8092` and `localhost:8085`, then retry |
 
 ## You are done when
 
-You've completed a real OIDC login as both `helen.ross` and `priya.wire`, confirmed a full sign-out between them, and can explain in one sentence why "she has a correlated account" and "she can actually log in" are different claims.
+- [ ] Completed OIDC login as both `helen.ross` and `priya.wire`
+- [ ] Full sign-out between them; second login shows different content
+- [ ] Can explain why “correlated account” ≠ “can actually log in”
+- [ ] `./tools/lab/enterprise/verify-lesson.sh 212` hard asserts PASS
 
 ## Control note
 
-- **Control:** SSO acceptance testing — login proof, not correlation alone.
-- **Owner:** IAM Ops / application owner.
-- **SLA (lab):** SSO proof required same session before an app is marked "integrated" in the DoD tracker.
-- **Evidence:** `~/iiq-lab-evidence/sandbox/212/` — login screenshots for both personas, sign-out proof.
+- **Control:** SSO acceptance testing — login proof, not correlation alone
+- **Owner:** IAM Ops / application owner
+- **SLA (lab):** SSO proof required same session before an app is marked “integrated”
+- **Evidence:** `~/iiq-lab-evidence/sandbox/212/` — login screenshots for both personas, sign-out proof
 
 ## Quick check
 
-1. Which client/flow does the portal use? → `employee-portal`, public client with PKCE (`S256`).
-2. What proves session isolation, not just "SSO works once"? → full sign-out then a second, different persona login showing different content.
-3. What's the standard fix for a PKCE/redirect-URI race after Keycloak boots? → force-recreate/rebuild the `employee-portal` container.
+1. Which client/flow does the portal use? → `employee-portal`, public + PKCE (`S256`)
+2. What proves session isolation? → full sign-out, then a second persona with different content
+3. Standard fix for PKCE/redirect race after Keycloak boots? → `--force-recreate --build employee-portal`
+
+## Feedback
+
+Could you redo Helen → sign-out → Priya without notes? If Priya still looked like Helen, note whether you cleared *both* portal and Keycloak cookies — that split session is the usual trap.
 
 ## Navigate
 
-- Previous: Lesson 211
-- Next: Lesson 213
+- Previous: [Lesson 211](211-keycloak-okta-shaped.md)
+- Next: [Lesson 213](213-gitea-sso-app.md)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

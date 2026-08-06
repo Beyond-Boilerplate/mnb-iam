@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 72
 
-> **Why:** Some access is ticket-fulfilled, not connector-provisioned. Governance still has to live in IIQ, or an examiner can't trace who approved a manually-fulfilled grant.
+> **Why:** Some access is ticket-fulfilled, not connector-provisioned. Governance still has to live in IIQ, or you can't trace who approved a manually-fulfilled grant when helpdesk or incident response asks later.
 
 ## What this is
 

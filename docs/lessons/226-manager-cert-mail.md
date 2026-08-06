@@ -7,7 +7,7 @@
 
 **Maps to classic track:** 43
 
-> **Why (1–2 lines):** Certs are real when certifiers get mail and decide in-product — rubber-stamp Approve-All is an examiner red flag. Revoke must reach a live target, not only the IIQ database.
+> **Why (1–2 lines):** Certs are real when certifiers get mail and decide in-product — rubber-stamp Approve-All hides real decisions and fails manager usability. Revoke must reach a live target, not only the IIQ database.
 
 ## What this is
 
@@ -64,7 +64,7 @@ Generate cert → launch mail (Mailpit)
    **Expect:** Two different decision types recorded — not Approve-All.
 
 5. **Complete Certification** (sign-off).  
-   **Why:** Sign-off is the audit-relevant event; undecided certs don’t complete the mail/provision story.  
+   **Why:** Sign-off is the event that closes the campaign; undecided certs don’t complete the mail/provision story.  
    **Expect:** Cert status completed / signed off.
 
 6. As `spadmin`, **Provisioning Transactions** filtered to the revoked identity.  
@@ -78,7 +78,7 @@ Generate cert → launch mail (Mailpit)
 
 ## If it fails
 
-- **No Mailpit mail** — Notification SMTP host `mailpit` port `1025`; re-launch; refresh Mailpit.
+- **No Mailpit mail** — Gear → Global Settings → IdentityIQ Configuration → Notification Settings: SMTP host `mailpit` port `1025`; re-launch; refresh Mailpit.
 - **Zero identities** — manager attribute missing; Refresh Identity Cubes for Helen’s org; regenerate.
 - **Revoke doesn’t provision** — `processRevokesImmediately` false in your copy, or connector down; check Failed PT rows.
 - **Helen can’t see cert** — she must be certifier via `manager` chain (`certifierName="manager"`), not only a random capability.
