@@ -13,15 +13,15 @@
 You will be able to:
 
 - Decide which bank HR fields belong on the Identity vs only on the Link (account)
+- Tell apart three IIQ screens that beginners confuse: Schema, Identity Mappings, and Manager Correlation
 - Map HR schema attributes so identity attributes populate after **`Refresh MNB Attributes`**
-- Name the Identity Refresh task that must run after HR aggregation to promote Link → Identity attributes
-- Validate manager linkage via `managersAssociateID` for a wire specialist toward Payments leadership
+- Correlate managers via `managersAssociateID` — never the display-name column `manager`
 - Distinguish terminated (`inactive=true`) from leave-of-absence (`exceptions=LOA`)
 - Publish a short Meridian identity attribute dictionary for roles/SoD/JML
 
 ## Why this matters
 
-Attribute design decides what roles, lifecycle events, and certifications can see. If `departmentName` / `JobCode` live only on the account link, population rules and birthright roles silently miss people—control gaps with no red error banner. Real bank extracts are wide (50+ columns); promotion must be deliberate.
+Attribute design decides what roles, lifecycle events, and certifications can see. If `departmentName` / `JobCode` live only on the account link, population rules and birthright roles silently miss people — control gaps with no red error banner. Real bank extracts are wide (50+ columns); promotion must be deliberate.
 
 **Control / audit:** Examiners ask how manager certifications know who reports to whom, and how leavers are distinguished from leave-of-absence. Your attribute dictionary is the design record; the cube is the runtime proof. Use [`hr-column-map.md`](../../lab-data/reference/hr-column-map.md).
 
@@ -55,9 +55,7 @@ Promote fields that drive governance (bank column → identity use):
   Identity attributes  -->  roles / populations / JML / cert display
 ```
 
-**Codes beat display strings:** Rule on `JobCode` / `costCenter`, not free-text `title`. Display titles change; codes stay stable.
-
-**Pipeline rule:** Mapping alone does not finish the job. After you save maps (and re-aggregate if required), you must run an **Identity Refresh** with attribute promotion—Meridian’s purpose-built task is `Refresh MNB Attributes` (created in Lesson 06). Aggregation writes the HR Link; refresh promotes selected fields onto the Identity.
+> **Tip:** Rule on `JobCode` / `costCenter`, not free-text `title`. Display titles change; codes stay stable.
 
 **Termination vs leave:**
 
@@ -68,19 +66,19 @@ Promote fields that drive governance (bank column → identity use):
 
 ## How it works
 
-Account Aggregation stores raw connector attributes on the **Link**. Identity attribute maps (or rules) **promote** selected fields onto the Identity so roles, populations, and certifications can filter on person-level truth—not buried account XML.
+Account Aggregation stores raw connector attributes on the **Link**. Identity attribute maps (or rules) **promote** selected fields onto the Identity so roles, populations, and certifications can filter on person-level truth — not buried account XML. **Mapping is design; promotion is a separate Refresh run (Lesson 06)** — saving maps here does not, by itself, fill the cube.
 
 ```text
 MNB-HR Link attributes (userId, managersAssociateID, departmentName, JobCode, …)
         │
         ▼
-Identity attribute assignment / maps (saved on application / identity attrs)
+Identity attribute assignment / maps  ←── this lesson stops here
         │
         ▼
 Aggregate MNB-HR (if schema change requires it)
         │
         ▼
-Refresh MNB Attributes  ← promotes Link fields onto Identity
+Refresh MNB Attributes  ← promotes Link fields onto Identity (Lesson 06)
 Refresh MNB Managers    ← resolves managersAssociateID → manager Identity (Lesson 06)
         │
         ▼
@@ -93,7 +91,7 @@ Selectors / roles / JML / cert display consume Identity attrs
 | `employeeType`, `exceptions`, `inactive` / `status` | Yes | Lifecycle & contractor SLAs |
 | Transient connector noise (`fax`, empty phones, …) | No | Keep Link-only |
 
-**Real-life Meridian example.** `sofia.torres` has `exceptions=LOA` on HR. Until that flag is promoted to the identity via `Refresh MNB Attributes`, leave-freeze workflows and the `MNB-On-Leave` population cannot see her—schema design is a control dependency, not cosmetics.
+**Real-life Meridian example.** `sofia.torres` has `exceptions=LOA` on HR. Until that flag is promoted to the identity via `Refresh MNB Attributes`, leave-freeze workflows and the `MNB-On-Leave` population cannot see her — schema design is a control dependency, not cosmetics.
 
 ## Before you start
 
@@ -103,9 +101,9 @@ Selectors / roles / JML / cert display consume Identity attrs
 
 ### Beginner note — how cubes are named in this lab
 
-Lesson 04 sets `MNB-HR` **native identity** = `userId`. That means Identity Warehouse **User Name** is usually `MNB00001`, not `helen.ross`.
+Lesson 04 sets `MNB-HR` **native identity** = `userId`, so Identity Warehouse **User Name** is `MNB00001`, not `helen.ross`. Search by **display name**, **email**, or **`MNB…` id** — all three work.
 
-| Persona (HR `name` / email) | Typical cube **User Name** | Display Name |
+| Persona (HR `name` / email) | Cube **User Name** | Display Name |
 | --- | --- | --- |
 | `helen.ross` | `MNB00001` | Helen Ross |
 | `priya.wire` | `MNB00090` | Priya Mehta |
@@ -114,312 +112,195 @@ Lesson 04 sets `MNB-HR` **native identity** = `userId`. That means Identity Ware
 | `sofia.torres` | `MNB00095` | Sofia Torres |
 | `raj.external` | `MNB00093` | Raj External |
 
-Search Identity Warehouse by **display name**, **email**, or **`MNB…` id**. If you open a cube whose User Name is a plain display string (e.g. `Aisha Hughes`) with **no** Application Accounts, that is usually an orphan stub — not the real HR person. Prefer the `MNB…` cube.
+> **Watch out:** If you open a cube whose User Name is a plain display string (e.g. `Aisha Hughes`) with **no** Application Accounts, that is usually an orphan stub — not the real HR person. Prefer the `MNB…` cube.
 
 ## Lab procedure
 
 ### Task 1 — Attribute inventory
 
-Before mapping anything in IIQ, inventory which HR columns are governance signals versus connector noise—promotion is a deliberate control decision.
+Before mapping anything in IIQ, inventory which HR columns are governance signals versus connector noise — promotion is a deliberate control decision.
 
 1. List every HR header column in your notebook.
 2. Mark each **Identity** (promote) or **Link-only** (keep on account).
 3. Minimum identity set: `email`, `manager` (from `managersAssociateID`), `departmentName`, `JobCode`, `inactive`, `status`, `employeeType`, `exceptions`, `location`.
-4. Optional promote: `costCenter`, `hireDate`, `title` (title is display-friendly but prefer `JobCode` for rules).
+4. Optional promote: `costCenter`, `hireDate`, `title` (prefer `JobCode` for rules).
 
 **Expected result:** Two-column inventory table completed before changing IIQ.
 
-### Task 2 — Refine MNB-HR schema maps
+### Task 2 — Three screens, not one
 
-Maps tell IIQ *which* Link fields become Identity attributes. **Saving maps does not fill the cube by itself**—aggregation writes the Link; **`Refresh MNB Attributes`** (Lesson 06) promotes Link → Identity. Manager display needs **`Refresh MNB Managers`**.
+Beginners conflate three different IIQ screens. Learn the split before you touch anything:
 
-#### 2a — Do not confuse three different screens
-
-| Screen | What it does | Lesson |
+| Screen | What it does | Status |
 | --- | --- | --- |
-| **Applications → MNB-HR → Schema** | Lists account (Link) columns from the CSV header (`firstname`, `JobCode`, …). Native identity = `userId`. | Lesson 04 (already done) |
-| **Gear → Global Settings → Identity Mappings** | For each **Identity** attribute, adds an **Attribute Source**: Application `MNB-HR` + account attribute. This is the “schema map” this task means. | **This task** |
-| **Applications → MNB-HR → Correlation** (Manager Correlation) | How IIQ resolves a manager *reference* on the account into another Identity (`managersAssociateID` → manager’s `userId`). | **This task** |
+| **Applications → MNB-HR → Schema** | Lists account (Link) columns from the CSV header. Native identity = `userId`. | Done in Lesson 04 |
+| **Gear → Global Settings → Identity Mappings** | For each **Identity** attribute, adds an **Attribute Source**: application `MNB-HR` + account attribute. | **This task** |
+| **Applications → MNB-HR → Correlation** (Manager Correlation) | Resolves a manager *reference* on the account into another Identity (`managersAssociateID` → manager's `userId`). | **This task** |
 
-If you only edit Schema again, you are not mapping promotion. If Identity attrs stay blank after Lesson 06, come back here and check Identity Mappings + manager correlation.
+If you only re-edit Schema, you have not mapped promotion. If Identity attrs stay blank after Lesson 06, come back here and check Identity Mappings + manager correlation — not Schema.
 
-#### 2b — Learn the names your install already uses
+### Task 3 — Map account → identity (Identity Mappings)
 
-IIQ stock attributes are usually lowercase (`firstname`, `lastname`, `email`, `manager`)—not camelCase `firstName`. Custom Meridian fields (`departmentName`, `JobCode`, `exceptions`, …) must match **exactly** what you will use later in populations/roles.
+IIQ stock attributes are usually lowercase (`firstname`, `email`, `manager`) — not camelCase. Custom Meridian fields (`departmentName`, `JobCode`, `exceptions`, …) must match **exactly** what later lessons use in populations/roles.
 
-1. Open a real HR cube (e.g. **`MNB00001`** / Helen Ross) → **Attributes** / view details.
-2. Note the **exact** attribute names shown (spelling and case). Write them in your notebook.
-3. Optional: **Debug** → Object Browser → `Identity` → open one identity → inspect `<Attributes>` / attribute keys. Prefer those names over inventing new ones.
-4. Confirm on **MNB-HR → Schema** that the account columns you need exist (`email`, `firstname`, `lastname`, `displayName`, `managersAssociateID`, `departmentName`, `JobCode`, `inactive`, `status`, `employeeType`, `exceptions`, `location`, `costCenter`, `hireDate`, `terminationDate`). If a column is missing, rediscover schema (Lesson 04), save, then continue.
-
-#### 2c — Map account → identity (Identity Mappings)
-
-1. Open **Gear (⚙) → Global Settings → Identity Mappings**  
-   (some builds: **System Setup → IdentityIQ Configuration → Identity Attributes**, or search the gear menu for “Identity Mappings”).
-2. You will see a list of identity attributes (`firstname`, `email`, `manager`, …). For **each** stock row in the table below that already exists:
-   - Open / edit that identity attribute.
-   - **Do not rename** the attribute **Name** (technical key). Especially never rename **Display Name** (`displayName`) — IIQ will error: *“The attribute named 'Display Name' is required and cannot be renamed.”*
-   - Under **Attribute Sources** (or “Value Source” / “Application Attribute”), **Add Source**.
-   - Application: **`MNB-HR`**.
-   - Attribute: the **account** column from the table (right column).
-   - Prefer a single HR source for these fields (do not add IT apps here—Lesson 22 hygiene).
-   - Save the attribute, then the next.
-3. If an identity attribute does **not** exist yet (common for bank fields like `JobCode`, `exceptions`, `departmentName`, `employeeType`, `userId`):
-   - Use **Add New Attribute** / **Create** on Identity Mappings (labels vary).
-   - **Name** (technical key): **exactly** as in the left column below — no spaces, case-sensitive (`userId`, not `User ID`).
-   - **Display Name** (UI label): friendly text is fine (e.g. `User ID`, `Employee Type`).
-   - Type: string (unless your UI offers boolean for `inactive`—string is fine for lab CSV `"true"`/`"false"`).
-   - Turn **Searchable** **ON** for custom fields you will use in manager correlation, populations, or Advanced Analytics (`userId`, `employeeType`, `departmentName`, `JobCode`, `exceptions`, `status`, …). Searchable assigns an extended attribute slot; without it, dropdowns often omit the field.
-   - Then add the `MNB-HR` attribute source as above.
-
-**Name vs Display Name (beginner trap):**
-
-| Field on “Add Attribute” | Example correct | Example wrong |
-| --- | --- | --- |
-| **Name** (technical) | `employeeType` | `Employee Type` or `type` |
-| **Display Name** (label) | `Employee Type` | (optional; can match Name) |
-
-**Do not map HR `employeeType` onto stock IIQ `type`.** Stock **Type** is reserved for IIQ identity types (`employee`, `contractor`, … lowercase). Mapping CSV values `Employee` / `Contractor` onto `type` is skipped or can break the Attributes page. Always create a **custom** attribute named **`employeeType`**.
+1. Open a real HR cube (e.g. `MNB00001` / Helen Ross), note the **exact** attribute names shown (or Debug → Object Browser → `Identity` → `<Attributes>` keys).
+2. Open **Gear (⚙) → Global Settings → Identity Mappings** (some builds: System Setup → IdentityIQ Configuration → Identity Attributes).
+3. For each **stock** attribute already listed (`firstname`, `lastname`, `email`, `displayName`): open it, add **Attribute Source** → application `MNB-HR` → matching account column. **Never rename** the attribute Name — especially `displayName` (IIQ blocks renaming Display Name).
+4. For attributes that do **not** exist yet (`userId`, `JobCode`, `exceptions`, `departmentName`, `employeeType`, `status`): use **Add New Attribute**.
+   - **Name** (technical key): exactly as in the table below — case-sensitive, no spaces (`userId`, not `User ID`).
+   - **Display Name**: friendly label is fine (`User ID`, `Employee Type`).
+   - Turn **Searchable** ON for anything used in manager correlation, populations, or Advanced Analytics — without it, dropdowns omit the field.
+   - Add the `MNB-HR` attribute source, then save.
 
 **Minimum maps for Meridian (copy into notebook):**
 
-| Identity attribute (cube) | Source application | Account attribute (Link / CSV column) | Notes |
-| --- | --- | --- | --- |
-| `firstname` | MNB-HR | `firstname` | Stock — map source only; do not rename |
-| `lastname` | MNB-HR | `lastname` | Stock |
-| `email` | MNB-HR | `email` | Authoritative mail |
-| `displayName` | MNB-HR | `displayName` | Or `fullName` if your cube already uses that; **never rename** this attribute |
-| `departmentName` | MNB-HR | `departmentName` | Create + **Searchable** if missing |
-| `JobCode` | MNB-HR | `JobCode` | Capital **J** and **C**—match CSV; **Searchable** |
-| `inactive` | MNB-HR | `inactive` | Stock boolean / `"true"`/`"false"` from file |
-| `status` | MNB-HR | `status` | Create + Searchable if missing |
-| `employeeType` | MNB-HR | `employeeType` | **Custom** attr — not stock `type` |
-| `exceptions` | MNB-HR | `exceptions` | `LOA` for leave; Searchable |
-| `location` | MNB-HR | `location` | Searchable if used in filters |
-| `costCenter` | MNB-HR | `costCenter` | Optional but useful |
-| `hireDate` | MNB-HR | `hireDate` | Optional |
-| `terminationDate` | MNB-HR | `terminationDate` | Optional; used for leavers |
-| `userId` | MNB-HR | `userId` | Create + **Searchable** — required for manager correlation dropdown |
-
-**Do not map for promotion (Link-only noise):** `fax`, empty phone columns, `wid_owner`, most `rf*` fields unless a later lesson needs them.
-
-**Display name tip:** If Identity Mappings already has `name` or `displayName` sourced from somewhere else, keep **one** clear HR source (`displayName` or `fullName`). Do not create three competing name sources.
-
-#### 2c-extra — Make custom fields show on View Identity → Attributes
-
-Mapping + Searchable is not always enough for the **Attributes** tab. That page uses a whitelist in **UIConfig**:
-
-1. Confirm the value exists first: **Debug → Identity → `MNB00001`** (or Accounts tab Link). If Debug shows `employeeType=Employee` but the Attributes tab does not, it is a UI list issue—not a failed map.
-2. **Debug → Object Browser → UIConfig → `UIConfig`**.
-3. Find entry **`identityViewAttributes`** (comma-separated list, e.g. `name,firstname,lastname,email,manager,type,…`).
-4. Append your custom names (no spaces around commas), e.g. `,userId,employeeType,departmentName,JobCode,exceptions,status,inactive`.
-5. Save. Hard-refresh the browser. Re-open the identity.
-
-Until Lesson 06 refresh runs, Identity-level values may still be blank even when the Link is correct.
-
-#### 2d — Manager: use `managersAssociateID`, not the display-name column
-
-HR has **two** manager-related columns—do not mix them up:
-
-| CSV column | Example value | Role |
+| Identity attribute | Account attribute (CSV column) | Notes |
 | --- | --- | --- |
-| `managersAssociateID` | `MNB00005` | **Correlation key** → manager’s `userId` |
-| `manager` | `Rachel Evans` | Human-readable display only—**not** the correlation key |
+| `firstname` / `lastname` | `firstname` / `lastname` | Stock — map source only, never rename |
+| `email` | `email` | Authoritative mail |
+| `displayName` | `displayName` | Never rename this attribute |
+| `departmentName` | `departmentName` | Create + **Searchable** |
+| `JobCode` | `JobCode` | Capital J/C — match CSV; **Searchable** |
+| `inactive` | `inactive` | Stock boolean (`"true"`/`"false"`) |
+| `status` | `status` | Create + Searchable |
+| `employeeType` | `employeeType` | **Custom** attr — never stock `type` |
+| `exceptions` | `exceptions` | `LOA` for leave; Searchable |
+| `location` | `location` | Searchable if used in filters |
+| `costCenter` / `hireDate` / `terminationDate` | same | Optional but useful for leavers |
+| `userId` | `userId` | Create + **Searchable** — required for manager correlation dropdown |
 
-1. Open **Applications → Application Definition → MNB-HR** (edit).
-2. Open the **Correlation** tab (sometimes under Configuration / Advanced—search the app page for “Manager”).
-3. Set **Manager Correlation** (wording varies). There are **two different dropdowns**:
-   - **Manager attribute** (on the **account** / this app’s schema): `managersAssociateID`
-   - **Identity attribute** (on the **manager’s** cube to match against): `userId`  
-     If `userId` is missing from this dropdown, go back to Identity Mappings, edit `userId`, enable **Searchable**, save, then re-open the application page.
-4. Save the application.
-5. In **Identity Mappings**, open the stock identity attribute **`manager`**:
-   - **Do not** add Attribute Source `manager` ← account column `manager` (display string like `Rachel Evans`).
-   - That pattern creates dozens of empty orphan identities named after display strings and leaves First/Last/Email blank on those stubs.
-   - Manager is filled when **manager correlation** runs during Identity Refresh (`Refresh MNB Managers` in Lesson 06). Your job here is correct correlation config + ensuring `managersAssociateID` exists on the Link after aggregation.
-6. Optional notebook check: for Priya (`MNB00090`), HR has `managersAssociateID=MNB00005` → expect manager cube `MNB00005` / Rachel Evans **after** Lesson 06 refresh—not necessarily filled today.
+> **Watch out:** Do not map HR `employeeType` onto stock IIQ `type`. Stock **Type** is reserved for IIQ identity types (`employee`, `contractor`, lowercase); mapping CSV `Employee`/`Contractor` onto it is skipped or can break the Attributes page. Always create a **custom** `employeeType` attribute.
 
-**Wrong patterns (fix if you see them):**
+**Do not map for promotion (Link-only noise):** `fax`, empty phone columns, `wid_owner`, most `rf*` fields.
 
-| Wrong | Why it hurts |
-| --- | --- |
-| Manager correlation: account `manager` → identity `name` / display name | Duplicates, collisions, orphans |
-| Identity Mapping: `manager` ← `MNB-HR.manager` (display string) | Same — orphan cubes with no HR Link |
-| Identity attribute dropdown missing `userId` | `userId` not Searchable yet |
+### Task 4 — Make custom fields show on View Identity → Attributes
 
-#### 2e — Save, re-aggregate if warned, then stop (refresh is Lesson 06)
+Mapping + Searchable is not always enough for the **Attributes** tab — that page uses a whitelist in **UIConfig**.
 
-1. Save Identity Mappings and the `MNB-HR` application (no red errors).
-2. If the UI warns that schema / correlation changes require aggregation, run **`Aggregate MNB-HR`** (Tasks → existing aggregation task from Lesson 04 → Run Now). Wait for Success.
-3. **Sanity check without full promotion:** open identity **`MNB00090`** (Priya) → **Application Accounts** → `MNB-HR` link → confirm Link attributes show `departmentName`, `JobCode`, `managersAssociateID=MNB00005`, `exceptions` (empty for Priya), etc. If the **Link** is wrong, fix Schema/file/aggregation—not Identity Mappings.
-4. Identity-level `departmentName` / `manager` may still be empty or stale until Lesson 06. That is expected. Write in your notebook:
+1. Confirm the value exists first: **Debug → Identity → `MNB00001`**. If Debug shows `employeeType=Employee` but Attributes does not, it is a UI list issue, not a failed map.
+2. **Debug → Object Browser → UIConfig → `UIConfig`** → find `identityViewAttributes` (comma-separated list).
+3. Append your custom names, no spaces around commas: `,userId,employeeType,departmentName,JobCode,exceptions,status,inactive`.
+4. Save, hard-refresh, re-open the identity. Values may still read blank until Lesson 06 refresh runs — that is expected.
 
-```text
-After Aggregate MNB-HR:
-  → Refresh MNB Attributes   (promotes mapped Link fields onto Identity)
-  → Refresh MNB Managers     (resolves managersAssociateID → manager Identity)
-(Create/run those tasks in Lesson 06.)
-```
+**Expected result:** Custom fields appear on the Attributes tab once a value exists on the Link.
 
-**Expected result:**  
-- Identity Mappings rows saved for the minimum table.  
-- Manager correlation uses `managersAssociateID` → `userId`.  
-- Notebook lists each identity attribute → bank HR column **and** names the two refresh tasks that finish promotion.  
-- Link attributes visible on at least one HR account.
+### Task 5 — Manager: `managersAssociateID`, not the display column
 
-**If it fails:**
+HR has two manager-related columns — do not mix them up: `managersAssociateID` (`MNB00005`, the correlation key) vs `manager` (`Rachel Evans`, display-only).
 
-| Symptom | Fix |
-| --- | --- |
-| Cannot find “Identity Mappings” | Gear search; or Debug → `ObjectConfig` named `Identity` (advanced). Lesson 92 also documents this path. |
-| Attribute source dropdown empty for MNB-HR | Schema missing that column → rediscover Schema on `MNB-HR`, save, re-open Mappings. |
-| Invented `firstName` / `dept` names | Delete/rename; align to cube names from step 2b. |
-| Manager still a raw id or blank after Lesson 06 | Correlation pointed at `manager` display column, or forgot `Refresh MNB Managers`. |
-| Error renaming Display Name | Leave stock `displayName` Name as-is; only add Attribute Source |
-| `userId` missing from Manager Correlation identity dropdown | Edit `userId` in Identity Mappings → enable **Searchable** → save → reopen app |
-| Custom field missing on Attributes tab but present in Debug | Append name to UIConfig `identityViewAttributes` (step 2c-extra) |
-| Serious error / incident after editing Type | Do not map onto stock `type`; restore `type` and use custom `employeeType` |
+1. Open **Applications → MNB-HR → Correlation** (Manager Correlation; sometimes under Configuration/Advanced).
+2. Set **Manager attribute** (on this app's schema) = `managersAssociateID`; **Identity attribute** to match against (on the manager's cube) = `userId`. If `userId` is missing from the dropdown, make it Searchable first (Task 3), then reopen.
+3. Save the application. In Identity Mappings, open stock attribute `manager`: **do not** add Attribute Source `manager` ← account `manager` (display string) — that pattern creates orphan identities named after display strings with First/Last/Email blank.
+4. Manager fills in when **manager correlation runs during Identity Refresh** (`Refresh MNB Managers`, Lesson 06) — your job here is correct config, not the fill itself. For Priya (`MNB00090`), HR has `managersAssociateID=MNB00005` → expect manager cube `MNB00005` / Rachel Evans **after** Lesson 06 refresh, not necessarily today.
 
-### Task 3 — Manager hierarchy check
+**Expected result:** Correlation uses `managersAssociateID` → `userId`; Identity Mappings has no `manager` ← display-name source.
 
-1. Open identity **`MNB00090`** (persona `priya.wire`).
-2. Confirm HR shows `managersAssociateID=MNB00005` in the source file (Accounts tab is enough today).
-3. After mappings (and refresh in Lesson 06 if manager not yet resolved), expect manager → **`MNB00005`** / Rachel Evans.
-4. Open **`MNB00005`** and note her `departmentName` (Treasury & Payments) / `JobCode` `WIR02` (on Link now; on Identity after Lesson 06).
-5. Sketch two levels: Rachel (`MNB00005`) → Priya (`MNB00090`) / Marcus (`MNB00091`).
+**If it fails:** Manager still a raw id or blank after Lesson 06 → correlation pointed at the `manager` display column, or you forgot to run `Refresh MNB Managers`.
 
-**Expected result:** Written hierarchy snippet for Payments. If manager display is empty, note “pending Identity Refresh” and continue—Lesson 06 completes calculation.
+### Task 6 — Save, sanity-check, then stop (refresh is Lesson 06)
 
-### Task 4 — Inactive and leave flags
+1. Save Identity Mappings and the `MNB-HR` application (no red errors). If the UI warns that changes require aggregation, re-run `Aggregate MNB-HR` and wait for Success.
+2. Sanity check without full promotion: open `MNB00090` (Priya) → **Application Accounts** → `MNB-HR` link → confirm the **Link** shows `departmentName`, `JobCode`, `managersAssociateID=MNB00005`, `exceptions` (empty for Priya). If the Link is wrong, fix Schema/file/aggregation — not Identity Mappings.
+3. Identity-level `departmentName` / `manager` may still be empty until Lesson 06. Write in your notebook: "After Aggregate MNB-HR → Refresh MNB Attributes (promote) → Refresh MNB Managers (resolve). Create/run those tasks in Lesson 06."
 
-1. Open **`MNB00094`** (`samir.hassan`): Link shows `inactive=true`, `status=Terminated`, `terminationDate=2026-05-30`.
-2. Open **`MNB00095`** (`sofia.torres`): `inactive=false`, `status=Active`, `exceptions=LOA`.
-3. Write how Meridian should treat each:
+**Expected result:** Mappings saved; manager correlation config correct; notebook names the two refresh tasks that finish the job. Do **not** run an Identity Refresh in this lesson — that is Lesson 06's job.
 
-| Persona | Flag | Treatment |
-| --- | --- | --- |
-| samir.hassan (`MNB00094`) | terminated | Leaver disablement; hunt residual IT access |
-| sofia.torres (`MNB00095`) | LOA (`exceptions`) | Temporary freeze; do not treat as final exit |
+### Task 7 — Termination, LOA, contractor, and the attribute dictionary
 
-**Expected result:** Clear written distinction—feeds Lessons 31–33.
+1. Open `MNB00094` (`samir.hassan`): Link shows `inactive=true`, `status=Terminated`, `terminationDate` set. Treatment: leaver disablement; hunt residual IT access.
+2. Open `MNB00095` (`sofia.torres`): `inactive=false`, `status=Active`, `exceptions=LOA`. Treatment: temporary freeze, not final exit.
+3. Open `MNB00093` (`raj.external`): `employeeType=Contractor`, email `raj.contractor@vendor-mail.invalid`. Authoritative email may not be `@meridiannb.com` for vendors — do not overwrite it from non-HR apps.
+4. Publish an attribute dictionary table (`userId`/`name`, `email`, `manager` ← `managersAssociateID`, `departmentName`, `JobCode`, `inactive`/`status`, `employeeType`, `exceptions`) with source app/field/consumers, then append the anti-patterns checklist below as its footer.
 
-### Task 5 — Contractor and email quality check
+**Anti-patterns (do not do these):**
 
-1. Open **`MNB00093`** (`raj.external`): Link `employeeType=Contractor`, email `raj.contractor@vendor-mail.invalid`.
-2. Note: corporate identity attribute email may not be `@meridiannb.com`.
-3. Document: “Do not overwrite authoritative email from non-HR apps; flag vendor domains for correlation review.”
-4. Confirm you created identity attribute **`employeeType`** (not stock **Type**) for Lesson 07 contractor populations.
+1. Map IT `accountStatus` onto HR `inactive` / `status`.
+2. Drive roles from free-text `title` when `JobCode` exists.
+3. Let non-HR apps overwrite authoritative `email`.
+4. Treat `exceptions=LOA` as terminated (`inactive=true`).
+5. Map HR `employeeType` onto stock identity **`type`** — use custom `employeeType`.
+6. Map or correlate manager from the HR **display-name** column `manager` — use `managersAssociateID` → `userId`.
+7. Rename stock attributes (`displayName`, `firstname`, …) — only add Attribute Sources.
+8. Create custom attributes with spaces in the **Name** (`User ID`); use `userId` and put spaces only in Display Name.
 
-**Expected result:** Data-quality note in attribute dictionary.
-
-### Task 6 — Publish attribute dictionary
-
-Create this table in `~/iiq-lab-notes/` (or binder):
-
-| Attribute | Source app | Source field | Consumers |
-| --- | --- | --- | --- |
-| userId / name | MNB-HR | userId / name | Correlation, display |
-| email | MNB-HR | email | Notify, correlate |
-| manager | MNB-HR | managersAssociateID | Certs, approvals |
-| departmentName | MNB-HR | departmentName | Roles, populations |
-| JobCode | MNB-HR | JobCode | Roles |
-| inactive / status | MNB-HR | inactive, status | Leaver, populations |
-| employeeType | MNB-HR | employeeType | Contractor scope |
-| exceptions | MNB-HR | exceptions | LoA controls |
-
-**Expected result:** Dictionary page exists; CHANGELOG notes “attribute dictionary v1”.
-
-### Task 7 — Anti-patterns checklist
-
-Add these “do not” rules to the dictionary footer:
-
-1. Do not map IT `accountStatus` onto HR `inactive` / `status`.
-2. Do not drive roles from free-text `title` when `JobCode` exists.
-3. Do not let non-HR apps overwrite authoritative `email`.
-4. Do not treat `exceptions=LOA` as terminated (`inactive=true`).
-5. Do not map HR `employeeType` onto stock identity **`type`** — use custom `employeeType`.
-6. Do not map or correlate manager from the HR **display-name** column `manager` — use `managersAssociateID` → `userId`.
-7. Do not rename stock attributes (`displayName`, `firstname`, …) — only add Attribute Sources.
-8. Do not create custom attributes with spaces in the **Name** (`User ID`); use `userId` and put spaces only in Display Name.
-
-**Expected result:** Eight anti-patterns listed; reusable in code reviews for later connectors.
+**Expected result:** Dictionary + eight anti-patterns published; CHANGELOG notes "attribute dictionary v1".
 
 ## Acceptance criteria
 
 - [ ] Identity vs Link inventory complete
-- [ ] `MNB-HR` mappings updated and saved
-- [ ] **Bank craft:** Optional export of maps/app of `config/Application/MNB-Application-HR.xml` when identity maps are durable
-- [ ] Manager chain sketched for priya.wire → rachel.evans
+- [ ] `MNB-HR` mappings updated and saved (three-screens distinction understood)
+- [ ] **Bank craft:** Optional export of maps/app to `config/Application/MNB-Application-HR.xml`
+- [ ] Manager correlation uses `managersAssociateID` → `userId`; no display-name `manager` source
 - [ ] Termination vs exceptions (LOA) comparison written
 - [ ] raj.external email anomaly noted
-- [ ] Attribute dictionary published in notes/binder
-- [ ] Anti-patterns checklist written
+- [ ] Attribute dictionary + anti-patterns published in notes/binder
+- [ ] No Identity Refresh run this lesson — deferred to Lesson 06
 
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Identity attrs blank | Not mapped / no refresh yet | Fix maps; run `Refresh MNB Attributes` (Lesson 06) |
-| Manager shows raw id only | Manager correlation not run | Run `Refresh MNB Managers` |
-| Wrong department on cube | Mapped display name instead of code | Map `departmentName` |
-| Duplicate custom attributes | Invented names | Align to standard identity attrs |
-| Contractor looks like employee | `employeeType` not promoted | Promote; re-aggregate; run `Refresh MNB Attributes` |
-| Cannot find `helen.ross` identity | Cube named `MNB00001` | Search display name / `MNB…` / email |
-| Empty cube named like “Aisha Hughes” | Orphan from manager display-name mapping | Use `MNB…` cube; remove bad `manager`←display source; delete orphans if needed |
-| “Display Name … cannot be renamed” | Tried to rename stock `displayName` | Cancel; add Attribute Source only |
-| Custom attr not in correlation / analytics dropdown | Not Searchable | Enable Searchable on the identity attribute |
+| Manager shows raw id only | Manager correlation not run | Run `Refresh MNB Managers` (Lesson 06) |
+| Wrong department on cube | Mapped display name instead of code | Map `departmentName`, not free text |
+| Contractor looks like employee | `employeeType` not promoted | Promote custom attr; re-aggregate; refresh |
+| Cannot find `helen.ross` | Cube is `MNB00001` | Search display name / `MNB…` / email |
+| Empty cube named like "Aisha Hughes" | Orphan from manager display-name mapping | Use `MNB…` cube; remove bad `manager` source; delete orphans |
+| "Display Name … cannot be renamed" | Tried to rename stock `displayName` | Cancel; add Attribute Source only |
+| `userId` missing from correlation dropdown | Not Searchable | Enable Searchable, save, reopen app |
 | Custom attr not on Attributes tab | Not in UIConfig whitelist | Append to `identityViewAttributes` |
-| Incident / NPE after editing Type | Mapped onto stock `type` | Restore `type`; create `employeeType` instead |
+| Incident / error after editing Type | Mapped onto stock `type` | Restore `type`; create `employeeType` instead |
 
 ## Training binder evidence
 
 - Attribute inventory table
-- Screenshot: `priya.wire` attributes showing department/job/manager (or id)
+- Screenshot: `priya.wire` Link showing department/job/`managersAssociateID`
 - Screenshot: `sofia.torres` exceptions (LOA) vs `samir.hassan` inactive
-- Attribute dictionary v1 document
-
-**Examiner question:** “Which identity attributes drive your termination controls versus leave-of-absence controls?”
+- Attribute dictionary v1 document with anti-patterns footer
 
 ## Knowledge check
 
 1. Which flag drives termination vs temporary freeze?
-2. Why keep `JobCode` / department on the identity?
-3. Name one attribute certifications commonly display.
+2. Why keep `JobCode` / department on the identity instead of only the Link?
+3. Which HR column is the manager **correlation key**, and which is display-only?
 4. Why avoid overwriting email from IT apps?
-5. Who should be manager of `marcus.approve` per HR?
-6. After HR aggregation, which Meridian Identity Refresh task promotes Link attributes onto the cube?
+5. Which Identity Refresh task (Lesson 06) promotes Link attributes onto the cube?
+6. Why does this lesson stop before running any refresh?
 
 ### Answers
 
 1. `inactive=true` / `status=Terminated` (termination) vs `exceptions=LOA` (temporary freeze while still employed).
 2. Roles and populations filter people by org/job codes; link-only fields are invisible to many selectors.
-3. Examples: display name, department, job title, manager, email.
+3. `managersAssociateID` is the correlation key (→ manager's `userId`); `manager` is a display-only string and must never be mapped or correlated against.
 4. HR is authoritative; IT dumps can be stale or wrong (vendor domains, typos).
-5. `rachel.evans` / MNB00005 (Payments Operations Manager).
-6. `Refresh MNB Attributes` (Identity Refresh with attribute promotion from accounts).
+5. `Refresh MNB Attributes` (with `Refresh MNB Managers` for hierarchy).
+6. Mapping is design; promotion is a Refresh run. Running refresh belongs to Lesson 06 so the pipeline order (aggregate → attributes → managers) stays intact and auditable.
 
 ## Further reading
 
-- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search “identity attribute assignment” and “application schema” for map vs rule promotion patterns.
-- [SailPoint Community](https://community.sailpoint.com/) — search “manager correlation” for hierarchy resolution tips after HR aggregation (`managersAssociateID`).
+- [SailPoint IdentityIQ product documentation](https://documentation.sailpoint.com/) — search "identity attribute assignment" and "application schema" for map vs rule promotion patterns.
+- [SailPoint Community](https://community.sailpoint.com/) — search "manager correlation" for hierarchy resolution tips after HR aggregation (`managersAssociateID`).
 - [NIST SP 800-53 AC-2](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) — account management attributes that must be accurate for lifecycle controls.
 - [FFIEC IT Examination Handbook — Information Security](https://ithandbook.ffiec.gov/it-booklets/information-security.aspx) — expectations that identity attributes supporting access decisions are complete and current.
 - [OWASP Identity Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Identity_and_Access_Management_Cheat_Sheet.html) — attribute hygiene and lifecycle signals (active vs leave vs terminated).
 
 ## Stretch lab
 
-- Promote `costCenter` to the identity, run `Refresh MNB Attributes`, and show it on `helen.ross`.
-- Build a one-page “forbidden mappings” list (e.g. never map IT `accountStatus` onto HR `inactive`).
-- Using Debug, compare Identity XML before vs after mapping changes (post-refresh).
+- Promote `costCenter` to the identity now; leave the actual refresh for Lesson 06, and predict what `helen.ross` will show afterward.
+- Build a one-page "forbidden mappings" list (e.g. never map IT `accountStatus` onto HR `inactive`).
+- Using Debug, capture Identity XML now so you can diff it against post-refresh XML in Lesson 06.
 
 ## Summary
 
-- Governance needs bank HR fields on the identity, not buried only on the link.
-- Codes (`JobCode`, `costCenter`) and lifecycle flags (`inactive`, `exceptions=LOA`) power roles and JML.
-- Create custom attrs carefully: exact **Name**, **Searchable** on, never abuse stock `type` / `displayName`, never manager-from-display-name.
-- After HR aggregation, `Refresh MNB Attributes` (Lesson 06) finishes Link → Identity promotion; the attribute dictionary is Meridian’s design contract for later lessons.
+- Governance needs bank HR fields on the identity, not buried only on the link — and three separate screens (Schema, Identity Mappings, Manager Correlation) each do one job.
+- Codes (`JobCode`, `costCenter`) and lifecycle flags (`inactive`, `exceptions=LOA`) power roles and JML; manager correlation must use `managersAssociateID`, never the display column.
+- Mapping alone does not fill the cube — this lesson stops at save; `Refresh MNB Attributes` and `Refresh MNB Managers` (Lesson 06) finish Link → Identity promotion.
 
----
+## Feedback
+
+Could you explain, without notes, why `manager` (display) and `managersAssociateID` (correlation key) are not interchangeable? If any mapping step produced a surprise (orphan cube, blocked rename, blank dropdown), record the task number and symptom — that is the fastest way to sharpen this lesson.
+
+## Navigation
 
 **Previous:** [Lesson 04 — Authoritative HR Source](04-authoritative-hr-source.md)  
 **Next:** [Lesson 06 — Identity Cubes & Refresh](06-identity-cubes-and-refresh.md)
