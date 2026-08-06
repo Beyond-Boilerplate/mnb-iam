@@ -7,6 +7,10 @@
 # Admin: Administrator / Password1!  (lab only)
 # Bind for IIQ: CN=Administrator,CN=Users,DC=meridiannb,DC=com / Password1!
 #   (or svc account created by seed-samba.sh after DC is healthy)
+#
+# Lab note: seed-samba.sh sets "ldap server require strong auth = no" so IIQ can
+# simple-bind on port 389. Without that, Test Connection fails with LDAP 8
+# (Transport encryption required). Do not copy this setting to production AD.
 
 ## Ports (host)
 

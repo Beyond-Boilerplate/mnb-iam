@@ -94,10 +94,7 @@
         "http://gitea:3000/user/oauth2/meridian/callback"
       ],
       "webOrigins": ["http://localhost:8093", "+"],
-      "protocol": "openid-connect",
-      "attributes": {
-        "pkce.code.challenge.method": "S256"
-      }
+      "protocol": "openid-connect"
     },
     {
       "clientId": "workstation-portal",

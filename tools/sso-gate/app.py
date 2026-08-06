@@ -41,6 +41,14 @@ REQUIRED_GROUPS = [
     if g.strip()
 ]
 
+FAVICON_BY_KIND = {
+    "workstation": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235a6577%22/%3E%20%3Ctext%20x%3D%2216%22%20y%3D%2221.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2Csans-serif%22%20font-size%3D%2211%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%3EWS%3C/text%3E%20%3C/svg%3E",
+    "hr": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%236b3fa0%22/%3E%20%3Ctext%20x%3D%2216%22%20y%3D%2221.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2Csans-serif%22%20font-size%3D%2211%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%3EHR%3C/text%3E%20%3C/svg%3E",
+    "finance": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230b3d6e%22/%3E%20%3Ctext%20x%3D%2216%22%20y%3D%2221.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2Csans-serif%22%20font-size%3D%2211%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%3EFN%3C/text%3E%20%3C/svg%3E",
+}
+FAVICON_HREF = FAVICON_BY_KIND.get(APP_KIND, FAVICON_BY_KIND["workstation"])
+FAVICON_LINK = f'<link rel="icon" href="{FAVICON_HREF}" type="image/svg+xml" />'
+
 SESSIONS: dict[str, dict[str, Any]] = {}
 PENDING: dict[str, str] = {}
 
@@ -139,6 +147,7 @@ def html_page(title: str, body: str) -> bytes:
 <html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>{esc(title)} · {esc(APP_TITLE)}</title>
+{FAVICON_LINK}
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet"/>
 <style>{SHELL_CSS}</style>
 </head><body><div class="shell"><div class="panel">{body}</div>
