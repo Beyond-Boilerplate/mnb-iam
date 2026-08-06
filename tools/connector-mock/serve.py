@@ -5,6 +5,7 @@
   -> http://127.0.0.1:8091/health
   -> http://127.0.0.1:8091/users
   -> http://127.0.0.1:8091/scim/v2/Users
+  -> http://127.0.0.1:8091/hcm/ui              (MNB Workday helper UI)
   -> http://127.0.0.1:8091/hcm/v1/workers
   -> http://127.0.0.1:8091/crm/scim/v2/Users
   -> http://127.0.0.1:8091/itsm/v1/catalog
@@ -36,6 +37,19 @@ _HCM_STATE: dict | None = None
 _ITSM_TICKETS: list[dict] = []
 _ENTRA_STATE: dict | None = None
 
+_HCM_PATCH_FIELDS = (
+    "userName",
+    "firstName",
+    "lastName",
+    "email",
+    "department",
+    "title",
+    "managerId",
+    "employeeType",
+    "status",
+    "hireDate",
+)
+
 
 def load_json(path: Path) -> dict:
     if not path.exists():
@@ -55,6 +69,425 @@ def hcm_payload() -> dict:
     if _HCM_STATE is None:
         _HCM_STATE = load_json(HCM_WORKERS) or {"workers": [], "total": 0}
     return _HCM_STATE
+
+
+def hcm_ui_html() -> bytes:
+    """Self-contained MNB Workday admin UI (browse / add / edit / terminate)."""
+    return _HCM_UI_HTML.encode("utf-8")
+
+
+_HCM_UI_HTML = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MNB Workday</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230875e1%22/%3E%20%3Ctext%20x%3D%2216%22%20y%3D%2221.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2Csans-serif%22%20font-size%3D%2211%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%3EWD%3C/text%3E%20%3C/svg%3E" type="image/svg+xml" />
+<style>
+  :root {
+    --navy: #0b2a4a;
+    --teal: #0d7377;
+    --teal-dark: #095456;
+    --sand: #f4f7f9;
+    --line: #d5dee6;
+    --text: #1a2330;
+    --muted: #5a6b7d;
+    --danger: #9b2c2c;
+    --ok: #1a6b3c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: var(--text);
+    background: linear-gradient(165deg, #e8eef4 0%, var(--sand) 45%, #eef5f5 100%);
+    min-height: 100vh;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem 1.5rem;
+    border-bottom: 3px solid var(--teal);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+  }
+  header .sub { color: #a8c0d8; font-size: 0.9rem; }
+  main { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1.25rem 3rem; }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .toolbar input[type="search"] {
+    flex: 1 1 220px;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+  .meta { color: var(--muted); font-size: 0.85rem; }
+  button, .btn {
+    appearance: none;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background: var(--teal);
+    color: #fff;
+    font-weight: 600;
+  }
+  button:hover, .btn:hover { background: var(--teal-dark); }
+  button.secondary { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+  button.secondary:hover { background: #f0f4f8; }
+  button.danger { background: var(--danger); }
+  button.danger:hover { background: #7a2020; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .flash {
+    display: none;
+    margin-bottom: 1rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  .flash.ok { display: block; background: #e6f4ea; color: var(--ok); border: 1px solid #b7dfc4; }
+  .flash.err { display: block; background: #fde8e8; color: var(--danger); border: 1px solid #f0b4b4; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 0.88rem;
+  }
+  th, td { text-align: left; padding: 0.55rem 0.65rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { background: #f0f4f8; color: var(--navy); font-weight: 650; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr.term { opacity: 0.65; }
+  .badge {
+    display: inline-block;
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 650;
+  }
+  .badge.active { background: #e6f4ea; color: var(--ok); }
+  .badge.term { background: #fde8e8; color: var(--danger); }
+  .actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .actions button { padding: 0.3rem 0.55rem; font-size: 0.8rem; }
+  dialog {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0;
+    width: min(520px, 94vw);
+    box-shadow: 0 12px 40px rgba(11, 42, 74, 0.2);
+  }
+  dialog::backdrop { background: rgba(11, 42, 74, 0.35); }
+  .dlg-head {
+    background: var(--navy);
+    color: #fff;
+    padding: 0.85rem 1.1rem;
+    font-weight: 650;
+  }
+  .dlg-body { padding: 1.1rem; }
+  .dlg-foot {
+    padding: 0.75rem 1.1rem 1.1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem 0.75rem; }
+  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+  label.span2 { grid-column: 1 / -1; }
+  input, select {
+    padding: 0.45rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  footer.note {
+    margin-top: 1.25rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+  code { font-size: 0.85em; background: #eef2f6; padding: 0.05em 0.3em; border-radius: 3px; }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    table { font-size: 0.8rem; }
+    .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>MNB Workday</h1>
+  <span class="sub">Meridian HCM lab helper — browse, hire, edit, terminate</span>
+</header>
+<main>
+  <div id="flash" class="flash" role="status"></div>
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Search id, userName, name, email, department…" autocomplete="off"/>
+    <button type="button" id="btnRefresh" class="secondary">Refresh</button>
+    <button type="button" id="btnAdd">Add worker</button>
+    <span class="meta" id="count"></span>
+  </div>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Name</th>
+          <th class="hide-sm">Department</th>
+          <th class="hide-sm">Manager</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <footer class="note">
+    Lab only — drives the same in-memory feed IIQ aggregates at <code>GET /hcm/v1/workers</code>.
+    Terminate sets <code>active: false</code> / <code>status: Terminated</code> (no hard delete).
+    Changes are lost when <code>connector-mock</code> restarts.
+  </footer>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <div class="dlg-head" id="dlgTitle">Add worker</div>
+    <div class="dlg-body">
+      <input type="hidden" id="f_id"/>
+      <div class="grid">
+        <label>userName <input id="f_userName" required autocomplete="off"/></label>
+        <label>employeeType
+          <select id="f_employeeType">
+            <option>Employee</option>
+            <option>Contingent Worker</option>
+            <option>Contractor</option>
+          </select>
+        </label>
+        <label>firstName <input id="f_firstName" required/></label>
+        <label>lastName <input id="f_lastName" required/></label>
+        <label class="span2">email <input id="f_email" type="email" required/></label>
+        <label>department <input id="f_department"/></label>
+        <label>title <input id="f_title"/></label>
+        <label class="span2">managerId <input id="f_managerId" placeholder="e.g. MNB00001 (optional)"/></label>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="secondary" id="btnCancel">Cancel</button>
+      <button type="submit" id="btnSave">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  const API = "/hcm/v1/workers";
+  let workers = [];
+  let mode = "create";
+
+  const $ = (id) => document.getElementById(id);
+  const flash = $("flash");
+  const rows = $("rows");
+  const dlg = $("dlg");
+  const form = $("form");
+
+  function showFlash(msg, ok) {
+    flash.textContent = msg;
+    flash.className = "flash " + (ok ? "ok" : "err");
+    if (ok) setTimeout(() => { flash.className = "flash"; }, 4000);
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function api(method, path, body) {
+    const opts = { method, headers: { "Accept": "application/json" } };
+    if (body !== undefined) {
+      opts.headers["Content-Type"] = "application/json";
+      opts.body = JSON.stringify(body);
+    }
+    const res = await fetch(path, opts);
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (_) { data = { raw: text }; }
+    if (!res.ok) {
+      const detail = (data && (data.error || data.detail || data.message)) || res.statusText;
+      throw new Error(detail || ("HTTP " + res.status));
+    }
+    return data;
+  }
+
+  function filtered() {
+    const q = ($("q").value || "").trim().toLowerCase();
+    if (!q) return workers.slice();
+    return workers.filter((w) => {
+      const blob = [
+        w.id, w.workerId, w.userName, w.firstName, w.lastName,
+        w.email, w.department, w.title, w.managerId, w.status, w.employeeType
+      ].join(" ").toLowerCase();
+      return blob.includes(q);
+    });
+  }
+
+  function render() {
+    const list = filtered();
+    $("count").textContent = list.length + " of " + workers.length + " workers";
+    rows.innerHTML = list.map((w) => {
+      const active = w.active !== false && String(w.status || "").toLowerCase() !== "terminated";
+      const name = [w.firstName, w.lastName].filter(Boolean).join(" ") || "—";
+      return (
+        "<tr class=\"" + (active ? "" : "term") + "\">" +
+        "<td><code>" + esc(w.id) + "</code></td>" +
+        "<td>" + esc(w.userName) + "</td>" +
+        "<td>" + esc(name) + "</td>" +
+        "<td class=\"hide-sm\">" + esc(w.department || "—") + "</td>" +
+        "<td class=\"hide-sm\">" + esc(w.managerId || "—") + "</td>" +
+        "<td><span class=\"badge " + (active ? "active" : "term") + "\">" +
+          esc(w.status || (active ? "Active" : "Terminated")) + "</span></td>" +
+        "<td><div class=\"actions\">" +
+          "<button type=\"button\" class=\"secondary\" data-edit=\"" + esc(w.id) + "\">Edit</button>" +
+          (active
+            ? "<button type=\"button\" class=\"danger\" data-term=\"" + esc(w.id) + "\">Terminate</button>"
+            : "") +
+        "</div></td></tr>"
+      );
+    }).join("") || "<tr><td colspan=\"7\">No workers match.</td></tr>";
+  }
+
+  async function load() {
+    const data = await api("GET", API);
+    workers = data.workers || [];
+    render();
+  }
+
+  function openCreate() {
+    mode = "create";
+    $("dlgTitle").textContent = "Add worker";
+    $("f_id").value = "";
+    $("f_userName").value = "";
+    $("f_userName").disabled = false;
+    $("f_firstName").value = "";
+    $("f_lastName").value = "";
+    $("f_email").value = "";
+    $("f_department").value = "Identity & Access";
+    $("f_title").value = "";
+    $("f_managerId").value = "";
+    $("f_employeeType").value = "Employee";
+    dlg.showModal();
+    $("f_userName").focus();
+  }
+
+  function openEdit(id) {
+    const w = workers.find((x) => x.id === id || x.workerId === id);
+    if (!w) return;
+    mode = "edit";
+    $("dlgTitle").textContent = "Edit worker — " + (w.id || id);
+    $("f_id").value = w.id || "";
+    $("f_userName").value = w.userName || "";
+    $("f_userName").disabled = false;
+    $("f_firstName").value = w.firstName || "";
+    $("f_lastName").value = w.lastName || "";
+    $("f_email").value = w.email || "";
+    $("f_department").value = w.department || "";
+    $("f_title").value = w.title || "";
+    $("f_managerId").value = w.managerId || "";
+    $("f_employeeType").value = w.employeeType || "Employee";
+    dlg.showModal();
+  }
+
+  function formBody() {
+    const managerId = ($("f_managerId").value || "").trim() || null;
+    return {
+      userName: ($("f_userName").value || "").trim(),
+      firstName: ($("f_firstName").value || "").trim(),
+      lastName: ($("f_lastName").value || "").trim(),
+      email: ($("f_email").value || "").trim(),
+      department: ($("f_department").value || "").trim() || null,
+      title: ($("f_title").value || "").trim() || null,
+      managerId: managerId,
+      employeeType: $("f_employeeType").value || "Employee",
+    };
+  }
+
+  $("btnRefresh").addEventListener("click", () => {
+    load().then(() => showFlash("Refreshed from API.", true)).catch((e) => showFlash(e.message, false));
+  });
+  $("btnAdd").addEventListener("click", openCreate);
+  $("btnCancel").addEventListener("click", () => dlg.close());
+  $("q").addEventListener("input", render);
+
+  rows.addEventListener("click", async (ev) => {
+    const t = ev.target;
+    if (!(t instanceof HTMLElement)) return;
+    const editId = t.getAttribute("data-edit");
+    const termId = t.getAttribute("data-term");
+    if (editId) {
+      openEdit(editId);
+      return;
+    }
+    if (termId) {
+      const w = workers.find((x) => x.id === termId);
+      const label = w ? (w.userName || termId) : termId;
+      if (!confirm("Terminate " + label + "? Sets active=false / status=Terminated.")) return;
+      try {
+        await api("PATCH", API + "/" + encodeURIComponent(termId), { active: false });
+        showFlash("Terminated " + label + ".", true);
+        await load();
+      } catch (e) {
+        showFlash(e.message, false);
+      }
+    }
+  });
+
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const body = formBody();
+    if (!body.userName || !body.firstName || !body.lastName || !body.email) {
+      showFlash("userName, firstName, lastName, and email are required.", false);
+      return;
+    }
+    try {
+      if (mode === "create") {
+        const created = await api("POST", API, body);
+        showFlash("Created worker " + (created.id || body.userName) + ".", true);
+      } else {
+        const id = $("f_id").value;
+        await api("PATCH", API + "/" + encodeURIComponent(id), body);
+        showFlash("Updated " + id + ".", true);
+      }
+      dlg.close();
+      await load();
+    } catch (e) {
+      showFlash(e.message, false);
+    }
+  });
+
+  load().catch((e) => showFlash("Failed to load workers: " + e.message, false));
+})();
+</script>
+</body>
+</html>
+"""
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -159,7 +592,10 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
 
-        # --- Workday-shaped HCM ---
+        # --- Workday-shaped HCM (UI + API) ---
+        if path == "/hcm/ui":
+            return self._send(200, hcm_ui_html(), content_type="text/html; charset=utf-8")
+
         if path in ("/hcm/v1/workers", "/hcm/v1/workers/"):
             data = hcm_payload()
             qs = parse_qs(parsed.query)
@@ -330,9 +766,15 @@ class Handler(BaseHTTPRequestHandler):
                     if "active" in body:
                         w["active"] = bool(body["active"])
                         w["status"] = "Active" if w["active"] else "Terminated"
-                    for k in ("department", "title", "managerId", "status", "email"):
+                    for k in _HCM_PATCH_FIELDS:
                         if k in body:
                             w[k] = body[k]
+                    if "status" in body and "active" not in body:
+                        st = str(body.get("status") or "")
+                        if st.lower() == "terminated":
+                            w["active"] = False
+                        elif st.lower() == "active":
+                            w["active"] = True
                     return self._send(200, w)
             return self._send(404, {"error": "not_found", "id": wid})
 
@@ -393,6 +835,7 @@ def main() -> None:
     print(f"mnb-connector-mock listening on http://{HOST}:{PORT}")
     print("  GET  /health")
     print("  GET  /users | /scim/v2/Users")
+    print("  GET  /hcm/ui  (MNB Workday helper UI)")
     print("  GET  /hcm/v1/workers | POST /hcm/v1/workers | PATCH /hcm/v1/workers/{id}")
     print("  GET  /crm/scim/v2/Users")
     print("  GET  /itsm/v1/catalog | POST /itsm/v1/tickets")
