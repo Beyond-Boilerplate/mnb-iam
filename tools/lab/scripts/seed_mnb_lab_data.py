@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
-"""Seed Meridian lab IIQ data: authoritative MNB-HR + MNB-OpenLDAP (+ optional refresh).
+"""Seed Meridian lab IIQ data: MNB-HR + MNB-OpenLDAP (+ optional refresh).
+
+Core Path default: authoritative MNB-HR aggregation creates workforce cubes, then OpenLDAP
+accounts correlate onto them.
+
+Enterprise Sandbox (--definitions-only): import app definitions only — MNB-HR is
+non-authoritative, no aggregation, no cubes. Learners create cubes from MNB-Workday in
+Lesson 207.
 
 Uses live MCP tools only (no hardcoded Teller routing). Idempotent with --overwrite.
 
 Prefers durable XML under config/Application and config/TaskDefinition (UI exports)
 via import_sailpoint_object (scrub_ids). Falls back to create/onboard when XML is missing.
 
-After MNB-HR aggregation, runs rebuild_manager_hierarchy (Link.manager → Identity.manager)
-because OOTB managerCorrelationMapping alone often leaves Identity.manager unset in this lab.
+After MNB-HR aggregation (Core Path), runs rebuild_manager_hierarchy (Link.manager →
+Identity.manager) because OOTB managerCorrelationMapping alone often leaves
+Identity.manager unset in this lab.
 
 Prereqs:
   - Stack up: ./tools/lab/docker/up.sh  (IIQ :8080, MCP :8766, OpenLDAP)
@@ -21,8 +29,14 @@ Examples:
   # Full seed (HR cubes + OpenLDAP accounts/groups)
   python3 tools/lab/scripts/seed_mnb_lab_data.py
 
-  # OpenLDAP only (expects MNB-HR identities already present for correlation)
-  python3 tools/lab/scripts/seed_mnb_lab_data.py --skip-hr
+  # Overlay without wipe
+  python3 tools/lab/scripts/seed_mnb_lab_data.py --keep-existing
+
+  # Enterprise definitions only (no workforce cubes)
+  python3 tools/lab/scripts/seed_mnb_lab_data.py --definitions-only --keep-existing
+
+  # OpenLDAP only (expects identities already present for correlation)
+  python3 tools/lab/scripts/seed_mnb_lab_data.py --skip-hr --keep-existing
 
   # Dry run — print planned MCP calls
   python3 tools/lab/scripts/seed_mnb_lab_data.py --dry-run
@@ -33,10 +47,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 REPO = Path(__file__).resolve().parents[3]
 CHAT_ROOT = REPO / "tools" / "iiq-chat"
@@ -144,8 +159,14 @@ def import_xml(
     *,
     dry_run: bool,
     justification: str,
+    xml_transform: Callable[[str], str] | None = None,
 ) -> Any:
-    xml = _read_xml(path) if not dry_run else f"<!-- dry-run {path} -->"
+    if dry_run:
+        xml = f"<!-- dry-run {path} -->"
+    else:
+        xml = _read_xml(path)
+        if xml_transform is not None:
+            xml = xml_transform(xml)
     return call(
         mcp,
         "import_sailpoint_object",
@@ -156,6 +177,11 @@ def import_xml(
         },
         dry_run=dry_run,
     )
+
+
+def _hr_non_authoritative_xml(xml: str) -> str:
+    """Enterprise seed: keep MNB-HR as a CSV contrast app, never cube source."""
+    return xml.replace('authoritative="true"', 'authoritative="false"', 1)
 
 
 def import_task_definitions(mcp: McpClient, *, dry_run: bool) -> None:
@@ -216,48 +242,69 @@ def poll_task(
 
 
 def seed_hr(mcp: McpClient, args: argparse.Namespace) -> None:
-    _log("\n=== MNB-HR (authoritative DelimitedFile) ===")
-    if CONFIG_HR_APP.is_file() and not args.force_wizard:
+    definitions_only = bool(getattr(args, "definitions_only", False))
+    hr_non_auth = bool(getattr(args, "hr_non_authoritative", False)) or definitions_only
+    mode = "definitions only (non-authoritative)" if hr_non_auth else "authoritative DelimitedFile"
+    _log(f"\n=== MNB-HR ({mode}) ===")
+
+    # Prefer durable XML when present. On scrub_ids/Hibernate races after wipe,
+    # fall back to create_application (authoritative=false for enterprise defs-only).
+    use_xml = CONFIG_HR_APP.is_file() and not args.force_wizard
+    created_via_wizard = False
+
+    if use_xml:
         _log(f"  importing {CONFIG_HR_APP.relative_to(REPO)}")
-        imported = import_xml(
-            mcp,
-            CONFIG_HR_APP,
-            dry_run=args.dry_run,
-            justification="seed_mnb_lab_data import MNB-Application-HR.xml",
-        )
-        _log(f"  import: {json.dumps(imported, default=str)[:400]}")
-        # Ensure container path wins over any host path left in XML.
-        call(
-            mcp,
-            "update_application_config",
-            {
-                "app_id": "MNB-HR",
-                "config_patch": {
-                    "attributes": {
-                        "file": args.hr_file,
-                        "delimiter": ",",
-                        "hasHeader": True,
-                    }
+        try:
+            imported = import_xml(
+                mcp,
+                CONFIG_HR_APP,
+                dry_run=args.dry_run,
+                justification="seed_mnb_lab_data import MNB-Application-HR.xml",
+                xml_transform=_hr_non_authoritative_xml if hr_non_auth else None,
+            )
+            _log(f"  import: {json.dumps(imported, default=str)[:400]}")
+            call(
+                mcp,
+                "update_application_config",
+                {
+                    "app_id": "MNB-HR",
+                    "config_patch": {
+                        "attributes": {
+                            "file": args.hr_file,
+                            "delimiter": ",",
+                            "hasHeader": True,
+                        }
+                    },
+                    "justification": "seed_mnb_lab_data ensure HR file path",
                 },
-                "justification": "seed_mnb_lab_data ensure HR file path",
-            },
-            dry_run=args.dry_run,
-        )
+                dry_run=args.dry_run,
+            )
+        except SystemExit as exc:
+            if not hr_non_auth:
+                raise
+            _log(f"  WARN XML import failed ({exc}); falling back to create_application")
+            created_via_wizard = True
     else:
+        created_via_wizard = True
+
+    if created_via_wizard:
         created = call(
             mcp,
             "create_application",
             {
                 "name": "MNB-HR",
                 "type": "DelimitedFile",
-                "description": "Meridian authoritative HR feed (lab seed)",
+                "description": (
+                    "Meridian HR CSV (lab; non-authoritative under enterprise seed)"
+                    if hr_non_auth
+                    else "Meridian authoritative HR feed (lab seed)"
+                ),
                 "overwrite": args.overwrite,
-                "authoritative": True,
+                "authoritative": not hr_non_auth,
                 "attributes": {
                     "file": args.hr_file,
                     "delimiter": ",",
                     "hasHeader": True,
-                    # Cubes end up named by displayName in this lab; manager column uses display names.
                     "identityAttribute": "name",
                     "displayAttribute": "displayName",
                     "managerAttribute": "manager",
@@ -283,6 +330,10 @@ def seed_hr(mcp: McpClient, args: argparse.Namespace) -> None:
         data = tested.get("data") if isinstance(tested.get("data"), dict) else tested
         if isinstance(data, dict) and data.get("success") is False:
             raise SystemExit(f"FAIL MNB-HR test connection: {data}")
+
+    if definitions_only:
+        _log("  skip aggregation/refresh (definitions-only — cubes come from MNB-Workday in Lesson 207)")
+        return
 
     # Pass 1 discovers schema; pass 2 populates Link attributes (needed for managers).
     for pass_no in (1, 2):
@@ -341,7 +392,8 @@ def seed_hr(mcp: McpClient, args: argparse.Namespace) -> None:
 
 
 def seed_ldap(mcp: McpClient, args: argparse.Namespace) -> None:
-    _log("\n=== MNB-OpenLDAP ===")
+    definitions_only = bool(getattr(args, "definitions_only", False))
+    _log("\n=== MNB-OpenLDAP" + (" (definitions only)" if definitions_only else "") + " ===")
     if CONFIG_LDAP_APP.is_file() and not args.force_wizard:
         _log(f"  importing {CONFIG_LDAP_APP.relative_to(REPO)}")
         imported = import_xml(
@@ -390,6 +442,9 @@ def seed_ldap(mcp: McpClient, args: argparse.Namespace) -> None:
             dry_run=args.dry_run,
         )
         _log(f"  test: {json.dumps(tested, default=str)[:400]}")
+        if definitions_only:
+            _log("  skip account/group aggregation (definitions-only — aggregate in Lesson 204 after Workday cubes)")
+            return
         agg = call(
             mcp,
             "trigger_aggregation",
@@ -437,7 +492,7 @@ def seed_ldap(mcp: McpClient, args: argparse.Namespace) -> None:
                 "type": "OpenLDAP - Direct",
                 "description": "Meridian lab OpenLDAP directory",
                 "overwrite": args.overwrite,
-                "run_aggregate": True,
+                "run_aggregate": not definitions_only,
                 "full_or_delta": "full",
                 "attributes": attrs,
                 "justification": "seed_mnb_lab_data",
@@ -445,6 +500,9 @@ def seed_ldap(mcp: McpClient, args: argparse.Namespace) -> None:
             dry_run=args.dry_run,
         )
         _log(f"  onboard: {json.dumps(onboard, default=str)[:500]}")
+        if definitions_only:
+            _log("  skip aggregation poll (definitions-only)")
+            return
         poll_task(
             mcp,
             _task_result_id(onboard),
@@ -524,16 +582,61 @@ def verify(mcp: McpClient, *, dry_run: bool) -> None:
     _log(f"  Christopher Hayes directReports → {reports}")
 
 
+def run_backup_and_reset(*, mcp_url: str, mcp_api_key: str, dry_run: bool) -> None:
+    """Export live MNB-* via MCP, then wipe so seed starts clean."""
+    if dry_run:
+        _log("DRY-RUN would: backup_and_reset_lab.py (extract → wipe)")
+        return
+    if os.environ.get("MNB_LAB_RESET_DONE", "").lower() in ("1", "true", "yes"):
+        _log("Skip backup/wipe (MNB_LAB_RESET_DONE already set)")
+        return
+    script = REPO / "tools" / "lab" / "scripts" / "backup_and_reset_lab.py"
+    cmd = [
+        sys.executable,
+        str(script),
+        "--mcp-url",
+        mcp_url,
+        "--mcp-api-key",
+        mcp_api_key,
+    ]
+    _log("==> Backup live Meridian objects, then wipe leftovers before seed")
+    env = os.environ.copy()
+    env["IIQ_MCP_URL"] = mcp_url
+    env["MCP_API_KEY"] = mcp_api_key
+    proc = subprocess.run(cmd, cwd=str(REPO), env=env)
+    if proc.returncode != 0:
+        raise RuntimeError(f"backup/wipe failed (exit {proc.returncode})")
+    os.environ["MNB_LAB_RESET_DONE"] = "1"
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--dry-run", action="store_true", help="Print planned MCP calls only")
     p.add_argument("--overwrite", action="store_true", default=True, help="Overwrite apps if present (default)")
     p.add_argument("--no-overwrite", action="store_false", dest="overwrite")
+    p.add_argument(
+        "--keep-existing",
+        action="store_true",
+        help="Skip backup+wipe; seed/overlay on current IIQ objects",
+    )
     p.add_argument("--skip-hr", action="store_true", help="Skip MNB-HR create/aggregate")
     p.add_argument("--skip-ldap", action="store_true", help="Skip MNB-OpenLDAP onboard")
     p.add_argument("--skip-group-agg", action="store_true", help="Skip Account Group Aggregation")
     p.add_argument("--skip-refresh", action="store_true", help="Skip Refresh Identity Cube")
     p.add_argument("--skip-verify", action="store_true")
+    p.add_argument(
+        "--definitions-only",
+        action="store_true",
+        help=(
+            "Import app definitions + TaskDefinitions only — no account aggregation, "
+            "no Identity Refresh, no workforce cubes (Enterprise Sandbox Path)"
+        ),
+    )
+    p.add_argument(
+        "--hr-non-authoritative",
+        action="store_true",
+        help="Import/create MNB-HR with authoritative=false (implied by --definitions-only)",
+    )
     p.add_argument(
         "--skip-tasks",
         action="store_true",
@@ -577,6 +680,10 @@ def main(argv: list[str] | None = None) -> int:
         _log("Nothing to do (--skip-hr, --skip-ldap, and --skip-verify)")
         return 0
 
+    keep_existing = args.keep_existing or os.environ.get(
+        "MNB_LAB_KEEP_EXISTING", ""
+    ).lower() in ("1", "true", "yes")
+
     mcp = McpClient(url=args.mcp_url, api_key=args.mcp_api_key, timeout=120.0)
     try:
         health = mcp.healthz()
@@ -591,6 +698,19 @@ def main(argv: list[str] | None = None) -> int:
             _log(f"FAIL MCP init: {exc}")
             return 1
 
+    if not keep_existing:
+        try:
+            run_backup_and_reset(
+                mcp_url=args.mcp_url,
+                mcp_api_key=args.mcp_api_key,
+                dry_run=args.dry_run,
+            )
+        except RuntimeError as exc:
+            _log(f"FAIL {exc}")
+            return 1
+    else:
+        _log("Keeping existing IIQ objects (--keep-existing)")
+
     try:
         if not args.skip_hr:
             seed_hr(mcp, args)
@@ -598,7 +718,12 @@ def main(argv: list[str] | None = None) -> int:
             seed_ldap(mcp, args)
         if not args.skip_tasks:
             import_task_definitions(mcp, dry_run=args.dry_run)
-        if not args.skip_verify:
+        if args.definitions_only:
+            _log(
+                "\nDefinitions-only seed complete — Identity Warehouse should only have "
+                "spadmin until Lesson 207 aggregates MNB-Workday."
+            )
+        elif not args.skip_verify:
             verify(mcp, dry_run=args.dry_run)
             if not args.dry_run and not args.skip_ldap:
                 ents = call(

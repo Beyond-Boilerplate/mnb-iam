@@ -22,6 +22,8 @@ scripts/auto_story/.env
 # Lab HR delta backups (scenario apply scripts)
 lab-data/HRApplications.txt.bak-*
 
+# Pre-wipe IIQ object extracts (backup-and-reset-lab)
+lab-data/backups/
 # Local podcast / TTS tooling
 tools/lesson-podcast/.venv/
 tools/lesson-podcast/out/

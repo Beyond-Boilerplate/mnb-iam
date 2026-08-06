@@ -34,6 +34,14 @@ Asserts **`MNB-Rule-Hello-World` only**. Academy apps are learner-built.
 
 See `e2e-hr-slice.sh` (after Lessons 04–06 objects exist) and `wipe-mnb-leftovers.sh` for clean UI-first labs.
 
+Preferred lab reset (backup via MCP extract, then wipe): 
+
+```bash
+./tools/lab/scripts/backup-and-reset-lab.sh
+```
+
+`docker/up.sh` runs that automatically before seed unless you pass `--keep-existing`.
+
 ## Regenerating specs
 
 ```bash

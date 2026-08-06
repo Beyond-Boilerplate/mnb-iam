@@ -11,8 +11,13 @@ echo "==> Generating identity artifacts"
 python3 "$ROOT/tools/lab/enterprise/generate-identity-artifacts.py"
 
 if [[ -x "$ROOT/tools/lab/scripts/seed-mnb-lab-data.sh" ]]; then
-  echo "==> Ensuring Core lab seed (HR + OpenLDAP) is present"
-  "$ROOT/tools/lab/scripts/seed-mnb-lab-data.sh" || true
+  echo "==> Ensuring Core app definitions (MNB-HR non-authoritative + MNB-OpenLDAP; no cubes)"
+  # When called from docker/up.sh after backup→wipe, MNB_LAB_RESET_DONE=1 skips a second wipe.
+  seed_args=(--definitions-only --hr-non-authoritative)
+  if [[ "${MNB_LAB_RESET_DONE:-}" == "1" ]] || [[ "${MNB_LAB_KEEP_EXISTING:-}" == "1" ]]; then
+    seed_args+=(--keep-existing)
+  fi
+  "$ROOT/tools/lab/scripts/seed-mnb-lab-data.sh" "${seed_args[@]}" || true
 fi
 
 echo "==> Importing enterprise XML via MCP"
@@ -31,3 +36,5 @@ echo "    Vault/PAM: http://localhost:8200/ui · http://localhost:8097/ (lab-dat
 echo "    Password path: lab-data/enterprise/password/README.md"
 echo "    Toolkit: GET /plugin/rest/mnbToolkit/enterprise/status (after plugin rebuild)"
 echo "    Note: Keycloak realm JSON imports only on empty volume — wipe mnb-keycloak-data to pick up new clients/groups"
+echo "    Cubes: none yet — Lesson 207 aggregates MNB-Workday (authoritative HCM)"
+echo "    MNB Workday UI: http://localhost:8091/hcm/ui"

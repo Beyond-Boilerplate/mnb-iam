@@ -2,7 +2,8 @@
 # Bootstrap Gitea admin + print Keycloak OIDC source settings (Lesson 213).
 set -euo pipefail
 GITEA="${GITEA_URL:-http://127.0.0.1:8093}"
-KC="${KEYCLOAK_PUBLIC_URL:-http://localhost:8085}"
+# Gitea fetches discovery from inside its container — localhost:8085 is Gitea itself.
+KC_DISCOVERY="${KEYCLOAK_DISCOVERY_URL:-http://host.docker.internal:8085}"
 REALM="${KEYCLOAK_REALM:-meridian}"
 CLIENT_ID="${GITEA_OIDC_CLIENT_ID:-gitea}"
 CLIENT_SECRET="${GITEA_OIDC_CLIENT_SECRET:-mnb-gitea-oidc-secret}"
@@ -43,8 +44,10 @@ cat <<EOF
   Client ID:           $CLIENT_ID
   Client Secret:       $CLIENT_SECRET
   OpenID Connect Auto Discovery URL:
-    $KC/realms/$REALM/.well-known/openid-configuration
+    $KC_DISCOVERY/realms/$REALM/.well-known/openid-configuration
   Scopes (optional):   openid profile email
+
+  (Use host.docker.internal — not localhost — so Gitea's container can reach Keycloak.)
 
 Then sign in via "meridian" with helen.ross / LabUser1!
 

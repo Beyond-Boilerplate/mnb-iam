@@ -18,6 +18,24 @@ if ! docker inspect "$CONTAINER" >/dev/null 2>&1; then
 fi
 
 echo "==> Seeding Samba users into $CONTAINER (best-effort)"
+
+# IIQ OpenLDAP-Direct binds simple on ldap://samba-ad:389. Modern Samba defaults to
+# "ldap server require strong auth = yes", which rejects that bind with LDAP 8
+# ("Transport encryption required"). TLS certs in this image are often missing, so
+# LDAPS/StartTLS is not a reliable lab path — allow cleartext binds for the sandbox.
+docker exec "$CONTAINER" bash -lc '
+CONF=/etc/samba/smb.conf
+if grep -qi "ldap server require strong auth" "$CONF"; then
+  sed -i "s/^[[:space:]]*ldap server require strong auth.*/\tldap server require strong auth = no/I" "$CONF"
+else
+  awk '\''BEGIN{d=0} /^\[global\]/{print; print "\tldap server require strong auth = no"; d=1; next} {print}'\'' "$CONF" > /tmp/smb.conf.new && mv /tmp/smb.conf.new "$CONF"
+fi
+smbcontrol all reload-config 2>/dev/null || true
+if command -v supervisorctl >/dev/null 2>&1; then
+  supervisorctl restart samba 2>/dev/null || true
+fi
+' || true
+
 # Create OU for people if missing
 docker exec "$CONTAINER" bash -lc "
 set -e

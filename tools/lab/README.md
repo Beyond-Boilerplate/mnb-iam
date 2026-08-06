@@ -13,7 +13,10 @@ export MCP_API_KEY=mnb-lab-mcp-key
 ./tools/lab/scripts/seed-mnb-lab-data.sh
 ```
 
-Creates/aggregates **MNB-HR** (authoritative) and **MNB-OpenLDAP**, refreshes cubes, then probes identities.
+**Default:** backup live `MNB-*` via MCP extract → `lab-data/backups/iiq-<ts>/`, wipe
+Meridian leftovers (keeps `spadmin` + HelloWorld), then create/aggregate **MNB-HR** and
+**MNB-OpenLDAP**. Overlay without wipe: `--keep-existing`.
+
 Details: `lab-data/connectors/ldap/README.md`.
 
 ## Sync UI changes back to `config/`
@@ -90,6 +93,7 @@ Your existing system MySQL on **:3306** (if any) is left alone.
 ./tools/lab/up.sh --check              # preflight only
 ./tools/lab/up.sh                      # IIQ (setup or start) + OpenAPI + MCP + Academy
 # Academy → http://localhost:4173/  |  IIQ → http://localhost:8080/identityiq
+# Lab hub → http://localhost:9000/  |  DB viewer → http://localhost:9001/
 # OpenAPI → http://localhost:8765/swagger/  |  MCP → http://127.0.0.1:8766/mcp
 
 ./tools/lab/up.sh --force-db           # rebuild schemas + re-import, then sidecars + Academy

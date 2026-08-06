@@ -11,6 +11,7 @@
 #   ./tools/lab/docker/up.sh --check
 #   ./tools/lab/docker/up.sh --rebuild
 #   ./tools/lab/docker/up.sh --skip-seed
+#   ./tools/lab/docker/up.sh --keep-existing
 #   ./tools/lab/docker/up.sh --kill-host-sidecars
 set -euo pipefail
 
@@ -22,6 +23,7 @@ PROJECT_NAME="mnb-iiq-lab"
 CHECK_ONLY=0
 KILL_HOST_SIDECARS=0
 DO_SEED=1
+KEEP_EXISTING=0
 FORCE_REBUILD=0
 ENTERPRISE=0
 for arg in "$@"; do
@@ -30,19 +32,21 @@ for arg in "$@"; do
     --kill-host-sidecars) KILL_HOST_SIDECARS=1 ;;
     --skip-seed) DO_SEED=0 ;;
     --seed) DO_SEED=1 ;;
+    --keep-existing) KEEP_EXISTING=1 ;;
     --rebuild|--build) FORCE_REBUILD=1 ;;
     --enterprise) ENTERPRISE=1 ;;
     -h|--help)
       cat <<'EOF'
 Usage: ./tools/lab/docker/up.sh [options]
 
-  (default)               Start stack, verify, install/enable plugin, seed lab apps
+  (default)               Start stack, verify, install/enable plugin, backup→wipe→seed
   --enterprise            Samba, Keycloak, Portal, Mailpit, Gitea, Vault/PAM (Enterprise Lab)
   --check                 Preflight ports only
   --rebuild               Force docker compose build (slower)
   --kill-host-sidecars    Stop host listeners on MCP/OpenAPI ports, then start
   --skip-seed             Start + verify only (no plugin seed / HR aggregation)
   --seed                  Explicitly enable seed (default)
+  --keep-existing         Seed without backup/wipe (overlay on current MNB-* apps)
 EOF
       exit 0
       ;;
@@ -62,6 +66,8 @@ MCP_PORT="${MCP_PORT:-8766}"
 API_DOCS_PORT="${API_DOCS_PORT:-8765}"
 CHAT_PORT="${CHAT_PORT:-4180}"
 ACADEMY_PORT="${ACADEMY_PORT:-4173}"
+LAB_HUB_PORT="${LAB_HUB_PORT:-9000}"
+DB_VIEWER_PORT="${DB_VIEWER_PORT:-9001}"
 LDAP_PORT="${LDAP_PORT:-389}"
 LDAPS_PORT="${LDAPS_PORT:-636}"
 PHPLDAPADMIN_PORT="${PHPLDAPADMIN_PORT:-8090}"
@@ -82,6 +88,8 @@ VAULT_HTTP_PORT="${VAULT_HTTP_PORT:-8200}"
 PAM_LAB_PORT="${PAM_LAB_PORT:-8097}"
 
 PORTS=(
+  "LabHub:${LAB_HUB_PORT}"
+  "DBViewer:${DB_VIEWER_PORT}"
   "IIQ:${IIQ_HTTP_PORT}"
   "MCP:${MCP_PORT}"
   "OpenAPI:${API_DOCS_PORT}"
@@ -464,16 +472,42 @@ for p in (d.get("objects") or []):
 
 seed_lab_data() {
   local key="${MCP_API_KEY:-mnb-lab-mcp-key}"
-  info "Seeding MNB-HR + MNB-OpenLDAP via MCP..."
   export IIQ_MCP_URL="http://127.0.0.1:${MCP_PORT}/mcp"
   export MCP_API_KEY="$key"
-  ./tools/lab/scripts/seed-mnb-lab-data.sh
+  local seed_args=()
+  if [[ "$KEEP_EXISTING" -eq 1 ]] || [[ "${MNB_LAB_RESET_DONE:-}" == "1" ]]; then
+    seed_args+=(--keep-existing)
+  fi
+  if [[ "$ENTERPRISE" -eq 1 ]]; then
+    info "Seeding app definitions only (MNB-HR non-authoritative; no workforce cubes)..."
+    seed_args+=(--definitions-only --hr-non-authoritative)
+  else
+    info "Seeding MNB-HR + MNB-OpenLDAP via MCP..."
+  fi
+  ./tools/lab/scripts/seed-mnb-lab-data.sh "${seed_args[@]+"${seed_args[@]}"}"
+}
+
+backup_and_reset_lab() {
+  local key="${MCP_API_KEY:-mnb-lab-mcp-key}"
+  if [[ "$KEEP_EXISTING" -eq 1 ]]; then
+    info "Keeping existing Meridian objects (--keep-existing)"
+    export MNB_LAB_KEEP_EXISTING=1
+    return 0
+  fi
+  info "Backup live Meridian objects (extract), then wipe before seed..."
+  export IIQ_MCP_URL="http://127.0.0.1:${MCP_PORT}/mcp"
+  export MCP_API_KEY="$key"
+  ./tools/lab/scripts/backup-and-reset-lab.sh
+  # Prevent seed-mnb / seed-enterprise from wiping again mid-pipeline
+  export MNB_LAB_RESET_DONE=1
 }
 
 print_ready() {
   local MCP_KEY="${MCP_API_KEY:-mnb-lab-mcp-key}"
   echo
   echo "Ready."
+  echo "  Lab hub:  http://localhost:${LAB_HUB_PORT}/  (TOC of all services)"
+  echo "  DB viewer: http://localhost:${DB_VIEWER_PORT}/  (Adminer — IIQ Postgres + JDBC lab)"
   echo "  Academy:  http://localhost:${ACADEMY_PORT}/"
   echo "  IIQ:      http://localhost:${IIQ_HTTP_PORT}/identityiq  (spadmin / admin)"
   echo "  OpenAPI:  http://localhost:${API_DOCS_PORT}/swagger/"
@@ -502,7 +536,17 @@ print_ready() {
     echo "  Path:     docs/lessons/_CATALOG_201_250.md  (Enterprise Sandbox Path)"
   fi
   if [[ "$DO_SEED" -eq 1 ]]; then
-    echo "  Seed:     MNB-HR + MNB-OpenLDAP (ran during up)"
+    if [[ "$ENTERPRISE" -eq 1 ]]; then
+      echo "  Seed:     backup→wipe→app definitions only (no workforce cubes)"
+      echo "            MNB-HR is non-authoritative; cubes come from MNB-Workday in Lesson 207"
+    else
+      echo "  Seed:     backup→wipe→MNB-HR + MNB-OpenLDAP (ran during up)"
+    fi
+    if [[ "$KEEP_EXISTING" -eq 1 ]]; then
+      echo "            (kept existing objects; no wipe)"
+    else
+      echo "            backups: lab-data/backups/iiq-*/"
+    fi
     if [[ "$ENTERPRISE" -eq 1 ]]; then
       echo "            + enterprise pack (seed-enterprise.sh)"
     fi
@@ -515,6 +559,8 @@ print_ready() {
   echo
   echo "Stop/wipe:  ./tools/lab/docker/down.sh"
   echo "Keep data:  ./tools/lab/docker/down.sh --keep-volumes"
+  echo "Re-seed only (backup+wipe): MCP_API_KEY=${MCP_KEY} ./tools/lab/scripts/seed-mnb-lab-data.sh"
+  echo "Re-seed overlay:            .../seed-mnb-lab-data.sh --keep-existing"
 }
 
 # --- main ---
@@ -577,6 +623,7 @@ post_ready_checks
 
 if [[ "$DO_SEED" -eq 1 ]]; then
   ensure_plugin_ready
+  backup_and_reset_lab
   seed_lab_data
   if [[ "$ENTERPRISE" -eq 1 ]]; then
     info "Seeding Enterprise Lab pack..."

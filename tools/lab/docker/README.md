@@ -1,7 +1,9 @@
 # Local Meridian stack (Docker)
 
 **One command** starts Postgres + OpenLDAP + IdentityIQ + Academy + MCP + OpenAPI + Teller,
-installs/enables the Meridian plugin, and seeds **MNB-HR** + **MNB-OpenLDAP**:
+installs/enables the Meridian plugin, **backs up** any live `MNB-*` objects (toolkit extract /
+MCP `export_sailpoint_object` → `lab-data/backups/iiq-<ts>/`), **wipes** Meridian leftovers,
+then seeds **MNB-HR** + **MNB-OpenLDAP**:
 
 ```bash
 ./tools/lab/docker/up.sh
@@ -13,9 +15,14 @@ installs/enables the Meridian plugin, and seeds **MNB-HR** + **MNB-OpenLDAP**:
 ./tools/lab/docker/up.sh --rebuild
 # start without HR/LDAP IIQ seeding:
 ./tools/lab/docker/up.sh --skip-seed
+# overlay seed without backup/wipe (keep lesson progress / existing apps):
+./tools/lab/docker/up.sh --keep-existing
 # if host MCP/OpenAPI leftovers hold 8765/8766:
 ./tools/lab/docker/up.sh --kill-host-sidecars
 ```
+
+Greenfield (no `MNB-*` apps yet) skips backup/wipe. Pass `--keep-existing` to re-seed on top
+of a populated lab. Manual backup→wipe: `./tools/lab/scripts/backup-and-reset-lab.sh`.
 
 By default `up.sh` skips Docker image rebuilds when local images already exist (big speed win), packages the plugin in the background while containers start, and probes IIQ/MCP/Teller/Academy/LDAP in parallel. Use `--rebuild` after Dockerfile or MCP source changes.
 
@@ -23,6 +30,8 @@ Startup **fails fast** if required host ports are taken by something other than 
 
 | URL | What |
 | --- | --- |
+| http://localhost:9000/ | **Lab hub** — TOC of all local services |
+| http://localhost:9001/ | **DB viewer** (Adminer) — IIQ Postgres + JDBC lab, one-click login |
 | http://localhost:4173/ | Academy lessons + progress + Verify now |
 | http://localhost:8080/identityiq | IIQ UI (`spadmin` / `admin`) |
 | http://localhost:8765/swagger/ | OpenAPI / Swagger (CORS-safe IIQ proxy) |
@@ -33,6 +42,7 @@ Startup **fails fast** if required host ports are taken by something other than 
 | ldap://localhost:389 | **OpenLDAP** (`cn=admin,dc=meridiannb,dc=com` / `admin`) |
 | localhost:5435 | **jdbc-pg** Meridian apps DB (`mnb` / `mnb` / `mnb_apps`) — Lessons 63–64 |
 | http://localhost:8091/health | **connector-mock** Wire + SCIM + HCM + CRM + ITSM |
+| http://localhost:8091/hcm/ui | **MNB Workday** HCM helper UI (browse / hire / edit / terminate) |
 | http://localhost:8085/ | **Keycloak** (`--enterprise`) realm `meridian` |
 | http://localhost:8092/ | **Employee Portal** OIDC login proof (`--enterprise`) |
 | http://localhost:8025/ | **Mailpit** catch-all mail UI (`--enterprise`) |

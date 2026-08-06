@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Seed Meridian lab IIQ: MNB-HR (authoritative) + MNB-OpenLDAP via MCP.
+# Seed Meridian lab IIQ: MNB-HR + MNB-OpenLDAP via MCP.
+# Core Path: authoritative HR aggregation creates cubes.
+# Enterprise: pass --definitions-only --hr-non-authoritative (no workforce cubes).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 export IIQ_MCP_URL="${IIQ_MCP_URL:-http://127.0.0.1:8766/mcp}"

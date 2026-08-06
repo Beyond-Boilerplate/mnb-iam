@@ -2,31 +2,53 @@
 <!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
 <Rule language="beanshell" name="MNB-Rule-E2E-WipeAcademy">
   <Description>
-    Lab wipe: remove learner leftover Meridian academy objects and non-spadmin identities
-    so the tenant is clean for UI-first lessons. Keeps MNB-Rule-Hello-World.
+    Lab wipe: remove Meridian (MNB-*) academy/enterprise leftovers and non-spadmin
+    identities so seed can recreate a known-good lab. Keeps spadmin + MNB-Rule-Hello-World.
   </Description>
   <Source>
     <![CDATA[
       import sailpoint.api.Terminator;
       import sailpoint.object.Application;
       import sailpoint.object.Bundle;
+      import sailpoint.object.CertificationDefinition;
       import sailpoint.object.CorrelationConfig;
       import sailpoint.object.EmailTemplate;
       import sailpoint.object.Identity;
+      import sailpoint.object.IdentityTrigger;
+      import sailpoint.object.PasswordPolicy;
       import sailpoint.object.Policy;
       import sailpoint.object.QueryOptions;
+      import sailpoint.object.QuickLink;
       import sailpoint.object.Rule;
+      import sailpoint.object.SailPointObject;
       import sailpoint.object.TaskDefinition;
       import sailpoint.object.TaskResult;
       import sailpoint.object.Workflow;
       import sailpoint.tools.Util;
       import java.util.ArrayList;
+      import java.util.HashSet;
       import java.util.Iterator;
       import java.util.List;
+      import java.util.Set;
 
       Terminator terminator = new Terminator(context);
       StringBuilder log = new StringBuilder();
       int deleted = 0;
+
+      Set keepRules = new HashSet();
+      keepRules.add("MNB-Rule-Hello-World");
+
+      boolean isMnbName(String name) {
+        return name != null && name.startsWith("MNB-");
+      }
+
+      boolean isMnbTaskName(String name) {
+        if (name == null) return false;
+        if (name.startsWith("MNB-")) return true;
+        if (name.indexOf("MNB") >= 0) return true;
+        if (name.startsWith("Aggregate MNB") || name.startsWith("Refresh MNB")) return true;
+        return false;
+      }
 
       void delByName(Class clazz, String name) {
         Object o = context.getObjectByName(clazz, name);
@@ -35,6 +57,34 @@
           deleted++;
           log.append("DEL ").append(clazz.getSimpleName()).append(" ").append(name).append("\n");
         }
+      }
+
+      void delMnbByClass(Class clazz, boolean taskStyle) {
+        QueryOptions qo = new QueryOptions();
+        Iterator it = context.search(clazz, qo);
+        List names = new ArrayList();
+        while (it.hasNext()) {
+          Object row = it.next();
+          SailPointObject obj = null;
+          if (row instanceof SailPointObject) {
+            obj = (SailPointObject) row;
+          } else if (row instanceof Object[]) {
+            Object[] arr = (Object[]) row;
+            if (arr.length > 0 && arr[0] instanceof SailPointObject) {
+              obj = (SailPointObject) arr[0];
+            }
+          }
+          if (obj == null) continue;
+          String n = obj.getName();
+          if (clazz == Rule.class && keepRules.contains(n)) continue;
+          boolean match = taskStyle ? isMnbTaskName(n) : isMnbName(n);
+          if (match) names.add(n);
+        }
+        Util.flushIterator(it);
+        for (Object n : names) {
+          delByName(clazz, (String) n);
+        }
+        log.append("SCAN ").append(clazz.getSimpleName()).append(" mnbCount=").append(names.size()).append("\n");
       }
 
       // Identities first (clears Links to apps)
@@ -57,29 +107,18 @@
       }
       log.append("DEL Identity count=").append(toKill.size()).append(" (kept spadmin)\n");
 
-      String[] apps = {
-        "MNB-HR", "MNB-IT-Access", "MNB-CoreBanking", "MNB-WirePortal",
-        "MNB-SAP-Finance", "MNB-AWS-Cloud"
-      };
-      for (String n : apps) delByName(Application.class, n);
-
-      String[] tasks = {
-        "Aggregate MNB-HR", "Aggregate MNB-IT-Access", "Aggregate MNB-CoreBanking",
-        "Aggregate MNB-WirePortal", "Aggregate MNB-SAP-Finance", "Aggregate MNB-AWS-Cloud",
-        "Refresh MNB Attributes", "Refresh MNB Managers", "Refresh MNB Roles",
-        "Refresh MNB Policies", "Refresh MNB Identities", "Aggregate MNB-HR-DRYRUN"
-      };
-      for (String n : tasks) delByName(TaskDefinition.class, n);
-
-      delByName(CorrelationConfig.class, "MNB-HR EmployeeId Correlation");
-      delByName(CorrelationConfig.class, "MNB-HR UserId Correlation");
-      delByName(Rule.class, "MNB-Rule-Correlation-EmployeeId");
-      delByName(Bundle.class, "MNB-Role-Birthright-Employee");
-      delByName(Bundle.class, "MNB-Role-IT-Directory-User");
-      delByName(Workflow.class, "MNB-Workflow-Joiner");
-      delByName(Workflow.class, "MNB-Workflow-Leaver");
-      delByName(EmailTemplate.class, "MNB-EmailTemplate-Joiner-Notify");
-      delByName(Policy.class, "MNB-SOD-Wire-Dual-Control");
+      delMnbByClass(Application.class, false);
+      delMnbByClass(TaskDefinition.class, true);
+      delMnbByClass(Bundle.class, false);
+      delMnbByClass(Workflow.class, false);
+      delMnbByClass(Rule.class, false);
+      delMnbByClass(Policy.class, false);
+      delMnbByClass(EmailTemplate.class, false);
+      delMnbByClass(CorrelationConfig.class, false);
+      delMnbByClass(IdentityTrigger.class, false);
+      delMnbByClass(QuickLink.class, false);
+      delMnbByClass(CertificationDefinition.class, false);
+      delMnbByClass(PasswordPolicy.class, false);
 
       // Best-effort: drop TaskResults whose names mention MNB / Aggregate MNB
       QueryOptions tq = new QueryOptions();
