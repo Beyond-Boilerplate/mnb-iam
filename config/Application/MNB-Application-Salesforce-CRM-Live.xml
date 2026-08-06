@@ -1,20 +1,26 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<!-- Enterprise Lab: Salesforce-shaped CRM via connector-mock SCIM. -->
 <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE" icon="enterpriseIcon" name="MNB-Salesforce-CRM-Live" type="SCIM 2.0">
   <Attributes>
     <Map>
-      <entry key="host" value="http://connector-mock:8091/crm"/>
+      <entry key="authType" value="No Auth"/>
+      <entry key="connectorClass" value="openconnector.connector.scim2.SCIM2Connector"/>
+      <entry key="host" value="http://connector-mock:8091/crm/scim/v2"/>
+      <entry key="pageSize" value="100"/>
+      <entry key="relaxConfiguration">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="scimProvider" value="generic"/>
       <entry key="sysDescriptions">
         <value>
           <Map>
-            <entry key="en_US" value="Meridian CRM SCIM mock (Enterprise Lab). Replaces CSV MNB-Salesforce-CRM when enterprise pack is imported."/>
+      <entry key="en_US" value="Meridian CRM SCIM mock (Enterprise Lab). Replaces CSV MNB-Salesforce-CRM when enterprise pack is imported."/>
           </Map>
         </value>
       </entry>
       <entry key="templateApplication" value="SCIM 2.0 Template"/>
-      <entry key="scimProvider" value="generic"/>
-      <entry key="pageSize" value="100"/>
     </Map>
   </Attributes>
   <Owner>
@@ -29,4 +35,5 @@
       <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" type="string"/>
     </Schema>
   </Schemas>
+  <ApplicationScorecard/>
 </Application>

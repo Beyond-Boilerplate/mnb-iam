@@ -1,26 +1,29 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<!-- Enterprise Lab v3: Entra-shaped Graph/SCIM via connector-mock (not a real Entra tenant).
-     Browser SSO still uses Keycloak. This app is for IIQ account lifecycle / agg labs. -->
 <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE, SYNC_PROVISIONING" icon="directory2Icon" name="MNB-EntraID" type="SCIM 2.0">
   <Attributes>
     <Map>
-      <entry key="host" value="http://connector-mock:8091"/>
-      <entry key="port" value=""/>
+      <entry key="authType" value="No Auth"/>
+      <entry key="connTimeout" value="60"/>
+      <entry key="connectorClass" value="openconnector.connector.scim2.SCIM2Connector"/>
+      <entry key="host" value="http://connector-mock:8091/entra/scim/v2"/>
+      <entry key="pageSize" value="50"/>
+      <entry key="port"/>
+      <entry key="relaxConfiguration">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="schemaDiscovery" value="true"/>
+      <entry key="scimProvider" value="generic"/>
       <entry key="sysDescriptions">
         <value>
           <Map>
-            <entry key="en_US" value="Entra-shaped SCIM/Graph mock at /entra/scim/v2 and /entra/v1. SSO login proofs use Keycloak groups, not this mock alone."/>
+      <entry key="en_US" value="Entra-shaped SCIM/Graph mock at /entra/scim/v2 and /entra/v1. SSO login proofs use Keycloak groups, not this mock alone."/>
           </Map>
         </value>
       </entry>
       <entry key="templateApplication" value="SCIM 2.0 Template"/>
-      <entry key="scimProvider" value="generic"/>
-      <entry key="connTimeout" value="60"/>
-      <entry key="pageSize" value="50"/>
-      <entry key="schemaDiscovery" value="true"/>
-      <!-- Point SCIM base path at Entra-shaped mock (configure in connector UI if host alone is insufficient) -->
-      <entry key="scimBasePath" value="/entra/scim/v2"/>
     </Map>
   </Attributes>
   <Owner>
@@ -40,4 +43,5 @@
       <AttributeDefinition name="displayName" type="string"/>
     </Schema>
   </Schemas>
+  <ApplicationScorecard/>
 </Application>

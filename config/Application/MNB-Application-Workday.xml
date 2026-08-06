@@ -1,10 +1,59 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<!-- Enterprise Lab: Workday-shaped HCM via connector-mock Web Services (not native Workday connector). -->
 <Application authoritative="true" connector="sailpoint.connector.webservices.WebServicesConnector" featuresString="PROVISIONING, ENABLE, DISCOVER_SCHEMA" icon="enterpriseIcon" name="MNB-Workday" type="Web Services">
   <Attributes>
     <Map>
+      <entry key="authenticationMethod" value="No Auth"/>
+      <entry key="connectionParameters">
+        <value>
+          <List>
+            <Map>
+      <entry key="contextUrl" value="/workers"/>
+      <entry key="httpMethodType" value="GET"/>
+      <entry key="operationType" value="Test Connection"/>
+      <entry key="sequenceNumberForEndpoint" value="1"/>
+      <entry key="uniqueNameForEndPoint" value="Test Connection"/>
+            </Map>
+            <Map>
+      <entry key="contextUrl" value="/workers"/>
+      <entry key="httpMethodType" value="GET"/>
+      <entry key="operationType" value="Account Aggregation"/>
+              <entry key="resMappingObj">
+                <value>
+                  <Map>
+                    <entry key="active" value="active"/>
+                    <entry key="department" value="department"/>
+                    <entry key="email" value="email"/>
+                    <entry key="employeeType" value="employeeType"/>
+                    <entry key="firstName" value="firstName"/>
+                    <entry key="hireDate" value="hireDate"/>
+                    <entry key="id" value="id"/>
+                    <entry key="lastName" value="lastName"/>
+                    <entry key="managerId" value="managerId"/>
+                    <entry key="status" value="status"/>
+                    <entry key="title" value="title"/>
+                    <entry key="userName" value="userName"/>
+                    <entry key="workerId" value="workerId"/>
+                  </Map>
+                </value>
+              </entry>
+      <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>2**</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath" value="$.workers"/>
+      <entry key="sequenceNumberForEndpoint" value="2"/>
+      <entry key="uniqueNameForEndPoint" value="Account Aggregation"/>
+            </Map>
+          </List>
+        </value>
+      </entry>
+      <entry key="enableHasMore" value="false"/>
       <entry key="genericWebServiceBaseUrl" value="http://connector-mock:8091/hcm/v1"/>
+      <entry key="managerAttribute" value="managerId"/>
       <entry key="sysDescriptions">
         <value>
           <Map>
@@ -13,36 +62,6 @@
         </value>
       </entry>
       <entry key="templateApplication" value="WebService Template"/>
-      <entry key="connectionParameters">
-        <value>
-          <List>
-            <Map>
-              <entry key="httpMethodType" value="GET"/>
-              <entry key="operationType" value="Test Connection"/>
-              <entry key="contextUrl" value="/workers"/>
-              <entry key="sequenceNumberForEndpoint" value="1"/>
-              <entry key="uniqueNameForEndPoint" value="Test Connection"/>
-            </Map>
-            <Map>
-              <entry key="httpMethodType" value="GET"/>
-              <entry key="operationType" value="Account Aggregation"/>
-              <entry key="contextUrl" value="/workers"/>
-              <entry key="rootPath" value="$.workers"/>
-              <entry key="sequenceNumberForEndpoint" value="2"/>
-              <entry key="uniqueNameForEndPoint" value="Account Aggregation"/>
-              <entry key="responseCode">
-                <value>
-                  <List>
-                    <String>2**</String>
-                  </List>
-                </value>
-              </entry>
-            </Map>
-          </List>
-        </value>
-      </entry>
-      <entry key="authenticationMethod" value="No Auth"/>
-      <entry key="managerAttribute" value="managerId"/>
     </Map>
   </Attributes>
   <Owner>
@@ -65,4 +84,5 @@
       <AttributeDefinition name="hireDate" type="string"/>
     </Schema>
   </Schemas>
+  <ApplicationScorecard/>
 </Application>

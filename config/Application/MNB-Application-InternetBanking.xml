@@ -1,18 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<Application authoritative="false" connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="MNB-InternetBanking" type="DelimitedFile">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="MNB-InternetBanking" type="DelimitedFile">
   <Attributes>
     <Map>
-      <entry key="acctAggregationEnd">
-        <value>
-          <Date>1785630175071</Date>
-        </value>
-      </entry>
-      <entry key="acctAggregationStart">
-        <value>
-          <Date>1785630174932</Date>
-        </value>
-      </entry>
       <entry key="aggregationPartitioned">
         <value>
           <Boolean></Boolean>
@@ -43,7 +33,7 @@
       <entry key="sysDescriptions">
         <value>
           <Map>
-            <entry key="en_US" value="Meridian Internet Banking support extract (IBSI)"/>
+      <entry key="en_US" value="Meridian Internet Banking support extract (IBSI)"/>
           </Map>
         </value>
       </entry>
@@ -62,4 +52,5 @@
       <AttributeDefinition name="accountStatus" type="string"/>
     </Schema>
   </Schemas>
+  <ApplicationScorecard/>
 </Application>

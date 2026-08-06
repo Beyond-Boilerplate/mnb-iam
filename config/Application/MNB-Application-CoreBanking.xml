@@ -1,23 +1,22 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
-<!-- Enterprise Lab: Core Banking JDBC (jdbc-pg). -->
 <Application connector="sailpoint.connector.JDBCConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE" icon="databaseIcon" name="MNB-CoreBanking" type="JDBC">
   <Attributes>
     <Map>
-      <entry key="url" value="jdbc:postgresql://jdbc-pg:5432/mnb_apps"/>
-      <entry key="user" value="mnb"/>
-      <entry key="password" value="mnb"/>
-      <entry key="driverClass" value="org.postgresql.Driver"/>
       <entry key="SQL" value="SELECT account_id, username, email, employee_id, status, entitlement FROM mnb_app_accounts"/>
+      <entry key="driverClass" value="org.postgresql.Driver"/>
       <entry key="getObjectSQL" value="SELECT account_id, username, email, employee_id, status, entitlement FROM mnb_app_accounts WHERE username = &apos;$(identity)&apos;"/>
+      <entry key="password" value="1:ACP:rHr76ZByDSE9VWHS3Aq2+DcVWS/j+elGcarJnWya/Io="/>
       <entry key="sysDescriptions">
         <value>
           <Map>
-            <entry key="en_US" value="Meridian Core Banking accounts (PostgreSQL jdbc-pg)."/>
+      <entry key="en_US" value="Meridian Core Banking accounts (PostgreSQL jdbc-pg)."/>
           </Map>
         </value>
       </entry>
       <entry key="templateApplication" value="JDBC Template"/>
+      <entry key="url" value="jdbc:postgresql://jdbc-pg:5432/mnb_apps"/>
+      <entry key="user" value="mnb"/>
     </Map>
   </Attributes>
   <Owner>
@@ -33,4 +32,5 @@
       <AttributeDefinition entitlement="true" managed="true" name="entitlement" type="string"/>
     </Schema>
   </Schemas>
+  <ApplicationScorecard/>
 </Application>
