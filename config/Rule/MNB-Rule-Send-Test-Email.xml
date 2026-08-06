@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB-Rule-Send-Test-Email">
+  <Description>
+    Lab SMTP proof: send MNB-EmailTemplate-Lab-Test to lab-test@meridiannb.com via
+    configured Notification Settings (mailpit:1025). Use when the UI has no Test Email button.
+  </Description>
+  <Source>
+    <![CDATA[
+      import sailpoint.object.EmailOptions;
+      import sailpoint.object.EmailTemplate;
+      import java.util.HashMap;
+
+      String to = "lab-test@meridiannb.com";
+      String tplName = "MNB-EmailTemplate-Lab-Test";
+      EmailTemplate template = context.getObjectByName(EmailTemplate.class, tplName);
+      if (template == null) {
+        return "FAIL missing EmailTemplate " + tplName
+            + " — import config/EmailTemplate/MNB-EmailTemplate-Lab-Test.xml first";
+      }
+      template = (EmailTemplate) template.deepCopy(context);
+      EmailOptions ops = new EmailOptions(to, new HashMap());
+      context.sendEmailNotification(template, ops);
+      return "OK sent to " + to + " via " + tplName;
+    ]]>
+  </Source>
+</Rule>

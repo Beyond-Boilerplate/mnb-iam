@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate name="MNB-EmailTemplate-Lab-Test">
+  <Description>Minimal template for Lesson 203 Mailpit round-trip (rule-driven; no UI Test Email button required).</Description>
+  <Body>
+Mailpit round-trip OK.
+
+Sent by rule MNB-Rule-Send-Test-Email from the Meridian enterprise lab.
+  </Body>
+  <Subject>Meridian lab SMTP test</Subject>
+</EmailTemplate>
