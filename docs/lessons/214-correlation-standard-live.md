@@ -182,12 +182,42 @@ Enterprise Path never ran classic Lesson **05**, so `userId` may never have been
 4. **Save**, then run **Identity Refresh** with **promote / refresh identity attributes** enabled so existing Workday cubes promote `id` → cube `userId`
 5. Re-open any Application → **Correlation** — Identity Attribute should now list `userId`
 
-> **Watch out — empty correlation rows after the dropdown:** If you pick Application Attribute + Identity Attribute and the grid shows **blank** cells (or Debug `CorrelationConfig` stays an empty `<CorrelationConfig name="…"/>` with no `AttributeAssignments`), `userId` is almost certainly **not Searchable**. Extended identity attrs must have **Searchable = ON** or IIQ will not persist usable AttributeAssignments — selecting from the dropdown is not enough. Fix Searchable, **Save** Identity Mappings, reopen the Application, delete the blank row, add the mapping again, click **Add**, confirm both names appear in the list, then **Save** the Application.
+> **Watch out — dropdown “sets” then goes blank / grid row is empty:** This is usually **not** “Searchable is off.” In Identity Mappings, **Searchable** is implemented as an `extendedNumber` on ObjectConfig (your `userId` already has `extendedNumber="1"`). The failure mode is that AttributeAssignments never land on the CorrelationConfig.
+>
+> Check Debug → `CorrelationConfig` (the name on the app, e.g. `employeeId-corr`). If you see a bare `<CorrelationConfig name="…"/>` with **no** `<AttributeAssignments>`, the UI never persisted the map — even if the dropdowns looked filled for a moment.
+>
+> Fix the click path:
+> 1. Application → **Correlation** → select or type a **Correlation Config** name first
+> 2. Choose **Identity Attribute** = `userId`
+> 3. Choose **Application Attribute** = `employeeNumber` (or that app’s employee-id attr)
+> 4. Click the **Add** control (arrow / +) — do **not** only Save the Application
+> 5. Confirm the **list below** shows both names in the row (not blank cells)
+> 6. **Then** Save the Application
+> 7. Re-open Debug → that CorrelationConfig must show AttributeAssignments
+>
+> If Add still inserts a blank row, or Save keeps an empty config: **stop using the stub.** Import a CorrelationConfig via Debug (XML below), then on the Application pick that **existing** config from the dropdown (do not keep reusing empty `employeeId-corr` / `employeeId` shells).
 
-**Prove Searchable in XML (optional):** Debug → Object Browser → `ObjectConfig` → `Identity` → find `userId`. You want `searchable="true"` (and usually no need for `editMode="ReadOnly"`):
+**Working CorrelationConfig XML (OpenLDAP example — import via Debug → Import):**
 
 ```xml
-<ObjectAttribute displayName="User Id" extendedNumber="1" name="userId" searchable="true" type="string">
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE CorrelationConfig PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<CorrelationConfig name="MNB-OpenLDAP Correlation">
+  <AttributeAssignments>
+    <Filter operation="EQ" property="userId" value="employeeNumber"/>
+  </AttributeAssignments>
+</CorrelationConfig>
+```
+
+- `property` = **identity** attribute (`userId`)
+- `value` = **account** attribute (`employeeNumber`)
+
+Repeat per app (`employee_id`, `externalId`, …) with a distinct config name, or one shared config if every app uses the same account attr name (they do not — prefer one config per app).
+
+**Prove Searchable / extended attr in ObjectConfig (optional):**
+
+```xml
+<ObjectAttribute displayName="User Id" extendedNumber="1" name="userId" type="string">
   <AttributeSource name="id">
     <ApplicationRef>
       <Reference class="sailpoint.object.Application" name="MNB-Workday"/>
@@ -196,10 +226,10 @@ Enterprise Path never ran classic Lesson **05**, so `userId` may never have been
 </ObjectAttribute>
 ```
 
-If `searchable="true"` is missing, add it, import the ObjectConfig, then recreate the Correlation mapping.
+`extendedNumber="1"` **is** Searchable in the Identity Mappings UI. Missing `searchable="true"` on the XML tag alone does not mean the checkbox is off.
 
-- **Why:** correlation and manager resolution both look up cubes by Searchable `userId`. A mapped-but-not-Searchable field either disappears from dropdowns or accepts a click and then saves **empty** AttributeAssignments.
-- **Expect:** Debug on a Workday cube shows `userId=MNB#####` after refresh; Correlation dropdown lists `userId`; added rows show **both** attribute names.
+- **Why:** correlation looks up cubes by extended/searchable `userId`. Empty AttributeAssignments mean every aggregation correlates nothing — dropdown theater without a saved map.
+- **Expect:** Debug CorrelationConfig shows real Filters; Application Correlation list shows non-blank rows after Add.
 
 #### 1a-bis — Make `userId` visible on View Identity → Attributes (UIConfig XML)
 
@@ -382,8 +412,10 @@ Under `~/iiq-lab-evidence/sandbox/214/`, write one sentence explaining why the l
 | No `userId` in Correlation Identity Attribute list | Create Searchable `userId` in Identity Mappings; source from Workday `id`; refresh; reopen app |
 | `userId` in Debug but missing on Attributes tab | Append `userId` to UIConfig `identityViewAttributes` (Task 1a-bis XML) |
 | CorrelationConfig exists but is empty XML | Add AttributeAssignments; confirm Filters in Debug (Task 1b step 6) |
-| Correlation dropdown Add shows blank rows / won’t stick | `userId` not **Searchable** — enable Searchable on Identity Mappings, save, reopen app, re-add mapping |
-| `userId` ObjectConfig missing `searchable="true"` | Edit ObjectConfig Identity XML (Task 1a Watch out), import, recreate CorrelationConfig |
+| Correlation dropdown “sets” then clears / Add inserts blank row | Click **Add** before Application Save; if stub config stays empty, import CorrelationConfig XML and select that existing config (Task 1a Watch out) |
+| `employeeId-corr` / `employeeId` never gain AttributeAssignments | Abandon the empty stub — import a new named CorrelationConfig with Filters, point the app at it |
+| AD-Live mints `Helen Ross` cubes (one AD link, no `userId`) | Wrong CorrelationConfig: app points at JDBC map `userId`←`employee_id`. Use `employeeNumber`→`userId`. Also Samba must have `employeeNumber` populated (`seed-samba.sh`) |
+| AD correlation still fails after correct config | `ldapsearch` Helen — if no `employeeNumber`, re-run `./tools/lab/enterprise/seed-samba.sh` |
 | Duplicate cubes (`helen.ross` + `Helen Ross`) with apps split | Empty/wrong correlation + create-identities minted `cn` ghosts — Task 3a |
 | Transient orphans after reverse-order agg | Re-run Task 2 in documented order |
 | Broken JDBC row not showing uncorrelated | Force a full Account Aggregation — Test Connection is not enough |

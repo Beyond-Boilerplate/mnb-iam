@@ -46,16 +46,37 @@ samba-tool group add 'Wire-Initiators' 2>/dev/null || true
 samba-tool group add 'Wire-Approvers' 2>/dev/null || true
 " || true
 
-# Skip header; create users
+# Skip header; create users (+ set employeeNumber for IIQ correlation)
 tail -n +2 "$CSV" | while IFS=, read -r sam given sn mail emp dept title uac password; do
   [[ -z "$sam" ]] && continue
-  echo "  user $sam"
+  echo "  user $sam ($emp)"
   docker exec "$CONTAINER" bash -lc "
 samba-tool user create '$sam' '$password' \
   --given-name='$given' --surname='$sn' --mail-address='$mail' \
   --job-title='$title' --department='$dept' \
   --userou='OU=People' 2>/dev/null || samba-tool user setpassword '$sam' --newpassword='$password' 2>/dev/null || true
 " || true
+done
+
+# samba-tool user create does not set employeeNumber; IIQ correlates AD employeeNumber → cube userId
+echo "==> Setting employeeNumber on Samba users (correlation key)"
+tail -n +2 "$CSV" | while IFS=, read -r sam given sn mail emp dept title uac password; do
+  [[ -z "$sam" || -z "$emp" ]] && continue
+  docker exec -e SAM="$sam" -e EMP="$emp" -e ADMIN_PASS="$ADMIN_PASS" -e DOMAIN_DN="$DOMAIN_DN" \
+    "$CONTAINER" bash -lc '
+DN=$(ldapsearch -x -H ldap://127.0.0.1 \
+  -D "CN=Administrator,CN=Users,${DOMAIN_DN}" -w "${ADMIN_PASS}" \
+  -b "OU=People,${DOMAIN_DN}" "(sAMAccountName=${SAM})" dn 2>/dev/null \
+  | awk "/^dn:/ {sub(/^dn: /,\"\"); print; exit}")
+[[ -z "$DN" ]] && exit 0
+ldapmodify -x -H ldap://127.0.0.1 \
+  -D "CN=Administrator,CN=Users,${DOMAIN_DN}" -w "${ADMIN_PASS}" <<EOF
+dn: ${DN}
+changetype: modify
+replace: employeeNumber
+employeeNumber: ${EMP}
+EOF
+' 2>/dev/null || true
 done
 
 echo "==> Samba seed finished (check docker logs $CONTAINER if users missing)"
