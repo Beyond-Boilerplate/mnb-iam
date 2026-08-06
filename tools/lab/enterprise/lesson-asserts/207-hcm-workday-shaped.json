@@ -1,0 +1,46 @@
+{
+  "lesson": "207",
+  "stem": "207-hcm-workday-shaped",
+  "title": "HCM Workday-shaped",
+  "checks": [
+    {
+      "id": "app-workday",
+      "type": "app.exists",
+      "name": "MNB-Workday",
+      "assert": "Application MNB-Workday exists"
+    },
+    {
+      "id": "hcm-ui",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/hcm/ui",
+      "assert": "MNB Workday helper UI /hcm/ui up"
+    },
+    {
+      "id": "hcm-workers",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/hcm/v1/workers",
+      "assert": "HCM mock /hcm/v1/workers up"
+    },
+    {
+      "id": "hcm-helen",
+      "type": "json.path_contains",
+      "url": "http://127.0.0.1:8091/hcm/v1/workers",
+      "contains": "helen.ross",
+      "assert": "HCM feed includes helen.ross"
+    },
+    {
+      "id": "identity-helen",
+      "type": "identity.exists",
+      "name": "helen.ross",
+      "soft": true,
+      "assert": "After Aggregate+Refresh: Warehouse has helen.ross (soft until learner completes)"
+    },
+    {
+      "id": "identity-priya",
+      "type": "identity.exists",
+      "name": "priya.wire",
+      "soft": true,
+      "assert": "After Aggregate+Refresh: Warehouse has priya.wire (soft until learner completes)"
+    }
+  ]
+}

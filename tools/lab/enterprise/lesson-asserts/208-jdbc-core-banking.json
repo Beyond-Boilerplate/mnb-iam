@@ -1,0 +1,20 @@
+{
+  "lesson": "208",
+  "stem": "208-jdbc-core-banking",
+  "title": "JDBC Core Banking",
+  "checks": [
+    {
+      "id": "app-corebanking",
+      "type": "app.exists",
+      "name": "MNB-CoreBanking",
+      "assert": "Application MNB-CoreBanking exists"
+    },
+    {
+      "id": "jdbc-pg",
+      "type": "shell.ok",
+      "command": "docker exec mnb-jdbc-sample psql -U mnb -d mnb_apps -tAc 'select 1' | grep -q 1",
+      "assert": "jdbc-pg accepts SQL (mnb_apps)",
+      "soft": true
+    }
+  ]
+}

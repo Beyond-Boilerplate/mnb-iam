@@ -1,0 +1,19 @@
+{
+  "lesson": "212",
+  "stem": "212-employee-portal-sso",
+  "title": "Employee Portal SSO",
+  "checks": [
+    {
+      "id": "portal-health",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8092/health",
+      "assert": "Employee Portal /health up"
+    },
+    {
+      "id": "keycloak-realm",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8085/realms/meridian",
+      "assert": "IdP realm available for SSO"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "lesson": "206",
+  "stem": "206-passthrough-iiq-login",
+  "title": "Pass-through IIQ Login",
+  "checks": [
+    {
+      "id": "app-openldap",
+      "type": "app.exists",
+      "name": "MNB-OpenLDAP",
+      "assert": "Pass-through target Application MNB-OpenLDAP exists"
+    },
+    {
+      "id": "iiq-login",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8080/identityiq/login.jsf",
+      "assert": "IIQ login page reachable for pass-through test"
+    }
+  ]
+}

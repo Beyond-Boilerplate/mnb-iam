@@ -1,0 +1,19 @@
+{
+  "lesson": "209",
+  "stem": "209-wire-webservices",
+  "title": "Wire Web Services",
+  "checks": [
+    {
+      "id": "wire-users",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/users",
+      "assert": "Wire mock GET /users reachable"
+    },
+    {
+      "id": "wire-scim",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/scim/v2/Users",
+      "assert": "Wire SCIM /scim/v2/Users reachable"
+    }
+  ]
+}

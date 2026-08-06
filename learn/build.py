@@ -15,6 +15,9 @@ OUT = ROOT / "learn" / "dist"
 ASSETS_SRC = ROOT / "learn" / "assets"
 MEDIA_SRC = ROOT / "learn" / "media"
 SPECS = ROOT / "tools" / "iiq-verify" / "lesson-specs"
+# Enterprise Sandbox Path (201-255) uses a separate, live-checkable assert set —
+# see tools/lab/enterprise/lesson-asserts/ + tools/academy/serve.py's enterprise route.
+ENTERPRISE_SPECS = ROOT / "tools" / "lab" / "enterprise" / "lesson-asserts"
 # Prefer learn/ copy (present in academy Docker build); fall back to studio catalog.
 AUDIO_HUB_CANDIDATES = (
     ROOT / "learn" / "audio-hub.json",
@@ -190,6 +193,7 @@ SHELL = """<!DOCTYPE html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title} · Meridian IAM Academy</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230b5cab%22/%3E%20%3Ctext%20x%3D%2216%22%20y%3D%2221.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22ui-sans-serif%2Csystem-ui%2C-apple-system%2Csans-serif%22%20font-size%3D%2211%22%20font-weight%3D%22700%22%20fill%3D%22%23ffffff%22%3EAC%3C/text%3E%20%3C/svg%3E" type="image/svg+xml" />
   <meta name="description" content="{description}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -329,9 +333,13 @@ def load_verify_meta(stem: str) -> dict:
     if not path.is_file():
         m = re.match(r"^(\d{3})-", stem)
         if m and 201 <= int(m.group(1)) <= 255:
+            # Enterprise Sandbox lesson: enable live Verify now if
+            # tools/lab/enterprise/lesson-asserts/ has a matching spec.
+            if list(ENTERPRISE_SPECS.glob(f"{m.group(1)}-*.json")):
+                return {"verifyMode": "enterprise", "paperworkNote": ""}
             return {
                 "verifyMode": "paperwork",
-                "paperworkNote": "Enterprise Sandbox Path — mark binder complete when the lesson Done When criteria pass (no classic Verify specs).",
+                "paperworkNote": "Enterprise Sandbox Path — no lesson-assert spec yet under tools/lab/enterprise/lesson-asserts/; mark binder complete when the lesson Done When criteria pass.",
             }
         return {"verifyMode": "lab", "paperworkNote": ""}
     try:

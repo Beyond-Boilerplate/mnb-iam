@@ -1,0 +1,26 @@
+{
+  "lesson": "210",
+  "stem": "210-crm-scim",
+  "title": "CRM via SCIM Mock",
+  "checks": [
+    {
+      "id": "app-crm-live",
+      "type": "app.exists",
+      "name": "MNB-Salesforce-CRM-Live",
+      "assert": "Application MNB-Salesforce-CRM-Live exists"
+    },
+    {
+      "id": "crm-scim-users",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/crm/scim/v2/Users",
+      "assert": "CRM SCIM /crm/scim/v2/Users reachable"
+    },
+    {
+      "id": "crm-helen",
+      "type": "json.path_contains",
+      "url": "http://127.0.0.1:8091/crm/scim/v2/Users",
+      "contains": "helen.ross",
+      "assert": "CRM SCIM feed includes helen.ross"
+    }
+  ]
+}

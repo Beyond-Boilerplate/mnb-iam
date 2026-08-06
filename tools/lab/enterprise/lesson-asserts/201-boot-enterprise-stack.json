@@ -1,0 +1,60 @@
+{
+  "lesson": "201",
+  "stem": "201-boot-enterprise-stack",
+  "title": "Boot the Enterprise Sandbox",
+  "checks": [
+    {
+      "id": "iiq-login",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8080/identityiq/login.jsf",
+      "assert": "IIQ login page reachable on :8080"
+    },
+    {
+      "id": "mcp-health",
+      "type": "mcp.health",
+      "assert": "MCP healthz OK (agent can reach IIQ)"
+    },
+    {
+      "id": "mailpit",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8025/api/v1/info",
+      "assert": "Mailpit API up on :8025"
+    },
+    {
+      "id": "keycloak-realm",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8085/realms/meridian",
+      "assert": "Keycloak meridian realm reachable"
+    },
+    {
+      "id": "hcm-ui",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/hcm/ui",
+      "assert": "MNB Workday helper UI /hcm/ui up"
+    },
+    {
+      "id": "hcm-workers",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/hcm/v1/workers",
+      "assert": "HCM mock workers endpoint up"
+    },
+    {
+      "id": "app-hr",
+      "type": "app.exists",
+      "name": "MNB-HR",
+      "assert": "Setup seeded Application MNB-HR (non-authoritative definition)"
+    },
+    {
+      "id": "app-openldap",
+      "type": "app.exists",
+      "name": "MNB-OpenLDAP",
+      "assert": "Setup seeded Application MNB-OpenLDAP (definition)"
+    },
+    {
+      "id": "app-workday",
+      "type": "app.exists",
+      "name": "MNB-Workday",
+      "assert": "Enterprise pack imported MNB-Workday"
+    }
+  ]
+}

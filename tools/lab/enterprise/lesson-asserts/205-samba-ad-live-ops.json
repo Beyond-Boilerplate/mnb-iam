@@ -1,0 +1,21 @@
+{
+  "lesson": "205",
+  "stem": "205-samba-ad-live-ops",
+  "title": "Samba AD Live Ops",
+  "checks": [
+    {
+      "id": "app-ad-live",
+      "type": "app.exists",
+      "name": "MNB-ActiveDirectory-Live",
+      "assert": "Application MNB-ActiveDirectory-Live exists"
+    },
+    {
+      "id": "samba-ldap",
+      "type": "shell.ok",
+      "command": "docker exec mnb-samba-ad bash -lc 'samba-tool user list 2>/dev/null | head -1' | grep -q .",
+      "assert": "Samba DC can list users (container healthy enough for samba-tool)",
+      "soft": true,
+      "timeout": 60
+    }
+  ]
+}

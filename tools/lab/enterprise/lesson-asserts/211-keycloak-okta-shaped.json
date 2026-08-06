@@ -1,0 +1,19 @@
+{
+  "lesson": "211",
+  "stem": "211-keycloak-okta-shaped",
+  "title": "Keycloak Okta-shaped",
+  "checks": [
+    {
+      "id": "keycloak-realm",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8085/realms/meridian",
+      "assert": "Keycloak meridian realm up"
+    },
+    {
+      "id": "app-okta",
+      "type": "app.exists",
+      "name": "MNB-Okta",
+      "assert": "Application MNB-Okta exists"
+    }
+  ]
+}

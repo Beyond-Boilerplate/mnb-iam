@@ -1,0 +1,50 @@
+{
+  "lesson": "202",
+  "stem": "202-identity-master-and-seed",
+  "title": "Identity Master & Enterprise Seed",
+  "checks": [
+    {
+      "id": "hcm-helen",
+      "type": "json.path_contains",
+      "url": "http://127.0.0.1:8091/hcm/v1/workers",
+      "contains": "helen.ross",
+      "assert": "Live HCM API returns helen.ross (generator fan-out)"
+    },
+    {
+      "id": "hcm-ui",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8091/hcm/ui",
+      "assert": "MNB Workday helper UI /hcm/ui up"
+    },
+    {
+      "id": "app-workday",
+      "type": "app.exists",
+      "name": "MNB-Workday",
+      "assert": "Enterprise seed imported MNB-Workday"
+    },
+    {
+      "id": "app-okta",
+      "type": "app.exists",
+      "name": "MNB-Okta",
+      "assert": "Enterprise seed imported MNB-Okta"
+    },
+    {
+      "id": "app-corebanking",
+      "type": "app.exists",
+      "name": "MNB-CoreBanking",
+      "assert": "Enterprise seed imported MNB-CoreBanking"
+    },
+    {
+      "id": "app-crm-live",
+      "type": "app.exists",
+      "name": "MNB-Salesforce-CRM-Live",
+      "assert": "Enterprise seed imported MNB-Salesforce-CRM-Live"
+    },
+    {
+      "id": "app-ad-live",
+      "type": "app.exists",
+      "name": "MNB-ActiveDirectory-Live",
+      "assert": "Enterprise seed imported MNB-ActiveDirectory-Live"
+    }
+  ]
+}

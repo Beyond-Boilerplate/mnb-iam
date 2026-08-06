@@ -1,0 +1,13 @@
+{
+  "lesson": "213",
+  "stem": "213-gitea-sso-app",
+  "title": "Gitea SSO App",
+  "checks": [
+    {
+      "id": "gitea-api",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8093/api/v1/version",
+      "assert": "Gitea API version endpoint up"
+    }
+  ]
+}

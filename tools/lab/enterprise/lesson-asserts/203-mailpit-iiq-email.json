@@ -1,0 +1,64 @@
+{
+  "lesson": "203",
+  "stem": "203-mailpit-iiq-email",
+  "title": "Catch All Mail in Mailpit",
+  "checks": [
+    {
+      "id": "mailpit-up",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8025/api/v1/info",
+      "assert": "Mailpit catch-all UI/API is up"
+    },
+    {
+      "id": "smtp-notifier-type",
+      "type": "system_config.in",
+      "key": "emailNotifierType",
+      "options": ["smtp", "SMTP", "smtpEmailNotifier", "sailpoint.server.SMTPEmailNotifier"],
+      "assert": "SystemConfiguration emailNotifierType is SMTP (not redirectToFile)"
+    },
+    {
+      "id": "smtp-host",
+      "type": "system_config.eq",
+      "key": "defaultEmailHost",
+      "equals": "mailpit",
+      "assert": "SystemConfiguration defaultEmailHost == mailpit (Docker DNS, not localhost)"
+    },
+    {
+      "id": "smtp-port",
+      "type": "system_config.eq",
+      "key": "defaultEmailPort",
+      "equals": "1025",
+      "assert": "SystemConfiguration defaultEmailPort == 1025 (container SMTP, not host 1026)"
+    },
+    {
+      "id": "smtp-from",
+      "type": "system_config.contains",
+      "key": "defaultEmailFromAddress",
+      "contains": "@",
+      "assert": "SystemConfiguration defaultEmailFromAddress is set"
+    },
+    {
+      "id": "template-lab-test",
+      "type": "object.exists",
+      "objectClass": "EmailTemplate",
+      "name": "MNB-EmailTemplate-Lab-Test",
+      "assert": "Lab EmailTemplate MNB-EmailTemplate-Lab-Test exists (import via send-test-email.sh)",
+      "soft": true
+    },
+    {
+      "id": "rule-send-test",
+      "type": "object.exists",
+      "objectClass": "Rule",
+      "name": "MNB-Rule-Send-Test-Email",
+      "assert": "Lab Rule MNB-Rule-Send-Test-Email exists",
+      "soft": true
+    },
+    {
+      "id": "mailpit-lab-subject",
+      "type": "mailpit.subject",
+      "subject": "Meridian lab SMTP test",
+      "assert": "Mailpit received rule-sent message (subject Meridian lab SMTP test)",
+      "soft": true
+    }
+  ]
+}

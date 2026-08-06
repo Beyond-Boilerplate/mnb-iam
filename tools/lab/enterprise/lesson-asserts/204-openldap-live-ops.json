@@ -1,0 +1,41 @@
+{
+  "lesson": "204",
+  "stem": "204-openldap-live-ops",
+  "title": "OpenLDAP Live Ops",
+  "checks": [
+    {
+      "id": "app-openldap",
+      "type": "app.exists",
+      "name": "MNB-OpenLDAP",
+      "assert": "Application MNB-OpenLDAP exists"
+    },
+    {
+      "id": "task-acct-aggregation",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "MNB-Acct-Aggregation",
+      "assert": "Account Aggregation task MNB-Acct-Aggregation exists (seeded; create if missing)",
+      "soft": true
+    },
+    {
+      "id": "task-group-aggregation",
+      "type": "object.exists",
+      "objectClass": "TaskDefinition",
+      "name": "MNB-OpenLDAP-Group-Aggregation",
+      "assert": "Group Aggregation task MNB-OpenLDAP-Group-Aggregation exists (seeded; create if missing)",
+      "soft": true
+    },
+    {
+      "id": "identity-helen",
+      "type": "identity.exists",
+      "name": "helen.ross",
+      "assert": "helen.ross cube exists for LDAP correlation"
+    },
+    {
+      "id": "phpldapadmin",
+      "type": "http.ok",
+      "url": "http://127.0.0.1:8090/",
+      "assert": "phpLDAPadmin UI reachable"
+    }
+  ]
+}
