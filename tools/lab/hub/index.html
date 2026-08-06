@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian Lab Hub</title>
+  <link rel="icon" href="/icons/hub.svg" type="image/svg+xml" />
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5a6577;
+      --line: #d8dee8;
+      --bg: #f6f8fb;
+      --card: #fff;
+      --accent: #0b5cab;
+      --ent: #6b3fa0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.45;
+    }
+    header {
+      background: linear-gradient(135deg, #0b3d6e 0%, #0b5cab 55%, #1a7a9c 100%);
+      color: #fff;
+      padding: 2rem 1.5rem 1.75rem;
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.65rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+    header h1 img {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.45rem;
+    }
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      max-width: 42rem;
+      font-size: 0.95rem;
+    }
+    main {
+      max-width: 56rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+    h2 {
+      margin: 1.75rem 0 0.65rem;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.35rem;
+    }
+    h2 .tag {
+      display: inline-block;
+      margin-left: 0.5rem;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      vertical-align: middle;
+      border-radius: 3px;
+      background: #efe8f8;
+      color: var(--ent);
+    }
+    ul.svc {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .svc li {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.7rem 0.9rem;
+      display: grid;
+      grid-template-columns: 1.5rem minmax(7.5rem, 10.5rem) 1fr;
+      gap: 0.35rem 0.75rem;
+      align-items: center;
+    }
+    @media (max-width: 560px) {
+      .svc li { grid-template-columns: 1.5rem 1fr; }
+      .svc li a.href,
+      .svc li > .port-line { grid-column: 2; }
+      .svc .meta { grid-column: 1 / -1; }
+    }
+    .svc .ico {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 0.35rem;
+      display: block;
+    }
+    .svc a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .svc a:hover { text-decoration: underline; }
+    .svc .name { font-weight: 650; }
+    .svc .meta {
+      grid-column: 3;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    @media (max-width: 560px) {
+      .svc .meta { grid-column: 1 / -1; }
+    }
+    .svc .port {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .svc .port-line {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .note {
+      margin-top: 2rem;
+      padding: 0.85rem 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      border-left: 3px solid var(--line);
+      background: #eef2f7;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.86em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><img src="/icons/hub.svg" alt="" width="32" height="32" /> Meridian Lab Hub</h1>
+    <p>
+      Index of local IdentityIQ lab services. Links open each app on its own host port
+      (OIDC redirect URIs stay unchanged). Enterprise section needs
+      <code>./tools/lab/docker/up.sh --enterprise</code>.
+    </p>
+  </header>
+  <main>
+    <h2>Core</h2>
+    <ul class="svc">
+      <li>
+        <img class="ico" src="/icons/academy.svg" alt="" width="24" height="24" />
+        <span class="name">Academy</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:4173/">http://localhost:4173/</a>
+        <span class="meta">Lessons, progress, Verify now · <span class="port">:4173</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/iiq.svg" alt="" width="24" height="24" />
+        <span class="name">IdentityIQ</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8080/identityiq">http://localhost:8080/identityiq</a>
+        <span class="meta">UI · <code>spadmin</code> / <code>admin</code> · <span class="port">:8080</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/teller.svg" alt="" width="24" height="24" />
+        <span class="name">Teller</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:4180/">http://localhost:4180/</a>
+        <span class="meta">
+          IIQ chatbot ·
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:4180/console.html">console</a> ·
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:4180/orgchart.html">org chart</a>
+          · <span class="port">:4180</span>
+        </span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/openapi.svg" alt="" width="24" height="24" />
+        <span class="name">OpenAPI</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8765/swagger/">http://localhost:8765/swagger/</a>
+        <span class="meta">Swagger / CORS-safe IIQ proxy · <span class="port">:8765</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/mcp.svg" alt="" width="24" height="24" />
+        <span class="name">MCP</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://127.0.0.1:8766/mcp">http://127.0.0.1:8766/mcp</a>
+        <span class="meta">
+          IdentityIQ MCP · Bearer <code>mnb-lab-mcp-key</code> ·
+          <a target="_blank" rel="noopener noreferrer" href="http://127.0.0.1:8766/healthz">healthz</a>
+          · <span class="port">:8766</span>
+        </span>
+      </li>
+    </ul>
+
+    <h2>Directories &amp; data</h2>
+    <ul class="svc">
+      <li>
+        <img class="ico" src="/icons/ldap.svg" alt="" width="24" height="24" />
+        <span class="name">phpLDAPadmin</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8090/">http://localhost:8090/</a>
+        <span class="meta">
+          Browse OpenLDAP · DN <code>cn=admin,dc=meridiannb,dc=com</code> / <code>admin</code>
+          · <span class="port">:8090</span>
+        </span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/openldap.svg" alt="" width="24" height="24" />
+        <span class="name">OpenLDAP</span>
+        <span class="port-line">ldap://localhost:389</span>
+        <span class="meta">Corp directory · same admin bind as LDAP UI · <span class="port">:389</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/dbviewer.svg" alt="" width="24" height="24" />
+        <span class="name">DB viewer</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:9001/">http://localhost:9001/</a>
+        <span class="meta">
+          Adminer · baked-in <code>IIQ_Postgres</code> / <code>IIQ_identityiq</code> / <code>JDBC_Lab</code>
+          · Auto Sign-In · <span class="port">:9001</span>
+        </span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/postgres.svg" alt="" width="24" height="24" />
+        <span class="name">Postgres (IIQ)</span>
+        <span class="port-line">localhost:5433</span>
+        <span class="meta">
+          IIQ DB publish · browse via
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:9001/">DB viewer</a>
+          · <span class="port">:5433</span> → 5432
+        </span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/jdbc.svg" alt="" width="24" height="24" />
+        <span class="name">JDBC lab</span>
+        <span class="port-line">localhost:5435</span>
+        <span class="meta">
+          Core banking DB <code>mnb</code> / <code>mnb</code> @ <code>mnb_apps</code>
+          · browse via
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:9001/">DB viewer</a>
+          · <span class="port">:5435</span>
+        </span>
+      </li>
+    </ul>
+
+    <h2>Connectors &amp; mocks</h2>
+    <ul class="svc">
+      <li>
+        <img class="ico" src="/icons/mock.svg" alt="" width="24" height="24" />
+        <span class="name">connector-mock</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8091/">http://localhost:8091/</a>
+        <span class="meta">
+          Wire + SCIM + HCM + CRM + ITSM ·
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:8091/health">health</a> ·
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:8091/hcm/ui">MNB Workday UI</a>
+          · <span class="port">:8091</span>
+        </span>
+      </li>
+    </ul>
+
+    <h2>Enterprise SSO &amp; ops <span class="tag">requires --enterprise</span></h2>
+    <ul class="svc">
+      <li>
+        <img class="ico" src="/icons/keycloak.svg" alt="" width="24" height="24" />
+        <span class="name">Keycloak</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8085/">http://localhost:8085/</a>
+        <span class="meta">
+          Okta-shaped IdP · realm <code>meridian</code> ·
+          <code>admin</code> / <code>admin</code> ·
+          <a target="_blank" rel="noopener noreferrer" href="http://localhost:8085/admin/">admin console</a>
+          · <span class="port">:8085</span>
+        </span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/portal.svg" alt="" width="24" height="24" />
+        <span class="name">Employee Portal</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8092/">http://localhost:8092/</a>
+        <span class="meta">OIDC login proof · try <code>helen.ross</code> / <code>LabUser1!</code> · <span class="port">:8092</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/gitea.svg" alt="" width="24" height="24" />
+        <span class="name">Gitea</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8093/">http://localhost:8093/</a>
+        <span class="meta">Second SSO app (OIDC via Keycloak) · <span class="port">:8093</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/workstation.svg" alt="" width="24" height="24" />
+        <span class="name">Workstation</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8094/">http://localhost:8094/</a>
+        <span class="meta">Laptop gate · group <code>mnb-workstation-users</code> · <span class="port">:8094</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/hr.svg" alt="" width="24" height="24" />
+        <span class="name">HR Intranet</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8095/">http://localhost:8095/</a>
+        <span class="meta">HR Self-Service SSO · group <code>mnb-hr-intranet</code> · <span class="port">:8095</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/finance.svg" alt="" width="24" height="24" />
+        <span class="name">Finance Portal</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8096/">http://localhost:8096/</a>
+        <span class="meta">Finance SSO · group <code>mnb-finance-portal</code> · <span class="port">:8096</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/mailpit.svg" alt="" width="24" height="24" />
+        <span class="name">Mailpit</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8025/">http://localhost:8025/</a>
+        <span class="meta">Catch-all mail UI · IIQ SMTP → <code>mailpit:1025</code> · <span class="port">:8025</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/vault.svg" alt="" width="24" height="24" />
+        <span class="name">Vault</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8200/ui">http://localhost:8200/ui</a>
+        <span class="meta">HashiCorp Vault · lab token <code>mnb-lab-vault-root</code> · <span class="port">:8200</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/pam.svg" alt="" width="24" height="24" />
+        <span class="name">PAM lab</span>
+        <a class="href" target="_blank" rel="noopener noreferrer" href="http://localhost:8097/">http://localhost:8097/</a>
+        <span class="meta">CyberArk-shaped safes / checkout · <span class="port">:8097</span></span>
+      </li>
+      <li>
+        <img class="ico" src="/icons/samba.svg" alt="" width="24" height="24" />
+        <span class="name">Samba AD</span>
+        <span class="port-line">ldap://localhost:3890</span>
+        <span class="meta">Corporate AD (Samba DC) · see <code>lab-data/enterprise/samba/README.md</code> · <span class="port">:3890</span></span>
+      </li>
+    </ul>
+
+    <p class="note">
+      Start core: <code>./tools/lab/docker/up.sh</code> ·
+      Enterprise: <code>./tools/lab/docker/up.sh --enterprise</code> ·
+      Guide: <code>docs/ENTERPRISE-LAB-V2.md</code>
+    </p>
+  </main>
+</body>
+</html>

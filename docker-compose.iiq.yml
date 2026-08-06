@@ -6,6 +6,8 @@
 #   # or: docker compose -f docker-compose.iiq.yml up -d --build
 #
 # URLs:
+#   Lab hub   http://localhost:9000/  (TOC of all local services)
+#   DB viewer http://localhost:9001/  (Adminer — IIQ Postgres + JDBC lab, one-click)
 #   Academy   http://localhost:4173/
 #   IIQ       http://localhost:8080/identityiq  (spadmin / admin)
 #   OpenAPI   http://localhost:8765/swagger/
@@ -26,6 +28,27 @@
 name: mnb-iiq-lab
 
 services:
+  # Static TOC of all lab URLs — starts immediately (no IIQ dependency)
+  lab-hub:
+    image: nginx:1.27-alpine
+    container_name: mnb-lab-hub
+    ports:
+      - "${LAB_HUB_PORT:-9000}:80"
+    volumes:
+      - ./tools/lab/hub/index.html:/usr/share/nginx/html/index.html:ro
+      - ./tools/lab/hub/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./tools/lab/hub/icons:/usr/share/nginx/html/icons:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
   openldap:
     build:
       context: .
@@ -114,6 +137,34 @@ services:
       timeout: 5s
       retries: 10
       start_period: 15s
+
+  # Adminer with baked-in IIQ Postgres + JDBC lab connections (dropdown + Auto Sign-In)
+  db-viewer:
+    image: ${DB_VIEWER_IMAGE:-dockette/adminer:postgres}
+    container_name: mnb-db-viewer
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jdbc-pg:
+        condition: service_healthy
+    environment:
+      ADMINER_PLUGIN_SERVER_LIST: "1"
+      # Suffix after ADMINER_SERVERS_ is the dropdown label
+      ADMINER_SERVERS_IIQ_Postgres: "pgsql://postgres:postgres@postgres:5432/identityiq"
+      ADMINER_SERVERS_IIQ_identityiq: "pgsql://identityiq:identityiq@postgres:5432/identityiq"
+      ADMINER_SERVERS_JDBC_Lab: "pgsql://mnb:mnb@jdbc-pg:5432/mnb_apps"
+    ports:
+      - "${DB_VIEWER_PORT:-9001}:80"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://127.0.0.1/ || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
 
   # Wire Portal REST + SCIM 2.0 mock for Lessons 68–69
   connector-mock:
