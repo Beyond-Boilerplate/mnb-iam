@@ -1,0 +1,58 @@
+---
+title: Staff Claude Code
+description: Free static curriculum for staff engineers — skills, hooks, agents, MCP, CLI, and ops playbooks. Zero tokens to learn.
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<div class="hero-band">
+  <p class="hero-band__eyebrow">Staff engineering · static curriculum</p>
+  <h1 class="hero-band__title">Staff Claude Code</h1>
+  <p class="hero-band__lede">
+    Go from chatty prompts to orchestrated skills, hooks, subagents, and MCP —
+    with copy-paste templates. Learning here costs zero API tokens.
+  </p>
+  <div class="hero-actions">
+    <a class="primary" href="/guides/get-started/">Get started →</a>
+    <a class="ghost" href="/guides/roadmap/">Find your level</a>
+    <a class="ghost" href="/progress/">Progress board</a>
+  </div>
+</div>
+
+## Why this exists
+
+Official docs describe features. This guide teaches **staff judgment**: when to use a skill vs a hook vs a subagent vs MCP — with labs you run in your own repo.
+
+You do **not** need Claude open to learn. Read here, copy templates, practice in the terminal.
+
+## How to move through it
+
+<CardGrid>
+  <Card title="1. Find your level" icon="approve-check">
+    Use the [roadmap](/guides/roadmap/) checkboxes — no quiz bot, no tokens.
+  </Card>
+  <Card title="2. Work a module" icon="document">
+    Open a module, follow the walkthrough, save work under `lessons/artifacts/`.
+  </Card>
+  <Card title="3. Track progress" icon="puzzle">
+    Tick the [progress board](/progress/) (browser-local only).
+  </Card>
+</CardGrid>
+
+## Modules
+
+<div class="module-grid">
+  <a class="module-card" href="/modules/01-slash-commands/"><div class="module-card__num">01</div><div class="module-card__title">Slash commands</div><p class="module-card__meta">~30–45 min · Beginner</p></a>
+  <a class="module-card" href="/modules/02-memory/"><div class="module-card__num">02</div><div class="module-card__title">Memory</div><p class="module-card__meta">~45 min · Beginner+</p></a>
+  <a class="module-card" href="/modules/03-skills/"><div class="module-card__num">03</div><div class="module-card__title">Skills</div><p class="module-card__meta">~1 h · Intermediate</p></a>
+  <a class="module-card" href="/modules/04-subagents/"><div class="module-card__num">04</div><div class="module-card__title">Subagents</div><p class="module-card__meta">~1–1.5 h · Intermediate+</p></a>
+  <a class="module-card" href="/modules/05-mcp/"><div class="module-card__num">05</div><div class="module-card__title">MCP</div><p class="module-card__meta">~1 h · Intermediate+</p></a>
+  <a class="module-card" href="/modules/06-hooks/"><div class="module-card__num">06</div><div class="module-card__title">Hooks</div><p class="module-card__meta">~1 h · Intermediate</p></a>
+  <a class="module-card" href="/modules/07-plugins/"><div class="module-card__num">07</div><div class="module-card__title">Plugins</div><p class="module-card__meta">~45 min · Advanced</p></a>
+  <a class="module-card" href="/modules/08-checkpoints/"><div class="module-card__num">08</div><div class="module-card__title">Checkpoints</div><p class="module-card__meta">~45 min · Intermediate</p></a>
+  <a class="module-card" href="/modules/09-advanced/"><div class="module-card__num">09</div><div class="module-card__title">Advanced</div><p class="module-card__meta">~1–2 h · Advanced</p></a>
+  <a class="module-card" href="/modules/10-cli/"><div class="module-card__num">10</div><div class="module-card__title">CLI</div><p class="module-card__meta">~45 min · Beginner+ / Adv</p></a>
+  <a class="module-card" href="/modules/11-ops-playbooks/"><div class="module-card__num">11</div><div class="module-card__title">Ops playbooks</div><p class="module-card__meta">~2 h · Advanced</p></a>
+</div>
+
+<LinkCard title="Feature catalog" href="/guides/catalog/" description="Quick install cheatsheet for every primitive." />

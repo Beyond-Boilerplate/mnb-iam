@@ -1,0 +1,31 @@
+{
+  "//": "Snippet to merge into your project's .claude/settings.json. Do not replace your whole settings file with this — merge the 'hooks' key in alongside your existing 'permissions' key.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-secrets.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-protected-path.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"[$(date -u +%FT%TZ)] tool=PostToolUse\" >> \"$CLAUDE_PROJECT_DIR/.claude/hooks.log\""
+          }
+        ]
+      }
+    ]
+  }
+}

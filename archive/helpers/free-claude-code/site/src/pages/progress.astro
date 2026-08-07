@@ -1,0 +1,117 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+---
+
+<StarlightPage frontmatter={{ title: 'Progress board', description: 'Interactive checklist — browser localStorage only, zero tokens.' }}>
+  <p><span class="token-free-badge">Local only · no tokens</span></p>
+  <p>
+    Tick modules when <strong>acceptance criteria</strong> are done (not when you only finished reading).
+    Progress saves in this browser. Mirror honest completion into <code>lessons/progress.md</code> if you want it in git.
+  </p>
+
+  <div class="progress-shell" id="progress-root">
+    <p id="pct">0% complete</p>
+    <div class="progress-bar" aria-hidden="true"><span id="fill"></span></div>
+    <div id="sections"></div>
+    <p style="margin-top:1.25rem">
+      <button type="button" id="reset" style="cursor:pointer;padding:0.4rem 0.75rem;border-radius:8px;border:1px solid var(--sl-color-gray-4);background:transparent;color:inherit">
+        Reset local progress
+      </button>
+    </p>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const LEVELS = [
+        {
+          title: "Level 1 — Foundations",
+          items: [
+            { id: "01", label: "01 — Slash commands", href: "/modules/01-slash-commands/" },
+            { id: "02", label: "02 — Memory", href: "/modules/02-memory/" },
+            { id: "08", label: "08 — Checkpoints", href: "/modules/08-checkpoints/" },
+            { id: "10a", label: "10 — CLI (basics)", href: "/modules/10-cli/" }
+          ]
+        },
+        {
+          title: "Level 2 — Automation",
+          items: [
+            { id: "03", label: "03 — Skills", href: "/modules/03-skills/" },
+            { id: "06", label: "06 — Hooks", href: "/modules/06-hooks/" },
+            { id: "05", label: "05 — MCP", href: "/modules/05-mcp/" },
+            { id: "04", label: "04 — Subagents", href: "/modules/04-subagents/" }
+          ]
+        },
+        {
+          title: "Level 3 — Power user",
+          items: [
+            { id: "09", label: "09 — Advanced", href: "/modules/09-advanced/" },
+            { id: "07", label: "07 — Plugins", href: "/modules/07-plugins/" },
+            { id: "10b", label: "10 — CLI (headless / CI)", href: "/modules/10-cli/" },
+            { id: "11", label: "11 — Ops playbooks", href: "/modules/11-ops-playbooks/" }
+          ]
+        },
+        {
+          title: "Capstone",
+          items: [{ id: "cap", label: "Teach-back demo under artifacts/demos/", href: "/modules/11-ops-playbooks/" }]
+        }
+      ];
+
+      const KEY = "staff-claude-curriculum-progress-v1";
+      const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+      const sections = document.getElementById("sections");
+      const fill = document.getElementById("fill");
+      const pct = document.getElementById("pct");
+
+      function save() {
+        localStorage.setItem(KEY, JSON.stringify(state));
+        updatePct();
+      }
+
+      function updatePct() {
+        const ids = LEVELS.flatMap((l) => l.items.map((i) => i.id));
+        const done = ids.filter((id) => state[id]).length;
+        const p = ids.length ? Math.round((done / ids.length) * 100) : 0;
+        fill.style.width = p + "%";
+        pct.textContent = p + "% complete (" + done + "/" + ids.length + ")";
+      }
+
+      LEVELS.forEach((level) => {
+        const wrap = document.createElement("div");
+        wrap.className = "progress-section";
+        const h = document.createElement("h3");
+        h.textContent = level.title;
+        wrap.appendChild(h);
+        level.items.forEach((item) => {
+          const lab = document.createElement("label");
+          if (state[item.id]) lab.classList.add("done");
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = !!state[item.id];
+          cb.addEventListener("change", () => {
+            state[item.id] = cb.checked;
+            lab.classList.toggle("done", cb.checked);
+            save();
+          });
+          const span = document.createElement("span");
+          const a = document.createElement("a");
+          a.href = item.href;
+          a.textContent = item.label;
+          span.appendChild(a);
+          lab.appendChild(cb);
+          lab.appendChild(span);
+          wrap.appendChild(lab);
+        });
+        sections.appendChild(wrap);
+      });
+
+      document.getElementById("reset").addEventListener("click", () => {
+        if (confirm("Clear local progress checkboxes?")) {
+          localStorage.removeItem(KEY);
+          location.reload();
+        }
+      });
+
+      updatePct();
+    })();
+  </script>
+</StarlightPage>

@@ -1,0 +1,43 @@
+{
+  "_comment": "Template only. Illustrates permission-mode settings shapes — no secrets, no real repo paths. Adapt keys/values to your actual settings schema/version before use.",
+
+  "example_project_default_plan_mode": {
+    "_use_case": "New/unfamiliar repo: default every session into Plan mode so nothing edits source until a plan is approved.",
+    "defaultMode": "plan"
+  },
+
+  "example_ci_locked_down": {
+    "_use_case": "Scripted/CI run: only pre-approved tools execute, nothing prompts because nothing is watching.",
+    "defaultMode": "dontAsk",
+    "permissions": {
+      "allow": [
+        "Bash(npm test)",
+        "Bash(npm run lint)",
+        "Read"
+      ],
+      "deny": [
+        "Bash(git push*)",
+        "Bash(rm -rf*)"
+      ]
+    }
+  },
+
+  "example_trusted_iteration": {
+    "_use_case": "Fast local iteration on non-critical code: accept routine file edits, still ask for anything else.",
+    "defaultMode": "acceptEdits"
+  },
+
+  "example_disable_bypass_org_wide": {
+    "_use_case": "Org policy: never allow bypassPermissions mode, even in a session that requests it.",
+    "permissions": {
+      "disableBypassPermissionsMode": true
+    }
+  },
+
+  "example_auto_mode_trust_scope": {
+    "_use_case": "Auto mode: extend classifier trust to one extra internal registry/domain beyond the working repo.",
+    "autoMode": {
+      "trustedDomains": ["registry.internal.example.com"]
+    }
+  }
+}

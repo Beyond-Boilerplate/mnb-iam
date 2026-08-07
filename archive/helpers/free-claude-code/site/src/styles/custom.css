@@ -1,0 +1,261 @@
+/* Staff Claude Code — static curriculum theme
+   Ink + teal instrument panel. Not purple-gradient AI defaults. */
+
+:root {
+  --sc-ink: #071018;
+  --sc-panel: #0d1a24;
+  --sc-line: #1e3344;
+  --sc-teal: #2ec4b6;
+  --sc-teal-dim: #1a8f85;
+  --sc-mist: #c5d4de;
+  --sc-bright: #e8f1f5;
+  --sc-warn: #e8b86d;
+}
+
+/* Starlight CSS vars */
+:root,
+starlight-theme-dark {
+  --sl-color-accent-low: #0f2f2c;
+  --sl-color-accent: #2ec4b6;
+  --sl-color-accent-high: #7ee8dc;
+  --sl-color-white: var(--sc-bright);
+  --sl-color-gray-1: #d5e0e8;
+  --sl-color-gray-2: #a8bac8;
+  --sl-color-gray-3: #6d8496;
+  --sl-color-gray-4: #3d5566;
+  --sl-color-gray-5: #1e3344;
+  --sl-color-gray-6: #0d1a24;
+  --sl-color-black: #071018;
+  --sl-font: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+starlight-theme-light {
+  --sl-color-accent-low: #d7f5f1;
+  --sl-color-accent: #0f7a72;
+  --sl-color-accent-high: #06554f;
+  --sl-font: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+/* Hero / landing atmosphere */
+.hero-band {
+  position: relative;
+  margin: -1.5rem -1rem 2rem;
+  padding: 3.5rem 1.5rem 3rem;
+  border-radius: 0 0 1.25rem 1.25rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(46, 196, 182, 0.22), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 90% 20%, rgba(232, 184, 109, 0.12), transparent 50%),
+    linear-gradient(165deg, #071018 0%, #0d1a24 55%, #0a1520 100%);
+  border-bottom: 1px solid var(--sc-line);
+  overflow: hidden;
+}
+
+.hero-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(46, 196, 182, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 196, 182, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black 30%, transparent 95%);
+  pointer-events: none;
+}
+
+.hero-band__eyebrow {
+  position: relative;
+  font-family: var(--sl-font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sc-teal);
+  margin: 0 0 0.75rem;
+}
+
+.hero-band__title {
+  position: relative;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--sc-bright);
+  margin: 0 0 1rem;
+  max-width: 14ch;
+}
+
+.hero-band__lede {
+  position: relative;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--sc-mist);
+  max-width: 36rem;
+  margin: 0 0 1.75rem;
+}
+
+.hero-actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hero-actions a:hover {
+  transform: translateY(-1px);
+}
+
+.hero-actions a.primary {
+  background: var(--sc-teal);
+  color: #04201c;
+  box-shadow: 0 0 0 1px rgba(46, 196, 182, 0.4), 0 8px 24px rgba(46, 196, 182, 0.2);
+}
+
+.hero-actions a.ghost {
+  background: transparent;
+  color: var(--sc-bright);
+  border: 1px solid var(--sc-line);
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.module-card {
+  display: block;
+  padding: 1rem 1.1rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--sl-color-gray-5);
+  background: linear-gradient(145deg, rgba(46, 196, 182, 0.06), transparent 60%);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.module-card:hover {
+  border-color: var(--sc-teal);
+  transform: translateY(-2px);
+}
+
+.module-card__num {
+  font-family: var(--sl-font-mono);
+  font-size: 0.75rem;
+  color: var(--sc-teal);
+}
+
+.module-card__title {
+  font-weight: 600;
+  margin: 0.25rem 0 0.35rem;
+}
+
+.module-card__meta {
+  font-size: 0.85rem;
+  color: var(--sl-color-gray-3);
+  margin: 0;
+}
+
+/* Progress board */
+.progress-shell {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  background: var(--sl-color-gray-6);
+}
+
+.progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--sl-color-gray-5);
+  overflow: hidden;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.progress-bar > span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--sc-teal-dim), var(--sc-teal));
+  transition: width 0.25s ease;
+}
+
+.progress-section {
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--sl-color-gray-5);
+}
+
+.progress-section h3 {
+  font-size: 0.95rem;
+  color: var(--sc-teal);
+  margin: 0 0 0.5rem;
+}
+
+.progress-section label {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.45rem 0;
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.progress-section label.done span {
+  color: var(--sc-teal);
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.token-free-badge {
+  display: inline-block;
+  font-family: var(--sl-font-mono);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--sc-teal-dim);
+  color: var(--sc-teal);
+  margin-bottom: 1rem;
+}
+
+/* Subtle motion */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-band__title {
+    animation: rise 0.7s ease both;
+  }
+  .hero-band__lede {
+    animation: rise 0.7s ease 0.08s both;
+  }
+  .hero-actions {
+    animation: rise 0.7s ease 0.14s both;
+  }
+  .module-card {
+    animation: rise 0.5s ease both;
+  }
+  .module-card:nth-child(2) { animation-delay: 0.04s; }
+  .module-card:nth-child(3) { animation-delay: 0.08s; }
+  .module-card:nth-child(4) { animation-delay: 0.12s; }
+  .module-card:nth-child(5) { animation-delay: 0.16s; }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

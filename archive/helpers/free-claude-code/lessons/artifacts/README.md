@@ -1,12 +1,14 @@
 # Artifacts landing zone
 
-Create subfolders as you complete days:
+Store **your** deliverables here as you complete modules. Promote into real `.claude/` paths only after you would trust them in a work session.
 
-- `skills/` — SKILL.md trees (promote from drafts after Day 14 eval)
-- `hooks/` — scripts + policy packs
-- `agents/` — specialist prompts + reports/
-- `mcp/` — configs, specs, fixtures
-- `playbooks/` — health, SSB loop, on-call, CAB
-- `demos/` — Day 30 script + proof
+| Folder | Put here |
+| --- | --- |
+| `skills/` | `SKILL.md` trees |
+| `hooks/` | Hook scripts + settings snippets |
+| `agents/` | Subagent definitions |
+| `mcp/` | MCP config examples (no secrets) |
+| `playbooks/` | Reusable prompt packs |
+| `demos/` | Capstone teach-back notes |
 
-Do not store secrets here.
+Acceptance for a module means the artifact exists **and** you used it once successfully — not that you only copied a template.

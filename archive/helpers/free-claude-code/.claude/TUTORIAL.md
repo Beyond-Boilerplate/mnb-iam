@@ -1,29 +1,33 @@
-Connect JIRA to claude
-> claude mcp add --scope user --transport sse jira https://mcp.atlassian.com/v1/sse
-> claude 
-> /mcp -> select the jira mcp and enable + authenticate
-> give me a title of 1 story that is in todo column -> test the connection
+# Quick notes
 
-Create a statusline
-> cd ~/.claude && touch statusliine.sh
-> chmod +x ~/.claude/statusline.sh
-> add the below block to ~/.claude/settings.json
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "~/.claude/statusline.sh",
-    "padding": 2,
-    "refreshInterval": 5
-  },
-  "hideVimModeIndicator": true
-}
+## Learn (zero tokens)
+
+```bash
+cd archive/helpers/free-claude-code/site
+npm install && npm run dev
 ```
 
-Daily Usage
-> shift + tab --> toggle claude modes
+Open Get started → modules. Progress: `/progress/`.
 
-> /init --> create project's claude.md file
+## Optional: practice with Claude later
 
-Diagnosis
-> Ctrl+E  -> to show an explanation of the command: what it does, why Claude is running it, and what could go wrong, labeled Low risk, Med risk, or High risk
+Only when you want live practice (uses tokens):
+
+```bash
+cd /path/to/your-project
+claude   # or cc after setup-cc-free.sh
+```
+
+## Connect Jira (optional MCP)
+
+```text
+claude mcp add --scope user --transport sse jira https://mcp.atlassian.com/v1/sse
+```
+
+Never paste API tokens into chat.
+
+## Daily usage
+
+- Shift+Tab — toggle modes
+- `/init` — draft project `CLAUDE.md` (then slim it — module 02)
+- Ctrl+E — explain a pending tool command’s risk

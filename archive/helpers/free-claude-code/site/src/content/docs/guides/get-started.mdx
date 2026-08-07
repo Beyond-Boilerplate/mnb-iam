@@ -1,0 +1,92 @@
+---
+title: Get started
+description: Zero-token path to begin the Staff Claude Code curriculum.
+sidebar:
+  order: 1
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+<span class="token-free-badge">Zero tokens</span>
+
+This path uses only this static site, your editor, and the terminal. Claude Code is for **practice later**, not required to read the material.
+
+## Before you start
+
+- A mid-size git repo to practice in (this monorepo works)
+- Node optional (only if you run this site locally)
+- Claude Code **optional** until you want to try a template live
+
+<Aside type="tip" title="Learning is free">
+Reading these pages and copying templates does not call a model. You only spend tokens if you later open Claude and ask it to implement something.
+</Aside>
+
+## Walkthrough
+
+<Steps>
+
+1. **Skim the roadmap**
+
+   Open [Learning roadmap](/guides/roadmap/) and tick what you already know. That picks your entry module — no interactive quiz required.
+
+2. **Open module 01 (or your level’s start)**
+
+   Beginners: [01 — Slash commands](/modules/01-slash-commands/).  
+   Download templates from the module page (`/templates/01-slash-commands/…`) or copy from the repo:
+
+   ```bash
+   cd archive/helpers/free-claude-code
+   ls lessons/01-slash-commands/
+   ```
+
+3. **Install one skill into a real project**
+
+   ```bash
+   mkdir -p /path/to/your-project/.claude/skills
+   cp -R lessons/01-slash-commands/optimize /path/to/your-project/.claude/skills/
+   cp -R lessons/01-slash-commands/pr /path/to/your-project/.claude/skills/
+   ```
+
+4. **Try it when ready (optional — uses tokens)**
+
+   Only when you want live practice:
+
+   ```bash
+   cd /path/to/your-project
+   claude   # or: cc
+   ```
+
+   Then run `/optimize` or `/pr`. Skip this step entirely if you are only studying today.
+
+5. **Track completion**
+
+   Use the [Progress board](/progress/) (browser localStorage) and/or tick `lessons/progress.md` in the repo when acceptance criteria are honestly done.
+
+</Steps>
+
+## Run this site locally
+
+```bash
+cd archive/helpers/free-claude-code/site
+npm install
+npm run sync    # pull latest module markdown from ../lessons
+npm run dev
+```
+
+Open the URL Astro prints (usually `http://localhost:4321`).
+
+## Deploy (static)
+
+```bash
+npm run sync && npm run build
+```
+
+Publish the `dist/` folder to GitHub Pages, Netlify, S3, etc. For a project-pages URL set:
+
+```bash
+SITE_URL=https://you.github.io SITE_BASE=/your-repo/ npm run build
+```
+
+## What we removed from the critical path
+
+In-Claude `/self-assessment`, `/lesson-quiz`, `/start-module`, and `/mark-complete` are **not** required. Those skills (if still present under `.claude/skills/`) cost tokens — treat them as optional experiments only.

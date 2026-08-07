@@ -1,0 +1,12 @@
+{
+  "//": "Example only. No secrets in this file — the token comes from your shell env, not from this JSON. Adapt paths/args to whichever GitHub MCP server binary or npx package you use.",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

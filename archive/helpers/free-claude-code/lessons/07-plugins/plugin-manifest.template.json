@@ -1,0 +1,21 @@
+{
+  "name": "pr-review-pack",
+  "version": "0.1.0",
+  "description": "Template only — replace with your real pack. Bundles the skill/hook/agent that always travel together for PR review.",
+  "author": {
+    "name": "<your team>"
+  },
+  "keywords": ["pr-review", "ci", "guardrails"],
+
+  "_comment_skills": "Default location ./skills/ is auto-discovered — leave this field out unless your skills live somewhere else.",
+  "skills": "./skills/",
+
+  "_comment_agents": "Default location ./agents/ is auto-discovered — leave this field out unless your agents live somewhere else.",
+  "agents": "./agents/",
+
+  "_comment_hooks": "Only declare this if hooks.json is NOT at the default ./hooks/hooks.json path.",
+  "hooks": "./hooks/hooks.json",
+
+  "_comment_mcpServers": "Only declare this if config is NOT at the default ./.mcp.json path.",
+  "mcpServers": "./.mcp.json"
+}

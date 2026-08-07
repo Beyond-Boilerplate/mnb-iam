@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Claude Code — Learning Progress</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6c8cff;
+      --text: #e2e8f0;
+      --muted: #8892b0;
+      --done: #4ade80;
+      --radius: 10px;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+    header, main { max-width: 860px; margin: 0 auto; }
+    header h1 { font-size: 1.75rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    header p { color: var(--muted); line-height: 1.5; margin-bottom: 1rem; }
+    .note {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .bar {
+      height: 10px;
+      background: var(--surface2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 1rem 0 0.35rem;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--done));
+      transition: width 0.25s ease;
+    }
+    #pct { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.25rem 0.5rem;
+      margin-bottom: 1rem;
+    }
+    section h2 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--accent); }
+    label {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      line-height: 1.4;
+    }
+    section label:last-child { border-bottom: none; }
+    label.done span { color: var(--done); text-decoration: line-through; opacity: 0.85; }
+    input[type=checkbox] { margin-top: 0.2rem; accent-color: var(--done); }
+    footer {
+      max-width: 860px;
+      margin: 2rem auto 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    button {
+      margin-top: 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { color: var(--text); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Staff Claude Code — progress</h1>
+    <p>Local checklist board. Syncs to your browser only. Mirror honest ticks into <code>lessons/progress.md</code>.</p>
+    <div class="note"><strong>Token note:</strong> This page is free. In-Claude <code>/lesson-quiz</code> and <code>/self-assessment</code> use model tokens.</div>
+    <div class="bar" aria-hidden="true"><span id="fill"></span></div>
+    <div id="pct">0% complete</div>
+  </header>
+  <main id="app"></main>
+  <footer>
+    <button type="button" id="reset">Reset local progress</button>
+    <p style="margin-top:1rem">Source of truth for the curriculum: <code>lessons/</code> markdown modules. This HTML is a companion only.</p>
+  </footer>
+  <script>
+    const LEVELS = [
+      {
+        title: "Level 1 — Foundations",
+        items: [
+          { id: "01", label: "01 — Slash commands" },
+          { id: "02", label: "02 — Memory" },
+          { id: "08", label: "08 — Checkpoints" },
+          { id: "10a", label: "10 — CLI (basics)" }
+        ]
+      },
+      {
+        title: "Level 2 — Automation",
+        items: [
+          { id: "03", label: "03 — Skills" },
+          { id: "06", label: "06 — Hooks" },
+          { id: "05", label: "05 — MCP" },
+          { id: "04", label: "04 — Subagents" }
+        ]
+      },
+      {
+        title: "Level 3 — Power user",
+        items: [
+          { id: "09", label: "09 — Advanced features" },
+          { id: "07", label: "07 — Plugins" },
+          { id: "10b", label: "10 — CLI (headless / CI)" },
+          { id: "11", label: "11 — Ops playbooks" }
+        ]
+      },
+      {
+        title: "Capstone",
+        items: [
+          { id: "cap", label: "Teach-back demo under artifacts/demos/" }
+        ]
+      }
+    ];
+
+    const KEY = "staff-claude-curriculum-progress-v1";
+    const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+    const app = document.getElementById("app");
+
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      updatePct();
+    }
+
+    function updatePct() {
+      const ids = LEVELS.flatMap(l => l.items.map(i => i.id));
+      const done = ids.filter(id => state[id]).length;
+      const pct = ids.length ? Math.round((done / ids.length) * 100) : 0;
+      document.getElementById("fill").style.width = pct + "%";
+      document.getElementById("pct").textContent = pct + "% complete (" + done + "/" + ids.length + ")";
+    }
+
+    LEVELS.forEach(level => {
+      const sec = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = level.title;
+      sec.appendChild(h);
+      level.items.forEach(item => {
+        const lab = document.createElement("label");
+        if (state[item.id]) lab.classList.add("done");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!state[item.id];
+        cb.addEventListener("change", () => {
+          state[item.id] = cb.checked;
+          lab.classList.toggle("done", cb.checked);
+          save();
+        });
+        const span = document.createElement("span");
+        span.textContent = item.label;
+        lab.appendChild(cb);
+        lab.appendChild(span);
+        sec.appendChild(lab);
+      });
+      app.appendChild(sec);
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      if (confirm("Clear local progress checkboxes?")) {
+        Object.keys(state).forEach(k => delete state[k]);
+        localStorage.removeItem(KEY);
+        location.reload();
+      }
+    });
+
+    updatePct();
+  </script>
+</body>
+</html>
