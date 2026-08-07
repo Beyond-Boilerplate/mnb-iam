@@ -1,100 +1,214 @@
 # Lesson 221 — Build a Live Request Catalog
 
 **Track:** Enterprise Sandbox Path (production-like local estate)  
-**Time:** ~55 minutes  
-**Prereq:** Lesson 216  
+**Time:** ~70 minutes  
+**Prereq:** Lessons 210, 216  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
 **Maps to classic track:** 35
 
-> **Why (1–2 lines):** A request catalog is only honest if every entitlement in it actually provisions on a live target when granted — not a list of things that were never wired end to end.
+> **Why:** A request catalog is only honest if every item in it actually provisions on a live target when granted — not a pretty list of things that were never wired end to end.
 
 ## What this is
 
-`MNB-QuickLink-Request-Access` is the pack's self-service entry point — a `QuickLink` with `action="external"` pointing at `accessRequest.jsf`, scoped to the `Self Service` `DynamicScope` (`allowSelf="true"`). What shows up *inside* that page depends entirely on which Bundles/entitlements are flagged `requestable`. Everything you add here must already provision for real: `MNB-Bundle-Wire-Initiator` (Lesson 216, provisions `WIRE_INIT`) and CRM access (Lesson 210) — because Lesson 222 depends on the request you submit here being genuinely fulfillable.
+So far, access arrived via **birthright** (automatic roles) or **ops assignment**. Banks also need **self-service requests**: “I need Wire Initiator for my Q3 rotation.”
+
+In IIQ that surface is usually:
+
+| Piece | What it is | In this estate |
+| --- | --- | --- |
+| **QuickLink** | Home-page shortcut | `MNB-QuickLink-Request-Access` → `accessRequest.jsf` |
+| **DynamicScope** | Who sees the QuickLink | `Self Service` (`allowSelf="true"`) |
+| **Requestable flag** | What appears *inside* the catalog | Bundles / entitlements with `requestable=true` |
+| **IdentityRequest** | The ticket IIQ creates on submit | Id you need for Lesson 222 |
+
+Nothing magical fills the catalog. If Wire Initiator isn’t requestable, Priya can’t find it. If CRM was never aggregation-tested, making it requestable invents a hollow button.
+
+Classic 35 taught catalog design on static data; here every item must already provision for real — Lesson 222 will approve the request you leave pending.
 
 ## Know these
 
 ```text
-Self Service DynamicScope → Request Access QuickLink
-  → catalog = requestable Bundles/entitlements
-  → submit → IdentityRequest (pending, no approver yet — Lesson 222 wires that)
+Self Service DynamicScope
+  → Request Access QuickLink visible to workforce
+  → catalog = requestable Bundles / entitlements
+  → submit + justification
+  → IdentityRequest (pending)
+  → approval work item (Lesson 222 wires Manager→Owner)
 ```
 
-| Catalog item | Backing object | Live proof it's real |
+| Catalog item | Backing object | Live proof it’s real |
 | --- | --- | --- |
-| Wire Initiator | `MNB-Bundle-Wire-Initiator` | `WIRE_INIT` on Lesson 216's target |
-| CRM access | `MNB-Salesforce-CRM-Live` managed group | `CRM-Users` (Lesson 210) |
+| Wire Initiator | `MNB-Bundle-Wire-Initiator` | `WIRE_INIT` on Wire/Core Banking (Lesson 216) |
+| CRM access | `CRM-Users` on `MNB-Salesforce-CRM-Live` | Aggregated in Lesson 210 |
+| Optional: Gitea | Keycloak group Bundle | Only if Lesson 213 SSO is live |
 
-**Wrong way:** Flagging something requestable that was never provisioning-tested — the catalog looks complete and grants nothing.
+| Term | Plain English |
+| --- | --- |
+| **Requestable** | Appears in the access request UI for eligible users |
+| **Birthright vs requestable** | Auto day-one vs must ask + get approved |
+| **Justification** | Why you need it — auditors read this later |
+| **Work item** | Approval queue entry someone must act on |
+
+- **Wrong way:** Flagging something requestable that was never provisioning-tested — the catalog looks complete and grants nothing.
+- **Wrong way:** Approving the request in this lesson — leave it pending so Lesson 222 has a live approval to work.
+- **Wrong way:** Building catalog-only Bundles with no required entitlements / IT roles underneath.
 
 ## Intent
 
-- Confirm the Request Access QuickLink is visible and scoped correctly for a normal persona.
-- Make at least two real, live-provisioning entitlements requestable.
-- Submit a real Access Request with a justification and capture the `IdentityRequest` id.
-- Leave it unapproved on purpose so Lesson 222 has something real to approve.
+- Confirm **Request Access** is visible to a normal workforce persona (not only admins).
+- Make at least two live-provisioning entitlements genuinely requestable.
+- Submit a real Access Request as `priya.wire` with a real justification; capture the `IdentityRequest` id.
+- Leave it **unapproved** on purpose for Lesson 222.
 
 ## Before you start
 
-- [ ] Lesson 216 wire birthright/request role provisions on a live target
-- [ ] Lesson 210 CRM `CRM-Users` group aggregated
-- [ ] `priya.wire` pass-through login works (Lesson 206 pattern)
-- [ ] Evidence: `mkdir -p ~/iiq-lab-evidence/sandbox/221`
+- [ ] Lesson 216: `MNB-Bundle-Wire-Initiator` exists and can provision `WIRE_INIT`
+- [ ] Lesson 210: CRM `CRM-Users` group aggregated into Entitlement Catalog
+- [ ] `priya.wire` can log in (pass-through `LabUser1!` or your seed password — Lesson 206 pattern)
+- [ ] `helen.ross` available to confirm Self Service QuickLink visibility
+- [ ] Evidence dir ready:
+
+```bash
+mkdir -p ~/iiq-lab-evidence/sandbox/221
+```
 
 ## Do this
 
-1. Log in as `helen.ross` and confirm **Request Access** appears on her home page/menu.  
-   **Expect:** QuickLink visible — proves `Self Service` scope includes a normal workforce persona, not just admins.
+### Task 1 — Confirm Request Access for a normal persona
 
-2. Confirm `MNB-Bundle-Wire-Initiator` is `requestable=true` and appears searching "wire" in the catalog.  
-   **Expect:** Role listed with a description, not hidden/owner-only.
+1. Log in as `helen.ross` / `LabUser1!` (or your seed password)
+2. Find **Request Access** on the home page / menu (QuickLink)
 
-3. Make CRM access requestable: flag `MNB-Salesforce-CRM-Live`'s `CRM-Users` managed entitlement requestable in the Entitlement Catalog, or wrap it in a small requestable Bundle if your build prefers role-based requests.  
-   **Expect:** CRM item now searchable in the catalog.
+- **Why:** proves `Self Service` scope includes workforce identities, not just `spadmin`.
+- **Expect:** QuickLink visible.
 
-4. Optional: if Gitea SSO (Lesson 213) is live, create a lightweight requestable Bundle mapped to the relevant Keycloak group as a third catalog item.  
-   **Expect:** Third item searchable — a test that your catalog design generalizes past the two pre-wired apps.
+If missing for Helen, fix DynamicScope / capabilities before blaming Priya’s login.
 
-5. Log out; log in as `priya.wire` / `LabUser1!`. Open **Request Access**, search "wire", select `MNB-Bundle-Wire-Initiator`, add justification ("Onboarding to wire desk per manager Sanjay Kapoor — Q3 rotation"). Submit.  
-   **Expect:** Request accepted; no auto-grant.
+Screenshot under evidence.
 
-6. Note the resulting `IdentityRequest` id shown by the UI.  
-   **Expect:** Id written down — needed again in Lesson 222.
+### Task 2 — Confirm Wire Initiator is requestable
 
-7. Do **not** approve or self-provision this request yet, even as spadmin.  
-   **Expect:** Request sits pending — Lesson 222 is built around approving *this* one.
+1. Still as Helen (or as `spadmin`): open the role `MNB-Bundle-Wire-Initiator`
+2. Confirm **requestable** = true (Attributes / options depending on UI)
+3. Open **Request Access**, search `wire`
 
-8. Confirm a real pending approval work item exists: spadmin's **Manage Work Items**, or Sanjay Kapoor's (`MNB00006`) queue if you know it.  
-   **Expect:** An addressable work item — proof the request is live, not just logged.
+- **Why:** role must be both requestable *and* searchable in the catalog UI.
+- **Expect:** role listed with a description — not hidden / owner-only.
+
+> **Tip:** If search finds nothing, check display name vs name, and whether the Bundle type is allowed in LCM request config.
+
+### Task 3 — Make CRM access requestable
+
+Pick one path:
+
+**Path A — Entitlement Catalog**
+
+1. **Applications → Entitlement Catalog** (or Manage → Entitlements)
+2. Find `MNB-Salesforce-CRM-Live` / `CRM-Users`
+3. Enable requestable / request options
+
+**Path B — Small requestable Bundle** (if entitlement UI won’t flag it)
+
+1. Create IT Bundle e.g. `MNB-Bundle-CRM-Users`
+2. Add required entitlement `CRM-Users`
+3. Set `requestable=true`
+
+- **Why:** Lesson 222’s catalog integrity rule — every item must provision on a live target.
+- **Expect:** CRM item searchable in **Request Access**.
+
+### Task 4 — Optional third item (Gitea / IdP group)
+
+If Lesson 213 Gitea SSO is live, create a lightweight requestable Bundle mapped to the relevant Keycloak group.
+
+- **Why:** proves catalog design generalizes past the two pre-wired apps.
+- **Expect:** third item searchable — or skip with a note if 213 isn’t done.
+
+### Task 5 — Submit as Priya (the real requester)
+
+1. Log out; log in as `priya.wire` / `LabUser1!`
+2. Open **Request Access**
+3. Search `wire` → select `MNB-Bundle-Wire-Initiator`
+4. Justification (copy exactly or adapt):
+
+```text
+Onboarding to wire desk per manager Sanjay Kapoor — Q3 rotation
+```
+
+5. Submit
+
+- **Why:** governance needs a named requester + business reason, not an admin click.
+- **Expect:** request accepted; **no** auto-grant of the entitlement yet.
+
+### Task 6 — Capture the IdentityRequest id
+
+Note the `IdentityRequest` id from the UI (confirmation page, request history, or Manage Access Requests).
+
+Write it under evidence:
+
+```text
+IdentityRequest id: _______________
+Requester: priya.wire
+Item: MNB-Bundle-Wire-Initiator
+```
+
+- **Why:** Lesson 222 opens *this* request — without the id you’ll hunt blindly.
+- **Expect:** id written down.
+
+### Task 7 — Do **not** approve yet
+
+Even as `spadmin`, do **not** approve or force-provision this request.
+
+- **Why:** Lesson 222 is built around fixing Manager→Owner routing and approving *this* pending item.
+- **Expect:** request sits pending.
+
+### Task 8 — Confirm a pending work item exists
+
+As `spadmin`: **Manage Work Items** (or Home → Work Items).
+
+Look for an approval item for Priya’s request. Optionally check Sanjay Kapoor (`MNB00006`) queue if manager routing is already partially wired.
+
+- **Why:** proves the request is live in the work queue, not just a log line.
+- **Expect:** an addressable work item — **or** note “auto-approved / no workflow” as a finding for Lesson 222 (you’ll attach `MNB-Workflow-Access-Approval` there).
 
 ## If it fails
 
-- **Request Access QuickLink missing for Priya** — check the `Self Service` DynamicScope population/capability actually includes her; compare against Helen, already confirmed.
-- **Wire role doesn't appear in search** — `requestable=true` alone may not be enough; confirm it isn't scoped hidden/owner-only.
-- **CRM entitlement can't be flagged requestable** — some builds only allow entitlement requests via a `ManagedAttribute` with request options enabled; wrap it in a small IT Bundle instead.
-- **Submission errors out** — check for a missing required provisioning-forms field (e.g. `MNB-OpenLDAP`'s account-create form fields, Lesson 204) not populated on the request form.
-- **No approval work item appears anywhere** — the request may have auto-approved with no workflow wired; useful information for Lesson 222, which needs `MNB-Workflow-Access-Approval` attached before that lesson's chain has anything to do.
+| Symptom | Fix |
+| --- | --- |
+| Request Access missing for Priya | Compare Helen; fix `Self Service` DynamicScope population / capability |
+| Wire role doesn’t appear in search | `requestable=true` alone may not be enough — check hidden/owner-only / LCM requestable types |
+| CRM entitlement can’t be flagged | Wrap in a small IT Bundle (Path B) |
+| Submission errors | Missing required provisioning-form field (e.g. OpenLDAP create fields) — complete form fields or fix Create scripts (Lesson 216) |
+| No approval work item | Request may have auto-approved with no workflow — Lesson 222 attaches `MNB-Workflow-Access-Approval` |
+| Priya can’t log in | Fix pass-through / password from Lesson 206; don’t submit the request as spadmin “for her” |
 
 ## You are done when
 
-At least two live-provisioning entitlements are genuinely requestable, Priya has submitted a real Access Request for wire initiate with justification, and you have the exact `IdentityRequest` id for Lesson 222.
+- [ ] At least two live-provisioning items are genuinely requestable
+- [ ] Priya submitted Wire Initiator with justification
+- [ ] You have the exact `IdentityRequest` id for Lesson 222
+- [ ] Request left **unapproved**
 
 ## Control note
 
-- **Control:** Self-service access request catalog integrity.  
-- **Owner:** IAM Ops (catalog curation) + app owners (entitlement scope).  
-- **SLA (lab):** Same session; production catalogs are reviewed on a recurring cadence to prune non-provisioning items.  
-- **Evidence:** `~/iiq-lab-evidence/sandbox/221/` — catalog screenshots, `IdentityRequest` id, pending work item proof.
+- **Control:** Self-service access request catalog integrity
+- **Owner:** IAM Ops (catalog curation) + app owners (entitlement scope)
+- **SLA (lab):** Same session; production catalogs are reviewed on a recurring cadence to prune non-provisioning items
+- **Evidence:** `~/iiq-lab-evidence/sandbox/221/` — catalog screenshots, IdentityRequest id, pending work item proof
 
 ## Quick check
 
-1. Why must every catalog item already provision for real? → Lesson 222 depends on this exact request being fulfillable.  
-2. What scope controls who sees Request Access? → The `Self Service` `DynamicScope`.  
-3. Why leave the request unapproved here? → So Lesson 222 has a live approval to work.
+1. Why must every catalog item already provision for real? → Lesson 222 depends on this request being fulfillable  
+2. What scope controls who sees Request Access? → The `Self Service` DynamicScope  
+3. Why leave the request unapproved here? → So Lesson 222 has a live approval to work  
+4. Birthright vs requestable — what’s the difference? → Auto day-one vs ask-and-approve  
+
+## Feedback
+
+Could you explain catalog integrity in one sentence (requestable ≠ wired)? If Wire didn’t appear in search, note whether `requestable` was true *and* whether the Bundle type is allowed in your LCM request config.
 
 ## Navigate
 
-- Previous: Lesson 220  
-- Next: Lesson 222  
+- Previous: [Lesson 220](220-contractor-loa-live.md)
+- Next: [Lesson 222](222-approvals-and-mail.md)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

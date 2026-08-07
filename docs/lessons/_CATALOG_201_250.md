@@ -55,19 +55,19 @@ No worksheets. One-line **Why**, then **What this is** / **Intent** / detailed *
 | 215 | [Attribute Sync on Live Targets](215-attribute-sync-live.md) | 50 | 20 / 30 |
 | 216 | [Birthright Roles Against Live Apps](216-birthright-roles-live.md) | 60 | 23–28 |
 | 217 | [Joiner LCM End-to-End](217-joiner-lcm-live.md) | 70 | 29–34b |
-| 218 | [Mover LCM End-to-End](218-mover-lcm-live.md) | 55 | 30 |
-| 219 | [Leaver LCM End-to-End](219-leaver-lcm-live.md) | 65 | 31 / 34 |
-| 220 | [Contractor & LOA Controls Live](220-contractor-loa-live.md) | 55 | 32–33 |
-| 221 | [Build a Live Request Catalog](221-access-catalog-live.md) | 55 | 35 |
-| 222 | [Approvals With Mailpit Proof](222-approvals-and-mail.md) | 65 | 36 / 38b |
-| 223 | [Break-Glass Access Drill](223-break-glass-live.md) | 50 | 37 |
-| 224 | [SoD: Wire Dual Control Live](224-sod-wire-live.md) | 60 | 39–40 |
-| 225 | [Work Violations & Mitigations](225-policy-violations-live.md) | 50 | 41–42 |
-| 226 | [Manager Cert + Email](226-manager-cert-mail.md) | 75 | 43 |
-| 227 | [App-Owner Certification Live](227-app-owner-cert-live.md) | 65 | 44 |
-| 228 | [Targeted / Focused Campaign](228-targeted-cert-live.md) | 50 | 45 |
-| 229 | [Certification Remediation Proof](229-cert-remediation-live.md) | 60 | 46 |
-| 230 | [Troubleshoot a Failed Provision](230-provisioning-troubleshoot-live.md) | 70 | 47 |
+| 218 | [Mover LCM End-to-End](218-mover-lcm-live.md) | 70 | 30 |
+| 219 | [Leaver LCM End-to-End](219-leaver-lcm-live.md) | 85 | 31 / 34 |
+| 220 | [Contractor & LOA Controls Live](220-contractor-loa-live.md) | 70 | 32–33 |
+| 221 | [Build a Live Request Catalog](221-access-catalog-live.md) | 70 | 35 |
+| 222 | [Approvals With Mailpit Proof](222-approvals-and-mail.md) | 80 | 36 / 38b |
+| 223 | [Break-Glass Access Drill](223-break-glass-live.md) | 65 | 37 |
+| 224 | [SoD: Wire Dual Control Live](224-sod-wire-live.md) | 75 | 39–40 |
+| 225 | [Work Violations & Mitigations](225-policy-violations-live.md) | 65 | 41–42 |
+| 226 | [Manager Cert + Email](226-manager-cert-mail.md) | 90 | 43 |
+| 227 | [App-Owner Certification Live](227-app-owner-cert-live.md) | 75 | 44 |
+| 228 | [Targeted / Focused Campaign](228-targeted-cert-live.md) | 65 | 45 |
+| 229 | [Certification Remediation Proof](229-cert-remediation-live.md) | 70 | 46 |
+| 230 | [Troubleshoot a Failed Provision](230-provisioning-troubleshoot-live.md) | 80 | 47 |
 | 231 | [Audit-Ready Reports Live](231-audit-reports-live.md) | 50 | 48 / 104 |
 | 232 | [Tune Email Templates Live](232-email-templates-live.md) | 50 | 49 |
 | 233 | [Live Aggregation Runbook](233-aggregation-strategy-live.md) | 40 | 16 / 54 |
