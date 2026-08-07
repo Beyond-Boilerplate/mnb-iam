@@ -20,6 +20,29 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+try:
+    from keycloak_idp import (  # type: ignore
+        create_user_scim as idp_create_user,
+        get_user_scim as idp_get_user,
+        health as idp_health,
+        list_groups_scim as idp_list_groups,
+        list_users_scim as idp_list_users,
+        patch_user_scim as idp_patch_user,
+    )
+except ImportError:  # container layout: same directory as serve.py
+    import sys
+    from pathlib import Path as _P
+
+    sys.path.insert(0, str(_P(__file__).resolve().parent))
+    from keycloak_idp import (  # type: ignore
+        create_user_scim as idp_create_user,
+        get_user_scim as idp_get_user,
+        health as idp_health,
+        list_groups_scim as idp_list_groups,
+        list_users_scim as idp_list_users,
+        patch_user_scim as idp_patch_user,
+    )
+
 ROOT = Path(__file__).resolve().parents[2]
 WS_USERS = ROOT / "lab-data" / "connectors" / "webservices" / "sample-users.json"
 SCIM_USERS = ROOT / "lab-data" / "connectors" / "scim" / "Users.json"
@@ -534,9 +557,53 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": True,
                     "service": "mnb-connector-mock",
                     "port": PORT,
-                    "apis": ["wire", "scim", "hcm", "crm", "itsm", "entra"],
+                    "apis": ["wire", "scim", "hcm", "crm", "itsm", "entra", "idp"],
                 },
             )
+
+        if path in ("/idp/health", "/idp/scim/v2/ServiceProviderConfig"):
+            if path.endswith("health"):
+                return self._send(200, idp_health())
+            return self._send(
+                200,
+                {
+                    "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"],
+                    "patch": {"supported": True},
+                    "filter": {"supported": True, "maxResults": 100},
+                    "bulk": {"supported": False},
+                },
+            )
+
+        if path in ("/idp/scim/v2/Users", "/idp/scim/v2/Users/"):
+            qs = parse_qs(parsed.query)
+            filt = (qs.get("filter") or [""])[0]
+            try:
+                return self._send(200, idp_list_users(filt))
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+
+        if path.startswith("/idp/scim/v2/Users/"):
+            rid = path.rsplit("/", 1)[-1]
+            try:
+                user = idp_get_user(rid)
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+            if not user:
+                return self._send(
+                    404,
+                    {
+                        "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
+                        "detail": f"Resource {rid} not found",
+                        "status": "404",
+                    },
+                )
+            return self._send(200, user)
+
+        if path in ("/idp/scim/v2/Groups", "/idp/scim/v2/Groups/"):
+            try:
+                return self._send(200, idp_list_groups())
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
 
         # --- Wire Portal ---
         if path == "/users":
@@ -751,6 +818,13 @@ class Handler(BaseHTTPRequestHandler):
             _ITSM_TICKETS.append(ticket)
             return self._send(201, ticket)
 
+        if path in ("/idp/scim/v2/Users", "/idp/scim/v2/Users/"):
+            try:
+                created = idp_create_user(body)
+                return self._send(201, created)
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+
         return self._send(404, {"error": "not_found", "path": path})
 
     def do_PATCH(self) -> None:
@@ -777,6 +851,13 @@ class Handler(BaseHTTPRequestHandler):
                             w["active"] = True
                     return self._send(200, w)
             return self._send(404, {"error": "not_found", "id": wid})
+
+        if path.startswith("/idp/scim/v2/Users/"):
+            rid = path.rsplit("/", 1)[-1]
+            try:
+                return self._send(200, idp_patch_user(rid, body))
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
 
         if path.startswith("/entra/scim/v2/Users/"):
             rid = path.rsplit("/", 1)[-1]
@@ -840,6 +921,7 @@ def main() -> None:
     print("  GET  /crm/scim/v2/Users")
     print("  GET  /itsm/v1/catalog | POST /itsm/v1/tickets")
     print("  GET  /entra/v1/users | /entra/scim/v2/Users | PATCH /entra/scim/v2/Users/{id}")
+    print("  GET/POST/PATCH /idp/scim/v2/Users | GET /idp/scim/v2/Groups  (Keycloak birthright)")
     httpd.serve_forever()
 
 

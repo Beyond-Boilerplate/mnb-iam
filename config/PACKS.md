@@ -25,6 +25,7 @@ Enterprise guide: [`docs/ENTERPRISE-LAB-V2.md`](../docs/ENTERPRISE-LAB-V2.md)
 | `Application/MNB-Application-Workday.xml` | `MNB-Workday` |
 | `Application/MNB-Application-ActiveDirectory-Live.xml` | `MNB-ActiveDirectory-Live` |
 | `Application/MNB-Application-Okta.xml` | `MNB-Okta` |
+| `Application/MNB-Application-Keycloak-IdP.xml` | `MNB-Keycloak-IdP` (live Keycloak via `/idp/scim`) |
 | `Application/MNB-Application-CoreBanking.xml` | `MNB-CoreBanking` |
 | `Application/MNB-Application-Salesforce-CRM-Live.xml` | `MNB-Salesforce-CRM-Live` |
 | `Application/MNB-Application-ServiceNow.xml` | `MNB-ServiceNow` |

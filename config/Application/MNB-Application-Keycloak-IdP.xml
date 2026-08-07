@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!--
+  Live Keycloak (meridian) via connector-mock IdP SCIM facade.
+  Host path: http://connector-mock:8091/idp/scim/v2
+  Prerequisites: keycloak-enable-iiq-provisioner.sh + rebuilt connector-mock.
+
+  Account entitlement attribute MUST use schemaObjectType="group" so group
+  aggregation stamps ManagedAttribute.attribute=groups (OpenLDAP pattern).
+  Group identityAttribute=displayName so catalog values are portal-users /
+  mnb-employees (not Keycloak UUIDs).
+-->
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE, SYNC_PROVISIONING" icon="directory2Icon" name="MNB-Keycloak-IdP" type="SCIM 2.0">
+  <Attributes>
+    <Map>
+      <entry key="authType" value="No Auth"/>
+      <entry key="connTimeout" value="60"/>
+      <entry key="connectorClass" value="openconnector.connector.scim2.SCIM2Connector"/>
+      <entry key="host" value="http://connector-mock:8091/idp/scim/v2"/>
+      <entry key="pageSize" value="100"/>
+      <entry key="relaxConfiguration">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="scimProvider" value="generic"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Meridian Keycloak IdP (live realm) through connector-mock /idp/scim. Birthright provisions portal-users + mnb-employees."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SCIM 2.0 Template"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="userName" identityAttribute="id" nativeObjectType="User" objectType="account">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="userName" type="string"/>
+      <AttributeDefinition name="active" type="boolean"/>
+      <AttributeDefinition name="emails" type="string"/>
+      <AttributeDefinition name="externalId" type="string"/>
+      <AttributeDefinition name="password" type="string"/>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
+        <Description>Keycloak group memberships (links to group schema)</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema descriptionAttribute="externalId" displayAttribute="displayName" identityAttribute="displayName" nativeObjectType="Group" objectType="group">
+      <AttributeDefinition name="id" type="string"/>
+      <AttributeDefinition name="displayName" type="string"/>
+      <AttributeDefinition name="externalId" type="string"/>
+    </Schema>
+  </Schemas>
+  <ProvisioningForms>
+    <Form name="account" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="account"/>
+        </Map>
+      </Attributes>
+      <Section>
+        <Field displayName="User Name" name="userName" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              return identity != null ? identity.getName() : null;
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Email" name="emails" type="string">
+          <Script>
+            <Source><![CDATA[
+              return identity != null ? identity.getEmail() : null;
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Employee Id" name="externalId" type="string">
+          <Script>
+            <Source><![CDATA[
+              if (identity == null) return null;
+              Object v = identity.getAttribute("userId");
+              if (v == null) v = identity.getAttribute("employeeNumber");
+              return v != null ? v.toString() : null;
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Password" name="password" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              return "LabUser1!";
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Active" name="active" type="boolean" value="true"/>
+      </Section>
+    </Form>
+  </ProvisioningForms>
+  <ApplicationScorecard/>
+</Application>

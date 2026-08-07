@@ -28,6 +28,11 @@ if docker inspect mnb-samba-ad >/dev/null 2>&1; then
   "$ROOT/tools/lab/enterprise/seed-samba.sh" || true
 fi
 
+echo "==> Enabling Keycloak iiq-scim provisioner roles (best-effort)"
+if [[ -x "$ROOT/tools/lab/enterprise/keycloak-enable-iiq-provisioner.sh" ]]; then
+  "$ROOT/tools/lab/enterprise/keycloak-enable-iiq-provisioner.sh" || true
+fi
+
 echo "==> Enterprise seed complete"
 echo "    Pass-through login: see lab-data/enterprise/PASS-THROUGH-AUTH.md"
 echo "    Portal: http://localhost:8092/  Keycloak: http://localhost:8085/"
@@ -36,5 +41,6 @@ echo "    Vault/PAM: http://localhost:8200/ui · http://localhost:8097/ (lab-dat
 echo "    Password path: lab-data/enterprise/password/README.md"
 echo "    Toolkit: GET /plugin/rest/mnbToolkit/enterprise/status (after plugin rebuild)"
 echo "    Note: Keycloak realm JSON imports only on empty volume — wipe mnb-keycloak-data to pick up new clients/groups"
+echo "    IdP birthright: MNB-Keycloak-IdP → connector-mock /idp/scim (after mock rebuild + keycloak-enable-iiq-provisioner.sh)"
 echo "    Cubes: none yet — Lesson 207 aggregates MNB-Workday (authoritative HCM)"
 echo "    MNB Workday UI: http://localhost:8091/hcm/ui"

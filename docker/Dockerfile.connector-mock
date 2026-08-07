@@ -2,6 +2,7 @@
 FROM python:3.12-alpine
 WORKDIR /app
 COPY tools/connector-mock/serve.py /app/serve.py
+COPY tools/connector-mock/keycloak_idp.py /app/keycloak_idp.py
 COPY lab-data/connectors/webservices/sample-users.json /app/lab-data/connectors/webservices/sample-users.json
 COPY lab-data/connectors/scim/Users.json /app/lab-data/connectors/scim/Users.json
 COPY lab-data/connectors/hcm/ /app/lab-data/connectors/hcm/
@@ -17,6 +18,7 @@ RUN mkdir -p /opt/mnb/tools/connector-mock \
     /opt/mnb/lab-data/connectors/itsm \
     /opt/mnb/lab-data/connectors/entra \
  && cp /app/serve.py /opt/mnb/tools/connector-mock/serve.py \
+ && cp /app/keycloak_idp.py /opt/mnb/tools/connector-mock/keycloak_idp.py \
  && cp /app/lab-data/connectors/webservices/sample-users.json /opt/mnb/lab-data/connectors/webservices/ \
  && cp /app/lab-data/connectors/scim/Users.json /opt/mnb/lab-data/connectors/scim/ \
  && cp -r /app/lab-data/connectors/hcm/. /opt/mnb/lab-data/connectors/hcm/ \
@@ -24,6 +26,6 @@ RUN mkdir -p /opt/mnb/tools/connector-mock \
  && cp -r /app/lab-data/connectors/itsm/. /opt/mnb/lab-data/connectors/itsm/ \
  && cp -r /app/lab-data/connectors/entra/. /opt/mnb/lab-data/connectors/entra/
 WORKDIR /opt/mnb
-ENV MOCK_HOST=0.0.0.0 MOCK_PORT=8091
+ENV MOCK_HOST=0.0.0.0 MOCK_PORT=8091 KEYCLOAK_URL=http://keycloak:8080
 EXPOSE 8091
 CMD ["python3", "tools/connector-mock/serve.py"]

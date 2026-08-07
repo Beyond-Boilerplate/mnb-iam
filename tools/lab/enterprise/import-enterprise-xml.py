@@ -20,6 +20,7 @@ FILES = [
     "config/Application/MNB-Application-Workday.xml",
     "config/Application/MNB-Application-ActiveDirectory-Live.xml",
     "config/Application/MNB-Application-Okta.xml",
+    "config/Application/MNB-Application-Keycloak-IdP.xml",
     "config/Application/MNB-Application-CoreBanking.xml",
     "config/Application/MNB-Application-Salesforce-CRM-Live.xml",
     "config/Application/MNB-Application-ServiceNow.xml",

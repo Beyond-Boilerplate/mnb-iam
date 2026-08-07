@@ -85,6 +85,11 @@ services:
     environment:
       MOCK_HOST: "0.0.0.0"
       MOCK_PORT: "8091"
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "meridian"
+      KEYCLOAK_IIQ_CLIENT_ID: "iiq-scim"
+      KEYCLOAK_IIQ_CLIENT_SECRET: "mnb-iiq-scim-secret"
+      KEYCLOAK_JOINER_PASSWORD: "LabUser1!"
     healthcheck:
       test:
         [
