@@ -23,11 +23,14 @@ from urllib.parse import parse_qs, urlparse
 try:
     from keycloak_idp import (  # type: ignore
         create_user_scim as idp_create_user,
+        get_group_scim as idp_get_group,
         get_user_scim as idp_get_user,
         health as idp_health,
         list_groups_scim as idp_list_groups,
         list_users_scim as idp_list_users,
+        patch_group_scim as idp_patch_group,
         patch_user_scim as idp_patch_user,
+        put_group_scim as idp_put_group,
     )
 except ImportError:  # container layout: same directory as serve.py
     import sys
@@ -36,11 +39,14 @@ except ImportError:  # container layout: same directory as serve.py
     sys.path.insert(0, str(_P(__file__).resolve().parent))
     from keycloak_idp import (  # type: ignore
         create_user_scim as idp_create_user,
+        get_group_scim as idp_get_group,
         get_user_scim as idp_get_user,
         health as idp_health,
         list_groups_scim as idp_list_groups,
         list_users_scim as idp_list_users,
+        patch_group_scim as idp_patch_group,
         patch_user_scim as idp_patch_user,
+        put_group_scim as idp_put_group,
     )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -605,6 +611,23 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as e:  # noqa: BLE001
                 return self._send(502, {"error": "idp_upstream", "detail": str(e)})
 
+        if path.startswith("/idp/scim/v2/Groups/"):
+            rid = path.rsplit("/", 1)[-1]
+            try:
+                group = idp_get_group(rid)
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+            if not group:
+                return self._send(
+                    404,
+                    {
+                        "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
+                        "detail": f"Resource {rid} not found",
+                        "status": "404",
+                    },
+                )
+            return self._send(200, group)
+
         # --- Wire Portal ---
         if path == "/users":
             return self._send(200, load_json(WS_USERS))
@@ -859,6 +882,13 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as e:  # noqa: BLE001
                 return self._send(502, {"error": "idp_upstream", "detail": str(e)})
 
+        if path.startswith("/idp/scim/v2/Groups/"):
+            rid = path.rsplit("/", 1)[-1]
+            try:
+                return self._send(200, idp_patch_group(rid, body))
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+
         if path.startswith("/entra/scim/v2/Users/"):
             rid = path.rsplit("/", 1)[-1]
             data = entra_payload()
@@ -910,6 +940,28 @@ class Handler(BaseHTTPRequestHandler):
         updated["active"] = active
         return self._send(200, updated)
 
+    def do_PUT(self) -> None:
+        parsed = urlparse(self.path)
+        path = parsed.path.rstrip("/")
+        body = self._read_json()
+
+        if path.startswith("/idp/scim/v2/Groups/"):
+            rid = path.rsplit("/", 1)[-1]
+            try:
+                return self._send(200, idp_put_group(rid, body))
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+
+        if path.startswith("/idp/scim/v2/Users/"):
+            # Full replace — reuse patch merge semantics
+            rid = path.rsplit("/", 1)[-1]
+            try:
+                return self._send(200, idp_patch_user(rid, body))
+            except Exception as e:  # noqa: BLE001
+                return self._send(502, {"error": "idp_upstream", "detail": str(e)})
+
+        return self._send(404, {"error": "not_found", "path": path})
+
 
 def main() -> None:
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
@@ -921,7 +973,7 @@ def main() -> None:
     print("  GET  /crm/scim/v2/Users")
     print("  GET  /itsm/v1/catalog | POST /itsm/v1/tickets")
     print("  GET  /entra/v1/users | /entra/scim/v2/Users | PATCH /entra/scim/v2/Users/{id}")
-    print("  GET/POST/PATCH /idp/scim/v2/Users | GET /idp/scim/v2/Groups  (Keycloak birthright)")
+    print("  GET/POST/PATCH/PUT /idp/scim/v2/Users|Groups  (Keycloak birthright)")
     httpd.serve_forever()
 
 

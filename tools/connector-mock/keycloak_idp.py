@@ -111,6 +111,22 @@ def _group_index() -> dict[str, str]:
     return out
 
 
+def _resolve_group_ids(group_names_or_ids: list[str]) -> set[str]:
+    """Accept Keycloak group display names *or* UUIDs (IIQ SCIM may send either)."""
+    idx = _group_index()
+    known_ids = set(idx.values())
+    wanted: set[str] = set()
+    for raw in group_names_or_ids:
+        n = str(raw).strip()
+        if not n:
+            continue
+        if n in idx:
+            wanted.add(idx[n])
+        elif n in known_ids:
+            wanted.add(n)
+    return wanted
+
+
 def _user_to_scim(u: dict, groups: list[str] | None = None) -> dict:
     attrs = u.get("attributes") or {}
     emp = attrs.get("employeeId") or attrs.get("employeeNumber") or []
@@ -217,6 +233,36 @@ def _normalize_groups(value: Any) -> list[str]:
     return [n for n in names if n]
 
 
+def _extract_email(body: dict) -> str | None:
+    email = body.get("emails")
+    if isinstance(email, list) and email:
+        first = email[0]
+        email = first.get("value") if isinstance(first, dict) else first
+    if email is None or email == "":
+        email = body.get("email")
+    return str(email) if email else None
+
+
+def _extract_names(body: dict) -> tuple[str | None, str | None]:
+    """IIQ SCIM may send nested name{}, flat givenName/familyName, or a string."""
+    given = body.get("givenName") or body.get("firstName")
+    family = body.get("familyName") or body.get("lastName") or body.get("sn")
+    name = body.get("name")
+    if isinstance(name, dict):
+        given = given or name.get("givenName") or name.get("firstName")
+        family = family or name.get("familyName") or name.get("lastName")
+    elif isinstance(name, str) and name.strip():
+        parts = name.strip().split(None, 1)
+        if not given and parts:
+            given = parts[0]
+        if not family and len(parts) > 1:
+            family = parts[1]
+    return (
+        str(given).strip() if given else None,
+        str(family).strip() if family else None,
+    )
+
+
 def _set_password(user_id: str, password: str) -> None:
     code, payload, _ = _admin(
         "PUT",
@@ -231,40 +277,62 @@ def _set_password(user_id: str, password: str) -> None:
         raise RuntimeError(f"set password failed ({code}): {payload}")
 
 
-def _set_groups(user_id: str, group_names: list[str]) -> None:
-    idx = _group_index()
-    # current
+def _set_groups(user_id: str, group_names: list[str], *, replace: bool = True) -> None:
     code, current, _ = _admin("GET", f"/users/{urllib.parse.quote(user_id)}/groups")
     current_ids = set()
     if code < 400 and isinstance(current, list):
         current_ids = {str(g.get("id")) for g in current if g.get("id")}
-    wanted_ids = {idx[n] for n in group_names if n in idx}
+    wanted_ids = _resolve_group_ids(group_names)
     for gid in wanted_ids - current_ids:
         c, p, _ = _admin("PUT", f"/users/{urllib.parse.quote(user_id)}/groups/{gid}", {})
         if c >= 400:
             raise RuntimeError(f"add group {gid} failed ({c}): {p}")
-    for gid in current_ids - wanted_ids:
-        # only remove groups we manage in birthright path if explicitly replaced;
-        # for PATCH replace we sync to wanted set
-        c, p, _ = _admin("DELETE", f"/users/{urllib.parse.quote(user_id)}/groups/{gid}")
-        if c >= 400:
-            raise RuntimeError(f"remove group {gid} failed ({c}): {p}")
+    if replace:
+        for gid in current_ids - wanted_ids:
+            c, p, _ = _admin("DELETE", f"/users/{urllib.parse.quote(user_id)}/groups/{gid}")
+            if c >= 400:
+                raise RuntimeError(f"remove group {gid} failed ({c}): {p}")
+
+
+def _finalize_user_profile(
+    user_id: str,
+    *,
+    email: str | None,
+    first_name: str | None,
+    last_name: str | None,
+    attrs: dict[str, list[str]],
+) -> None:
+    """Ensure profile is complete and clear VERIFY_PROFILE / required actions."""
+    code_g, full, _ = _admin("GET", f"/users/{urllib.parse.quote(user_id)}")
+    if code_g >= 400 or not isinstance(full, dict):
+        raise RuntimeError(f"fetch user for profile finalize failed ({code_g}): {full}")
+    if email:
+        full["email"] = email
+    if first_name:
+        full["firstName"] = first_name
+    if last_name:
+        full["lastName"] = last_name
+    full["emailVerified"] = True
+    full["requiredActions"] = []
+    if attrs:
+        merged = dict(full.get("attributes") or {})
+        merged.update(attrs)
+        full["attributes"] = merged
+    code_u, payload_u, _ = _admin("PUT", f"/users/{urllib.parse.quote(user_id)}", full)
+    if code_u >= 400:
+        raise RuntimeError(f"finalize profile failed ({code_u}): {payload_u}")
 
 
 def create_user_scim(body: dict) -> dict:
     username = body.get("userName") or body.get("username")
     if not username:
         raise RuntimeError("userName required")
-    name = body.get("name") if isinstance(body.get("name"), dict) else {}
-    email = body.get("emails")
-    if isinstance(email, list) and email:
-        first = email[0]
-        email = first.get("value") if isinstance(first, dict) else first
+    email = _extract_email(body)
+    first_name, last_name = _extract_names(body)
     attrs: dict[str, list[str]] = {}
     ext = body.get("externalId")
     if ext:
         attrs["employeeId"] = [str(ext)]
-    # also accept employeeId top-level
     if body.get("employeeId"):
         attrs["employeeId"] = [str(body["employeeId"])]
 
@@ -272,9 +340,10 @@ def create_user_scim(body: dict) -> dict:
         "username": username,
         "enabled": bool(body.get("active", True)),
         "email": email,
-        "firstName": name.get("givenName") or body.get("givenName") or body.get("firstName"),
-        "lastName": name.get("familyName") or body.get("familyName") or body.get("lastName"),
+        "firstName": first_name,
+        "lastName": last_name,
         "emailVerified": True,
+        "requiredActions": [],
         "attributes": attrs,
     }
     code, payload, headers = _admin("POST", "/users", kc_user)
@@ -294,24 +363,108 @@ def create_user_scim(body: dict) -> dict:
 
     password = body.get("password") or DEFAULT_PASSWORD
     _set_password(str(user_id), str(password))
-
-    if attrs:
-        code_g, full, _ = _admin("GET", f"/users/{urllib.parse.quote(str(user_id))}")
-        if code_g < 400 and isinstance(full, dict):
-            merged = dict(full.get("attributes") or {})
-            merged.update(attrs)
-            full["attributes"] = merged
-            code_u, payload_u, _ = _admin("PUT", f"/users/{urllib.parse.quote(str(user_id))}", full)
-            if code_u >= 400:
-                raise RuntimeError(f"set attributes failed ({code_u}): {payload_u}")
+    _finalize_user_profile(
+        str(user_id),
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        attrs=attrs,
+    )
 
     groups = _normalize_groups(body.get("groups"))
     if groups:
-        _set_groups(str(user_id), groups)
+        _set_groups(str(user_id), groups, replace=True)
 
     out = get_user_scim(str(user_id))
     if not out:
         raise RuntimeError("create user: fetch after create failed")
+    return out
+
+
+def get_group_scim(rid: str) -> dict | None:
+    idx = _group_index()
+    gid = idx.get(rid) or (rid if rid in set(idx.values()) else None)
+    if not gid:
+        return None
+    name = next((n for n, i in idx.items() if i == gid), rid)
+    # members via Keycloak brief representation is not on group GET; omit for list identity
+    return {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:Group"],
+        "id": gid,
+        "displayName": name,
+        "externalId": name,
+        "members": [],
+    }
+
+
+def patch_group_scim(rid: str, body: dict) -> dict:
+    """SCIM Group membership updates (IIQ often PATCHes members, not User.groups)."""
+    existing = get_group_scim(rid)
+    if not existing:
+        raise RuntimeError(f"group not found: {rid}")
+    gid = str(existing["id"])
+    for op in body.get("Operations") or []:
+        path = (op.get("path") or "").lstrip("/").lower()
+        opname = (op.get("op") or "add").lower()
+        val = op.get("value")
+        if path not in ("members", "") and not (
+            isinstance(val, list) and val and isinstance(val[0], dict) and "value" in val[0]
+        ):
+            if "member" not in path:
+                continue
+        members = val if isinstance(val, list) else ([val] if val else [])
+        for m in members:
+            uid = m.get("value") if isinstance(m, dict) else m
+            if not uid:
+                continue
+            uid = str(uid)
+            # resolve username → id if needed
+            user = get_user_scim(uid)
+            if user:
+                uid = str(user["id"])
+            if opname in ("add", "replace"):
+                c, p, _ = _admin("PUT", f"/users/{urllib.parse.quote(uid)}/groups/{gid}", {})
+                if c >= 400:
+                    raise RuntimeError(f"group add member failed ({c}): {p}")
+            elif opname == "remove":
+                c, p, _ = _admin("DELETE", f"/users/{urllib.parse.quote(uid)}/groups/{gid}")
+                if c >= 400:
+                    raise RuntimeError(f"group remove member failed ({c}): {p}")
+    if "members" in body and isinstance(body["members"], list):
+        for m in body["members"]:
+            uid = m.get("value") if isinstance(m, dict) else m
+            if not uid:
+                continue
+            user = get_user_scim(str(uid))
+            uid = str(user["id"]) if user else str(uid)
+            c, p, _ = _admin("PUT", f"/users/{urllib.parse.quote(uid)}/groups/{gid}", {})
+            if c >= 400:
+                raise RuntimeError(f"group put member failed ({c}): {p}")
+    out = get_group_scim(gid)
+    if not out:
+        raise RuntimeError("group patch: refetch failed")
+    return out
+
+
+def put_group_scim(rid: str, body: dict) -> dict:
+    """IIQ SCIM connector often PUTs Group with a members[] list to grant entitlements."""
+    existing = get_group_scim(rid)
+    if not existing:
+        raise RuntimeError(f"group not found: {rid}")
+    gid = str(existing["id"])
+    members = body.get("members") if isinstance(body.get("members"), list) else []
+    for m in members:
+        uid = m.get("value") if isinstance(m, dict) else m
+        if not uid:
+            continue
+        user = get_user_scim(str(uid))
+        uid = str(user["id"]) if user else str(uid)
+        c, p, _ = _admin("PUT", f"/users/{urllib.parse.quote(uid)}/groups/{gid}", {})
+        if c >= 400:
+            raise RuntimeError(f"group put member failed ({c}): {p}")
+    out = get_group_scim(gid)
+    if not out:
+        raise RuntimeError("group put: refetch failed")
     return out
 
 
@@ -323,6 +476,9 @@ def patch_user_scim(rid: str, body: dict) -> dict:
 
     enabled = existing.get("active", True)
     groups = list(existing.get("groups") or [])
+    groups_touched = False
+    replace_groups = True
+    first_name = last_name = email = None
     for op in body.get("Operations") or []:
         path = (op.get("path") or "").lstrip("/")
         val = op.get("value")
@@ -332,28 +488,54 @@ def patch_user_scim(rid: str, body: dict) -> dict:
                 enabled = bool(val["active"])
             elif isinstance(val, bool):
                 enabled = val
+        if path in ("emails", "email") or (isinstance(val, dict) and "emails" in val):
+            raw = val.get("emails") if isinstance(val, dict) and "emails" in val else val
+            email = _extract_email({"emails": raw})
+        if path in ("name.givenName", "givenName", "name.familyName", "familyName") or (
+            isinstance(val, dict) and ("givenName" in val or "familyName" in val or "name" in val)
+        ):
+            g, f = _extract_names(val if isinstance(val, dict) else {path.split(".")[-1]: val})
+            first_name = g or first_name
+            last_name = f or last_name
         if path == "groups" or (isinstance(val, dict) and "groups" in val):
+            groups_touched = True
             raw = val.get("groups") if isinstance(val, dict) and "groups" in val else val
             if opname == "add":
+                replace_groups = False
                 groups = list(dict.fromkeys(groups + _normalize_groups(raw)))
             else:
+                replace_groups = True
                 groups = _normalize_groups(raw)
     if "active" in body:
         enabled = bool(body["active"])
     if "groups" in body:
+        groups_touched = True
+        replace_groups = True
         groups = _normalize_groups(body["groups"])
+    if "emails" in body or "email" in body:
+        email = _extract_email(body)
+    if any(k in body for k in ("givenName", "familyName", "firstName", "lastName", "name")):
+        g, f = _extract_names(body)
+        first_name = g or first_name
+        last_name = f or last_name
 
-    code, payload, _ = _admin("PUT", f"/users/{urllib.parse.quote(user_id)}", {"enabled": enabled})
-    # Keycloak PUT requires full representation — fetch + merge
     code_g, full, _ = _admin("GET", f"/users/{urllib.parse.quote(user_id)}")
     if code_g < 400 and isinstance(full, dict):
         full["enabled"] = enabled
+        if email:
+            full["email"] = email
+            full["emailVerified"] = True
+        if first_name:
+            full["firstName"] = first_name
+        if last_name:
+            full["lastName"] = last_name
+        full["requiredActions"] = []
         code, payload, _ = _admin("PUT", f"/users/{urllib.parse.quote(user_id)}", full)
         if code >= 400:
             raise RuntimeError(f"update user failed ({code}): {payload}")
 
-    if groups is not None:
-        _set_groups(user_id, groups)
+    if groups_touched:
+        _set_groups(user_id, groups, replace=replace_groups)
 
     out = get_user_scim(user_id)
     if not out:

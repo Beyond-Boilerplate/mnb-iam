@@ -43,6 +43,8 @@
       <AttributeDefinition name="userName" type="string"/>
       <AttributeDefinition name="active" type="boolean"/>
       <AttributeDefinition name="emails" type="string"/>
+      <AttributeDefinition name="givenName" type="string"/>
+      <AttributeDefinition name="familyName" type="string"/>
       <AttributeDefinition name="externalId" type="string"/>
       <AttributeDefinition name="password" type="string"/>
       <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
@@ -70,10 +72,24 @@
             ]]></Source>
           </Script>
         </Field>
-        <Field displayName="Email" name="emails" type="string">
+        <Field displayName="Email" name="emails" required="true" type="string">
           <Script>
             <Source><![CDATA[
               return identity != null ? identity.getEmail() : null;
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="First Name" name="givenName" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              return identity != null ? identity.getFirstname() : null;
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Last Name" name="familyName" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              return identity != null ? identity.getLastname() : null;
             ]]></Source>
           </Script>
         </Field>

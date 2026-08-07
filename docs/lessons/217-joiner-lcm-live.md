@@ -35,16 +35,15 @@ HCM POST worker
   → Identity Refresh with **Process events**
   → IdentityTrigger → MNB-Workflow-Joiner
   → birthright (OpenLDAP + Keycloak IdP packs)
-  → **OpenLDAP Create Form** if policy has no Field scripts
-  → OpenLDAP account + all-employees
-  → Keycloak user + mnb-employees + portal-users   ← from birthright
-  → Employee Portal SSO                            ← done
+  → OpenLDAP account + all-employees     ← Create Field scripts (no Form)
+  → Keycloak user (email+names) + mnb-employees + portal-users
+  → Employee Portal SSO                  ← no first-login profile prompt
 ```
 
 | Layer | What joiner automation does | Manual only if |
 | --- | --- | --- |
 | Cube | Workday agg + refresh | — |
-| Birthright LDAP | Role + provision plan | Complete Create **Form** when OpenLDAP policy has no scripts |
+| Birthright LDAP | Role + provision plan | Create Field scripts missing (Lesson 216 Task 1d) |
 | Birthright IdP | `MNB-IT-IdP-Portal` → Keycloak via `MNB-Keycloak-IdP` | Lesson 216 IdP pack missing / `/idp/health` down |
 | Welcome email | — | Nothing — no email step yet (Lesson 232) |
 
@@ -54,21 +53,24 @@ HCM POST worker
 | `Refresh` | `call:refreshIdentity` with `promoteAttributes`, `provision`, `correlateEntitlements` |
 
 - **Wrong way:** Expecting Portal login before birthright IdP pack exists (finish Lesson 216 Task 1c / 2b first).
-- **Wrong way:** Treating a Pending `Refresh identity …` as “IIQ is slow” — usually an OpenLDAP Create Form.
+- **Wrong way:** Treating a Pending `Refresh identity …` as “IIQ is slow” — usually OpenLDAP Create Field scripts were never imported.
 - **Wrong way:** Hand-creating the Keycloak user when birthright already owns `portal-users` — that fights the control model.
 - **Wrong way:** Aggregating Workday without **Process events** — cube appears, joiner workflow never starts.
+- **Wrong way:** Accepting a Keycloak user with empty Groups as “SSO ready” — Portal still needs `portal-users`.
 
 ## Intent
 
 - Create `MNB-Workflow-Joiner` and `MNB-IdentityTrigger-Joiner` in the live estate.
 - Hire via live HCM; fire the joiner path (or manual fallback).
-- Complete OpenLDAP Create provisioning (form) when presented.
-- **Verify** Keycloak user + Portal groups came from birthright (not Admin console).
-- Prove Portal SSO; document that welcome mail is out of scope today.
+- Confirm OpenLDAP Create Field scripts keep refresh off the Form path (Lesson 216 Task 1d).
+- **Verify** Keycloak user has email + names + Portal groups from birthright (not Admin console).
+- Prove Portal SSO without a first-login profile prompt; document that welcome mail is out of scope today.
 
 ## Before you start
 
 - [ ] Lesson 216 birthright includes **both** `MNB-IT-OpenLDAP-Employees` and `MNB-IT-IdP-Portal`
+- [ ] Lesson 216 Task 1d — OpenLDAP Create Field scripts present (no Form expected)
+- [ ] Lesson 216 Task 1c — IdP Create has `emails` / `givenName` / `familyName` scripts
 - [ ] `curl -s http://localhost:8091/idp/health` shows `"ok": true`
 - [ ] Keycloak `meridian` up; Employee Portal: [http://localhost:8092/](http://localhost:8092/)
 - [ ] HCM mock healthy: `curl -sf http://localhost:8091/health`
@@ -201,14 +203,18 @@ Open `lab.joiner1` → **Roles**:
 
 - `MNB-Bundle-Birthright-Employee` present
 
-OpenLDAP under **Application Accounts** may still be missing — that is normal until the Create Form is completed.
+OpenLDAP under **Application Accounts** should appear after the refresh finishes when Create Field scripts are present (Lesson 216 Task 1d).
 
-- **Why:** role assignment and account create are sequential; the form is the gate between them.
-- **Expect:** birthright role yes; LDAP link maybe not yet.
+- **Why:** role assignment and account create are sequential; scripts remove the Form gate.
+- **Expect:** birthright role yes; LDAP link present (or briefly pending only if scripts missing).
 
-### Task 9 — Complete the OpenLDAP Create provisioning Form
+### Task 9 — OpenLDAP Create: scripts vs Form fallback
 
-When birthright needs a **new** OpenLDAP account and the Create policy has no FieldValue scripts, IIQ opens a **Form** work item and leaves `Refresh identity lab.joiner1` in **Pending**.
+**Preferred:** OpenLDAP Create already has Field scripts (Lesson 216 Task 1d). After joiner refresh you should **not** see a provisioning Form — skip to Task 10.
+
+**Fallback only** if scripts were never imported:
+
+When birthright needs a **new** OpenLDAP account and Create has no FieldValue scripts, IIQ opens a **Form** work item and leaves `Refresh identity lab.joiner1` in **Pending**.
 
 1. Check the bell / **My Work → Work Items** for  
    `Automatic provisioning form for lab.joiner1`  
@@ -225,9 +231,10 @@ When birthright needs a **new** OpenLDAP account and the Create policy has no Fi
 
 3. **Complete** / Submit the work item.
 4. Confirm Task Result leaves Pending (Success).
+5. Then re-import `config/Application/MNB-Application-OpenLDAP.xml` so the next hire does not hit the Form again.
 
-- **Why:** without this form, provisioning never creates the LDAP entry — birthright stays metadata-only.
-- **Expect:** work item gone; refresh completes.
+- **Why:** scripts are the durable fix; the Form is only a one-time recovery.
+- **Expect:** either no Form, or work item gone after submit + scripts restored.
 
 > **Watch out:** Pending with empty Host/Result is usually **waiting on you**, not a hung server. Workflow summary step name is often `Do Provisioning Forms`.
 
@@ -256,12 +263,18 @@ curl -s 'http://localhost:8091/idp/scim/v2/Users?filter=userName%20eq%20%22lab.j
   | python3 -m json.tool
 ```
 
-3. Optional: Keycloak Admin → realm `meridian` → Users → `lab.joiner1` → Groups tab (read-only proof).
+3. Confirm the JSON shows:
+   - `emails` populated
+   - `name.givenName` / `name.familyName` populated
+   - `groups` includes **`mnb-employees`** and **`portal-users`**
+4. Optional: Keycloak Admin → realm `meridian` → Users → `lab.joiner1` → **Details** (names/email) and **Groups** tab.
 
 - **Why:** Portal SSO must be attributable to birthright IdP packs — the control Lesson 216 built.
-- **Expect:** user exists with both groups; password is `LabUser1!` from the Create policy default.
+- **Expect:** user exists with both groups; password is `LabUser1!` from the Create policy default; **no** empty Groups list.
 
 > **Watch out:** If the IdP account is missing, fix Lesson 216 (`MNB-IT-IdP-Portal` on birthright, `/idp/health` ok, refresh with provisioning) — don’t paper over it with a manual Keycloak user unless you are documenting a temporary workaround.
+
+> **Watch out:** User exists but Groups empty → rebuild connector-mock (group UUID + PUT `/Groups` support), confirm IT pack entitlements, re-run Identity Refresh with provisioning.
 
 ### Task 12 — Portal SSO acceptance test
 
@@ -269,10 +282,11 @@ Only after Task 10 (LDAP) and Task 11 (IdP):
 
 1. Open [http://localhost:8092/](http://localhost:8092/)
 2. Sign in as `lab.joiner1` / `LabUser1!`
-3. Screenshot under `~/iiq-lab-evidence/sandbox/217/` (no passwords)
+3. Confirm Keycloak does **not** interrupt with “update account information” (email / first / last).
+4. Screenshot under `~/iiq-lab-evidence/sandbox/217/` (no passwords)
 
-- **Why:** end-to-end acceptance — cube + LDAP + IdP birthright + app.
-- **Expect:** successful Portal session.
+- **Why:** end-to-end acceptance — cube + LDAP + IdP birthright + app without a profile repair screen.
+- **Expect:** successful Portal session on first password entry.
 
 ### Task 13 — Mailpit: confirm **no** welcome mail (honest gap)
 
@@ -287,11 +301,13 @@ Open [http://localhost:8025](http://localhost:8025).
 
 | Symptom | Fix |
 | --- | --- |
-| `Refresh identity …` Pending forever | **My Work** → Complete OpenLDAP Create Form (Task 9) |
+| `Refresh identity …` Pending forever | OpenLDAP Create scripts missing → import Lesson 216 Task 1d; or complete Form (Task 9 fallback) |
 | Form fields unknown | DN `uid=<username>,ou=people,dc=meridiannb,dc=com`, password `LabUser1!` |
 | No Keycloak user after joiner | Lesson 216: `MNB-IT-IdP-Portal` on birthright; `/idp/health` ok; refresh with provisioning |
+| Keycloak user, empty Groups | Rebuild connector-mock; confirm IdP IT pack ents; re-refresh with provisioning |
+| First login asks for email / first / last | IdP Create missing name/email Field scripts — re-import `MNB-Application-Keycloak-IdP.xml`, delete IdP link, re-provision |
 | `/idp/health` ok:false | `./tools/lab/enterprise/keycloak-enable-iiq-provisioner.sh` + rebuild connector-mock |
-| Portal login fails | Missing `portal-users` on IdP link; or OpenLDAP Form never completed |
+| Portal login fails | Missing `portal-users` on IdP link; or OpenLDAP never provisioned |
 | Portal auth OK but access denied | Birthright IdP pack missing `portal-users` |
 | Zero workflow launches | Process events off; wrong trigger workflow name; Task 7 |
 | Looking for welcome mail | Task 13 — expect none |
@@ -300,9 +316,9 @@ Open [http://localhost:8025](http://localhost:8025).
 
 - [ ] `MNB-Workflow-Joiner` + `MNB-IdentityTrigger-Joiner` in place
 - [ ] `lab.joiner1` cube from live HCM
-- [ ] OpenLDAP account proven (`ldapsearch`)
-- [ ] Keycloak user + `portal-users` / `mnb-employees` from **birthright** (Task 11)
-- [ ] Employee Portal SSO succeeds
+- [ ] OpenLDAP account proven (`ldapsearch`) — no Form unless scripts were missing
+- [ ] Keycloak user has email + names + `portal-users` / `mnb-employees` from **birthright** (Task 11)
+- [ ] Employee Portal SSO succeeds **without** first-login profile prompt
 - [ ] Evidence notes: no welcome mail in Mailpit
 
 ## Control note
@@ -315,14 +331,15 @@ Open [http://localhost:8025](http://localhost:8025).
 ## Quick check
 
 1. What must never be birthright on day one? → Wire / CRM elevated / BreakGlass
-2. Why is a Pending `Refresh identity lab.joiner1` often not “slow”? → waiting on OpenLDAP Create **Form**
+2. Why is a Pending `Refresh identity lab.joiner1` often not “slow”? → OpenLDAP Create Field scripts missing (Form work item)
 3. Does joiner still require hand-creating a Keycloak user? → **No** — if Lesson 216 IdP birthright pack is in place
 4. Which Application provisions live Keycloak for birthright? → `MNB-Keycloak-IdP` (not `MNB-Okta`)
-5. Should Mailpit show a joiner welcome after this workflow? → **No** — Lesson 232
+5. Why might Portal ask for email/first/last on first sign-in? → IdP Create omitted those attributes (Keycloak required user profile)
+6. Should Mailpit show a joiner welcome after this workflow? → **No** — Lesson 232
 
 ## Feedback
 
-Could you explain the three gates (Process events → LDAP Form → IdP birthright provision) without opening this file? If Portal failed, note whether LDAP, IdP groups, or `portal-users` was the miss.
+Could you explain the three gates (Process events → LDAP Create scripts → IdP birthright with names+groups) without opening this file? If Portal failed, note whether LDAP, empty Groups, or the profile prompt was the miss.
 
 ## Navigate
 

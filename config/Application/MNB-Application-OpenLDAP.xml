@@ -91,11 +91,50 @@
         </Map>
       </Attributes>
       <Section>
-        <Field displayName="con_prov_policy_ldap_user_DN" helpKey="help_con_prov_policy_ldap_user_DN" name="dn" required="true" type="string"/>
-        <Field displayName="con_prov_policy_ldap_password" helpKey="help_con_prov_policy_ldap_password" name="password" required="true" type="secret"/>
-        <Field displayName="con_prov_policy_ldap_full_name" helpKey="help_con_prov_policy_ldap_full_name" name="cn" required="true" type="string"/>
-        <Field displayName="con_prov_policy_ldap_first_name" helpKey="help_con_prov_policy_ldap_first_name" name="givenName" reviewRequired="true" type="string"/>
-        <Field displayName="con_prov_policy_ldap_last_name" helpKey="help_con_prov_policy_ldap_last_name" name="sn" required="true" type="string"/>
+        <!-- Field scripts auto-fill Create so joiner refresh does not pause on a Form work item. -->
+        <Field displayName="con_prov_policy_ldap_user_DN" helpKey="help_con_prov_policy_ldap_user_DN" name="dn" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              if (identity == null) return null;
+              return "uid=" + identity.getName() + ",ou=people,dc=meridiannb,dc=com";
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="con_prov_policy_ldap_password" helpKey="help_con_prov_policy_ldap_password" name="password" required="true" type="secret">
+          <Script>
+            <Source><![CDATA[
+              return "LabUser1!";
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="con_prov_policy_ldap_full_name" helpKey="help_con_prov_policy_ldap_full_name" name="cn" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              if (identity == null) return null;
+              String fn = identity.getFirstname();
+              String ln = identity.getLastname();
+              if (fn != null && ln != null) return fn + " " + ln;
+              if (identity.getDisplayName() != null) return identity.getDisplayName();
+              return identity.getName();
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="con_prov_policy_ldap_first_name" helpKey="help_con_prov_policy_ldap_first_name" name="givenName" type="string">
+          <Script>
+            <Source><![CDATA[
+              return identity != null ? identity.getFirstname() : null;
+            ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="con_prov_policy_ldap_last_name" helpKey="help_con_prov_policy_ldap_last_name" name="sn" required="true" type="string">
+          <Script>
+            <Source><![CDATA[
+              if (identity == null) return null;
+              if (identity.getLastname() != null) return identity.getLastname();
+              return identity.getName();
+            ]]></Source>
+          </Script>
+        </Field>
       </Section>
     </Form>
     <Form name="group create" objectType="group" type="Create">

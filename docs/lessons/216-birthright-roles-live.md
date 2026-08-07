@@ -43,8 +43,8 @@ Business roles show *“Entitlements section is not supported”* — that is ex
 ```text
 employeeType=Employee + inactive=false
   → birthright detection/assignment
-  → OpenLDAP all-employees
-  → Keycloak mnb-employees + portal-users   ← Portal SSO ready
+  → OpenLDAP all-employees   (Create Field scripts auto-fill DN/cn/sn — no Form pause)
+  → Keycloak mnb-employees + portal-users   ← Portal SSO ready (names+email on Create)
 
 Wire / CRM / Cloud  → NEVER birthright (request + approval)
 ```
@@ -55,10 +55,12 @@ Wire / CRM / Cloud  → NEVER birthright (request + approval)
 | Business role | Holds the selector / requestable flag — who may get the IT packs |
 | Required Roles | Business → one or more IT packs; without them, assignment is label-only |
 | `MNB-Keycloak-IdP` | Live Keycloak via `/idp/scim` facade (not manual Admin console) |
+| Create Field scripts | Auto-values on OpenLDAP + IdP Create policies so refresh does not open a Form |
 
 - **Wrong way:** Putting `WIRE_INIT` on the birthright IT pack “so Treasury isn’t delayed.”
 - **Wrong way:** Birthright with only OpenLDAP — Portal still needs Keycloak groups.
 - **Wrong way:** Hand-creating Keycloak users in Lesson 217 when birthright already owns IdP packs.
+- **Wrong way:** Shipping IdP Create without `givenName` / `familyName` / `emails` — Keycloak’s required user profile forces a first-login form.
 
 ## Intent
 
@@ -124,6 +126,25 @@ Account aggregation alone does **not** fill the catalog for **directory groups**
 - **Why:** same catalog, different promotion path — groups vs account entitlement attribute.
 - **Expect:** `WIRE_INIT` findable without ever running Group Aggregation on Wire.
 
+### Task 1d — Automate OpenLDAP Create (no Form work item)
+
+Open **Applications → MNB-OpenLDAP → Provisioning Policies → account (Create)**.
+
+Confirm Field scripts on:
+
+| Field | Lab script intent |
+| --- | --- |
+| `dn` | `uid=<identity.name>,ou=people,dc=meridiannb,dc=com` |
+| `password` | `LabUser1!` |
+| `cn` | first + last (or display name) |
+| `givenName` | Identity first name |
+| `sn` | Identity last name |
+
+If those scripts are missing, Debug → Import `config/Application/MNB-Application-OpenLDAP.xml` (or paste the Field `<Script>` blocks from that file).
+
+- **Why:** without scripts, joiner refresh opens **My Work** Create Form and leaves `Refresh identity …` Pending.
+- **Expect:** Create policy fields resolve from the cube — Lesson 217 should not pause on OpenLDAP Form.
+
 ### Task 1c — Bring up Keycloak IdP provisioning
 
 Birthright will create real Keycloak users through **`MNB-Keycloak-IdP`**. That app talks to connector-mock’s `/idp/scim/v2` facade, which calls Keycloak Admin API as client `iiq-scim`.
@@ -145,14 +166,21 @@ curl -s http://localhost:8091/idp/health | python3 -m json.tool
 - **Expect:** `"ok": true` and groups list includes `portal-users`, `mnb-employees`.
 
 3. Confirm Application **`MNB-Keycloak-IdP`** exists (enterprise seed). If missing, Debug → Import `config/Application/MNB-Application-Keycloak-IdP.xml`.
-4. Run **Account Aggregation** and **Account Group Aggregation** for `MNB-Keycloak-IdP` (create tasks if needed; app = that name only).
-5. Entitlement Catalog → Application `MNB-Keycloak-IdP` → confirm **`portal-users`** and **`mnb-employees`**.
-6. Open one entitlement in Debug (`ManagedAttribute`) and confirm **`attribute=groups`** (not blank). If blank, the account schema is missing `schemaObjectType="group"` on `groups` — re-import `config/Application/MNB-Application-Keycloak-IdP.xml`, delete the bad catalog rows, and re-run group aggregation.
+4. Open the app → **Provisioning Policies** (Create) and confirm Field scripts exist for **`userName`**, **`emails`**, **`givenName`**, **`familyName`**, **`password`** (`LabUser1!`).
+
+   - **Why:** Keycloak realm user profile marks email / first / last as required for role `user`. Create without those attributes → first Portal sign-in asks the hire to type them.
+   - **Expect:** scripts pull from the Identity cube (`getEmail()`, `getFirstname()`, `getLastname()`).
+
+5. Run **Account Aggregation** and **Account Group Aggregation** for `MNB-Keycloak-IdP` (create tasks if needed; app = that name only).
+6. Entitlement Catalog → Application `MNB-Keycloak-IdP` → confirm **`portal-users`** and **`mnb-employees`**.
+7. Open one entitlement in Debug (`ManagedAttribute`) and confirm **`attribute=groups`** (not blank). If blank, the account schema is missing `schemaObjectType="group"` on `groups` — re-import `config/Application/MNB-Application-Keycloak-IdP.xml`, delete the bad catalog rows, and re-run group aggregation.
 
 - **Why:** without managed group entitlements linked to account attribute `groups`, the IdP IT pack cannot provision memberships.
 - **Expect:** both groups searchable; `attribute=groups`; values are names (`portal-users`), not UUIDs.
 
 > **Watch out:** `MNB-Okta` is a different Application (Lesson 238 mock SCIM). Do **not** attach birthright IdP groups there.
+
+> **Watch out:** Users can appear in Keycloak **with empty Groups** if membership updates fail. The `/idp/scim` facade must accept group UUIDs **and** display names on User PATCH, and PUT/PATCH on `/Groups/{id}` (IIQ often adds members that way). Rebuild connector-mock after pulling those fixes.
 
 ### Task 2 — Create IT pack `MNB-IT-OpenLDAP-Employees`
 
@@ -297,6 +325,9 @@ In Keycloak Admin (`meridian`) or via `/idp/scim`, confirm Helen is **not** in `
 | IdP entitlements have blank `attribute` / UUID values | Re-import `MNB-Application-Keycloak-IdP.xml` (`groups` must have `schemaObjectType="group"`; group identity=`displayName`); delete old MAs; re-agg groups |
 | Attached groups to `MNB-Okta` | Wrong app — use `MNB-Keycloak-IdP` |
 | Birthright assigns, no Keycloak user | Required Roles missing `MNB-IT-IdP-Portal`, or refresh lacked provisioning |
+| Keycloak user exists but **Groups** empty | Rebuild connector-mock (UUID + PUT `/Groups/{id}` membership); confirm IT pack ents; re-refresh with provisioning |
+| First Portal login asks for email / first / last | IdP Create missing `emails`/`givenName`/`familyName` scripts — re-import `MNB-Application-Keycloak-IdP.xml`, delete+reprovision IdP link |
+| OpenLDAP Create Form / Pending refresh | Re-import `MNB-Application-OpenLDAP.xml` Field scripts (Task 1d) |
 | Group Aggregation fails on `MNB-WirePortal` | Expected — use Account Aggregation (Task 1b) |
 | Searching `MNB-Employees` under OpenLDAP | Use **`all-employees`**; Samba name is different |
 | Birthright assigns, no LDAP group | Required Roles / IT pack missing `all-employees` |
@@ -324,10 +355,12 @@ In Keycloak Admin (`meridian`) or via `/idp/scim`, confirm Helen is **not** in `
 3. Which two Keycloak groups must birthright own for Portal SSO? → `mnb-employees` and `portal-users`
 4. Why can’t you put those groups on the business role? → stock **business** type does not support Entitlements — use **IT** packs + Required Roles
 5. `MNB-Okta` vs `MNB-Keycloak-IdP` — which one provisions live Keycloak for birthright? → **`MNB-Keycloak-IdP`**
+6. Why does IdP Create need `givenName` / `familyName` / `emails`? → Keycloak required user profile; missing attrs → first-login form
+7. What stops OpenLDAP Create from opening a Form work item? → Field scripts on the Create policy (Task 1d)
 
 ## Feedback
 
-Could you explain why Portal SSO needs an IdP IT pack on birthright without opening Keycloak Admin? If Helen got LDAP but not `portal-users`, note whether Required Roles included `MNB-IT-IdP-Portal` and whether `/idp/health` was ok.
+Could you explain why Portal SSO needs an IdP IT pack on birthright without opening Keycloak Admin? If Helen got LDAP but empty Keycloak Groups, note whether Required Roles included `MNB-IT-IdP-Portal`, whether `/idp/health` was ok, and whether connector-mock was rebuilt for UUID/PUT Groups.
 
 ## Navigate
 
