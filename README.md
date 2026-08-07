@@ -4,7 +4,9 @@ SailPoint **Services Standard Deployment (SSD)** project for IdentityIQ **8.5**,
 
 Day-to-day customization uses **SSB** (Services Standard Build) — do not reinvent Ant packaging; use `./build.sh`.
 
-## Quick start (Docker — IIQ + Academy + MCP + OpenAPI)
+## Quick start (Docker)
+
+**Core** (IIQ + Academy + MCP + OpenAPI + Teller + OpenLDAP):
 
 ```bash
 ./tools/lab/docker/up.sh
@@ -16,7 +18,23 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 # LDAP UI → http://localhost:8090/  (phpLDAPadmin; cn=admin,dc=meridiannb,dc=com / admin)
 ```
 
-Tomcat host path (one command):
+**Enterprise Lab v2** (core + Samba AD, Keycloak, portals, Mailpit, Vault/PAM, connector mocks). Needs ≥16 GB RAM and the Docker **Compose plugin** (`docker compose version`; Homebrew: symlink `docker-compose` into `~/.docker/cli-plugins/` if `docker compose` is missing):
+
+```bash
+./tools/lab/docker/up.sh --enterprise
+# Hub      → http://localhost:9000/   (TOC of all local services)
+# IIQ      → http://localhost:8080/identityiq  (spadmin / admin)
+# Workday  → http://localhost:8091/hcm/ui
+# Keycloak → http://localhost:8085/   (realm meridian)
+# Portal   → http://localhost:8092/
+# Mailpit  → http://localhost:8025/
+# Vault    → http://localhost:8200/   · PAM → http://localhost:8097/
+# Samba AD → ldap://localhost:3890
+```
+
+Operator guide: [docs/ENTERPRISE-LAB-V2.md](docs/ENTERPRISE-LAB-V2.md) · Sandbox Path lessons 201–250: [docs/lessons/_CATALOG_201_250.md](docs/lessons/_CATALOG_201_250.md)
+
+Tomcat host path (core only):
 
 ```bash
 ./tools/lab/up.sh
@@ -35,6 +53,7 @@ Tomcat host path (one command):
 | [docs/SSD.md](docs/SSD.md) | How SSD/SSB works in this repo + CI/CD path |
 | [docs/REPO_LAYOUT.md](docs/REPO_LAYOUT.md) | Live paths vs `archive/` (cleanup map) |
 | [docs/HOMELAB-CD.md](docs/HOMELAB-CD.md) | GHCR + Helm + Tailscale → `sailpoint.lmsapp.us` |
+| [docs/ENTERPRISE-LAB-V2.md](docs/ENTERPRISE-LAB-V2.md) | **Enterprise Lab v2** — `--enterprise` stack, apps, seed, DoD |
 | [config/README.md](config/README.md) | Where to add XML features |
 | [config/PACKS.md](config/PACKS.md) | What CD ships (HelloWorld) vs what learners build |
 | [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md) | Local IIQ: **Docker or Tomcat** dual path |
@@ -42,7 +61,7 @@ Tomcat host path (one command):
 | [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) | Beginner architecture |
 | [docs/lessons/README.md](docs/lessons/README.md) | Progressive Meridian lessons |
 | [tools/lab/README.md](tools/lab/README.md) | Tomcat laptop bootstrap |
-| [tools/lab/docker/README.md](tools/lab/docker/README.md) | **One-command** Docker: IIQ + Academy + MCP + OpenAPI |
+| [tools/lab/docker/README.md](tools/lab/docker/README.md) | **One-command** Docker: core + `--enterprise` |
 
 ---
 
