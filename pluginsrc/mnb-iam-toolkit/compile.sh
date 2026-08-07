@@ -2,11 +2,14 @@
 # Compile Meridian IAM Toolkit plugin classes against extracted IIQ WAR libs.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PLUGIN="$ROOT/pluginsrc/mnb-iam-toolkit"
 LIB="$ROOT/build/extract/WEB-INF/lib"
-SRC="$ROOT/pluginsrc/mnb-iam-toolkit/src"
-OUT="$ROOT/pluginsrc/mnb-iam-toolkit/build/classes"
+SRC="$PLUGIN/src"
+OUT="$PLUGIN/build/classes"
+# Prefer ./build.sh clean war extract; else docker-cp from running mnb-identityiq
+"$PLUGIN/stage-iiq-libs.sh"
 if [[ ! -f "$LIB/identityiq.jar" ]]; then
-  echo "ERROR: $LIB/identityiq.jar missing — run ./build.sh clean war first" >&2
+  echo "ERROR: $LIB/identityiq.jar missing after stage-iiq-libs.sh" >&2
   exit 1
 fi
 rm -rf "$OUT"

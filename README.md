@@ -18,9 +18,11 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 # LDAP UI → http://localhost:8090/  (phpLDAPadmin; cn=admin,dc=meridiannb,dc=com / admin)
 ```
 
-**Enterprise Lab v2** (core + Samba AD, Keycloak, portals, Mailpit, Vault/PAM, connector mocks). Needs ≥16 GB RAM and the Docker **Compose plugin** (`docker compose version`; Homebrew: symlink `docker-compose` into `~/.docker/cli-plugins/` if `docker compose` is missing):
+**Enterprise Lab v2** (core + Samba AD, Keycloak, portals, Mailpit, Vault/PAM, connector mocks). Needs host ≥16 GB RAM, Docker **Compose plugin** (`docker compose version`; Homebrew: symlink `docker-compose` into `~/.docker/cli-plugins/` if missing), and a roomy Docker VM — Colima defaults (**2 GiB**) OOM-kill Keycloak (exit **137**); size before first `--enterprise`:
 
 ```bash
+colima stop
+colima start --memory 10 --cpu 4   # persist in ~/.colima/default/colima.yaml
 ./tools/lab/docker/up.sh --enterprise
 # Hub      → http://localhost:9000/   (TOC of all local services)
 # IIQ      → http://localhost:8080/identityiq  (spadmin / admin)

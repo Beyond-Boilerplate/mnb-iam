@@ -24,7 +24,7 @@ then seeds **MNB-HR** + **MNB-OpenLDAP**:
 Greenfield (no `MNB-*` apps yet) skips backup/wipe. Pass `--keep-existing` to re-seed on top
 of a populated lab. Manual backup→wipe: `./tools/lab/scripts/backup-and-reset-lab.sh`.
 
-By default `up.sh` skips Docker image rebuilds when local images already exist (big speed win), packages the plugin in the background while containers start, and probes IIQ/MCP/Teller/Academy/LDAP in parallel. Use `--rebuild` after Dockerfile or MCP source changes.
+By default `up.sh` skips Docker image rebuilds when local images already exist (big speed win), prepares the Meridian plugin zip (prefers `ssdplugins/`, else stages IIQ jars from the running container — no `base/ga` zip required), and probes IIQ/MCP/Teller/Academy/LDAP in parallel. Use `--rebuild` after Dockerfile or MCP source changes.
 
 Startup **fails fast** if required host ports are taken by something other than this Compose project (`mnb-iiq-lab`). It also verifies `mnb-identityiq` is running and that MCP can resolve `http://identityiq:8080` (avoids the “Name or service not known” seed failure when only host Tomcat is on `:8080`).
 

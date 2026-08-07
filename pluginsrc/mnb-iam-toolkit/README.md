@@ -21,11 +21,20 @@ Owner: **helen.ross** / `MNB-WG-IAM-Ops`
 ## Build + install
 
 ```bash
-./pluginsrc/mnb-iam-toolkit/package.sh
+# Preferred (uses ssdplugins zip, or stages jars from running mnb-identityiq, or SSB extract)
+./pluginsrc/mnb-iam-toolkit/ensure-plugin-zip.sh
 ./pluginsrc/mnb-iam-toolkit/install.sh
 # Reinstall clears setting values — re-check:
 ./pluginsrc/mnb-iam-toolkit/enable-settings.sh
 ```
+
+`./tools/lab/docker/up.sh` calls the same path automatically. Version is centralized in [`version.env`](version.env).
+
+| Helper | Role |
+| --- | --- |
+| `ensure-plugin-zip.sh` | dist ← ssdplugins, else `stage-iiq-libs` + `package.sh` |
+| `stage-iiq-libs.sh` | Fill `build/extract/WEB-INF/lib` from SSB WAR or `docker cp` from `mnb-identityiq` |
+| `package.sh` / `compile.sh` | Rebuild from source when no committed zip |
 
 ### Settings
 

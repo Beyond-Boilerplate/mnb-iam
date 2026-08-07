@@ -4,8 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLUGIN="$ROOT/pluginsrc/mnb-iam-toolkit"
 DIST="$PLUGIN/dist"
-NAME="mnb_iam_toolkit"
-VER="1.3.17"
+# shellcheck source=version.env
+source "$PLUGIN/version.env"
+NAME="$PLUGIN_NAME"
+VER="$PLUGIN_VER"
 
 "$PLUGIN/compile.sh"
 

@@ -393,21 +393,32 @@ EOF
 
 PLUGIN_PKG_PID=""
 PLUGIN_PKG_LOG="/tmp/mnb-plugin-package.log"
+# shellcheck source=../../../pluginsrc/mnb-iam-toolkit/version.env
+source "$ROOT/pluginsrc/mnb-iam-toolkit/version.env"
+PLUGIN_ZIP="$ROOT/pluginsrc/mnb-iam-toolkit/dist/${PLUGIN_NAME}-${PLUGIN_VER}.zip"
+PLUGIN_SSD_ZIP="$ROOT/ssdplugins/${PLUGIN_NAME}/${PLUGIN_NAME}-${PLUGIN_VER}.zip"
 
 start_plugin_package_bg() {
   if [[ "$DO_SEED" -ne 1 ]]; then
     return 0
   fi
-  # Skip packaging if a zip already exists and looks fresh enough; still package when missing.
-  if [[ -f "$ROOT/pluginsrc/mnb-iam-toolkit/dist/mnb_iam_toolkit-1.3.6.zip" ]]; then
-    info "Plugin zip present - will install after IIQ is up (skip background package)"
+  # Prefer dist or committed ssdplugins zip — no compile / no base/ga required.
+  if [[ -f "$PLUGIN_ZIP" ]] || [[ -f "$PLUGIN_SSD_ZIP" ]] \
+    || [[ -f "$ROOT/ssdplugins/${PLUGIN_NAME}/${PLUGIN_NAME}.zip" ]]; then
+    info "Plugin zip available (dist or ssdplugins) - will install after IIQ is up"
     return 0
   fi
-  info "Packaging plugin in background while stack starts..."
-  (
-    ./pluginsrc/mnb-iam-toolkit/package.sh
-  ) >"$PLUGIN_PKG_LOG" 2>&1 &
-  PLUGIN_PKG_PID=$!
+  # Can compile now only if SSB extract already exists; otherwise defer until
+  # ensure_plugin_ready (IIQ container up → stage-iiq-libs docker cp).
+  if [[ -f "$ROOT/build/extract/WEB-INF/lib/identityiq.jar" ]]; then
+    info "Packaging plugin in background while stack starts..."
+    (
+      ./pluginsrc/mnb-iam-toolkit/ensure-plugin-zip.sh
+    ) >"$PLUGIN_PKG_LOG" 2>&1 &
+    PLUGIN_PKG_PID=$!
+    return 0
+  fi
+  info "No plugin zip / SSB extract yet - will stage libs from IIQ container after healthy"
 }
 
 await_plugin_package_bg() {
@@ -429,14 +440,16 @@ ensure_plugin_ready() {
   info "Ensuring Meridian Custom APIs plugin is installed + flags enabled..."
   await_plugin_package_bg
 
+  # dist ← ssdplugins, or package via container-staged libs / SSB extract
+  if ! ./pluginsrc/mnb-iam-toolkit/ensure-plugin-zip.sh; then
+    die "Could not produce plugin zip (see pluginsrc/mnb-iam-toolkit/ensure-plugin-zip.sh)"
+  fi
+
   ping_code="$(curl -sS -o /tmp/mnb-up-ping.json -w '%{http_code}' -u "${user}:${pass}" \
     -H 'Accept: application/json' "${base}/plugin/rest/mnbToolkit/ping" || true)"
 
   if [[ "$ping_code" != "200" ]]; then
-    info "Plugin not reachable (http=${ping_code}) - installing mnb_iam_toolkit..."
-    if [[ ! -f "$ROOT/pluginsrc/mnb-iam-toolkit/dist/mnb_iam_toolkit-1.3.6.zip" ]]; then
-      ./pluginsrc/mnb-iam-toolkit/package.sh
-    fi
+    info "Plugin not reachable (http=${ping_code}) - installing ${PLUGIN_NAME} ${PLUGIN_VER}..."
     local pid
     pid="$(curl -sS -u "${user}:${pass}" -H 'Accept: application/json' -H 'X-Requested-With: XMLHttpRequest' \
       "${base}/rest/plugins" 2>/dev/null | python3 -c '
