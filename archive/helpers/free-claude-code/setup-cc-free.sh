@@ -758,6 +758,8 @@ for key in (
 env.update({
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
     "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
+    # OpenRouter free models are unknown to Claude Code's catalog; set an explicit window.
+    "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "200000",
     "ANTHROPIC_BASE_URL": gateway,
     "ANTHROPIC_API_BASE_URL": gateway,
     "CLAUDE_AGENT_API_BASE_URL": gateway,
