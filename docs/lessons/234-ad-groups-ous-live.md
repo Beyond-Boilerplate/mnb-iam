@@ -3,7 +3,7 @@
 **Track:** Enterprise Sandbox Path (production-like local estate)  
 **Time:** ~60 minutes  
 **Prereq:** Lesson 205  
-**Stack:** `./tools/lab/docker/up.sh --enterprise`
+**Stack:** `./tools/lab/docker/up.sh --enterprise --with=ad`
 
 **Maps to classic track:** 57
 

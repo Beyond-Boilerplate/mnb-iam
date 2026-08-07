@@ -1,8 +1,17 @@
-# Meridian Enterprise Lab v2 — additive services (Samba AD, Keycloak, Employee Portal)
+# Meridian Enterprise Lab v2 — additive services (tiered Compose profiles)
+#
+# Profiles:
+#   enterprise       — Keycloak + Employee Portal + Mailpit (default --enterprise)
+#   enterprise-ad    — Samba AD DC (amd64; heavy on Apple Silicon) — Lessons 205/234
+#   enterprise-sso   — Gitea + Workstation/HR/Finance SSO gates — Lessons 212–213+
+#   enterprise-pam   — Vault + pam-lab — PAM / break-glass lessons
 #
 # Usage:
-#   docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml --profile enterprise up -d
 #   ./tools/lab/docker/up.sh --enterprise
+#   ./tools/lab/docker/up.sh --enterprise --with=ad,sso,pam
+#   ./tools/lab/docker/up.sh --enterprise-full
+#   docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml \
+#     --profile enterprise --profile enterprise-ad up -d
 #
 # Does not replace Core Path stack. See docs/ENTERPRISE-LAB-V2.md
 
@@ -10,7 +19,7 @@ name: mnb-iiq-lab
 
 services:
   samba-ad:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-ad"]
     image: ${SAMBA_AD_IMAGE:-nowsci/samba-domain:latest}
     platform: ${SAMBA_PLATFORM:-linux/amd64}
     container_name: mnb-samba-ad
@@ -53,6 +62,8 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      # Cap heap — start-dev defaults are too fat for Colima/laptop labs
+      JAVA_OPTS_APPEND: ${KEYCLOAK_JAVA_OPTS_APPEND:--Xms256m -Xmx512m}
       KC_HTTP_PORT: "8080"
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME: "localhost"
@@ -136,7 +147,7 @@ services:
 
   # Workstation login gate — grant group → login; revoke → deny (Enterprise Lab v3)
   workstation-portal:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-sso"]
     build:
       context: .
       dockerfile: docker/Dockerfile.sso-gate
@@ -172,7 +183,7 @@ services:
       start_period: 15s
 
   hr-intranet:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-sso"]
     image: ${SSO_GATE_IMAGE:-mnb-sso-gate:local}
     container_name: mnb-hr-intranet
     depends_on:
@@ -207,7 +218,7 @@ services:
       start_period: 15s
 
   finance-portal:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-sso"]
     image: ${SSO_GATE_IMAGE:-mnb-sso-gate:local}
     container_name: mnb-finance-portal
     depends_on:
@@ -243,7 +254,7 @@ services:
 
   # Privileged credential vault (HashiCorp Vault) — CyberArk-shaped ops via pam-lab
   vault:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-pam"]
     image: ${VAULT_IMAGE:-hashicorp/vault:1.17}
     container_name: mnb-vault
     cap_add:
@@ -268,7 +279,7 @@ services:
       start_period: 10s
 
   pam-lab:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-pam"]
     build:
       context: .
       dockerfile: docker/Dockerfile.pam-lab
@@ -322,7 +333,7 @@ services:
 
   # Second SSO app (OIDC via Keycloak) — developer portal stand-in
   gitea:
-    profiles: ["enterprise"]
+    profiles: ["enterprise-sso"]
     image: ${GITEA_IMAGE:-gitea/gitea:1.22.3}
     container_name: mnb-gitea
     depends_on:

@@ -12,10 +12,10 @@ python3 "$ROOT/tools/lab/enterprise/generate-identity-artifacts.py"
 
 if [[ -x "$ROOT/tools/lab/scripts/seed-mnb-lab-data.sh" ]]; then
   echo "==> Ensuring Core app definitions (MNB-HR non-authoritative + MNB-OpenLDAP; no cubes)"
-  # When called from docker/up.sh after backup→wipe, MNB_LAB_RESET_DONE=1 skips a second wipe.
-  seed_args=(--definitions-only --hr-non-authoritative)
-  if [[ "${MNB_LAB_RESET_DONE:-}" == "1" ]] || [[ "${MNB_LAB_KEEP_EXISTING:-}" == "1" ]]; then
-    seed_args+=(--keep-existing)
+  # Overlay by default. up.sh --wipe sets MNB_LAB_RESET_DONE after backup→reset.
+  seed_args=(--definitions-only --hr-non-authoritative --keep-existing)
+  if [[ "${MNB_LAB_WIPE:-}" == "1" ]]; then
+    seed_args=(--definitions-only --hr-non-authoritative --wipe)
   fi
   "$ROOT/tools/lab/scripts/seed-mnb-lab-data.sh" "${seed_args[@]}" || true
 fi

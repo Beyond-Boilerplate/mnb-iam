@@ -2,16 +2,18 @@
 # One command: Postgres + OpenLDAP + IdentityIQ + Academy + MCP + OpenAPI + Teller.
 #
 # Fail-fast on occupied ports. Default path also installs the Meridian plugin and seeds
-# MNB-HR + MNB-OpenLDAP. Speeds: skip image rebuild when local images exist; parallel
-# readiness probes; package plugin while the stack is coming up.
+# (overlay — does NOT wipe unless --wipe). Speeds: skip image rebuild when local images
+# exist; parallel readiness probes; prepare plugin zip while the stack is coming up.
 #
 # Usage:
 #   ./tools/lab/docker/up.sh
 #   ./tools/lab/docker/up.sh --enterprise
+#   ./tools/lab/docker/up.sh --enterprise --with=ad,sso,pam
+#   ./tools/lab/docker/up.sh --enterprise-full
+#   ./tools/lab/docker/up.sh --wipe
 #   ./tools/lab/docker/up.sh --check
 #   ./tools/lab/docker/up.sh --rebuild
 #   ./tools/lab/docker/up.sh --skip-seed
-#   ./tools/lab/docker/up.sh --keep-existing
 #   ./tools/lab/docker/up.sh --kill-host-sidecars
 set -euo pipefail
 
@@ -23,30 +25,88 @@ PROJECT_NAME="mnb-iiq-lab"
 CHECK_ONLY=0
 KILL_HOST_SIDECARS=0
 DO_SEED=1
-KEEP_EXISTING=0
+# Default: preserve live MNB-* objects. Explicit --wipe runs backup→reset first.
+DO_WIPE=0
 FORCE_REBUILD=0
 ENTERPRISE=0
+WITH_AD=0
+WITH_SSO=0
+WITH_PAM=0
+
+apply_with_token() {
+  local tok
+  tok="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+  case "$tok" in
+    "" ) ;;
+    ad|samba) WITH_AD=1 ;;
+    sso|portals|gitea) WITH_SSO=1 ;;
+    pam|vault) WITH_PAM=1 ;;
+    full|all)
+      WITH_AD=1
+      WITH_SSO=1
+      WITH_PAM=1
+      ;;
+    *)
+      echo "Unknown --with token: $1 (use ad,sso,pam,full)" >&2
+      exit 2
+      ;;
+  esac
+}
+
 for arg in "$@"; do
   case "$arg" in
     --check) CHECK_ONLY=1 ;;
     --kill-host-sidecars) KILL_HOST_SIDECARS=1 ;;
     --skip-seed) DO_SEED=0 ;;
     --seed) DO_SEED=1 ;;
-    --keep-existing) KEEP_EXISTING=1 ;;
+    --keep-existing)
+      # Legacy alias — keep is now the default
+      DO_WIPE=0
+      ;;
+    --wipe|--reset-lab|--reset)
+      DO_WIPE=1
+      ;;
     --rebuild|--build) FORCE_REBUILD=1 ;;
     --enterprise) ENTERPRISE=1 ;;
+    --enterprise-full)
+      ENTERPRISE=1
+      WITH_AD=1
+      WITH_SSO=1
+      WITH_PAM=1
+      ;;
+    --with=*)
+      ENTERPRISE=1
+      _with_csv="${arg#--with=}"
+      IFS=',' read -ra _with_parts <<< "$_with_csv"
+      for _tok in "${_with_parts[@]}"; do
+        apply_with_token "$_tok"
+      done
+      unset _with_csv _with_parts _tok
+      ;;
     -h|--help)
       cat <<'EOF'
 Usage: ./tools/lab/docker/up.sh [options]
 
-  (default)               Start stack, verify, install/enable plugin, backup→wipe→seed
-  --enterprise            Samba, Keycloak, Portal, Mailpit, Gitea, Vault/PAM (Enterprise Lab)
+  (default)               Start stack, verify, install/enable plugin, overlay-seed
+                          (keeps existing MNB-* objects)
+
+  Enterprise (tiered):
+  --enterprise            Lite: Keycloak + Employee Portal + Mailpit
+  --with=ad,sso,pam       Add packs (implies --enterprise). Tokens: ad|sso|pam|full
+  --enterprise-full       All enterprise packs (ad + sso + pam)
+
+  Seed / reset:
+  --wipe / --reset-lab    Backup→wipe Meridian objects, then seed (destructive)
+  --keep-existing         No-op alias (keep is default)
+  --skip-seed             Start + verify only (no plugin seed)
+  --seed                  Explicitly enable seed (default)
+
+  Other:
   --check                 Preflight ports only
   --rebuild               Force docker compose build (slower)
   --kill-host-sidecars    Stop host listeners on MCP/OpenAPI ports, then start
-  --skip-seed             Start + verify only (no plugin seed / HR aggregation)
-  --seed                  Explicitly enable seed (default)
-  --keep-existing         Seed without backup/wipe (overlay on current MNB-* apps)
+
+Samba AD ( --with=ad ) is opt-in: Lessons 205 / 234. Emulated amd64 on Apple Silicon.
 EOF
       exit 0
       ;;
@@ -58,7 +118,15 @@ EOF
 done
 
 if [[ "$ENTERPRISE" -eq 1 ]]; then
-  COMPOSE=(docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml --profile enterprise)
+  COMPOSE=(
+    docker compose
+    -f docker-compose.iiq.yml
+    -f docker-compose.enterprise.yml
+    --profile enterprise
+  )
+  [[ "$WITH_AD" -eq 1 ]] && COMPOSE+=(--profile enterprise-ad)
+  [[ "$WITH_SSO" -eq 1 ]] && COMPOSE+=(--profile enterprise-sso)
+  [[ "$WITH_PAM" -eq 1 ]] && COMPOSE+=(--profile enterprise-pam)
 fi
 
 IIQ_HTTP_PORT="${IIQ_HTTP_PORT:-8080}"
@@ -107,16 +175,26 @@ if [[ "$ENTERPRISE" -eq 1 ]]; then
   PORTS+=(
     "Keycloak:${KEYCLOAK_PORT}"
     "EmployeePortal:${EMPLOYEE_PORTAL_PORT}"
-    "SambaLDAP:${SAMBA_LDAP_PORT}"
     "MailpitUI:${MAILPIT_UI_PORT}"
     "MailpitSMTP:${MAILPIT_SMTP_PORT}"
-    "Gitea:${GITEA_HTTP_PORT}"
-    "Workstation:${WORKSTATION_PORTAL_PORT}"
-    "HRIntranet:${HR_INTRANET_PORT}"
-    "FinancePortal:${FINANCE_PORTAL_PORT}"
-    "Vault:${VAULT_HTTP_PORT}"
-    "PamLab:${PAM_LAB_PORT}"
   )
+  if [[ "$WITH_AD" -eq 1 ]]; then
+    PORTS+=("SambaLDAP:${SAMBA_LDAP_PORT}")
+  fi
+  if [[ "$WITH_SSO" -eq 1 ]]; then
+    PORTS+=(
+      "Gitea:${GITEA_HTTP_PORT}"
+      "Workstation:${WORKSTATION_PORTAL_PORT}"
+      "HRIntranet:${HR_INTRANET_PORT}"
+      "FinancePortal:${FINANCE_PORTAL_PORT}"
+    )
+  fi
+  if [[ "$WITH_PAM" -eq 1 ]]; then
+    PORTS+=(
+      "Vault:${VAULT_HTTP_PORT}"
+      "PamLab:${PAM_LAB_PORT}"
+    )
+  fi
 fi
 
 # Images we build locally (pull-only IIQ image is separate).
@@ -131,8 +209,12 @@ LOCAL_IMAGES=(
 
 if [[ "$ENTERPRISE" -eq 1 ]]; then
   LOCAL_IMAGES+=("${EMPLOYEE_PORTAL_IMAGE:-mnb-employee-portal:local}")
-  LOCAL_IMAGES+=("${SSO_GATE_IMAGE:-mnb-sso-gate:local}")
-  LOCAL_IMAGES+=("${PAM_LAB_IMAGE:-mnb-pam-lab:local}")
+  if [[ "$WITH_SSO" -eq 1 ]]; then
+    LOCAL_IMAGES+=("${SSO_GATE_IMAGE:-mnb-sso-gate:local}")
+  fi
+  if [[ "$WITH_PAM" -eq 1 ]]; then
+    LOCAL_IMAGES+=("${PAM_LAB_IMAGE:-mnb-pam-lab:local}")
+  fi
 fi
 
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -487,32 +569,35 @@ seed_lab_data() {
   local key="${MCP_API_KEY:-mnb-lab-mcp-key}"
   export IIQ_MCP_URL="http://127.0.0.1:${MCP_PORT}/mcp"
   export MCP_API_KEY="$key"
-  local seed_args=()
-  if [[ "$KEEP_EXISTING" -eq 1 ]] || [[ "${MNB_LAB_RESET_DONE:-}" == "1" ]]; then
-    seed_args+=(--keep-existing)
+  local seed_args=(--keep-existing)
+  if [[ "$DO_WIPE" -eq 1 ]] || [[ "${MNB_LAB_RESET_DONE:-}" == "1" ]]; then
+    # After an explicit wipe, seed still overlays; reset already cleared objects.
+    seed_args=(--keep-existing)
   fi
   if [[ "$ENTERPRISE" -eq 1 ]]; then
     info "Seeding app definitions only (MNB-HR non-authoritative; no workforce cubes)..."
     seed_args+=(--definitions-only --hr-non-authoritative)
   else
-    info "Seeding MNB-HR + MNB-OpenLDAP via MCP..."
+    info "Seeding MNB-HR + MNB-OpenLDAP via MCP (overlay)..."
   fi
   ./tools/lab/scripts/seed-mnb-lab-data.sh "${seed_args[@]+"${seed_args[@]}"}"
 }
 
 backup_and_reset_lab() {
   local key="${MCP_API_KEY:-mnb-lab-mcp-key}"
-  if [[ "$KEEP_EXISTING" -eq 1 ]]; then
-    info "Keeping existing Meridian objects (--keep-existing)"
+  if [[ "$DO_WIPE" -ne 1 ]]; then
+    info "Keeping existing Meridian objects (default). Pass --wipe for backup→reset."
     export MNB_LAB_KEEP_EXISTING=1
     return 0
   fi
-  info "Backup live Meridian objects (extract), then wipe before seed..."
+  info "Backup live Meridian objects (extract), then wipe before seed (--wipe)..."
   export IIQ_MCP_URL="http://127.0.0.1:${MCP_PORT}/mcp"
   export MCP_API_KEY="$key"
+  unset MNB_LAB_KEEP_EXISTING || true
   ./tools/lab/scripts/backup-and-reset-lab.sh
   # Prevent seed-mnb / seed-enterprise from wiping again mid-pipeline
   export MNB_LAB_RESET_DONE=1
+  export MNB_LAB_KEEP_EXISTING=1
 }
 
 print_ready() {
@@ -539,26 +624,38 @@ print_ready() {
     echo "  Keycloak: http://localhost:${KEYCLOAK_PORT}/  (admin / admin) realm=meridian"
     echo "  Portal:   http://localhost:${EMPLOYEE_PORTAL_PORT}/  (helen.ross / LabUser1!)"
     echo "  Mailpit:  http://localhost:${MAILPIT_UI_PORT}/  (SMTP host mailpit:${MAILPIT_SMTP_PORT} from IIQ)"
-    echo "  Gitea:    http://localhost:${GITEA_HTTP_PORT}/  (OIDC via Keycloak — Lesson 213)"
-    echo "  Workstation: http://localhost:${WORKSTATION_PORTAL_PORT}/  (group mnb-workstation-users)"
-    echo "  HR Intranet: http://localhost:${HR_INTRANET_PORT}/  · Finance: http://localhost:${FINANCE_PORTAL_PORT}/"
-    echo "  Vault:    http://localhost:${VAULT_HTTP_PORT}/ui  (token mnb-lab-vault-root — lab only)"
-    echo "  PAM lab:  http://localhost:${PAM_LAB_PORT}/  (CyberArk-shaped safes/checkout)"
-    echo "  Samba AD: ldap://localhost:${SAMBA_LDAP_PORT}  (see lab-data/enterprise/samba/README.md)"
+    if [[ "$WITH_SSO" -eq 1 ]]; then
+      echo "  Gitea:    http://localhost:${GITEA_HTTP_PORT}/  (OIDC via Keycloak — Lesson 213)"
+      echo "  Workstation: http://localhost:${WORKSTATION_PORTAL_PORT}/  (group mnb-workstation-users)"
+      echo "  HR Intranet: http://localhost:${HR_INTRANET_PORT}/  · Finance: http://localhost:${FINANCE_PORTAL_PORT}/"
+    else
+      echo "  SSO pack: off — add with --with=sso (Gitea + Workstation/HR/Finance)"
+    fi
+    if [[ "$WITH_PAM" -eq 1 ]]; then
+      echo "  Vault:    http://localhost:${VAULT_HTTP_PORT}/ui  (token mnb-lab-vault-root — lab only)"
+      echo "  PAM lab:  http://localhost:${PAM_LAB_PORT}/  (CyberArk-shaped safes/checkout)"
+    else
+      echo "  PAM pack: off — add with --with=pam (Vault + pam-lab)"
+    fi
+    if [[ "$WITH_AD" -eq 1 ]]; then
+      echo "  Samba AD: ldap://localhost:${SAMBA_LDAP_PORT}  (Lessons 205/234 — see lab-data/enterprise/samba/README.md)"
+    else
+      echo "  Samba AD: off — add with --with=ad (Lessons 205/234; heavy on Apple Silicon)"
+    fi
     echo "  Guide:    docs/ENTERPRISE-LAB-V2.md"
     echo "  Path:     docs/lessons/_CATALOG_201_250.md  (Enterprise Sandbox Path)"
   fi
   if [[ "$DO_SEED" -eq 1 ]]; then
     if [[ "$ENTERPRISE" -eq 1 ]]; then
-      echo "  Seed:     backup→wipe→app definitions only (no workforce cubes)"
+      echo "  Seed:     overlay app definitions (no workforce cubes)"
       echo "            MNB-HR is non-authoritative; cubes come from MNB-Workday in Lesson 207"
     else
-      echo "  Seed:     backup→wipe→MNB-HR + MNB-OpenLDAP (ran during up)"
+      echo "  Seed:     overlay MNB-HR + MNB-OpenLDAP (ran during up)"
     fi
-    if [[ "$KEEP_EXISTING" -eq 1 ]]; then
-      echo "            (kept existing objects; no wipe)"
+    if [[ "$DO_WIPE" -eq 1 ]]; then
+      echo "            (--wipe: backup→reset ran first; backups under lab-data/backups/iiq-*/)"
     else
-      echo "            backups: lab-data/backups/iiq-*/"
+      echo "            (kept existing objects; pass --wipe for a clean Meridian reset)"
     fi
     if [[ "$ENTERPRISE" -eq 1 ]]; then
       echo "            + enterprise pack (seed-enterprise.sh)"
@@ -567,17 +664,47 @@ print_ready() {
     echo
     echo "Next (seed skipped):"
     echo "  ./pluginsrc/mnb-iam-toolkit/enable-settings.sh"
-    echo "  MCP_API_KEY=${MCP_KEY} ./tools/lab/scripts/seed-mnb-lab-data.sh"
+    echo "  MCP_API_KEY=${MCP_KEY} ./tools/lab/scripts/seed-mnb-lab-data.sh --keep-existing"
   fi
   echo
   echo "Stop/wipe:  ./tools/lab/docker/down.sh"
   echo "Keep data:  ./tools/lab/docker/down.sh --keep-volumes"
-  echo "Re-seed only (backup+wipe): MCP_API_KEY=${MCP_KEY} ./tools/lab/scripts/seed-mnb-lab-data.sh"
-  echo "Re-seed overlay:            .../seed-mnb-lab-data.sh --keep-existing"
+  echo "Overlay seed:               MCP_API_KEY=${MCP_KEY} ./tools/lab/scripts/seed-mnb-lab-data.sh --keep-existing"
+  echo "Backup→reset then seed:     ./tools/lab/docker/up.sh --wipe"
 }
 
 # --- main ---
 require_docker
+
+stop_unselected_enterprise_packs() {
+  # Compose profiles do not stop services from a previous fuller --enterprise run.
+  local stop=()
+  if [[ "$ENTERPRISE" -ne 1 ]]; then
+    stop=(
+      mnb-keycloak mnb-employee-portal mnb-mailpit
+      mnb-samba-ad mnb-gitea mnb-workstation-portal mnb-hr-intranet mnb-finance-portal
+      mnb-vault mnb-pam-lab
+    )
+  else
+    [[ "$WITH_AD" -eq 1 ]] || stop+=(mnb-samba-ad)
+    if [[ "$WITH_SSO" -ne 1 ]]; then
+      stop+=(mnb-gitea mnb-workstation-portal mnb-hr-intranet mnb-finance-portal)
+    fi
+    if [[ "$WITH_PAM" -ne 1 ]]; then
+      stop+=(mnb-vault mnb-pam-lab)
+    fi
+  fi
+  local c running=()
+  for c in "${stop[@]+"${stop[@]}"}"; do
+    if docker inspect -f '{{.State.Running}}' "$c" 2>/dev/null | grep -qx true; then
+      running+=("$c")
+    fi
+  done
+  if [[ "${#running[@]}" -gt 0 ]]; then
+    info "Stopping unselected enterprise packs to free RAM: ${running[*]}"
+    docker stop "${running[@]}" >/dev/null || true
+  fi
+}
 
 if [[ -z "${IIQ_IMAGE:-}" ]]; then
   if docker image inspect mnb-identityiq:local >/dev/null 2>&1; then
@@ -602,7 +729,11 @@ start_plugin_package_bg
 info "Starting Meridian stack (IIQ + OpenLDAP + Academy + MCP + OpenAPI + Teller${ENTERPRISE:+ + Enterprise})"
 echo "    IIQ_IMAGE=${IIQ_IMAGE:-ghcr.io/beyond-boilerplate/identityiq:0.1.0}"
 if [[ "$ENTERPRISE" -eq 1 ]]; then
-  info "Enterprise profile: Samba AD + Keycloak + Employee Portal"
+  local_packs="lite (Keycloak + Portal + Mailpit)"
+  [[ "$WITH_AD" -eq 1 ]] && local_packs+=", ad"
+  [[ "$WITH_SSO" -eq 1 ]] && local_packs+=", sso"
+  [[ "$WITH_PAM" -eq 1 ]] && local_packs+=", pam"
+  info "Enterprise packs: ${local_packs}"
   python3 "$ROOT/tools/lab/enterprise/generate-identity-artifacts.py" || true
 fi
 if need_image_build; then
@@ -616,6 +747,8 @@ else
   info "Local images present - starting without rebuild (pass --rebuild to force)"
   "${COMPOSE[@]}" up -d
 fi
+
+stop_unselected_enterprise_packs
 
 info "Waiting for IdentityIQ login..."
 # Poll IIQ while other services come up; full parallel verify follows bootstrap

@@ -3,7 +3,7 @@
 **Track:** Enterprise Sandbox Path (production-like local estate)  
 **Time:** ~65 minutes  
 **Prereq:** Lesson **207** (204 strongly recommended — dual-link cube proof)  
-**Stack:** `./tools/lab/docker/up.sh --enterprise`
+**Stack:** `./tools/lab/docker/up.sh --enterprise --with=ad`
 
 **Maps to classic track:** 56–57
 

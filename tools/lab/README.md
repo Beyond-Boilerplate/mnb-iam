@@ -13,9 +13,8 @@ export MCP_API_KEY=mnb-lab-mcp-key
 ./tools/lab/scripts/seed-mnb-lab-data.sh
 ```
 
-**Default:** backup live `MNB-*` via MCP extract → `lab-data/backups/iiq-<ts>/`, wipe
-Meridian leftovers (keeps `spadmin` + HelloWorld), then create/aggregate **MNB-HR** and
-**MNB-OpenLDAP**. Overlay without wipe: `--keep-existing`.
+**Default:** overlay seed for **MNB-HR** and **MNB-OpenLDAP** (keeps live `MNB-*`).  
+Destructive reset: `./tools/lab/docker/up.sh --wipe` or `./tools/lab/scripts/seed-mnb-lab-data.sh --wipe`.
 
 Details: `lab-data/connectors/ldap/README.md`.
 

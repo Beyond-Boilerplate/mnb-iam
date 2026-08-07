@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Backup live Meridian IIQ objects via MCP extract, then wipe for a clean seed.
-# Used automatically by docker/up.sh + seed-mnb-lab-data unless --keep-existing.
+# Opt-in only: ./tools/lab/docker/up.sh --wipe  (or call this script / seed --wipe).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 export IIQ_MCP_URL="${IIQ_MCP_URL:-http://127.0.0.1:8766/mcp}"

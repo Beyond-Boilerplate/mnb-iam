@@ -18,23 +18,24 @@ Day-to-day customization uses **SSB** (Services Standard Build) — do not reinv
 # LDAP UI → http://localhost:8090/  (phpLDAPadmin; cn=admin,dc=meridiannb,dc=com / admin)
 ```
 
-**Enterprise Lab v2** (core + Samba AD, Keycloak, portals, Mailpit, Vault/PAM, connector mocks). Needs host ≥16 GB RAM, Docker **Compose plugin** (`docker compose version`; Homebrew: symlink `docker-compose` into `~/.docker/cli-plugins/` if missing), and a roomy Docker VM — Colima defaults (**2 GiB**) OOM-kill Keycloak (exit **137**); size before first `--enterprise`:
+**Enterprise Lab v2** — lite by default (Keycloak + Portal + Mailpit). Needs host ≥16 GB RAM, Docker **Compose plugin**, and a roomy Docker VM — Colima defaults (**2 GiB**) OOM-kill Keycloak (exit **137**):
 
 ```bash
 colima stop
 colima start --memory 10 --cpu 4   # persist in ~/.colima/default/colima.yaml
-./tools/lab/docker/up.sh --enterprise
-# Hub      → http://localhost:9000/   (TOC of all local services)
+./tools/lab/docker/up.sh --enterprise              # lite IdP pack
+./tools/lab/docker/up.sh --enterprise --with=ad    # + Samba AD (Lessons 205/234)
+./tools/lab/docker/up.sh --enterprise-full         # ad + sso + pam
+./tools/lab/docker/up.sh --enterprise --wipe       # backup→reset Meridian objects, then seed
+# Hub      → http://localhost:9000/
 # IIQ      → http://localhost:8080/identityiq  (spadmin / admin)
 # Workday  → http://localhost:8091/hcm/ui
 # Keycloak → http://localhost:8085/   (realm meridian)
 # Portal   → http://localhost:8092/
 # Mailpit  → http://localhost:8025/
-# Vault    → http://localhost:8200/   · PAM → http://localhost:8097/
-# Samba AD → ldap://localhost:3890
 ```
 
-Operator guide: [docs/ENTERPRISE-LAB-V2.md](docs/ENTERPRISE-LAB-V2.md) · Sandbox Path lessons 201–250: [docs/lessons/_CATALOG_201_250.md](docs/lessons/_CATALOG_201_250.md)
+Seed **overlays** by default (does not wipe). Operator guide: [docs/ENTERPRISE-LAB-V2.md](docs/ENTERPRISE-LAB-V2.md) · Sandbox Path: [docs/lessons/_CATALOG_201_250.md](docs/lessons/_CATALOG_201_250.md)
 
 Tomcat host path (core only):
 

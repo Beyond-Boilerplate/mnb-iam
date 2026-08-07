@@ -40,7 +40,7 @@ Preferred lab reset (backup via MCP extract, then wipe):
 ./tools/lab/scripts/backup-and-reset-lab.sh
 ```
 
-`docker/up.sh` runs that automatically before seed unless you pass `--keep-existing`.
+`docker/up.sh` overlay-seeds by default. Destructive backup→wipe: pass `--wipe` (or run this script / `seed-mnb-lab-data.sh --wipe`).
 
 ## Regenerating specs
 

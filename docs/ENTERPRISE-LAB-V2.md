@@ -46,19 +46,34 @@ HCM mock ──agg──► IIQ ──provision──► OpenLDAP / Samba / JDBC
 ## Quick start
 
 ```bash
-# Core (unchanged)
+# Core (unchanged) — overlay seed; does not wipe MNB-* objects
 ./tools/lab/docker/up.sh
 
-# Enterprise profile (Core + Samba + Keycloak + Portal + Mailpit + Gitea + mocks)
+# Enterprise lite (Keycloak + Employee Portal + Mailpit) — default --enterprise
 ./tools/lab/docker/up.sh --enterprise
 
-# Or compose directly
-docker compose -f docker-compose.iiq.yml -f docker-compose.enterprise.yml --profile enterprise up -d
+# Add packs only when the lesson needs them
+./tools/lab/docker/up.sh --enterprise --with=ad          # Samba AD (Lessons 205/234)
+./tools/lab/docker/up.sh --enterprise --with=sso         # Gitea + SSO gates
+./tools/lab/docker/up.sh --enterprise --with=pam         # Vault + pam-lab
+./tools/lab/docker/up.sh --enterprise-full               # all packs
+
+# Destructive Meridian reset (backup → wipe → seed)
+./tools/lab/docker/up.sh --enterprise --wipe
 ```
+
+| Pack / profile | Services | When |
+| --- | --- | --- |
+| `enterprise` (lite) | Keycloak, Employee Portal, Mailpit | Default `--enterprise` — IdP / mail / portal |
+| `enterprise-ad` | Samba AD DC (`linux/amd64`) | Lessons **205**, **234** — real AD-shaped LDAP |
+| `enterprise-sso` | Gitea, Workstation, HR, Finance gates | Lessons **212–213+** |
+| `enterprise-pam` | Vault, pam-lab | PAM / break-glass lessons |
+
+**Samba AD value:** dedicated live path for AD aggregation/groups without IQService (`MNB-ActiveDirectory-Live`). Core Path lessons 56–57 use CSV stubs; Enterprise Sandbox proves the same skills against a real Samba DC. Opt-in because the image is **amd64** (QEMU on Apple Silicon) and slow to become healthy.
 
 Tear down: `./tools/lab/docker/down.sh` (add `-v` to wipe volumes including Samba/Keycloak).
 
-**RAM:** ≥16 GB recommended with `--enterprise`.
+**RAM:** ≥10 GB Colima / ≥16 GB host recommended. Lite `--enterprise` is lighter than `--enterprise-full`.
 
 ## Identity correlation standard
 
@@ -109,11 +124,9 @@ Import enterprise objects after stack is healthy:
 ./tools/lab/enterprise/seed-enterprise.sh
 ```
 
-`./tools/lab/docker/up.sh --enterprise` already runs backup→wipe→**definitions-only** core apps (`MNB-HR` **non-authoritative**, `MNB-OpenLDAP` definition, no account aggregation)→this pack.
+`./tools/lab/docker/up.sh --enterprise` already overlays definitions-only core apps (`MNB-HR` **non-authoritative**, `MNB-OpenLDAP` definition, no account aggregation)→this pack. Pass `--wipe` for backup→reset first. Samba seed runs only when `mnb-samba-ad` is up (`--with=ad`).
 
 **Workforce cubes are not created at seed.** Learners create the first Identity Warehouse population in Lesson **207** by aggregating authoritative `MNB-Workday` and running Identity Refresh (create identities). Use **MNB Workday** UI at http://localhost:8091/hcm/ui to browse/hire/terminate against the same HCM feed.
-
-Use `--keep-existing` on `up.sh` (or `MNB_LAB_KEEP_EXISTING=1`) to overlay without wipe.
 
 ## Success criteria (DoD)
 

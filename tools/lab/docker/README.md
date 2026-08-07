@@ -1,28 +1,30 @@
 # Local Meridian stack (Docker)
 
 **One command** starts Postgres + OpenLDAP + IdentityIQ + Academy + MCP + OpenAPI + Teller,
-installs/enables the Meridian plugin, **backs up** any live `MNB-*` objects (toolkit extract /
-MCP `export_sailpoint_object` → `lab-data/backups/iiq-<ts>/`), **wipes** Meridian leftovers,
-then seeds **MNB-HR** + **MNB-OpenLDAP**:
+installs/enables the Meridian plugin, then **overlay-seeds** **MNB-HR** + **MNB-OpenLDAP**
+(keeps existing `MNB-*` objects). Pass `--wipe` for backup→reset before seed.
 
 ```bash
 ./tools/lab/docker/up.sh
-# Enterprise Lab v2 (Samba AD + Keycloak + Employee Portal):
+# Enterprise Lab v2 lite (Keycloak + Portal + Mailpit):
 ./tools/lab/docker/up.sh --enterprise
+# Add Samba AD / SSO gates / Vault+PAM only when needed:
+./tools/lab/docker/up.sh --enterprise --with=ad,sso,pam
+./tools/lab/docker/up.sh --enterprise-full
+# Destructive Meridian reset then seed:
+./tools/lab/docker/up.sh --wipe
 # preflight only (fail-fast on occupied ports):
 ./tools/lab/docker/up.sh --check
 # force rebuild images (slower):
 ./tools/lab/docker/up.sh --rebuild
 # start without HR/LDAP IIQ seeding:
 ./tools/lab/docker/up.sh --skip-seed
-# overlay seed without backup/wipe (keep lesson progress / existing apps):
-./tools/lab/docker/up.sh --keep-existing
 # if host MCP/OpenAPI leftovers hold 8765/8766:
 ./tools/lab/docker/up.sh --kill-host-sidecars
 ```
 
-Greenfield (no `MNB-*` apps yet) skips backup/wipe. Pass `--keep-existing` to re-seed on top
-of a populated lab. Manual backup→wipe: `./tools/lab/scripts/backup-and-reset-lab.sh`.
+`--keep-existing` is a no-op alias (keep is default). Manual backup→wipe:
+`./tools/lab/scripts/backup-and-reset-lab.sh` or `./tools/lab/scripts/seed-mnb-lab-data.sh --wipe`.
 
 By default `up.sh` skips Docker image rebuilds when local images already exist (big speed win), prepares the Meridian plugin zip (prefers `ssdplugins/`, else stages IIQ jars from the running container — no `base/ga` zip required), and probes IIQ/MCP/Teller/Academy/LDAP in parallel. Use `--rebuild` after Dockerfile or MCP source changes.
 

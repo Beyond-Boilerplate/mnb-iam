@@ -26,17 +26,17 @@ Examples:
   export MCP_API_KEY=mnb-lab-mcp-key
   export IIQ_MCP_URL=http://127.0.0.1:8766/mcp
 
-  # Full seed (HR cubes + OpenLDAP accounts/groups)
+  # Overlay seed (default — does not wipe)
   python3 tools/lab/scripts/seed_mnb_lab_data.py
 
-  # Overlay without wipe
-  python3 tools/lab/scripts/seed_mnb_lab_data.py --keep-existing
+  # Destructive: backup→wipe Meridian objects, then seed
+  python3 tools/lab/scripts/seed_mnb_lab_data.py --wipe
 
   # Enterprise definitions only (no workforce cubes)
-  python3 tools/lab/scripts/seed_mnb_lab_data.py --definitions-only --keep-existing
+  python3 tools/lab/scripts/seed_mnb_lab_data.py --definitions-only
 
   # OpenLDAP only (expects identities already present for correlation)
-  python3 tools/lab/scripts/seed_mnb_lab_data.py --skip-hr --keep-existing
+  python3 tools/lab/scripts/seed_mnb_lab_data.py --skip-hr
 
   # Dry run — print planned MCP calls
   python3 tools/lab/scripts/seed_mnb_lab_data.py --dry-run
@@ -617,7 +617,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--keep-existing",
         action="store_true",
-        help="Skip backup+wipe; seed/overlay on current IIQ objects",
+        default=True,
+        help="Skip backup+wipe; seed/overlay on current IIQ objects (default)",
+    )
+    p.add_argument(
+        "--wipe",
+        action="store_false",
+        dest="keep_existing",
+        help="Backup→wipe Meridian objects before seed (destructive)",
     )
     p.add_argument("--skip-hr", action="store_true", help="Skip MNB-HR create/aggregate")
     p.add_argument("--skip-ldap", action="store_true", help="Skip MNB-OpenLDAP onboard")
@@ -680,9 +687,13 @@ def main(argv: list[str] | None = None) -> int:
         _log("Nothing to do (--skip-hr, --skip-ldap, and --skip-verify)")
         return 0
 
-    keep_existing = args.keep_existing or os.environ.get(
-        "MNB_LAB_KEEP_EXISTING", ""
-    ).lower() in ("1", "true", "yes")
+    keep_existing = args.keep_existing
+    env_keep = os.environ.get("MNB_LAB_KEEP_EXISTING", "").lower() in ("1", "true", "yes")
+    env_wipe = os.environ.get("MNB_LAB_WIPE", "").lower() in ("1", "true", "yes")
+    if env_wipe:
+        keep_existing = False
+    elif env_keep:
+        keep_existing = True
 
     mcp = McpClient(url=args.mcp_url, api_key=args.mcp_api_key, timeout=120.0)
     try:

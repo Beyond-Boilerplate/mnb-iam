@@ -7,7 +7,8 @@ Production-like Meridian estate after the classic **01–110** curriculum. Fast,
 | **Style** | [_SANDBOX_STYLE.md](_SANDBOX_STYLE.md) (enriched template: Know these / Before you start / Expect / Control note) |
 | **Coverage map** | [_COVERAGE_01_110.md](_COVERAGE_01_110.md) (author map classic → sandbox) |
 | **Stack guide** | [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) |
-| **Start** | `./tools/lab/docker/up.sh --enterprise` then [201](201-boot-enterprise-stack.md) |
+| **Start** | `./tools/lab/docker/up.sh --enterprise` (lite IdP) then [201](201-boot-enterprise-stack.md); add `--with=ad|sso|pam` per lesson |
+
 | **Finish** | [250 Capstone: Full Bank Day](250-capstone-bank-day.md) |
 
 No worksheets. One-line **Why**, then **What this is** / **Intent** / detailed **Do this** (each step says what and why) / **If it fails**. Tweak the lab as you go.

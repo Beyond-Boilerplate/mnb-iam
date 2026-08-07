@@ -70,7 +70,7 @@ Also regenerated on enterprise boot: artifacts under `lab-data/enterprise/genera
 - Pass-through login as `helen.ross` (Lesson **206** — needs cubes from 207)
 - Classic CSV apps from Core Path 09–16 — not part of this seed
 
-**Escape hatch:** `--keep-existing` skips wipe and overlays seed. `--skip-seed` starts infra + plugin only.
+**Escape hatch:** Seed **overlays** by default (keeps `MNB-*`). Pass `--wipe` for backup→reset. `--skip-seed` starts infra + plugin only. Lite `--enterprise` omits Samba/SSO/PAM — add with `--with=ad,sso,pam` or use `--enterprise-full`.
 
 **Wrong way:** Searching Warehouse for Helen right after `Ready.` and assuming seed failed — empty workforce is the contract.
 
@@ -106,9 +106,9 @@ One command starts Core + enterprise Compose, installs the plugin, and runs the 
 - **Expect:**
   - Preflight ports clear (or owned by `mnb-iiq-lab`)
   - Script ends with `Ready.`
-  - Seed lines say **definitions only** / no workforce cubes (unless you passed `--keep-existing`)
+  - Seed lines say **definitions only** / no workforce cubes (unless leftovers from an older wipe-heavy seed)
 
-> **Tip:** First boot may **build** images (slow). Later runs skip rebuild unless you pass `--rebuild`. Need to keep work already in IIQ? Use `--keep-existing` so seed overlays instead of wipe.
+> **Tip:** First boot may **build** images (slow). Later runs skip rebuild unless you pass `--rebuild`. Seed overlays by default — use `--wipe` only when you want a clean Meridian reset.
 
 ### Task 2 — Open each surface in a browser
 
@@ -135,7 +135,7 @@ Boot hands you infra + app *definitions*, not a Warehouse full of Meridian emplo
    - Open `MNB-HR` → confirm it is **not** marked authoritative
 2. **Setup → Tasks** → search `MNB` for imported task templates (create later if empty after a bad wipe)
 3. **Identities → Identity Warehouse** → search `helen.ross`
-   - **Expect:** no workforce hit (or leftovers only if you used `--keep-existing`). `spadmin` is fine.
+   - **Expect:** no workforce hit (or leftovers only if you never wiped). `spadmin` is fine.
 
 - **Why:** empty workforce search is success here — cubes start in Lesson 207 from `MNB-Workday`.
 - **Expect:** inventory matches “What bootstrap already stood up.”
@@ -163,7 +163,7 @@ Save output under `~/iiq-lab-evidence/sandbox/201/`.
 | Keycloak never healthy | Wait for healthcheck `start_period`; `docker compose … logs keycloak` |
 | Gitea “Install” page | First-boot race — `--force-recreate gitea` (see [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)) |
 | Smoke FAIL on OpenLDAP | Install host `ldapsearch` (`brew install openldap`) or `docker exec mnb-openldap ldapsearch …` |
-| Re-`up` wiped my apps | Default is backup→wipe — use `--keep-existing`, or restore from `lab-data/backups/iiq-*/` |
+| Re-`up` wiped my apps | Default is **overlay** — wipe only with `--wipe`; restore from `lab-data/backups/iiq-*/` if you wiped by mistake |
 | Warehouse empty of Helen | **Expected** — create cubes in Lesson 207 from `MNB-Workday` |
 | `/hcm/ui` 404 | Rebuild `connector-mock`: `docker compose -f docker-compose.iiq.yml up -d --build --force-recreate connector-mock` |
 
@@ -187,7 +187,7 @@ Save output under `~/iiq-lab-evidence/sandbox/201/`.
 
 1. Does `up.sh --enterprise` create Helen’s identity cube? → **No** — only app definitions; cubes start in Lesson 207.
 2. Is `MNB-HR` authoritative after enterprise seed? → **No** — CSV contrast only; `MNB-Workday` is the authoritative HCM app.
-3. How do you re-seed **without** wiping existing `MNB-*` objects? → `--keep-existing` (or `MNB_LAB_KEEP_EXISTING=1`).
+3. How do you **wipe** existing `MNB-*` objects before re-seed? → `--wipe` (or `./tools/lab/scripts/backup-and-reset-lab.sh`).
 
 ## Feedback
 

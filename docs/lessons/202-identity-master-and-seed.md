@@ -171,7 +171,7 @@ People live in HCM/directories first; IIQ cubes are an operator action in Lesson
 | Samba seed step does nothing | Wait until `mnb-samba-ad` is **healthy** (2+ min first boot), then `./tools/lab/enterprise/seed-samba.sh` |
 | Apps imported but attributes look stale | You edited the master after a prior seed — re-run generator **and** `seed-enterprise.sh` together |
 | HCM UI empty / refused | `connector-mock` down — `curl -sf http://localhost:8091/health`; finish Lesson 201 first |
-| Warehouse already has Helen | Leftover from an old Core-style seed — wipe with `up.sh --enterprise` (no `--keep-existing`) or ignore and continue; Lesson 207 still owns Workday as source of truth |
+| Warehouse already has Helen | Leftover from an old Core-style seed — wipe with `up.sh --enterprise --wipe` or ignore and continue; Lesson 207 still owns Workday as source of truth |
 
 ## You are done when
 

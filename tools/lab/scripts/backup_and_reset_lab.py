@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """Backup live Meridian IIQ objects (extract plugin / MCP), then wipe for a clean seed.
 
-Default lab create path: export MNB-* XML → lab-data/backups/iiq-<ts>/ → wipe academy
+Opt-in destructive path: export MNB-* XML → lab-data/backups/iiq-<ts>/ → wipe academy
 leftovers (keeps spadmin + MNB-Rule-Hello-World) → caller re-seeds.
+
+Default lab up/seed overlays without calling this. Use:
+  ./tools/lab/docker/up.sh --wipe
+  ./tools/lab/scripts/seed-mnb-lab-data.sh --wipe
+  ./tools/lab/scripts/backup-and-reset-lab.sh
 
 Uses the toolkit objects/export path via MCP tool export_sailpoint_object.
 
@@ -14,7 +19,7 @@ Examples:
   # Backup only (no wipe)
   python3 tools/lab/scripts/backup_and_reset_lab.py --backup-only
 
-  # Skip when you want to overlay on existing apps
+  # Explicit no-op (overlay callers)
   python3 tools/lab/scripts/backup_and_reset_lab.py --keep-existing
 """
 
