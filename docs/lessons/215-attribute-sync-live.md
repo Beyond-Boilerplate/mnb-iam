@@ -36,17 +36,24 @@ PATCH /hcm/v1/workers/{id}  (department / title)
 HCM PATCH department/title
   → Aggregate MNB-Workday
   → cube attribute promote
-  → Attribute Sync mapping → provisioning plan
+  → Attribute Target (Identity Mapping) → provisioning plan
+  → Update policy Field scripts supply values
   → LDAP MODIFY
   → ldapsearch confirms     (Mailpit: silent — no approval)
 ```
 
+| Direction | Identity Mapping term | Meaning |
+| --- | --- | --- |
+| **In** | Attribute **Source** | App account attr → cube (promotion) |
+| **Out** | Attribute **Target** | Cube attr → app account attr (this lesson) |
+
 - **Wrong way:** Trusting the cube’s own attribute as proof of sync — that’s just promoted HR data. Only the *target* account changing proves provisioning fired.
+- **Wrong way:** Pointing Identity Mapping **Sources** at `MNB-OpenLDAP` for `department`/`title`. Refresh will pull LDAP’s *old* values back onto the cube and never push HR outbound. Sources for these attrs belong on **`MNB-Workday`** (or stay empty if Workday already promotes them); **Targets** point at OpenLDAP.
 
 ## Intent
 
 - Trigger a live HR attribute change through the HCM mock (not a file edit).
-- Confirm (or wire) attribute sync from identity `department`/`title` to OpenLDAP.
+- Wire Identity Mapping **Attribute Targets** (and Update policy Field scripts) from identity `department`/`title` to OpenLDAP.
 - Prove the change with raw `ldapsearch`.
 - Confirm Mailpit stayed silent for this change.
 
@@ -93,19 +100,54 @@ Save output under `~/iiq-lab-evidence/sandbox/215/`.
 - **Why:** aggregation updates the account link; promotion moves the value onto the identity cube.
 - **Expect:** Helen’s cube `department` / `title` match the new HCM values.
 
-### Task 4 — Confirm attribute sync mapping
+### Task 4 — Wire outbound Attribute Targets (+ Update policy values)
 
-Confirm (or configure) attribute sync from the identity’s `department` / `title` to `MNB-OpenLDAP`’s `departmentNumber` / `title` — Application provisioning policy or global Attribute Sync mapping, depending on your build’s menu layout.
+Two pieces work together. The **Target** decides *whether* Refresh builds an OpenLDAP MODIFY; the **Update policy** decides *which values* go on that plan. An Update form alone never “triggers” itself.
 
-- **Why:** without a mapping, refresh can compute a plan that never touches LDAP.
-- **Expect:** a mapping exists linking identity attribute → target account attribute.
+#### 4a — Identity Mapping Attribute Targets (required)
 
-### Task 5 — Refresh with provisioning enabled
+1. Open **Global Settings → Identity Mapping** (or ObjectConfig **Identity**).
+2. Edit identity attributes `department` and `title` (add them if missing).
+3. For each, add an **Attribute Target** (not Source):
 
-Re-run Identity Refresh with provisioning enabled so the sync plan *executes*, not just computes.
+   | Identity attr | Target application | Target attribute |
+   | --- | --- | --- |
+   | `department` | `MNB-OpenLDAP` | `departmentNumber` |
+   | `title` | `MNB-OpenLDAP` | `title` |
 
-- **Why:** preview-only refresh is a common false “it worked” — the cube looks right, LDAP never moved.
-- **Expect:** Task Result shows a provisioning plan against `MNB-OpenLDAP`.
+4. If either attribute already has an Attribute **Source** on `MNB-OpenLDAP`, remove it (or retarget the Source to `MNB-Workday`). LDAP-as-source overwrites the cube with directory values and blocks this lesson.
+
+- **Why:** Refresh “synchronize attributes” compares cube vs account using Targets. Zero Targets → zero OpenLDAP plan → Update policy never runs.
+- **Expect:** both attributes show Targets to `MNB-OpenLDAP`; Sources (if any) are Workday / HR — not OpenLDAP.
+
+#### 4b — Update provisioning policy Field scripts (value supply)
+
+1. Application **MNB-OpenLDAP** → **Configuration** → Provisioning Policy → **Update** (account) → **Edit Policy**.
+2. Landing on the **policy form** is expected — that form *is* the mapping UI.
+3. Ensure fields `departmentNumber` and `title` exist.
+4. Open each field → scroll past **Settings** (`Hidden` / `Read Only` / `Hide Nulls` are display flags only) → **Value Settings**.
+5. Set **Value** = **Script**:
+
+```java
+return identity.getAttribute("department");
+```
+
+```java
+return identity.getAttribute("title");
+```
+
+6. **Apply** each field → **Save** the form → **Save** the application.
+7. Delete any empty/broken Update form that has sections named `departmentNumber`/`title` but no Field scripts — keep one clean Update form.
+
+- **Why:** Targets create the plan; Field scripts tell the connector what to write. Blank Value Settings → MODIFY with nothing useful.
+- **Expect:** Update form fields bind cube `department`/`title` → LDAP `departmentNumber`/`title`.
+
+### Task 5 — Refresh with sync + provisioning enabled
+
+Re-run Identity Refresh with **synchronize attributes** (or equivalent) **and** provisioning enabled so the Target-driven plan *executes*, not just computes.
+
+- **Why:** preview-only refresh is a common false “it worked” — the cube looks right, LDAP never moved. Targets without provision also leave LDAP stale.
+- **Expect:** Task Result shows a provisioning plan / transaction against `MNB-OpenLDAP`.
 
 ### Task 6 — Prove LDAP changed with ldapsearch
 
@@ -134,7 +176,10 @@ Open [http://localhost:8025](http://localhost:8025) and confirm no new message t
 | --- | --- |
 | `hcm-scenario.sh mover` usage error | Form is `mover <username\|workerId> <newDepartment> [newTitle]`; quote departments with spaces |
 | HCM new, cube old after refresh | Aggregated but skipped promotion — or agg only touched the link |
-| Cube new, LDAP unchanged | Sync mapping missing, or refresh ran preview-only (no provisioning) |
+| Cube snapped back to old LDAP values (`SEC`, old title) | Identity Mapping **Source** points at `MNB-OpenLDAP` — remove it; Source should be Workday (or none). Re-agg Workday + promote (re-run mover only if HCM was overwritten) |
+| Cube new, LDAP unchanged; **no** OpenLDAP plan / 0 provisioning txns | Missing **Attribute Targets**, or refresh lacked synchronize attributes + provisioning. Update policy alone does not fire |
+| Plan exists but attrs blank / LDAP unchanged | Update form Field **Value Settings** missing scripts; or a second empty Update form is winning |
+| Form editor **Settings** has no mapping | Scroll to **Value Settings** → Script (Settings is only Hidden / Read Only / Hide Nulls) |
 | `ldapsearch` still shows old values | Stale terminal scrollback — re-run the exact command fresh |
 | Unexpected Mailpit mail | An `IdentityTrigger` scoped to `attributeChange` may be matching broader than intended |
 
@@ -156,11 +201,13 @@ Open [http://localhost:8025](http://localhost:8025) and confirm no new message t
 
 1. Why isn’t cube-level attribute value proof enough? → it’s promoted HR data, not confirmation provisioning fired
 2. What should Mailpit show for a pure attribute sync? → nothing — silent, no-approval
-3. What two refresh options does this lesson depend on? → attribute promotion, then provisioning
+3. What two refresh options does this lesson depend on? → attribute promotion, then synchronize attributes + provisioning
+4. Source vs Target — which one pushes cube → OpenLDAP? → Attribute **Target**
+5. Why doesn’t the Update provisioning policy “trigger” by itself? → it only supplies values once Targets + refresh build a MODIFY plan
 
 ## Feedback
 
-Could you re-run mover → agg → promote → provision → `ldapsearch` from memory? If LDAP stayed stale, note whether the refresh Task Result actually listed an OpenLDAP plan — missing mapping vs preview-only are different failures.
+Could you re-run mover → Workday agg → promote → confirm Targets → refresh with sync+provision → `ldapsearch` from memory? If LDAP stayed stale, note whether the Task Result listed an OpenLDAP plan — missing Targets vs preview-only vs Source-from-LDAP are different failures.
 
 ## Navigate
 
