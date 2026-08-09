@@ -4,9 +4,12 @@
   <Attributes>
     <Map>
       <entry key="SQL" value="SELECT account_id, username, email, employee_id, status, entitlement FROM mnb_app_accounts"/>
+      <entry key="accountprovisionRule" value="globalRule"/>
       <entry key="driverClass" value="org.postgresql.Driver"/>
-      <entry key="getObjectSQL" value="SELECT account_id, username, email, employee_id, status, entitlement FROM mnb_app_accounts WHERE username = &apos;$(identity)&apos;"/>
+      <entry key="getObjectSQL" value="SELECT account_id, username, email, employee_id, status, entitlement FROM mnb_app_accounts WHERE account_id = &apos;$(identity)&apos;"/>
+      <entry key="jdbcProvisionRule" value="MNB-Rule-JDBC-CoreBanking-Provision"/>
       <entry key="password" value="1:ACP:rHr76ZByDSE9VWHS3Aq2+DcVWS/j+elGcarJnWya/Io="/>
+      <entry key="provisionRule" value="globalRule"/>
       <entry key="sysDescriptions">
         <value>
           <Map>

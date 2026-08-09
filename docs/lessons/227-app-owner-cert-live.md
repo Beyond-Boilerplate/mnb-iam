@@ -5,7 +5,7 @@
 **Prereq:** Lesson 226  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
-**Maps to classic track:** 44
+**Maps to classic track:** 44 / 10
 
 > **Why:** App owners certify what managers cannot judge — whether an account still belongs on their system, not whether a person still needs it for their job.
 
@@ -42,10 +42,21 @@ Application.Owner = spadmin (meaningless for accountability)
 | **`certifierName="applicationOwner"`** | IIQ looks up `Application.Owner` for the certifier |
 | **Account-level row** | One link on one app — not Helen’s entire access list |
 | **Manager vs owner** | Job need vs system membership |
+| **ManagedAttribute** | Entitlement Catalog entry — display / risk / owner / requestable (classic 10) |
+
+App-owner certs (and manager certs) are only usable when rows show **business language**. Enrich Entitlement Catalog before you expect Marcus to decide thoughtfully:
+
+| Metadata | Why the certifier cares |
+| --- | --- |
+| Display name + description | “Wire Portal — Initiate” vs opaque `WIRE_INIT` |
+| Risk | Critical rows jump the queue |
+| Owner | Escalation path when Marcus needs a peer |
+| Requestable | Self-service vs tightly controlled — not every code belongs in Lesson 221’s catalog |
 
 - **Wrong way:** Leaving `Owner` on `spadmin` and certifying anyway — no real accountability.
 - **Wrong way:** Expecting the same row shape as Lesson 226 — owner certs are account/app scoped.
 - **Wrong way:** Revoke accepted in UI but never checking the target system.
+- **Wrong way:** Certifying bare codes with no display/risk — rubber-stamp by opacity (classic 10).
 
 ## Intent
 
@@ -104,9 +115,11 @@ Note subject under evidence.
 1. Log in as `marcus.approve` / `LabUser1!`  
 2. Open **My Certifications**  
 3. Observe: rows are **one per account on the app**, not one identity’s whole access  
-4. Pick a stale account — e.g. `priya.wire` if she no longer needs initiator rights on this app — and **Revoke**  
+4. Note whether entitlements show **display names** or opaque codes — if codes only, fix ManagedAttribute metadata (Lesson 221 / Entitlement Catalog) before calling the campaign “reviewer-ready”  
+5. Pick a stale account — e.g. `priya.wire` if she no longer needs initiator rights on this app — and **Revoke**  
 
-- **Expect:** Revoke recorded on an account-level row.
+- **Why:** owner accountability + readable dictionary metadata is the control; opaque codes train Approve-All.
+- **Expect:** Revoke recorded on an account-level row; you can say whether display/risk metadata was present.
 
 > **Tip:** Write one comparison line now: “226 rows ≈ N identity-access items; 227 rows ≈ M accounts on one app.”
 
@@ -189,10 +202,11 @@ Owner was marcus.approve (not spadmin). Revoked <user> on <app>. Target proof: <
 2. What’s the row unit vs a manager cert? → Account-on-app, not identity’s whole access  
 3. Why is `spadmin` as Owner meaningless? → No real accountability  
 4. What question does app-owner cert answer? → “Does this account still belong on my system?”  
+5. Why enrich ManagedAttribute before the campaign? → Display/risk/owner make decisions real, not rubber stamps  
 
 ## Feedback
 
-Could you explain manager vs app-owner cert in two sentences without looking back? If Marcus never saw the cert, note whether Owner was saved as the Identity **name** — display-name mismatches are a common miss.
+Could you explain manager vs app-owner cert in two sentences without looking back? If Marcus never saw the cert, note whether Owner was saved as the Identity **name** — display-name mismatches are a common miss. If rows were bare codes, note that as a dictionary gap (classic 10) before blaming Marcus.
 
 ## Navigate
 

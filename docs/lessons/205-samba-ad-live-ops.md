@@ -209,4 +209,5 @@ Could you explain why this lab uses OpenLDAP-Direct against Samba instead of Act
 
 - Previous: [Lesson 204](204-openldap-live-ops.md)
 - Next: [Lesson 206](206-passthrough-iiq-login.md)
+- Theory: [Lesson 257 — IQService Architecture](257-iqservice-architecture-theory.md) (why this lab skips native AD Direct + password ops)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

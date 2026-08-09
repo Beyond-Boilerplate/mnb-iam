@@ -366,5 +366,5 @@ Could you explain why Portal SSO needs an IdP IT pack on birthright without open
 
 - Previous: [Lesson 215](215-attribute-sync-live.md)
 - Next: [Lesson 217](217-joiner-lcm-live.md)
-- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)
+- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · Theory: [256 Connector Registry](256-connector-registry-theory.md) · [258 LDIF offline](258-ldif-offline-evidence-theory.md)
 

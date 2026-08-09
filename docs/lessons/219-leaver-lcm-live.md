@@ -5,7 +5,7 @@
 **Prereq:** Lessons 216–217  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
-**Maps to classic track:** 31 / 34
+**Maps to classic track:** 31 / 34 / 20
 
 > **Why:** A leaver is only done when SSO fails and accounts are disabled everywhere — a Terminated badge alone is a paper trail, not security. Prove disable on directory and IdP, not just IIQ status.
 
@@ -54,10 +54,20 @@ HCM PATCH active=false / Terminated
 | `Log Leaver` | Script log — proves the case ran (`MNB Leaver workflow for …`) |
 | `Refresh` | `call:refreshIdentity` with `provision=true`, `disable=true` |
 
+**Orphan vs leaver residual** (classic 20) — different playbooks:
+
+| Pattern | What it is | Playbook |
+| --- | --- | --- |
+| **Orphan / uncorrelated** | Account with no owning cube (Lesson 214) | Correlate / Disable / Exception |
+| **Leaver residual / dormant** | Cube exists and is **inactive/Terminated**, but accounts or entitlements still show on the cube or target | Hunt → ticket → finish disable/remove |
+
+Mixing them opens the wrong ticket. Disabled-but-still-linked privileged membership can still fail certs — treat critical residuals as open until policy says “disabled is closed.”
+
 - **Wrong way:** Marking inactive in IIQ Debug without HCM termination — no source-of-truth trail, and the leaver trigger may never fire.
 - **Wrong way:** Terminating Helen / Priya — shared personas break later certs and SSO lessons.
 - **Wrong way:** Declaring victory after LDAP disable while Portal still works — Keycloak is a separate store.
 - **Wrong way:** Aggregating Workday without **Process events** — cube flips inactive, leaver workflow never starts.
+- **Wrong way:** Stopping at “cube Terminated” without hunting leftover Application Accounts / entitlements.
 
 ## Intent
 
@@ -65,6 +75,7 @@ HCM PATCH active=false / Terminated
 - Use a disposable identity only; prove Portal login works **before** terminate.
 - Terminate via live HCM; fire the leaver path (auto or manual fallback).
 - Prove disable on ≥1 directory **and** failed Portal login.
+- Hunt the inactive cube for leftover access (leaver residual vs orphan).
 - Record Mailpit termination mail presence or honest gap (welcome/term mail often arrives in Lesson 232).
 
 ## Before you start
@@ -229,7 +240,39 @@ Attempt Employee Portal login as the leaver.
 - **Why:** this is the acceptance test — Terminated badge without failed SSO is incomplete.
 - **Expect:** **login fails**. If it succeeds, trace HCM → cube → plan → target until you find the open hop — that gap *is* the lesson outcome.
 
-### Task 12 — Mailpit termination notice
+### Task 12 — Hunt leaver residual (inactive cube + leftover access)
+
+Classic **20**: after terminate, prove you can **detect** incomplete offboarding — not only that the happy path worked.
+
+1. Open the disposable leaver’s cube (`lab.leaver1` / `lab.joiner1`)  
+2. Confirm **inactive / Terminated** on Identity attributes  
+3. Open **Application Accounts** and **Entitlements / Roles**  
+4. List anything still linked or still present on a target after re-agg (directory, Wire, CRM, IdP)  
+5. Classify each leftover:
+
+| Finding | Severity cue | Next action |
+| --- | --- | --- |
+| Live / enabled account on inactive cube | Sev-1 if privileged / SSO | Finish disable plan or open ticket |
+| Disabled but entitlement still listed | Often Sev-1 for wire/finance | Remove membership / re-run provision |
+| No leftovers | Clean leaver | Record “zero residual” under evidence |
+
+Optional control seed name for later reports: `MNB-Terminated-With-Access`.
+
+Write under evidence:
+
+```text
+Leaver residual hunt: <identity>
+inactive=true / Terminated: yes|no
+leftover accounts/ents: <none | list>
+orphan vs residual: residual (cube exists) | would escalate to 214 if uncorrelated
+```
+
+- **Why:** examiners sample terminated workers and ask whether access was removed — hunting proves detection when automation stalls.
+- **Expect:** written hunt result; any leftover is named (not “looked fine”).
+
+> **Tip:** If you find an **uncorrelated** privileged account with no cube, that is Lesson **214** orphan disposition — not this leaver residual playbook.
+
+### Task 13 — Mailpit termination notice
 
 Check [http://localhost:8025](http://localhost:8025).
 
@@ -251,6 +294,7 @@ Check [http://localhost:8025](http://localhost:8025).
 
 - [ ] Disposable identity disabled on at least one directory (raw proof)
 - [ ] Portal login as the leaver **fails**
+- [ ] Leaver residual hunt recorded (zero leftovers **or** named residuals)
 - [ ] You can name any remaining hop where access still works
 - [ ] Workflow + trigger exist for the next leaver (not a one-off Debug disable)
 
@@ -259,7 +303,7 @@ Check [http://localhost:8025](http://localhost:8025).
 - **Control:** Leaver / rapid offboarding (terminate → disable all surfaces)
 - **Owners:** HR Ops + IAM Ops + IdP owner
 - **SLA (lab):** same session; production often same-day / hours for privileged
-- **Evidence:** `~/iiq-lab-evidence/sandbox/219/` — HCM PATCH proof, ldap/IdP disable, failed Portal attempt
+- **Evidence:** `~/iiq-lab-evidence/sandbox/219/` — HCM PATCH proof, ldap/IdP disable, failed Portal attempt, residual hunt note
 
 ## Quick check
 
@@ -267,13 +311,14 @@ Check [http://localhost:8025](http://localhost:8025).
 2. What IIQ flags drive disable plans? → `disable=true` with `provision=true` on refresh  
 3. Why use a disposable identity? → Shared personas break later certs/SSO lessons  
 4. What Refresh option must be on for the leaver trigger to fire? → **Process events**  
+5. Orphan vs leaver residual? → No owning cube vs inactive cube with leftover access  
 
 ## Feedback
 
-Could you name every store that must be disabled for SSO to fail? If Portal still worked after LDAP disable, that multi-store gap is the finding — write it down before moving on.
+Could you name every store that must be disabled for SSO to fail? If Portal still worked after LDAP disable, that multi-store gap is the finding — write it down before moving on. If the cube was Terminated but Application Accounts still listed access, note that residual — classic 20 hunt.
 
 ## Navigate
 
 - Previous: [Lesson 218](218-mover-lcm-live.md)
 - Next: [Lesson 220](220-contractor-loa-live.md)
-- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)
+- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · Theory: [257 IQService](257-iqservice-architecture-theory.md) (AD disable path) · [256 Connector Registry](256-connector-registry-theory.md)

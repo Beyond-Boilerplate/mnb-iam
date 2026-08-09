@@ -31,8 +31,9 @@ Leave with a personal triage card: *where do I look first?*
 Symptom: access didn't land / disable didn't stick
   → Provisioning Transactions (list + DETAIL)
   → Task Result stack trace (full text)
+  → IdentityRequest / work-item history (who approved what)
   → Application → Test Connection
-  → Classify: auth vs schema vs network
+  → Classify: auth vs schema vs network vs process
   → Fix cause → retry SAME transaction (or re-run plan)
   → Confirm Committed + target proof
 ```
@@ -43,11 +44,13 @@ Symptom: access didn't land / disable didn't stick
 | Bad JDBC auth | `SQLException`, password authentication failed | Task Result + Core Banking Application password |
 | Bad plan / schema | Unknown attribute, schema violation | Task Result — **different** wording than auth |
 | Stale pool | Test Connection green, provision still fails | Restart task / recycle connector cache |
+| Wrong LCM process | Approvals done, no plan / wrong owner | IdentityRequest trail + Lifecycle Manager map (Lesson 222) |
 
 | Term | Plain English |
 | --- | --- |
 | **Test Connection** | App config can bind/connect *right now* |
 | **Provisioning Transaction** | One attempted change on a target |
+| **IdentityRequest trail** | Who requested/approved before the plan ran |
 | **Retry** | Re-execute after fixing root cause |
 | **Connection pool cache** | Old bad password may linger until recycle |
 
@@ -55,6 +58,7 @@ Symptom: access didn't land / disable didn't stick
 - **Wrong way:** Reading only the PT list row — full stack often lives in Task Result detail.
 - **Wrong way:** Changing a *different* Application than the plan targets (similar names confuse).
 - **Wrong way:** Leaving the lab broken — always restore correct passwords before you finish.
+- **Wrong way:** Debugging only the connector when the IdentityRequest shows the wrong workflow/approver — process bugs look like “provision failed.”
 
 ## Intent
 
@@ -183,9 +187,14 @@ Under `~/iiq-lab-evidence/sandbox/230/triage-card.txt`:
 First places I look next time:
 - PT detail
 - Task Result stack
+- IdentityRequest / approval trail (process vs connector)
 - Test Connection
 - Confirm I edited the SAME Application the plan targets
 ```
+
+Optional: open the IdentityRequest from Lesson 222 for `priya.wire` and note how you’d distinguish “connector auth failed” from “wrong workflow / never provisioned.”
+
+- **Expect:** triage card saved; you can name process vs connector as separate classes.
 
 ## If it fails
 
@@ -217,6 +226,7 @@ First places I look next time:
 2. Why do LDAP and JDBC credential failures look different? → Different connector/driver error shapes for the same root cause (bad secret)  
 3. What’s a third failure class beyond bad credentials? → Malformed plan / non-existent target attribute  
 4. Why can Test Connection lie after a fix? → Connection pool may still hold the old credential  
+5. When is “provision failed” actually a process bug? → IdentityRequest shows wrong workflow / never reached `provisionProject` (Lesson 222)  
 
 ## Feedback
 
@@ -226,4 +236,5 @@ Could you triage “provision failed” by naming your first three clicks withou
 
 - Previous: [Lesson 229](229-cert-remediation-live.md)
 - Next: [Lesson 231](231-audit-reports-live.md)
+- Theory: [Lesson 256 — Connector Registry](256-connector-registry-theory.md) (`featuresString` / what a connector can honestly provision)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

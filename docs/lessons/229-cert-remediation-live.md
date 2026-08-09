@@ -210,6 +210,8 @@ Outcome: Committed verified | Manual remediation completed
 
 Could you list the four evidence artifacts this lesson bags without scrolling up? If Committed disagreed with your target query, write which side you trusted first and why — that instinct is the skill.
 
+Next up (230): you’ll *break* connectors on purpose — keep your PT id; triage starts from the same surfaces you used here.
+
 ## Navigate
 
 - Previous: [Lesson 228](228-targeted-cert-live.md)

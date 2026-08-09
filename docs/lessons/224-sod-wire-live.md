@@ -212,6 +212,8 @@ Pick one:
 
 Could you explain dangling Bundle references without opening the XML? If the policy never fired, note whether you enabled check-policies on refresh — existence of a Policy object is not detection.
 
+Before Lesson 225: write whether you chose **reject** or **mitigate** — 225 needs an open violation (or a recreate path) either way.
+
 ## Navigate
 
 - Previous: [Lesson 223](223-break-glass-live.md)

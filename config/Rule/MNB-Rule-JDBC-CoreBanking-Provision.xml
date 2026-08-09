@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MNB-Rule-JDBC-CoreBanking-Provision" type="JDBCOperationProvisioning">
+  <Description>JDBC create/modify/disable for mnb_app_accounts — entitlement UPDATEs required by break-glass (223); Create/Disable align with lesson 236.</Description>
+  <Signature returnType="ProvisioningResult">
+    <Inputs>
+      <Argument name="application"/>
+      <Argument name="schema"/>
+      <Argument name="connection"/>
+      <Argument name="plan"/>
+      <Argument name="request"/>
+    </Inputs>
+    <Returns>
+      <Argument name="result"/>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningResult;
+
+ProvisioningResult result = new ProvisioningResult();
+
+String firstValue(Object v) {
+  if (v == null) return null;
+  if (v instanceof Collection) {
+    Iterator it = ((Collection) v).iterator();
+    return it.hasNext() ? String.valueOf(it.next()) : null;
+  }
+  return String.valueOf(v);
+}
+
+String attr(AccountRequest ar, String name) {
+  if (ar == null) return null;
+  AttributeRequest a = ar.getAttributeRequest(name);
+  if (a == null) return null;
+  return firstValue(a.getValue());
+}
+
+String entitlementFrom(AccountRequest ar) {
+  if (ar == null || ar.getAttributeRequests() == null) return null;
+  String removed = null;
+  String setOrAdd = null;
+  for (Object o : ar.getAttributeRequests()) {
+    AttributeRequest a = (AttributeRequest) o;
+    if (a == null || !"entitlement".equals(a.getName())) continue;
+    String v = firstValue(a.getValue());
+    if (v == null) continue;
+    if (ProvisioningPlan.Operation.Remove.equals(a.getOp())) {
+      removed = v;
+    } else {
+      setOrAdd = v;
+    }
+  }
+  return setOrAdd != null ? setOrAdd : removed;
+}
+
+try {
+  if (plan == null) {
+    result.setStatus(ProvisioningResult.STATUS_FAILED);
+    result.addError("MNB JDBC provision: plan was null");
+    return result;
+  }
+
+  List accountRequests = plan.getAccountRequests();
+  if (accountRequests == null || accountRequests.isEmpty()) {
+    result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+    return result;
+  }
+
+  for (Object o : accountRequests) {
+    AccountRequest ar = (AccountRequest) o;
+    AccountRequest.Operation op = ar.getOperation();
+
+    if (AccountRequest.Operation.Create.equals(op)) {
+      String accountId = attr(ar, "account_id");
+      if (accountId == null) accountId = ar.getNativeIdentity();
+      String username = attr(ar, "username");
+      String email = attr(ar, "email");
+      String employeeId = attr(ar, "employee_id");
+      String status = attr(ar, "status");
+      String entitlement = attr(ar, "entitlement");
+      if (accountId == null || username == null) {
+        result.setStatus(ProvisioningResult.STATUS_FAILED);
+        result.addError("MNB JDBC Create missing account_id or username");
+        return result;
+      }
+      if (status == null) status = "ACTIVE";
+      PreparedStatement ps = connection.prepareStatement(
+        "INSERT INTO mnb_app_accounts "
+        + "(account_id, username, email, employee_id, status, entitlement) "
+        + "VALUES (?,?,?,?,?,?)");
+      ps.setString(1, accountId);
+      ps.setString(2, username);
+      ps.setString(3, email);
+      ps.setString(4, employeeId);
+      ps.setString(5, status);
+      ps.setString(6, entitlement);
+      ps.executeUpdate();
+      ps.close();
+      result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+    }
+    else if (AccountRequest.Operation.Disable.equals(op)
+          || AccountRequest.Operation.Delete.equals(op)) {
+      String accountId = ar.getNativeIdentity();
+      if (accountId == null) accountId = attr(ar, "account_id");
+      if (accountId == null) {
+        result.setStatus(ProvisioningResult.STATUS_FAILED);
+        result.addError("MNB JDBC Disable missing nativeIdentity/account_id");
+        return result;
+      }
+      PreparedStatement ps = connection.prepareStatement(
+        "UPDATE mnb_app_accounts "
+        + "SET status = 'DISABLED', updated_at = CURRENT_TIMESTAMP "
+        + "WHERE account_id = ?");
+      ps.setString(1, accountId);
+      int n = ps.executeUpdate();
+      ps.close();
+      if (n < 1) {
+        result.setStatus(ProvisioningResult.STATUS_FAILED);
+        result.addError("MNB JDBC Disable matched 0 rows for " + accountId);
+        return result;
+      }
+      result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+    }
+    else if (AccountRequest.Operation.Enable.equals(op)) {
+      String accountId = ar.getNativeIdentity();
+      if (accountId == null) accountId = attr(ar, "account_id");
+      PreparedStatement ps = connection.prepareStatement(
+        "UPDATE mnb_app_accounts "
+        + "SET status = 'ACTIVE', updated_at = CURRENT_TIMESTAMP "
+        + "WHERE account_id = ?");
+      ps.setString(1, accountId);
+      ps.executeUpdate();
+      ps.close();
+      result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+    }
+    else if (AccountRequest.Operation.Modify.equals(op)) {
+      String accountId = ar.getNativeIdentity();
+      if (accountId == null) accountId = attr(ar, "account_id");
+      String entitlement = entitlementFrom(ar);
+      if (accountId == null) {
+        result.setStatus(ProvisioningResult.STATUS_FAILED);
+        result.addError("MNB JDBC Modify missing nativeIdentity/account_id");
+        return result;
+      }
+      if (entitlement == null) {
+        result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+        continue;
+      }
+      PreparedStatement ps = connection.prepareStatement(
+        "UPDATE mnb_app_accounts "
+        + "SET entitlement = ?, updated_at = CURRENT_TIMESTAMP "
+        + "WHERE account_id = ?");
+      ps.setString(1, entitlement);
+      ps.setString(2, accountId);
+      int n = ps.executeUpdate();
+      ps.close();
+      if (n < 1) {
+        result.setStatus(ProvisioningResult.STATUS_FAILED);
+        result.addError("MNB JDBC Modify matched 0 rows for " + accountId);
+        return result;
+      }
+      result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+    }
+    else {
+      result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+    }
+  }
+}
+catch (SQLException e) {
+  result.setStatus(ProvisioningResult.STATUS_FAILED);
+  result.addError("MNB JDBC SQLException: " + e.getMessage());
+}
+
+return result;
+  ]]></Source>
+</Rule>

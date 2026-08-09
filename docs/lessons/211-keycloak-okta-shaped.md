@@ -417,4 +417,4 @@ Could you teach a teammate public vs confidential vs PKCE without opening this p
 
 - Previous: [Lesson 210](210-crm-scim.md)
 - Next: [Lesson 212](212-employee-portal-sso.md)
-- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)
+- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · Theory: [256 Connector Registry](256-connector-registry-theory.md) (when IdP/OIDC vs directory connectors)

@@ -345,4 +345,4 @@ Could you explain the three gates (Process events → LDAP Create scripts → Id
 
 - Previous: [Lesson 216](216-birthright-roles-live.md)
 - Next: [Lesson 218](218-mover-lcm-live.md)
-- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)
+- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · Theory: [256](256-connector-registry-theory.md) · [257 IQService](257-iqservice-architecture-theory.md) · [258 LDIF](258-ldif-offline-evidence-theory.md)

@@ -65,6 +65,7 @@ LOA path (simulated — no real field):
 - Inventory what Rachel still has without birthright; sketch what a contractor package *should* include.
 - Simulate LOA with the only HCM lever available; reverse it; confirm access restores.
 - Name exactly why LOA-via-terminate is an audit finding.
+- Leave knowing the next path for non-birthright access is **request + approve** (Lesson 221–222), not “just assign.”
 
 ## Before you start
 
@@ -113,9 +114,16 @@ Open Rachel’s **Application Accounts**. List which live apps still correlate e
 
 Save the inventory as a short text file under evidence.
 
-### Task 3 — Sketch a contractor birthright (optional create)
+### Task 3 — Sketch a contractor package (optional create)
 
 Decide what day-one access a contractor *should* get (example: Portal SSO only, no Wire, no employee LDAP group).
+
+Banks usually mix two patterns:
+
+| Pattern | When | Lesson that proves it |
+| --- | --- | --- |
+| Narrow **birthright** | Every engaged contractor needs the same thin pack | Selector on `employeeType=Contractor` |
+| **Requestable** only | Wire / elevated apps — ask + approve | Lessons 221–222 |
 
 **Option A — Create a draft Bundle in IIQ**
 
@@ -129,12 +137,14 @@ Decide what day-one access a contractor *should* get (example: Portal SSO only, 
 Write one evidence line:
 
 ```text
-Contractor birthright candidate: portal-users only via MNB-Keycloak-IdP;
-exclude Wire Initiator and employee OpenLDAP all-employees.
+Contractor day-one: portal-users only via MNB-Keycloak-IdP (birthright candidate).
+Elevated (Wire, CRM): requestable only — never employee birthright.
 ```
 
 - **Why:** observing exclusion without deciding the alternative is incomplete ops work.
 - **Expect:** either a draft Bundle in IIQ, or a one-line policy note under evidence.
+
+> **Tip:** Lesson 221’s catalog is how contractors (and employees) get Wire without birthright. Keep that distinction clear.
 
 ### Task 4 — Simulate LOA with the leaver lever
 
@@ -235,6 +245,8 @@ workflow (suspend without Terminated semantics).
 ## Feedback
 
 Could you explain why LOA-via-terminate is unsafe for audit without opening this lesson? If access didn’t restore after Task 7, note whether you saw an enable plan — status flip without provisioning is the usual miss.
+
+Also: could you tell a teammate how a contractor gets Wire access in this estate (hint: not birthright)?
 
 ## Navigate
 

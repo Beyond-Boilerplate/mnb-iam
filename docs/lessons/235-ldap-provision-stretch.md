@@ -1,89 +1,225 @@
 # Lesson 235 — OpenLDAP Provision Stretch
 
 **Track:** Enterprise Sandbox Path (production-like local estate)  
-**Time:** ~50 minutes  
-**Prereq:** Lesson 204  
+**Time:** ~55 minutes  
+**Prereq:** Lessons 204, 216–217, 230  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
 **Maps to classic track:** 58
 
-> **Why:** Reads without writes teach half a connector. If provisioning was never exercised, an ACL denial in production is the first time anyone finds out.
+> **Why:** Reads without writes teach half a connector. If group membership remove and ACL denials were never exercised, production is the first time anyone finds out.
 
 ## What this is
 
-Lesson 204 operated `MNB-OpenLDAP` read-only — aggregation, correlation, pass-through auth. The `MNB-Application-OpenLDAP.xml` definition already lists `PROVISIONING` in its `featuresString`, meaning IIQ can write, but you've never made it. This lesson closes that gap: create a brand-new `ou=people` entry for a joiner directly from an IIQ plan, then add/remove a group membership, and if a write is denied, fix the actual ACL on the OpenLDAP server rather than routing around it.
+Lesson 204 operated OpenLDAP read-heavy. Lessons 216–217 already **create** OpenLDAP accounts via birthright (Create Field scripts → no Form). This lesson is the **stretch beyond create**:
+
+| Already proved (216–217) | Stretch here |
+| --- | --- |
+| Account create for joiners | Group **member add** and **member remove** |
+| Birthright `all-employees` path | Deliberate ACL denial → fix directory ACL → retry |
+| Cube matches after joiner | Re-agg drift check after membership churn |
+
+`MNB-OpenLDAP` lists `PROVISIONING` in `featuresString` — IIQ *can* write. You prove membership writes and ACL hygiene with `ldapsearch`, not UI success alone.
+
+Classic 58 taught LDAP ops; here add/remove + ACL fix are the bar.
 
 ## Know these
 
+```text
+Disposable identity (or existing LDAP-linked user)
+  → request/assign OpenLDAP group entitlement
+  → provision ADD → ldapsearch group member
+  → remove assignment → provision REMOVE → ldapsearch
+  → break bind to read-only / wrong ACL → PT shows denial
+  → restore admin bind / fix olcAccess → retry → Committed
+  → Aggregate → cube matches directory
+```
+
 | Operation | Proof command |
 | --- | --- |
-| Account create | `ldapsearch ... '(uid=<user>)'` |
-| Group member add/remove | `ldapsearch ... '(cn=<group>)' member` |
-| ACL denial | Provisioning Transaction / bind error text |
+| Account create (refresh) | `ldapsearch … '(uid=<user>)'` |
+| Group member add/remove | `ldapsearch … '(cn=<group>)' member` |
+| ACL denial | PT / bind / insufficient access error text |
 
-**Wrong way:** "Fixing" an ACL denial by disabling the provisioning feature in IIQ — that hides the gap instead of closing it.
+| Term | Plain English |
+| --- | --- |
+| **groupOfNames** | LDAP group object that stores `member` DNs |
+| **ACL** | Who can write which attributes on the directory |
+| **Drift** | IIQ cube ≠ directory after a write |
+| **Create Field scripts** | Already required for joiner create (216 Task 1d) — not re-taught here |
+
+- **Wrong way:** “Fixing” ACL denial by disabling provisioning in IIQ — hides the gap.
+- **Wrong way:** Re-doing only account create and calling the stretch done — 217 already owns create.
+- **Wrong way:** Anonymous `ldapsearch` when proving writes — bind as admin for ground truth.
 
 ## Intent
 
-- Provision a create-account plan against `MNB-OpenLDAP` for a joiner and confirm the entry lands.
-- Provision a group member add and a group member remove, confirming both with `ldapsearch`.
-- Deliberately trigger an ACL denial and fix the OpenLDAP ACL instead of disabling the check.
-- Re-aggregate and confirm no drift between IIQ's cube and the directory.
+- Provision OpenLDAP **group member add** and **remove**; confirm both with `ldapsearch`.
+- Trigger an ACL / bind denial; fix the directory side; retry to Committed.
+- Re-aggregate; confirm no drift.
+- Leave create-path as known (216–217); document if Create scripts are still missing.
 
 ## Before you start
 
-- [ ] `MNB-OpenLDAP` (204) aggregating and pass-through auth working
-- [ ] Admin bind DN known: `cn=admin,dc=meridiannb,dc=com` / `admin`
-- [ ] A fresh joiner slot available via `hcm-scenario.sh joiner`
-- [ ] Evidence: `mkdir -p ~/iiq-lab-evidence/sandbox/235`
+- [ ] `MNB-OpenLDAP` aggregating; Lesson 230 triage card idea familiar
+- [ ] Admin bind: `cn=admin,dc=meridiannb,dc=com` / `admin`
+- [ ] A user with an OpenLDAP link (Helen, Priya, or disposable joiner from 217)
+- [ ] Entitlement Catalog has an OpenLDAP group (e.g. `all-employees`) — run Group Aggregation if empty (Lesson 216)
+- [ ] Evidence dir ready:
+
+```bash
+mkdir -p ~/iiq-lab-evidence/sandbox/235
+```
 
 ## Do this
 
-1. Get a fresh joiner: reuse a Lesson 217 joiner without an OpenLDAP link, or run `./tools/lab/enterprise/hcm-scenario.sh joiner lab.ldaptest LDAP Test lab.ldaptest@meridiannb.com`, then aggregate `MNB-Workday` + Refresh.  
-   **Expect:** Identity exists in IIQ, no OpenLDAP link yet.
-2. Trigger LCM provisioning for OpenLDAP via the joiner's birthright plan (216/217) or a manual **Manage Existing Access → Request Access** account creation. Approve and let it provision.  
-   **Expect:** Provisioning Transaction shows success.
-3. Confirm on the real server: `ldapsearch -x -H ldap://localhost:389 -b ou=people,dc=meridiannb,dc=com -D 'cn=admin,dc=meridiannb,dc=com' -w admin '(uid=lab.ldaptest)'`.  
-   **Expect:** New `dn` with `cn`, `mail`, `employeeNumber` populated by IIQ.
-4. Provision a group membership add: assign an OpenLDAP-backed entitlement/role, or seed a group first with `ldapadd -x -H ldap://localhost:389 -D 'cn=admin,dc=meridiannb,dc=com' -w admin` (minimal `groupOfNames` under `ou=groups,dc=meridiannb,dc=com`), then request/approve.  
-   **Expect:** Provisioning succeeds.
-5. Confirm: `ldapsearch -x -H ldap://localhost:389 -b ou=groups,dc=meridiannb,dc=com -D 'cn=admin,dc=meridiannb,dc=com' -w admin '(cn=<group>)' member`.  
-   **Expect:** New joiner's DN listed.
-6. Remove the assignment in IIQ, let it provision the remove, re-run the same `ldapsearch`.  
-   **Expect:** Member entry gone.
-7. Trigger an ACL denial on purpose: edit `MNB-Application-OpenLDAP`'s bind DN to a read-only account, attempt another write.  
-   **Expect:** Bind/insufficient-access error visible on the Provisioning Transaction — copy the exact text.
-8. Fix the actual ACL on the OpenLDAP side (restore `cn=admin` bind, or add write access for the DN in `slapd.conf`/`olcAccess` inside the container).  
-   **Expect:** Do not fix by disabling the provisioning feature in IIQ — that only hides the gap.
-9. Retry the write, confirm success, then **Aggregate** once more.  
-   **Expect:** IIQ's OpenLDAP link matches the directory with no drift.
-10. Save the `ldapsearch` outputs for create, group-add, group-remove, and the before/after ACL fix under `~/iiq-lab-evidence/sandbox/235/`.
+### Task 1 — Confirm create path already works (baseline, don’t rebuild)
+
+Pick a user who **already** has an OpenLDAP account from birthright/joiner:
+
+```bash
+ldapsearch -x -H ldap://localhost:389 \
+  -b ou=people,dc=meridiannb,dc=com \
+  -D 'cn=admin,dc=meridiannb,dc=com' -w admin \
+  '(uid=helen.ross)'
+```
+
+- **Why:** this lesson stretches membership/ACL — if create is broken, finish 216 Task 1d / 217 first.
+- **Expect:** entry exists. If not, stop and repair create before membership drills.
+
+### Task 2 — Ensure a group entitlement exists
+
+1. Confirm Group Aggregation has run for `MNB-OpenLDAP`  
+2. Find `all-employees` (or create a lab `groupOfNames` under `ou=groups,dc=meridiannb,dc=com` if you need a disposable group)  
+
+Minimal create if needed (seed admin as first member — `groupOfNames` requires ≥1 member):
+
+```bash
+# Only if you need a disposable group — adjust DNs to your tree
+ldapadd -x -H ldap://localhost:389 \
+  -D 'cn=admin,dc=meridiannb,dc=com' -w admin <<'EOF'
+dn: cn=mnb-lab-stretch,ou=groups,dc=meridiannb,dc=com
+objectClass: groupOfNames
+cn: mnb-lab-stretch
+member: cn=admin,dc=meridiannb,dc=com
+EOF
+```
+
+Then aggregate groups and mark the entitlement requestable / wrap in a small IT Bundle.
+
+- **Expect:** group visible for assignment.
+
+### Task 3 — Provision member ADD
+
+Assign the OpenLDAP group entitlement to a user who is **not** already a member (or use Priya on a disposable group).
+
+Approve/provision (Lesson 222 path if requestable).
+
+- **Expect:** PT **Committed**.
+
+### Task 4 — Prove ADD with ldapsearch
+
+```bash
+ldapsearch -x -H ldap://localhost:389 \
+  -b ou=groups,dc=meridiannb,dc=com \
+  -D 'cn=admin,dc=meridiannb,dc=com' -w admin \
+  '(cn=all-employees)' member
+```
+
+(Use `cn=mnb-lab-stretch` if you created the disposable group.)
+
+- **Expect:** user’s DN listed under `member`.
+
+Save output as `member-add.txt`.
+
+### Task 5 — Provision member REMOVE
+
+1. Remove the assignment in IIQ  
+2. Refresh with **provisioning**  
+3. Re-run the same `ldapsearch`  
+
+- **Expect:** member entry **gone**.
+
+Save as `member-remove.txt`.
+
+> **Tip:** Same failure class as Lessons 218/223/234 — role gone in IIQ but member still present means provisioning/re-agg skipped.
+
+### Task 6 — Trigger an ACL / bind denial
+
+1. **Applications → MNB-OpenLDAP**  
+2. Change bind password to a **wrong** value (or a known read-only bind if you have one)  
+3. **Save**  
+4. Attempt another membership write  
+
+- **Expect:** Failed PT with bind / insufficient-access language — copy exact text to `acl-denial.txt`.
+
+> **Watch out:** You are breaking the connector on purpose — restore before you leave (Lesson 230 hygiene).
+
+### Task 7 — Fix at the directory / bind, not by disabling provisioning
+
+1. Restore `cn=admin` bind password (or repair `olcAccess` / ACL inside the OpenLDAP container if you used a read-only DN)  
+2. **Test Connection** green  
+3. Retry the write  
+
+- **Why:** disabling `PROVISIONING` in IIQ only hides the control gap.
+- **Expect:** Committed after fix.
+
+If Test Connection is green but retry fails, recycle connector cache (Lesson 230) then retry.
+
+### Task 8 — Re-aggregate and check drift
+
+1. Aggregate `MNB-OpenLDAP`  
+2. Open the identity → Application Accounts / Entitlements  
+3. Confirm IIQ matches `ldapsearch`  
+
+- **Expect:** no drift between cube and directory.
+
+### Task 9 — Evidence pack
+
+Save under `~/iiq-lab-evidence/sandbox/235/`:
+
+- `member-add.txt` / `member-remove.txt`  
+- `acl-denial.txt` + note of restore  
+- Drift check screenshot  
 
 ## If it fails
 
-- **Create succeeds in IIQ but `ldapsearch` shows nothing** — check base DN and bind as `cn=admin`, not anonymously.
-- **Group entry rejected as malformed** — `groupOfNames` needs at least one `member` at creation; seed with the admin DN, then have IIQ add/remove the real member.
-- **ACL fix doesn't take effect** — OpenLDAP often needs a `slapd` restart or `ldapmodify` against `cn=config`; check `docker logs mnb-openldap` for the actual refusal reason.
+| Symptom | Fix |
+| --- | --- |
+| Create missing for joiner | Lesson 216 Create Field scripts / 217 — not this stretch’s primary path |
+| Group entry malformed | `groupOfNames` needs ≥1 `member` at create — seed admin DN |
+| ADD succeeds in UI, ldapsearch empty | Bind as admin; confirm base DN `ou=groups,…` |
+| ACL fix ignored | Restart slapd / `ldapmodify` cn=config; read `docker logs` for OpenLDAP |
+| Lab left broken | Restore admin bind; Test Connection green before Lesson 236 |
 
 ## You are done when
 
-Account create, group add, and group remove all succeed on the live OpenLDAP server, and the ACL denial you triggered is genuinely fixed and retried to success.
+- [ ] Group member **add** and **remove** proved with `ldapsearch`  
+- [ ] ACL/bind denial captured and fixed without disabling provisioning  
+- [ ] Cube matches directory after re-agg  
+- [ ] Connectors green again  
 
 ## Control note
 
-- **Control:** Directory write-path proof (provisioning, not just aggregation).  
-- **Owner:** IAM Engineering / Directory Ops.  
-- **SLA (lab):** ACL denials fixed at the source, never bypassed in IIQ.  
-- **Evidence:** `~/iiq-lab-evidence/sandbox/235/` — create/add/remove `ldapsearch` output, ACL error + fix.
+- **Control:** Directory write-path proof (membership + ACL hygiene)  
+- **Owner:** IAM Engineering / Directory Ops  
+- **SLA (lab):** ACL denials fixed at the source, never bypassed in IIQ  
+- **Evidence:** `~/iiq-lab-evidence/sandbox/235/` — add/remove ldapsearch; ACL error + fix  
 
 ## Quick check
 
-1. What proves a write, not just a UI success message? → `ldapsearch` against the live server.  
-2. What's the wrong fix for an ACL denial? → Disabling provisioning in IIQ instead of fixing the ACL.  
-3. What object type needs at least one member at creation? → `groupOfNames`.
+1. What does this stretch add beyond Lesson 217? → Group member add/remove + ACL denial/fix  
+2. What proves a write? → `ldapsearch` against the live server  
+3. Wrong fix for ACL denial? → Disabling provisioning in IIQ  
+4. Why does `groupOfNames` need a member at create? → Schema requires ≥1 `member`  
+
+## Feedback
+
+Could you separate “joiner create failed” from “membership remove failed” without this page? If remove left the member in LDAP, note whether the PT was Committed — Committed + still present is drift/wrong group DN, not “IIQ ignored you.”
 
 ## Navigate
 
-- Previous: Lesson 234
-- Next: Lesson 236
+- Previous: [Lesson 234](234-ad-groups-ous-live.md)
+- Next: [Lesson 236](236-jdbc-provision-policies.md)
+- Theory: [Lesson 258 — LDIF Offline Evidence](258-ldif-offline-evidence-theory.md) (offline directory dump vs this live bind path)
 - Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)

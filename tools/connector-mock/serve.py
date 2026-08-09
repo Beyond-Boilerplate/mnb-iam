@@ -3,12 +3,13 @@
 
   python3 tools/connector-mock/serve.py
   -> http://127.0.0.1:8091/health
-  -> http://127.0.0.1:8091/users
-  -> http://127.0.0.1:8091/scim/v2/Users
+  -> http://127.0.0.1:8091/users                 (GET/POST/PATCH — mutable)
+  -> http://127.0.0.1:8091/scim/v2/Users         (GET/PATCH — mutable)
   -> http://127.0.0.1:8091/hcm/ui              (MNB Workday helper UI)
   -> http://127.0.0.1:8091/hcm/v1/workers
-  -> http://127.0.0.1:8091/crm/scim/v2/Users
+  -> http://127.0.0.1:8091/crm/scim/v2/Users     (GET/POST/PATCH + filter)
   -> http://127.0.0.1:8091/itsm/v1/catalog
+  -> http://127.0.0.1:8091/itsm/v1/tickets
 """
 
 from __future__ import annotations
@@ -63,6 +64,9 @@ PORT = int(os.environ.get("MOCK_PORT", "8091"))
 
 # Mutable lab state for joiner/leaver demos
 _HCM_STATE: dict | None = None
+_WS_STATE: dict | None = None
+_SCIM_STATE: dict | None = None
+_CRM_STATE: dict | None = None
 _ITSM_TICKETS: list[dict] = []
 _ENTRA_STATE: dict | None = None
 
@@ -77,6 +81,14 @@ _HCM_PATCH_FIELDS = (
     "employeeType",
     "status",
     "hireDate",
+)
+
+_WS_PATCH_FIELDS = (
+    "username",
+    "email",
+    "employeeId",
+    "active",
+    "entitlements",
 )
 
 
@@ -98,6 +110,79 @@ def hcm_payload() -> dict:
     if _HCM_STATE is None:
         _HCM_STATE = load_json(HCM_WORKERS) or {"workers": [], "total": 0}
     return _HCM_STATE
+
+
+def ws_payload() -> dict:
+    """Wire Portal REST /users — mutable so Create/Update/Disable survive re-GET."""
+    global _WS_STATE
+    if _WS_STATE is None:
+        _WS_STATE = load_json(WS_USERS) or {"users": []}
+        if "users" not in _WS_STATE:
+            _WS_STATE = {"users": []}
+    return _WS_STATE
+
+
+def scim_payload() -> dict:
+    """Wire SCIM /scim/v2/Users — separate store from REST (Lesson 209/237)."""
+    global _SCIM_STATE
+    if _SCIM_STATE is None:
+        _SCIM_STATE = load_json(SCIM_USERS) or {
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+            "totalResults": 0,
+            "Resources": [],
+        }
+    return _SCIM_STATE
+
+
+def crm_payload() -> dict:
+    """CRM SCIM /crm/scim/v2/Users — mutable for filter + PATCH drills (Lesson 238)."""
+    global _CRM_STATE
+    if _CRM_STATE is None:
+        _CRM_STATE = load_json(CRM_USERS) or {
+            "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+            "totalResults": 0,
+            "Resources": [],
+        }
+    return _CRM_STATE
+
+
+def _scim_filter_resources(resources: list, filt: str) -> list:
+    if not filt:
+        return list(resources)
+    if "userName eq" in filt and '"' in filt:
+        name = filt.split('"')[1]
+        return [r for r in resources if r.get("userName") == name]
+    if "externalId eq" in filt and '"' in filt:
+        eid = filt.split('"')[1]
+        return [r for r in resources if r.get("externalId") == eid]
+    return list(resources)
+
+
+def _apply_scim_patch(user: dict, body: dict) -> dict:
+    updated = dict(user)
+    active = updated.get("active", True)
+    for op in body.get("Operations") or []:
+        path = (op.get("path") or "").strip()
+        val = op.get("value")
+        if path == "active" or (isinstance(val, dict) and "active" in val):
+            if isinstance(val, dict) and "active" in val:
+                active = bool(val["active"])
+            elif isinstance(val, bool):
+                active = val
+        if path == "groups" and isinstance(val, list):
+            updated["groups"] = val
+        if path in {"emails", "userName", "externalId"} and val is not None:
+            updated[path.split(".")[0] if "." not in path else path] = val
+        if (op.get("op") or "").lower() in {"replace", "add"} and path == "" and isinstance(val, dict):
+            if "active" in val:
+                active = bool(val["active"])
+            for k in ("userName", "externalId", "emails", "groups", "name"):
+                if k in val:
+                    updated[k] = val[k]
+    if "active" in body:
+        active = bool(body["active"])
+    updated["active"] = active
+    return updated
 
 
 def hcm_ui_html() -> bytes:
@@ -630,36 +715,34 @@ class Handler(BaseHTTPRequestHandler):
 
         # --- Wire Portal ---
         if path == "/users":
-            return self._send(200, load_json(WS_USERS))
+            return self._send(200, ws_payload())
 
         if path.startswith("/users/"):
             uid = path.split("/")[-1]
-            data = load_json(WS_USERS)
-            for u in data.get("users", []):
+            for u in ws_payload().get("users", []):
                 if u.get("id") == uid or u.get("username") == uid:
                     return self._send(200, u)
             return self._send(404, {"error": "not_found", "id": uid})
 
         # --- Wire SCIM ---
         if path in ("/scim/v2/Users", "/scim/v2/Users/"):
-            data = load_json(SCIM_USERS)
+            data = scim_payload()
             qs = parse_qs(parsed.query)
             filt = (qs.get("filter") or [""])[0]
-            resources = list(data.get("Resources") or [])
-            if "userName eq" in filt:
-                name = filt.split('"')[1] if '"' in filt else ""
-                resources = [r for r in resources if r.get("userName") == name]
-                data = {
-                    "schemas": data.get("schemas"),
+            resources = _scim_filter_resources(list(data.get("Resources") or []), filt)
+            return self._send(
+                200,
+                {
+                    "schemas": data.get("schemas")
+                    or ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
                     "totalResults": len(resources),
                     "Resources": resources,
-                }
-            return self._send(200, data)
+                },
+            )
 
         if path.startswith("/scim/v2/Users/"):
             rid = path.rsplit("/", 1)[-1]
-            data = load_json(SCIM_USERS)
-            for r in data.get("Resources") or []:
+            for r in scim_payload().get("Resources") or []:
                 if r.get("id") == rid or r.get("userName") == rid:
                     return self._send(200, r)
             return self._send(
@@ -713,13 +796,23 @@ class Handler(BaseHTTPRequestHandler):
 
         # --- CRM SCIM ---
         if path in ("/crm/scim/v2/Users", "/crm/scim/v2/Users/"):
-            data = load_json(CRM_USERS) or {"Resources": [], "totalResults": 0}
-            return self._send(200, data)
+            data = crm_payload()
+            qs = parse_qs(parsed.query)
+            filt = (qs.get("filter") or [""])[0]
+            resources = _scim_filter_resources(list(data.get("Resources") or []), filt)
+            return self._send(
+                200,
+                {
+                    "schemas": data.get("schemas")
+                    or ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+                    "totalResults": len(resources),
+                    "Resources": resources,
+                },
+            )
 
         if path.startswith("/crm/scim/v2/Users/"):
             rid = path.rsplit("/", 1)[-1]
-            data = load_json(CRM_USERS)
-            for r in data.get("Resources") or []:
+            for r in crm_payload().get("Resources") or []:
                 if r.get("id") == rid or r.get("userName") == rid:
                     return self._send(200, r)
             return self._send(404, {"error": "not_found", "id": rid})
@@ -831,15 +924,79 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(201, worker)
 
         if path == "/itsm/v1/tickets":
+            catalog_id = body.get("catalogId") or body.get("item") or body.get("catalogItem")
             ticket = {
                 "id": f"INC{uuid.uuid4().hex[:6].upper()}",
                 "shortDescription": body.get("shortDescription") or "Access request",
-                "requestedFor": body.get("requestedFor"),
-                "catalogId": body.get("catalogId"),
+                "requestedFor": body.get("requestedFor") or body.get("requester"),
+                "requester": body.get("requester") or body.get("requestedFor"),
+                "catalogId": catalog_id,
+                "item": body.get("item") or catalog_id,
+                "identityRequestId": body.get("identityRequestId")
+                or body.get("identityRequest")
+                or body.get("requestId"),
                 "state": "open",
             }
+            if not ticket.get("requestedFor") and not catalog_id:
+                return self._send(
+                    400,
+                    {
+                        "error": "bad_request",
+                        "detail": "requester/requestedFor and catalogId/item are required",
+                    },
+                )
             _ITSM_TICKETS.append(ticket)
             return self._send(201, ticket)
+
+        # Wire Portal create
+        if path == "/users":
+            data = ws_payload()
+            users = list(data.get("users") or [])
+            uid = body.get("id") or f"wp-{uuid.uuid4().hex[:6]}"
+            username = body.get("username") or body.get("userName")
+            if not username:
+                return self._send(400, {"error": "bad_request", "detail": "username required"})
+            user = {
+                "id": uid,
+                "username": username,
+                "email": body.get("email") or f"{username}@meridiannb.com",
+                "employeeId": body.get("employeeId") or body.get("externalId") or "",
+                "active": body.get("active", True),
+                "entitlements": body.get("entitlements") or [],
+            }
+            users = [u for u in users if u.get("id") != uid and u.get("username") != username]
+            users.append(user)
+            data["users"] = users
+            return self._send(201, user)
+
+        # CRM SCIM create (lab disposable users)
+        if path in ("/crm/scim/v2/Users", "/crm/scim/v2/Users/"):
+            data = crm_payload()
+            resources = list(data.get("Resources") or [])
+            uname = body.get("userName") or body.get("username")
+            if not uname:
+                return self._send(400, {"error": "bad_request", "detail": "userName required"})
+            rid = body.get("id") or f"crm-{uname}"
+            user = {
+                "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+                "id": rid,
+                "userName": uname,
+                "name": body.get("name")
+                or {
+                    "givenName": body.get("givenName") or uname.split(".")[0].title(),
+                    "familyName": body.get("familyName") or "Lab",
+                },
+                "emails": body.get("emails")
+                or [{"value": body.get("email") or f"{uname}@meridiannb.com", "primary": True}],
+                "active": body.get("active", True),
+                "externalId": body.get("externalId") or body.get("employeeId") or "",
+                "groups": body.get("groups") or [{"display": "CRM-Users"}],
+            }
+            resources = [r for r in resources if r.get("id") != rid and r.get("userName") != uname]
+            resources.append(user)
+            data["Resources"] = resources
+            data["totalResults"] = len(resources)
+            return self._send(201, user)
 
         if path in ("/idp/scim/v2/Users", "/idp/scim/v2/Users/"):
             try:
@@ -898,47 +1055,65 @@ class Handler(BaseHTTPRequestHandler):
             )
             if not user:
                 return self._send(404, {"error": "not_found", "id": rid})
-            active = user.get("active", True)
-            for op in body.get("Operations") or []:
-                val = op.get("value")
-                if op.get("path") == "active" or (isinstance(val, dict) and "active" in val):
-                    if isinstance(val, dict) and "active" in val:
-                        active = bool(val["active"])
-                    elif isinstance(val, bool):
-                        active = val
-                if op.get("path") == "groups" and isinstance(val, list):
-                    user["groups"] = val
-            if "active" in body:
-                active = bool(body["active"])
-            user["active"] = active
+            patched = _apply_scim_patch(user, body)
+            user.clear()
+            user.update(patched)
             return self._send(200, user)
+
+        # Wire Portal update / disable
+        if path.startswith("/users/"):
+            uid = path.rsplit("/", 1)[-1]
+            data = ws_payload()
+            for i, u in enumerate(data.get("users") or []):
+                if u.get("id") == uid or u.get("username") == uid:
+                    updated = dict(u)
+                    for k in _WS_PATCH_FIELDS:
+                        if k in body:
+                            updated[k] = body[k]
+                    # Allow SCIM-ish or plan-shaped aliases
+                    if "userName" in body and "username" not in body:
+                        updated["username"] = body["userName"]
+                    if "active" in body:
+                        updated["active"] = bool(body["active"])
+                    data["users"][i] = updated
+                    return self._send(200, updated)
+            return self._send(404, {"error": "not_found", "id": uid})
+
+        # CRM SCIM PATCH
+        if path.startswith("/crm/scim/v2/Users/"):
+            rid = path.rsplit("/", 1)[-1]
+            data = crm_payload()
+            resources = list(data.get("Resources") or [])
+            for i, r in enumerate(resources):
+                if r.get("id") == rid or r.get("userName") == rid:
+                    patched = _apply_scim_patch(r, body)
+                    resources[i] = patched
+                    data["Resources"] = resources
+                    data["totalResults"] = len(resources)
+                    return self._send(200, patched)
+            return self._send(404, {"error": "not_found", "id": rid})
 
         if not path.startswith("/scim/v2/Users/"):
             return self._send(404, {"error": "not_found", "path": path})
 
         rid = path.rsplit("/", 1)[-1]
-        data = load_json(SCIM_USERS)
-        user = next(
-            (r for r in data.get("Resources") or [] if r.get("id") == rid or r.get("userName") == rid),
-            None,
+        data = scim_payload()
+        resources = list(data.get("Resources") or [])
+        for i, r in enumerate(resources):
+            if r.get("id") == rid or r.get("userName") == rid:
+                patched = _apply_scim_patch(r, body)
+                resources[i] = patched
+                data["Resources"] = resources
+                data["totalResults"] = len(resources)
+                return self._send(200, patched)
+        return self._send(
+            404,
+            {
+                "schemas": ["urn:ietf:params:scim:api:messages:2.0:Error"],
+                "detail": f"Resource {rid} not found",
+                "status": "404",
+            },
         )
-        if not user:
-            return self._send(404, {"error": "not_found", "id": rid})
-
-        active = user.get("active", True)
-        for op in body.get("Operations") or []:
-            if op.get("path") == "active" or (op.get("op") or "").lower() in {"replace", "add"}:
-                val = op.get("value")
-                if isinstance(val, dict) and "active" in val:
-                    active = bool(val["active"])
-                elif isinstance(val, bool):
-                    active = val
-        if "active" in body:
-            active = bool(body["active"])
-
-        updated = dict(user)
-        updated["active"] = active
-        return self._send(200, updated)
 
     def do_PUT(self) -> None:
         parsed = urlparse(self.path)
@@ -967,11 +1142,11 @@ def main() -> None:
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"mnb-connector-mock listening on http://{HOST}:{PORT}")
     print("  GET  /health")
-    print("  GET  /users | /scim/v2/Users")
+    print("  GET/POST/PATCH /users | GET/PATCH /scim/v2/Users")
     print("  GET  /hcm/ui  (MNB Workday helper UI)")
     print("  GET  /hcm/v1/workers | POST /hcm/v1/workers | PATCH /hcm/v1/workers/{id}")
-    print("  GET  /crm/scim/v2/Users")
-    print("  GET  /itsm/v1/catalog | POST /itsm/v1/tickets")
+    print("  GET/POST/PATCH /crm/scim/v2/Users  (filter + active)")
+    print("  GET  /itsm/v1/catalog | GET/POST /itsm/v1/tickets")
     print("  GET  /entra/v1/users | /entra/scim/v2/Users | PATCH /entra/scim/v2/Users/{id}")
     print("  GET/POST/PATCH/PUT /idp/scim/v2/Users|Groups  (Keycloak birthright)")
     httpd.serve_forever()

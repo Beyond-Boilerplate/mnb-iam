@@ -2,16 +2,18 @@
 
 **Track:** Enterprise Sandbox Path (production-like local estate)  
 **Time:** ~90 minutes  
-**Prereq:** Lessons 203, 214  
+**Prereq:** Lessons 203, 214, 225  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
-**Maps to classic track:** 43
+**Maps to classic track:** 43 / 21
 
-> **Why:** Certs are real when certifiers get mail and decide in-product — rubber-stamp Approve-All hides real decisions and fails manager usability. Revoke must reach a live target, not only the IIQ database.
+> **Why:** Certs are real when certifiers get mail and decide in-product — rubber-stamp Approve-All hides real decisions and fails manager usability. Revoke must reach a live target, not only the IIQ database. After SoD (224–225), certification is how managers still vouch for access that *is* allowed.
 
 ## What this is
 
 A **certification** (access review) asks a human: “Does this access still belong?”
+
+You just finished SoD detection and disposition (Lessons 224–225). That answers “is this *pair* of powers illegal?” Certification answers a different question: “for access that remains, does a named human still vouch for it?” Both are required — SoD without certs leaves allowed-but-stale access; certs without SoD can Approve-All a dual-control conflict.
 
 **Manager Access Review** is an **Identity**-type certification:
 
@@ -56,12 +58,16 @@ Confirm Helen has reports (manager correlation)
 | **Campaign / definition** | Template that generates certs |
 | **Approve-All pathology** | Clicking approve on everything without reading |
 | **`processRevokesImmediately`** | Revokes provision on save instead of waiting |
+| **Manager chain** | Cube `manager` resolved from Workday `managerId` → `userId` (Lesson **214** / classic 21) |
 
-**Sizing:** Prefer Helen’s org — finishable in ~30–45 minutes of decisions. Birthright-only noise trains Approve-All — include at least one high-risk Wire/CRM row to revoke.
+**Manager hierarchy cue (classic 21):** `certifierName="manager"` only works if the chain resolves. Empty manager on an **exec** can be intentional; blank/unresolved manager on a mid-level report = broken chain → zero-row or “no certifier.” Fix is HR data + managers refresh (214), with a **named temporary fallback** if someone left yesterday — never dump the whole campaign on `spadmin`.
+
+**Sizing:** Prefer Helen’s org — finishable in ~30–45 minutes of decisions. Birthright-only noise trains Approve-All — include at least one high-risk Wire/CRM row to revoke. Risk scores (225) may sort who you look at first; they still do not decide for you.
 
 - **Wrong way:** Completing as `spadmin` instead of the manager — no certifier accountability trail.
 - **Wrong way:** Approve-All with zero revokes on a mixed-risk population — rubber stamp.
 - **Wrong way:** Stopping at “Revoke clicked” without a Committed Provisioning Transaction / target proof.
+- **Wrong way:** “Fixing” missing certifiers by permanently assigning everything to Helen / spadmin.
 
 ## Intent
 
@@ -74,6 +80,7 @@ Confirm Helen has reports (manager correlation)
 
 - [ ] Mailpit works (Lesson 203): [http://localhost:8025](http://localhost:8025)
 - [ ] Manager correlation: Helen has reports (Lesson 214)
+- [ ] Lesson 225 disposition done (or Marcus’s SoD resolved) — don’t certify a known dual-control conflict as “Approve”
 - [ ] Pass-through / lab password for Helen: `LabUser1!` (or your seed)
 - [ ] At least one report holds a revocable Wire/CRM entitlement you can re-check live
 - [ ] Evidence dir ready:
@@ -84,14 +91,14 @@ mkdir -p ~/iiq-lab-evidence/sandbox/226
 
 ## Do this
 
-### Task 1 — Confirm Helen’s org is non-empty
+### Task 1 — Confirm Helen’s org is non-empty (manager chain)
 
-In IIQ identity search (Advanced / filter), find identities whose manager is `helen.ross` (e.g. Christopher Hayes and others).
+In IIQ identity search (Advanced / filter), find identities whose manager is `helen.ross` (e.g. Christopher Hayes and others). Spot-check one report’s cube: **Manager** shows Helen (resolved identity), not a raw `MNB#####` and not blank.
 
-- **Why:** empty org = zero-row cert = nothing to decide.
-- **Expect:** non-empty report list.
+- **Why:** empty org = zero-row cert = nothing to decide; unresolved manager = classic 21 broken chain.
+- **Expect:** non-empty report list with resolved manager links.
 
-If empty: fix manager correlation / Refresh Identity Cubes (Lesson 214), then continue.
+If empty: fix manager correlation / Refresh Identity Cubes with manager correlation (Lesson 214), then continue — do not invent managers on the cube.
 
 ### Task 2 — Generate the manager certification
 
@@ -122,7 +129,7 @@ Screenshot under evidence; note message id.
 4. **Approve** one correct birthright-style entitlement (still appropriate)  
 5. **Revoke** one Wire or CRM entitlement on a report (e.g. Christopher Hayes) you can re-check on a live app  
 
-- **Why:** two decision types prove you read the rows — not Approve-All.
+- **Why:** two decision types prove you read the rows — not Approve-All. If you see both Wire Initiator **and** Approver on the same person, that is Lesson 224 SoD territory — revoke one side, don’t Approve both.
 - **Expect:** Approve + Revoke both recorded.
 
 > **Watch out:** Certifying while still logged in as spadmin fails the accountability control even if the UI lets you click.
@@ -191,10 +198,11 @@ Save under `~/iiq-lab-evidence/sandbox/226/`:
 2. What flag provisions revokes immediately? → `processRevokesImmediately=true`  
 3. Name one rubber-stamp signal → Approve-All with no revokes on a mixed-risk population  
 4. What must a Revoke produce for Lesson 229? → A Provisioning Transaction id (and later target proof)  
+5. Zero-row cert / missing certifier — first fix? → Manager chain (Lesson 214); not permanent spadmin dump  
 
 ## Feedback
 
-Could you explain Approve-All pathology in one sentence? If Helen never got mail, note SMTP settings *before* blaming the certification definition — those are separate layers.
+Could you explain Approve-All pathology in one sentence? If Helen never got mail, note SMTP settings *before* blaming the certification definition — those are separate layers. If the org was empty, note whether manager correlation was resolved — classic 21.
 
 ## Navigate
 

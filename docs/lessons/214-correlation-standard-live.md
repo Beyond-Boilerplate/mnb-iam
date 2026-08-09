@@ -339,20 +339,28 @@ This is classic **19** remediation — not “create identity to clean the list.
 - **Why:** correlation only runs for accounts being aggregated; a Link already glued to the wrong cube stays there until you break that link or merge.
 - **Expect:** Warehouse has a single `helen.ross` (and peers) with all intended app links; ghost display-name identities are gone; identity **count** does not spike after re-agg.
 
-### Task 4 — Sweep Uncorrelated Accounts
+### Task 4 — Sweep Uncorrelated Accounts (classic 19 dispositions + Sev-1)
 
 Open **Identities → Uncorrelated Accounts** (or each Application’s uncorrelated list).
 
-Treat unexplained hits for seeded personas as bugs. Classic **19** dispositions for real leftovers:
+Treat unexplained hits for seeded personas as bugs. Every residual lands in **exactly one** disposition — “TBD” is not allowed for Sev-1.
 
-| Disposition | When |
+| Disposition | When | Action |
+| --- | --- | --- |
+| **Correlate** | Valid Workday person exists; key mismatch / typo / rule gap | Fix data or manual correlate with associate-key proof |
+| **Disable** | No valid owner; terminated vendor; stale ID | Disable in source / flag app owner; track ticket |
+| **Exception** | Break-glass or service account pending vaulting | Owner + review date + compensating control — never forever |
+
+**Privileged residuals are Sev-1** (classic 19): uncorrelated `WIRE_*`, core-banking privileged, `AWS_ADMIN`-class, break-glass → triage within **24h**, close within **5 business days** (lab: same session). Soft CRM/directory residuals are Sev-2/3.
+
+| Temptation | Why it fails exam |
 | --- | --- |
-| **Correlate** | HR/Workday person exists; fix key / re-agg (or manual correlate with proof) |
-| **Disable** | No person should have this access |
-| **Exception** | Time-bounded, ticketed — never “TBD” for privileged (`WIRE_*`, `AWS_ADMIN`, core banking) |
+| Create identity from privileged orphan | Ghost cube; no HR leaver; certs attest fiction |
+| Leave Sev-1 “for next sprint” | No age/disposition evidence when sampled |
+| Exception with no review date | Permanent unowned access with a form attached |
 
-- **Why:** uncorrelated privileged access is a control metric, not UI clutter.
-- **Expect:** zero unexplained hits for Helen / Priya / Marcus.
+- **Why:** uncorrelated privileged access is a control metric, not UI clutter — classify → act → evidence.
+- **Expect:** zero unexplained hits for Helen / Priya / Marcus; any privileged leftover has Correlate|Disable|Exception + ticket note under evidence.
 
 ### Task 5 — Break and heal one JDBC correlation (classic 19 loop)
 
@@ -383,17 +391,23 @@ docker exec -it mnb-jdbc-sample psql -U mnb -d mnb_apps -c \
 
 ### Task 6 — Confirm manager hierarchy (classic 05 / 06 / 21)
 
-Account correlation attaches apps. **Manager correlation** builds the org chart managers and certifiers trust.
+Account correlation attaches apps. **Manager correlation** builds the org chart managers, approvals, and certifiers trust (Lessons **218** movers, **226** manager certs).
 
 1. On `MNB-Workday`, confirm **Manager attribute** (schema / manager setting) points at the HCM manager ref (`managerId` in this estate)
 2. Confirm Manager Correlation (or equivalent) matches that ref to identity **`userId`** (Searchable — same Task 1a attribute)
-3. Run Identity Refresh with **manager correlation / refresh manager** enabled (classic `Refresh MNB Managers` pattern)
+3. Run Identity Refresh with **manager correlation / refresh manager** enabled (classic `Refresh MNB Managers` pattern — purpose-built, not every checkbox)
 4. Open `priya.wire`
+
+| Situation | Risk | Response |
+| --- | --- | --- |
+| Exec / chain top, empty manager ref | Intentional — chain must end | No defect |
+| Mid-level blank or unresolved `managerId` | Certs / approvals stall (“no certifier”) | Defect to HR; temporary **fallback certifier** + SLA — never permanent `spadmin` dump |
+| Manager terminated; HR still points at them | Open certs route to inactive identity | Fallback + HR correction |
 
 - **Why:** manager blank after a clean account-correlation pass usually means the manager’s Workday row wasn’t aggregated, Searchable `userId` was missing, or you never ran the managers refresh — not “Priya has no manager in HR.”
 - **Expect:** manager resolves to `sanjay.kapoor` (`MNB00006` per identity master), not blank and not a raw id string.
 
-> **Watch out:** Do **not** add Identity Mapping Attribute Source `manager` ← account display-name column. That classic-05 anti-pattern creates empty display-name cubes.
+> **Watch out:** Do **not** add Identity Mapping Attribute Source `manager` ← account display-name column. That classic-05 anti-pattern creates empty display-name cubes. Do **not** invent a permanent manager on the cube — HR owns `managerId`; next Workday agg overwrites fiction.
 
 > **Tip:** Exec tops with empty `managerId` / `managersAssociateID` can be intentional. Blank manager on a mid-level Wire specialist like Priya is a broken chain.
 
@@ -455,13 +469,15 @@ Under `~/iiq-lab-evidence/sandbox/214/`, write one sentence explaining why the l
 7. Aggregation vs Refresh — which promotes `id` → cube `userId`? → Identity Refresh (with promote attributes)
 8. Why is a false merge worse than a false orphan? → wrong person owns access; orphan is visible and remediable
 9. Manager correlation uses which cube attribute as the match target? → Searchable `userId` (never display-name `manager`)
+10. Three uncorrelated dispositions? → Correlate / Disable / Exception — Sev-1 privileged never “TBD”
+11. Broken mid-level manager chain — wrong fix? → Permanent spadmin dump; use named fallback + HR SLA
 
 ## Feedback
 
-Could you name the six correlation keys without opening the table? If orphans appeared after reverse-order agg, note whether a second pass in Workday-first order cleared them. If you minted display-name duplicates, note whether CorrelationConfig XML was empty when you checked Debug — and whether Task 3a left identity count stable after cleanup.
+Could you name the six correlation keys without opening the table? If orphans appeared after reverse-order agg, note whether a second pass in Workday-first order cleared them. If you minted display-name duplicates, note whether CorrelationConfig XML was empty when you checked Debug — and whether Task 3a left identity count stable after cleanup. If a privileged uncorrelated row lingered, note which disposition + ticket you chose — classic 19 Sev-1.
 
 ## Navigate
 
 - Previous: [Lesson 213](213-gitea-sso-app.md)
 - Next: [Lesson 215](215-attribute-sync-live.md)
-- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md)
+- Catalog: [_CATALOG_201_250.md](_CATALOG_201_250.md) · Coverage: [_COVERAGE_01_110.md](_COVERAGE_01_110.md) · Guide: [ENTERPRISE-LAB-V2.md](../ENTERPRISE-LAB-V2.md) · Theory: [256 Connector Registry](256-connector-registry-theory.md)

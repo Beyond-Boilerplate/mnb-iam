@@ -5,11 +5,17 @@
   <Variable input="true" name="identityName"/>
   <Variable input="true" name="approvalSet"/>
   <Variable input="true" name="plan"/>
+  <Variable input="true" name="launcher"/>
+  <Variable input="true" name="source"/>
+  <Variable input="true" name="optimisticProvisioning"/>
+  <Variable name="project">
+    <Description>Compiled ProvisioningProject from the LCM plan — required by provisionProject.</Description>
+  </Variable>
   <Step icon="Start" name="Start" posX="20" posY="20">
     <Transition to="Manager Approval"/>
   </Step>
   <Step icon="Approval" name="Manager Approval" posX="180" posY="20">
-    <Approval mode="serial" owner="ref:launcher" renderer="lcmApprovalRenderer">
+    <Approval mode="serial" owner="script:&#10;      import sailpoint.object.Identity;&#10;      Identity id = context.getObjectByName(Identity.class, identityName);&#10;      return (id != null) ? id.getManager() : null;&#10;    " renderer="lcmApprovalRenderer">
       <Arg name="workItemDescription" value="string:Manager approval for $(identityName)"/>
     </Approval>
     <Transition to="Owner Approval"/>
@@ -18,10 +24,19 @@
     <Approval mode="serial" owner="spadmin" renderer="lcmApprovalRenderer">
       <Arg name="workItemDescription" value="string:App owner approval for $(identityName)"/>
     </Approval>
+    <Transition to="Compile Project"/>
+  </Step>
+  <Step action="call:compileProvisioningProject" icon="Task" name="Compile Project" posX="500" posY="20" resultVariable="project">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="requester" value="ref:launcher"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
     <Transition to="Provision"/>
   </Step>
-  <Step action="call:provisionProject" icon="Task" name="Provision" posX="540" posY="20">
+  <Step action="call:provisionProject" icon="Task" name="Provision" posX="640" posY="20">
+    <Arg name="project" value="ref:project"/>
     <Transition to="Stop"/>
   </Step>
-  <Step icon="Stop" name="Stop" posX="700" posY="20"/>
+  <Step icon="Stop" name="Stop" posX="780" posY="20"/>
 </Workflow>

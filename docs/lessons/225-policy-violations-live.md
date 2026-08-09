@@ -1,7 +1,7 @@
 # Lesson 225 — Work Violations & Mitigations
 
 **Track:** Enterprise Sandbox Path (production-like local estate)  
-**Time:** ~65 minutes  
+**Time:** ~70 minutes  
 **Prereq:** Lesson 224  
 **Stack:** `./tools/lab/docker/up.sh --enterprise`
 
@@ -22,9 +22,13 @@ Detection alone is not a control. Compliance needs a **disposition lifecycle**:
 | **Remediate** | Remove the conflicting access | Permanent fix |
 | **Reopened** | Mitigation expired; conflict still true | After expiry + re-scan |
 
+**Risk / severity (why some violations jump the queue):** SoD policies can carry a higher **risk** weight than soft rules (e.g. unused-account hygiene). Wire dual-control is a **high-risk** finding — treat it ahead of cosmetic policy noise. In the queue UI, sort/filter by risk or policy name so Marcus’s wire conflict isn’t buried under lower-severity rows.
+
+**Identity / entitlement risk scores** (classic 42) are a **prioritization signal** for certs, huddles, and which violations you open first. They do **not** auto-revoke, replace SoD evaluation, or delay a leaver SLA while you “wait for score refresh.”
+
 You will take Marcus’s SoD violation through: find in the **queue** → mitigate with ticket + short expiry → see it in a report → let expiry lapse → confirm it reopens → make a final decision.
 
-Classic 41–42 taught violation handling; here expiry must be observable in-session (minutes, not 90 days).
+Classic 41–42 taught violation handling and risk; here expiry must be observable in-session (minutes, not 90 days).
 
 ## Know these
 
@@ -44,11 +48,32 @@ Open violation (Policy Violations queue — not only on the cube)
 | **Mitigation** | Time-boxed acceptance with owner + ticket |
 | **Remediation** | Remove the conflicting entitlement/role |
 | **Expiry** | When the waiver dies — must reopen if conflict remains |
+| **Risk / severity** | How urgent the finding is — Wire SoD outranks soft hygiene |
+| **Identity risk score** | Composite priority number from critical ents + open violations (+ unused signals) |
+
+```text
+Critical ents + open SoD violations
+        │
+        ▼
+ Identity risk score (Refresh / risk config)
+        │
+        ├──► Sort Policy Violations / cert work items
+        ├──► Weekly IAM huddle top-N
+        └──► NOT auto-revoke / NOT SoD replacement / NOT leaver delay
+```
+
+| Scores **should** | Scores must **never** |
+| --- | --- |
+| Jump Wire SoD ahead of soft hygiene | Auto-revoke or auto-disable on threshold |
+| Scope targeted certs when a population’s median spikes | Replace SoD policy evaluation (Lesson 224) |
+| Feed “who do we look at first?” | Delay terminate/disable while waiting for refresh |
 
 - **Wrong way:** Mitigating with no ticket id or rationale — looks like an unaddressed violation to an auditor.
 - **Wrong way:** Open-ended mitigation with no expiry — a permanent waiver in disguise.
 - **Wrong way:** Working only from Marcus’s cube — real analysts work the queue.
 - **Wrong way:** Assuming expiry “just works” without a re-evaluation scan/task.
+- **Wrong way:** Treating every open violation as equal priority — high-risk SoD waits behind noise.
+- **Wrong way:** Wiring automation that revokes when score crosses a number — false positives break the bank (classic 42).
 
 ## Intent
 
@@ -83,10 +108,12 @@ If Lesson 224 already remediated Marcus:
 
 1. **Setup → Policy Violations** (wording may vary slightly by build)  
 2. Filter to open / unmitigated  
-3. Find the row for Marcus + Wire dual-control policy  
+3. Sort or filter so **high-risk / SOD** rows surface first if your build shows risk  
+4. Optionally open Marcus’s identity risk / score view (if present) — note that a high score **prioritizes** review; it does **not** remove access by itself  
+5. Find the row for Marcus + Wire dual-control policy  
 
-- **Why:** a real compliance analyst works from the queue, not persona-by-persona.
-- **Expect:** violation found from the queue view alone.
+- **Why:** a real compliance analyst works from the queue, not persona-by-persona — and prioritizes by risk/score without treating the number as enforcement.
+- **Expect:** violation found from the queue view alone; you can say why it outranks a soft finding; you can state “score ≠ revoke.”
 
 Screenshot under evidence.
 
@@ -195,10 +222,14 @@ If you remediate, confirm live entitlement cleanup (provision + re-agg) like Les
 2. What proves expiry isn’t cosmetic? → Violation reopens once the window lapses and you re-evaluate  
 3. What makes a mitigation audit-worthy? → Ticket id, expiry, and written rationale  
 4. Where should analysts work from? → The Policy Violations queue, not only identity cubes  
+5. Why does Wire dual-control jump the queue? → Higher risk / severity than soft hygiene findings  
+6. Do risk scores auto-revoke? → **No** — they prioritize certs/monitoring; humans (or SoD/leaver controls) enforce  
 
 ## Feedback
 
 Could you explain mitigate vs remediate without looking back? If expiry didn’t reopen the violation, note whether you re-ran the scan after the clock — expired status alone often isn’t enough.
+
+Name one reason Wire SoD should outrank a low-severity policy row before you start certs in Lesson 226. Could you explain “scores prioritize, never auto-revoke” in one sentence for an examiner?
 
 ## Navigate
 

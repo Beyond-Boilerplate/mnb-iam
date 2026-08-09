@@ -21,6 +21,8 @@ FILES = [
     "config/Application/MNB-Application-ActiveDirectory-Live.xml",
     "config/Application/MNB-Application-Okta.xml",
     "config/Application/MNB-Application-Keycloak-IdP.xml",
+    # JDBC provision rule before Core Banking so jdbcProvisionRule resolves on import.
+    "config/Rule/MNB-Rule-JDBC-CoreBanking-Provision.xml",
     "config/Application/MNB-Application-CoreBanking.xml",
     "config/Application/MNB-Application-Salesforce-CRM-Live.xml",
     "config/Application/MNB-Application-ServiceNow.xml",
@@ -30,6 +32,7 @@ FILES = [
     "config/IdentityTrigger/MNB-IdentityTrigger-Leaver.xml",
     "config/Workflow/MNB-Workflow-Joiner.xml",
     "config/Workflow/MNB-Workflow-Leaver.xml",
+    # Compiles ProvisioningProject before provisionProject (Access Request / Roles Request).
     "config/Workflow/MNB-Workflow-Access-Approval.xml",
     "config/Bundle/MNB-Bundle-Birthright-Employee.xml",
     "config/Bundle/MNB-Bundle-Wire-Initiator.xml",

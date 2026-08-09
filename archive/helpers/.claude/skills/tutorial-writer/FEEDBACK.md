@@ -81,3 +81,19 @@ Format per entry:
 ## 2026-08-07 — Joiner IdP profile prompt, empty Groups, OpenLDAP Form
 - **Issue:** New Keycloak users prompted for email/first/last on first Portal login; users existed in Keycloak with empty Groups; OpenLDAP Create still opened Form work items
 - **Fix:** (1) IdP Create Field scripts for `emails`/`givenName`/`familyName` + clear requiredActions on create; (2) `/idp/scim` resolve group UUIDs and implement PUT/PATCH `/Groups/{id}` members (IIQ membership path); (3) OpenLDAP Create Field scripts for `dn`/`password`/`cn`/`givenName`/`sn`; document in Lessons 216 (Tasks 1d/1c) and 217 (Task 9 scripts-first, profile/groups checks)
+
+## 2026-08-09 — Enterprise 220–235 arc revision
+- **Issue:** Lessons 231–235 were thin runbooks (flat numbered lists, no Feedback, `Why (1–2 lines)`, weak Navigate, Okta/Keycloak confusion, LDAP stretch re-teaching joiner create). Mid-arc (220–230) lacked bridges (contractor→catalog, SoD→certs, IdentityRequest→reports/triage, break-glass live entitlement, risk priority).
+- **Fix:** Upgrade 231–235 to full sandbox style (Know these / Tasks / Feedback); close joiner mail gap in 232; HR-first runbook + Keycloak-IdP in 233; OU vs group in 234; membership+ACL stretch (not create redo) in 235. Bridge 220→221 request path, 222→231 trail, 223 live entitlement preference, 225 risk/severity, 226 SoD contrast, 230 process-vs-connector triage. Update catalog mins + coverage map statuses.
+
+## 2026-08-09 — Lesson 223 assumed break-glass already set up
+- **Issue:** User flagged 223 as poor — assumed roles/entitlements/persona/LCM already existed; Option A/B vague; no step-by-step for grant→SQL→sunset revoke from scratch
+- **Fix:** Rewrite E2E from zero: create `lab.breakglass1`, set manager, seed Core Banking row, promote `WIRE_APPR`, build IT+business roles with exact fields (216 pattern), verify LCM map, INC request, accelerated dual approve, psql before/after, sunset revoke; ban Cloud PAM pack for this drill; bump to ~90 min
+
+## 2026-08-09 — Enterprise Path 201–258 refactor epic
+- **Issue:** User asked to revise 201–255 to Lesson 223 bar, absorb classic Core for sunset, and add theory lessons where live estate cannot prove concepts
+- **Fix:** (A) `_SANDBOX_STYLE` exemplar 223 + theory rules; catalog standalone 201–258; Theory **256** registry, **257** IQService, **258** LDIF; coverage map updated. (B) Rewrote thin 236–255 + capstone 250 to Task/Feedback/assume-nothing. (C) Absorbed classic 07–08/10/19–21/42/54/103 into 214/218–219/221/225–228/233/201/248 primers. (D) Enriched 201/206/208/212/213/218. Do not reintroduce Expect-only runbooks or “Why (1–2 lines)”.
+
+## 2026-08-09 — Lessons 236 / 241 / 242 thin runbooks → 223 bar
+- **Issue:** 236/241/242 were flat checklists; 241 still had `Why (1–2 lines)`; JDBC lesson assumed joiner/leaver birthright; rules lesson had no pasteable BeanShell; LCM customize hand-waved the designer
+- **Fix:** Full sandbox structure (Know these / nested Why-Expect Tasks / If it fails table / Feedback / md Navigate). 236: policies + JDBCOperationProvisioning rule from scratch, `lab.jdbctest`, `docker exec mnb-jdbc-sample psql` ACTIVE→DISABLED no DELETE. 241: pasteable Before/After on Core Banking, fail-then-pass disposables, Mailpit After. 242: exact Debug Import XML + Business Processes Option B (217/222 style), pause proof at Manager Approval for `lab.wftest`
